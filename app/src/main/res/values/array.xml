@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="genderList">
+        <item>여성</item>
+        <item>남성</item>
+    </string-array>
+
+    <string-array name="communityList">
+        <item>없음</item>
+        <item>위례 치매안심센터</item>
+    </string-array>
+</resources>
