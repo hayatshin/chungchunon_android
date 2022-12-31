@@ -9,16 +9,26 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -27,6 +37,8 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private val db = Firebase.firestore
+    private val auth = Firebase.auth
+    private var verificationId = ""
 
     private val calendar = Calendar.getInstance()
     private var birthDBInput = ""
@@ -78,18 +90,86 @@ class RegisterActivity : AppCompatActivity() {
             ).show()
         }
 
+        // 휴대폰 인증 보내기
+
+        binding.phoneAuthBtn.setOnClickListener {
+            val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+                var authEditTextView = EditText(applicationContext)
+
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                    Log.d("인증번호", "성공")
+                }
+
+                override fun onVerificationFailed(p0: FirebaseException) {
+                    Log.d("인증번호", "실호")
+                }
+
+                override fun onCodeSent(
+                    verificationId: String,
+                    token: PhoneAuthProvider.ForceResendingToken
+                ) {
+                    super.onCodeSent(verificationId, token)
+                    this@RegisterActivity.verificationId = verificationId
+                    binding.phoneAuthLayout.removeView(binding.phoneAuthBtn)
+
+                    authEditTextView.hint = "인증번호 입력하기"
+
+                    var authBtn = TextView(applicationContext)
+                    authBtn.setTag("verificationBtn")
+                    authBtn.text = "확인"
+                    authBtn.setOnClickListener {
+                        val credential = PhoneAuthProvider.getCredential(
+                            verificationId,
+                            authEditTextView.text.toString()
+                        )
+                        signInWithPhoneAuthCredential(credential)
+                    }
+
+                    val layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    )
+                    authEditTextView.layoutParams = layoutParams
+                    authBtn.layoutParams = layoutParams
+                    binding.phoneAuthLayout.addView(authEditTextView)
+                    binding.phoneAuthLayout.addView(authBtn)
+
+                }
+            }
+
+            val authphone =
+                "+82 10${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+
+            Log.d("번호", authphone)
+
+            val optionCompat = PhoneAuthOptions.newBuilder(auth)
+                .setPhoneNumber(authphone)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(this)
+                .setCallbacks(callbacks)
+                .build()
+
+            PhoneAuthProvider.verifyPhoneNumber(optionCompat)
+            auth.setLanguageCode("kr")
+        }
+
+
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+            val current_time = LocalDateTime.now()
 
             val user = hashMapOf(
+                "loginType" to "app",
+                "userId" to auth.currentUser,
+                "createdTime" to current_time,
                 "name" to (binding.nameInput.text.toString()),
                 "gender" to (binding.genderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
                 "birth" to (birthDBInput),
                 "community" to (binding.communityInput.selectedItem.toString())
-
             )
 
             db.collection("users")
@@ -108,6 +188,33 @@ class RegisterActivity : AppCompatActivity() {
         return true
     }
 
+
+    // 휴대폰 인증 확인
+
+    private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // 인증 성공
+                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
+
+                    var successTextView = TextView(applicationContext)
+                    successTextView.text = "인증에 성공했습니다."
+                    binding.phoneLayout.addView(successTextView)
+
+                } else {
+                    // 인증 실패
+                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
+
+                    var successTextView = TextView(applicationContext)
+                    successTextView.text = "인증에 실패했습니다."
+                    binding.phoneLayout.addView(successTextView)
+                }
+            }
+    }
+
 }
+
+
 
 

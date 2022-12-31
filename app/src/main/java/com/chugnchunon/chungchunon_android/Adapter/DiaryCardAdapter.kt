@@ -27,7 +27,7 @@ class DiaryCardAdapter(items: ArrayList<DiaryCard>) :
         fun bind(position: Int) {
             userNameView.text = items[position].name
             userStepCountView.text = items[position].stepCount
-            userMoodView.setImageResource(items[position].mood)
+            userMoodView.setImageResource(items[position].mood ?: 2131230873)
             userDiaryView.text = items[position].diary
 
         }

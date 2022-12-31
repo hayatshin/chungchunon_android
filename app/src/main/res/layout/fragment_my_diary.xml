@@ -54,8 +54,8 @@
             android:layout_height="wrap_content" />
 
         <TextView
+            android:text="0"
             android:id="@+id/todayStepCount"
-            tools:text="1,357"
             android:gravity="end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

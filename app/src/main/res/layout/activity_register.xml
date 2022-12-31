@@ -9,10 +9,10 @@
     android:paddingVertical="100dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_weight="1"
         android:id="@+id/nameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/genderLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,10 +31,10 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:inputType="text"
             android:id="@+id/nameInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:inputType="text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/nameLabel"
@@ -43,10 +43,10 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_weight="1"
         android:id="@+id/genderLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         app:layout_constraintBottom_toTopOf="@id/birthLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,10 +76,10 @@
 
 
     <LinearLayout
-        android:layout_weight="1"
         android:id="@+id/birthLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         app:layout_constraintBottom_toTopOf="@id/phoneLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -87,10 +87,10 @@
         app:layout_constraintTop_toBottomOf="@id/genderLayout">
 
         <TextView
-            android:layout_weight="1"
             android:id="@+id/birthLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="생년월일"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -108,10 +108,11 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_weight="1"
         android:id="@+id/phoneLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/communityLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -159,13 +160,32 @@
                 android:inputType="number" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/phoneAuthLayout"
+            android:gravity="end"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/phoneAuthBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="휴대폰 인증하기" />
+
+        </LinearLayout>
+
+        />
+
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_weight="1"
         android:id="@+id/communityLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
