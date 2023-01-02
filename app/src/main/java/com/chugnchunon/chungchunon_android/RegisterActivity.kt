@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
@@ -22,7 +23,9 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDate
@@ -36,8 +39,10 @@ class RegisterActivity : AppCompatActivity() {
         ActivityRegisterBinding.inflate(layoutInflater)
     }
 
-    private val db = Firebase.firestore
+    private val userDB = Firebase.firestore.collection("users")
     private val auth = Firebase.auth
+    private lateinit var userId: String
+
     private var verificationId = ""
 
     private val calendar = Calendar.getInstance()
@@ -68,8 +73,8 @@ class RegisterActivity : AppCompatActivity() {
                 binding.birthLayout.removeView(binding.birthInput)
                 var birthTextView = TextView(applicationContext)
                 var birthScreenInput = ""
-                birthScreenInput = "${year}년 ${monthOfYear}월 ${dayOfMonth}일"
-                birthDBInput = "$year/$monthOfYear/$dayOfMonth"
+                birthScreenInput = "${year}년 ${monthOfYear+1}월 ${dayOfMonth}일"
+                birthDBInput = "$year/${monthOfYear+1}/$dayOfMonth"
                 birthTextView.text = birthScreenInput
 
                 val layoutParams = LinearLayout.LayoutParams(
@@ -113,6 +118,7 @@ class RegisterActivity : AppCompatActivity() {
                     this@RegisterActivity.verificationId = verificationId
                     binding.phoneAuthLayout.removeView(binding.phoneAuthBtn)
 
+                    authEditTextView.setRawInputType(InputType.TYPE_CLASS_NUMBER)
                     authEditTextView.hint = "인증번호 입력하기"
 
                     var authBtn = TextView(applicationContext)
@@ -157,14 +163,16 @@ class RegisterActivity : AppCompatActivity() {
 
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
+
+            userId = Firebase.auth.currentUser?.uid.toString()
+
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
-            val current_time = LocalDateTime.now()
 
-            val user = hashMapOf(
+            val userSet = hashMapOf(
                 "loginType" to "app",
-                "userId" to auth.currentUser,
-                "createdTime" to current_time,
+                "userId" to userId,
+                "createdTime" to FieldValue.serverTimestamp(),
                 "name" to (binding.nameInput.text.toString()),
                 "gender" to (binding.genderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
@@ -172,10 +180,16 @@ class RegisterActivity : AppCompatActivity() {
                 "community" to (binding.communityInput.selectedItem.toString())
             )
 
-            db.collection("users")
-                .add(user)
+            userDB
+                .document(userId)
+                .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    startActivity(Intent(this@RegisterActivity, DiaryActivity::class.java))
+                    Log.d("파이어베이스2", "$userId")
+                    var goDiary = Intent(this, DiaryActivity::class.java)
+                    startActivity(goDiary)
+                }
+                .addOnFailureListener { error ->
+                    Log.d("회원가입 실패", "$error")
                 }
         }
 
