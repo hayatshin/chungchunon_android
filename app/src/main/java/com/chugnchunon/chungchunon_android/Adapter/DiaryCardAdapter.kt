@@ -1,6 +1,7 @@
 package com.chugnchunon.chungchunon_android.Adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,21 +14,24 @@ import com.chugnchunon.chungchunon_android.R
 
 
 
-class DiaryCardAdapter(items: ArrayList<DiaryCard>) :
+class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
     RecyclerView.Adapter<DiaryCardAdapter.CardViewHolder>() {
 
     var items = items
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
         var userNameView: TextView = itemView.findViewById<TextView>(R.id.userName)
         var userStepCountView: TextView = itemView.findViewById<TextView>(R.id.userStepCount)
         var userMoodView: ImageView = itemView.findViewById<ImageView>(R.id.userMood)
         var userDiaryView: TextView = itemView.findViewById<TextView>(R.id.userDiary)
 
         fun bind(position: Int) {
+            Log.d("전체다이어리2", "$items")
+
             userNameView.text = items[position].name
-            userStepCountView.text = items[position].stepCount
-            userMoodView.setImageResource(items[position].mood ?: 2131230873)
+            userStepCountView.text = "${items[position].stepCount}보"
+            userMoodView.setImageResource((items[position].mood ?: 2131230873).toInt())
             userDiaryView.text = items[position].diary
 
         }
@@ -44,11 +48,5 @@ class DiaryCardAdapter(items: ArrayList<DiaryCard>) :
 
     override fun getItemCount(): Int = items.size
 }
-
-
-
-
-
-
 
 

@@ -2,19 +2,27 @@ package com.chugnchunon.chungchunon_android.Fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.getIntent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.speech.RecognizerIntent
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.BroadcastReceiver
@@ -22,12 +30,17 @@ import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.MyService
 import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCount
 import com.chugnchunon.chungchunon_android.R
+import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
 import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_diary.*
+import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.time.LocalDateTime
+import java.util.*
+import androidx.fragment.app.viewModels
 
 
 class MyDiaryFragment : Fragment() {
@@ -46,7 +59,7 @@ class MyDiaryFragment : Fragment() {
     lateinit var broadcastReceiver: BroadcastReceiver
 
     private var currentMonth: String = ""
-
+    private val model: BaseViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -63,6 +76,7 @@ class MyDiaryFragment : Fragment() {
         todayTotalStepCount?.observe(viewLifecycleOwner) { value ->
             binding.todayStepCount.text = value.toString()
         }
+
 
         // 오늘 걸음수 초기화
 //        userDB.document("$userId").get().addOnSuccessListener { document ->
@@ -117,9 +131,21 @@ class MyDiaryFragment : Fragment() {
             )
         }
 
+        // 음성녹음
+
+        model.initial(textToSpeechEngine, startForResult)
+
+        binding.recordBtn.setOnClickListener {
+            model.displaySpeechRecognizer()
+            val text = todayDiary.text?.trim().toString()
+            model.speak(if (text.isNotEmpty()) text else "Text tidak boleh kosong")
+
+        }
+
+        // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
 
-            val writeTime = LocalDateTime.now()
+            val writeTime = LocalDateTime.now().toString().substring(0, 10)
 
             val diarySet = hashMapOf(
                 "userId" to userId.toString(),
@@ -132,7 +158,7 @@ class MyDiaryFragment : Fragment() {
                 .document("${userId}_${writeTime.toString().substring(0, 10)}")
                 .set(diarySet, SetOptions.merge())
                 .addOnSuccessListener {
-                    Log.d("내 일기", "작성 성공")
+                    activity?.viewPager?.currentItem = 1
                 }
         }
 
@@ -145,9 +171,28 @@ class MyDiaryFragment : Fragment() {
                 return true
             }
         })
-
         return view
+
     }
+
+    private val startForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val spokenText: String? =
+                result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                    .let { text -> text?.get(0) }
+            binding.todayDiary.setText(spokenText)
+        }
+    }
+
+    private val textToSpeechEngine: TextToSpeech by lazy {
+        TextToSpeech(context) {
+            if (it == TextToSpeech.SUCCESS) textToSpeechEngine.language = Locale("in_ID")
+        }
+    }
+}
+
 
 //
 //    override fun onSensorChanged(stepEvent: SensorEvent?) {
@@ -189,4 +234,4 @@ class MyDiaryFragment : Fragment() {
 //        Log.d("걸음수", "아직")
 //    }
 
-}
+

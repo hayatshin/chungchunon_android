@@ -1,9 +1,6 @@
 package com.chugnchunon.chungchunon_android
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -14,6 +11,7 @@ import android.hardware.SensorManager
 import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
@@ -42,7 +40,7 @@ class MyService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
-    Log.d("결과gm", "onStart")
+        Log.d("결과gm", "onStart")
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
@@ -55,7 +53,7 @@ class MyService : Service(), SensorEventListener {
             todayTotalStepCount?.value = todayStepCountFromDB.toInt()
         }
 
-        secondNoti()
+        StepCountNotification(this, todayTotalStepCount?.value)
 //
 //        todayTotalStepCount?.value?.let { createNotification("hi", it) };
 
@@ -66,7 +64,7 @@ class MyService : Service(), SensorEventListener {
 
         Log.d("결과gm", "onStartcommand");
 
-        secondNoti()
+        StepCountNotification(this, todayTotalStepCount?.value)
 //        todayTotalStepCount?.value?.let { createNotification("hi", it) };
         return super.onStartCommand(intent, flags, startId)
     }
@@ -162,19 +160,26 @@ class MyService : Service(), SensorEventListener {
 //        startForeground(3, notification)
 //    }
 
-    private fun secondNoti() {
+
+    private fun StepCountNotification(context: Context, stepCount: Int?) {
+
         if (Build.VERSION.SDK_INT >= 26) {
             val CHANNEL_ID = "my_app"
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "MyApp", NotificationManager.IMPORTANCE_DEFAULT
             )
-            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+            (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
                 channel
             )
-            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("")
-                .setContentText("").build()
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentTitle("$stepCount 걸음")
+                .setColor(ContextCompat.getColor(context, R.color.main_color))
+                .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setVibrate(longArrayOf(0L))
+                .build()
+
             startForeground(1, notification)
         }
     }
@@ -183,5 +188,4 @@ class MyService : Service(), SensorEventListener {
 
 
 private operator fun <T> MutableLiveData<T>.plus(t: T): MutableLiveData<T> = this + t
-
 

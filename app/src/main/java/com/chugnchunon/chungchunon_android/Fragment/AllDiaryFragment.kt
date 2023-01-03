@@ -1,5 +1,7 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,6 +17,7 @@ import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_all_diary.*
@@ -24,16 +27,18 @@ import java.time.LocalDateTime
 class AllDiaryFragment : Fragment() {
 
     private val db = Firebase.firestore
-    private val diaryDB = db.collection("diary")
     private val userDB = db.collection("users")
+    private val diaryDB = db.collection("diary")
 
     private val userId = Firebase.auth.currentUser?.uid
+
+    private lateinit var username: String
+    private lateinit var userStepCount: String
 
     private var _binding: FragmentAllDiaryBinding? = null
     private val binding get() = _binding!!
 
-    private var username: String = "안녕"
-    private var userStepCount: String = "342"
+    private var items: ArrayList<DiaryCard> = ArrayList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,61 +47,38 @@ class AllDiaryFragment : Fragment() {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        return view
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        var items: ArrayList<DiaryCard> = ArrayList()
-        var currentTime = LocalDate.now()
-
+        var adapter = DiaryCardAdapter(requireContext(), items)
 
         userDB
             .document("$userId")
             .get()
             .addOnSuccessListener { document ->
-                Log.d("전체다이어리", "${document.data?.getValue("name").toString()}")
-//                username = document.data?.getValue("name").toString()
-//                userStepCount = document.data?.getValue("todayStepCount").toString()
-            }
+                username = document.data?.getValue("name").toString()
+                userStepCount = document.data?.getValue("todayStepCount").toString()
 
-        diaryDB
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    items.add(
-                        DiaryCard(
-                            username,
-                            userStepCount,
-                            (document.data?.getValue("todayMood") as Mood).image,
-                            document.data?.getValue("todayDiary").toString(),
-                        )
-                    )
-                }
-
+                diaryDB
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        for (document in documents) {
+                            items.add(
+                                DiaryCard(
+                                    username,
+                                    userStepCount,
+                                    (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                    document.data?.getValue("todayDiary").toString(),
+                                )
+                            )
+                        }
+                        adapter.notifyDataSetChanged()
+                    }
             }
+        binding.recyclerDiary.adapter = adapter
+        binding.recyclerDiary.layoutManager = LinearLayoutManager(
+            context,
+            RecyclerView.VERTICAL,
+            false
+        )
+        return view
     }
 }
-//                    items.add(
-//                        DiaryCard(
-//                            result.data.getValue("name").toString(),
-//                            result.data.getValue("stepCount").toString()  ,
-//                            result.data.getValue("mood").toString().toInt(),
-//                            result.data.getValue("diary").toString()
-//                        )
-//                    )
-
-
-
-//        for (i in 1..10) {
-//            items.add(
-//                DiaryCard(
-//                    "신순국",
-//                    "1,357",
-//                    2131230871,
-//                    "보고싶다, 건강하거라",
-//                )
-//            )
-//        }
-
 

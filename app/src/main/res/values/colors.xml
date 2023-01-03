@@ -8,7 +8,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="main_color">#FF2D78</color>
+    <color name="main_color">#E67D9B</color>
+    <color name="light_main_color">#F6CCDA</color>
+    <color name="dark_main_color">#440816</color>
+
     <color name="kakao_yellow">#FFFFE812</color>
 
 </resources>
