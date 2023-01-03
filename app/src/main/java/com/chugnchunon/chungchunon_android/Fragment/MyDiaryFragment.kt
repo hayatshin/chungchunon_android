@@ -2,15 +2,10 @@ package com.chugnchunon.chungchunon_android.Fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,44 +13,40 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
-import com.chugnchunon.chungchunon_android.BroadCastReceiver
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.BroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.Mood
+import com.chugnchunon.chungchunon_android.MyService
+import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCount
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.concurrent.scheduleAtFixedRate
 
 
-class MyDiaryFragment : Fragment(), SensorEventListener {
+class MyDiaryFragment : Fragment() {
 
     private var _binding: FragmentMyDiaryBinding? = null
     private val binding get() = _binding!!
 
+    private val db = Firebase.firestore
+    private val userDB = Firebase.firestore.collection("users")
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-    private var running = false
-    private lateinit var sensorManager: SensorManager
-    private lateinit var step_sensor: Sensor
+//    private lateinit var sensorManager: SensorManager
+//    private lateinit var step_sensor: Sensor
 
-    lateinit var broadcastReceiver: BroadCastReceiver
+    lateinit var broadcastReceiver: BroadcastReceiver
 
-    companion object {
-        var todayTotalStepCount: Int = 0
-    }
+    private var currentMonth: String = ""
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -64,6 +55,24 @@ class MyDiaryFragment : Fragment(), SensorEventListener {
     ): View? {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+
+        var startService = Intent(activity, MyService::class.java)
+        activity?.let { ContextCompat.startForegroundService(it, startService) }
+
+        todayTotalStepCount?.observe(viewLifecycleOwner) { value ->
+            binding.todayStepCount.text = value.toString()
+        }
+
+        // 오늘 걸음수 초기화
+//        userDB.document("$userId").get().addOnSuccessListener { document ->
+//            var todayStepCountFromDB = document.getLong("todayStepCount")
+//            todayTotalStepCount = todayStepCountFromDB
+//            binding.todayStepCount.text = todayStepCountFromDB.toString()
+//        }
+
+        currentMonth = LocalDateTime.now().toString().substring(0, 7)
+
 
         // 걸음수 권한
         if (ContextCompat.checkSelfPermission(
@@ -79,20 +88,20 @@ class MyDiaryFragment : Fragment(), SensorEventListener {
             )
         }
 
+
         // 걸음수 셋업
-        sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-
-        broadcastReceiver = BroadCastReceiver()
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_DATE_CHANGED)
-        context?.registerReceiver(broadcastReceiver, filter)
-
-        if (step_sensor != null) {
-            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
-        } else {
-        }
-
+        broadcastReceiver = BroadcastReceiver()
+        val intent = IntentFilter()
+        intent.addAction(Intent.ACTION_DATE_CHANGED)
+        activity?.registerReceiver(broadcastReceiver, intent)
+//
+//        sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+//
+//        if (step_sensor != null) {
+//            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
+//        } else {
+//        }
 
         // 기분 스니퍼
         binding.todayMood.adapter = activity?.applicationContext?.let {
@@ -110,14 +119,17 @@ class MyDiaryFragment : Fragment(), SensorEventListener {
 
         binding.diaryBtn.setOnClickListener {
 
+            val writeTime = LocalDateTime.now()
+
             val diarySet = hashMapOf(
-                "writeTime" to FieldValue.serverTimestamp(),
-                "todayMood" to (binding.todayMood.selectedItem.toString()),
+                "userId" to userId.toString(),
+                "writeTime" to writeTime,
+                "todayMood" to binding.todayMood.selectedItem,
                 "todayDiary" to (binding.todayDiary.text.toString()),
             )
 
             diaryDB
-                .document(userId.toString())
+                .document("${userId}_${writeTime.toString().substring(0, 10)}")
                 .set(diarySet, SetOptions.merge())
                 .addOnSuccessListener {
                     Log.d("내 일기", "작성 성공")
@@ -133,45 +145,48 @@ class MyDiaryFragment : Fragment(), SensorEventListener {
                 return true
             }
         })
+
         return view
     }
 
-
-    override fun onSensorChanged(stepEvent: SensorEvent?) {
-        Log.d("걸음수", "sensorEvent ${stepEvent!!.values[0].toInt()}")
-        todayTotalStepCount += stepEvent!!.values[0].toInt()
-        binding.todayStepCount.text = todayTotalStepCount.toString()
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        Log.d("걸음수", "아직")
-    }
-
-//    private operator fun Int.plus(a: Int): Int = todayStepCount + a
+//
+//    override fun onSensorChanged(stepEvent: SensorEvent?) {
+//        Log.d("결과아", "sensorEvent ${stepEvent!!.values[0].toInt()}")
+//
+//        var currentDate = LocalDate.now()
+//
+//        todayTotalStepCount = todayTotalStepCount?.plus(stepEvent!!.values[0].toInt())
+//        binding.todayStepCount.text = todayTotalStepCount.toString()
+//
+//        // user 내 todayStepCount
+//        var todayStepCountSet = hashMapOf(
+//            "todayStepCount" to todayTotalStepCount
+//        )
+//
+//        userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
+//
+//        var userStepCountSet = hashMapOf(
+//            "$currentDate" to todayTotalStepCount
+//        )
+//
+//        var periodStepCountSet = hashMapOf(
+//            "$userId" to todayTotalStepCount
+//        )
+//
+//        // user_step_count
+//        db.collection("user_step_count")
+//            .document("$userId")
+//            .set(userStepCountSet, SetOptions.merge())
+//
+//        // period_step_count
+//        db.collection("period_step_count")
+//            .document("$currentDate")
+//            .set(periodStepCountSet, SetOptions.merge())
+//
+//    }
+//
+//    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+//        Log.d("걸음수", "아직")
+//    }
 
 }
-
-
-//
-//override fun onResume() {
-//    super.onResume()
-////        running = true
-////        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-////
-////        broadcastReceiver = BroadCastReceiver()
-////        val filter = IntentFilter()
-////        filter.addAction(Intent.ACTION_TIME_TICK)
-////        context?.registerReceiver(broadcastReceiver, filter)
-////
-////        if (step_sensor != null) {
-////            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
-////        } else {
-////        }
-//
-//}
-//
-//override fun onPause() {
-//    super.onPause()
-////        running = false
-////        sensorManager.unregisterListener(this)
-//}

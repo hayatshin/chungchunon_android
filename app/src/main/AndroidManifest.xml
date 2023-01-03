@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".GlobalApplication"
@@ -17,10 +18,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Chugnchunon_android"
-        tools:targetApi="31">
+        >
+
+        <service
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="true" />
+
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_native_key" />
+
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
@@ -36,14 +44,13 @@
                     android:scheme="@string/kakao_scheme_key" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -56,12 +63,15 @@
         <activity
             android:name=".CommunityRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
-        <receiver android:name=".BroadCastReceiver"
+
+        <receiver
+            android:name=".BroadcastReceiver.BroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_DATE_CHANGED" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

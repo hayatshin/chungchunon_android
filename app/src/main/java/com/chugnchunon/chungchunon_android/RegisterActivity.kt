@@ -168,16 +168,18 @@ class RegisterActivity : AppCompatActivity() {
 
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+            var createTime = LocalDateTime.now()
 
             val userSet = hashMapOf(
                 "loginType" to "app",
                 "userId" to userId,
-                "createdTime" to FieldValue.serverTimestamp(),
+                "createTime" to createTime,
                 "name" to (binding.nameInput.text.toString()),
                 "gender" to (binding.genderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
                 "birth" to (birthDBInput),
-                "community" to (binding.communityInput.selectedItem.toString())
+                "community" to (binding.communityInput.selectedItem.toString()),
+                "todayStepCount" to 0
             )
 
             userDB

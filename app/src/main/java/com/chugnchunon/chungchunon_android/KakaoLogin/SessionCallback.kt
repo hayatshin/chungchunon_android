@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.time.LocalDateTime
 
 
 class SessionCallback(val context: MainActivity): ISessionCallback {
@@ -32,16 +33,18 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
                     val phoneNumber = "010-${
                         result.kakaoAccount?.phoneNumber?.substring(7)}"
+                    val createTime = LocalDateTime.now()
 
                     val userSet = hashMapOf(
                         "loginType" to "kakao",
                         "userId" to (result.id),
-                        "createdTime" to FieldValue.serverTimestamp(),
+                        "createdTime" to createTime,
                         "name" to (result.nickname),
                         "gender" to (result.kakaoAccount?.gender),
                         "phone" to phoneNumber,
                         "birth" to ("${result.kakaoAccount?.birthyear}/${result.kakaoAccount?.birthday}"),
-                    )
+                        "todayStepCount" to 0
+                        )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->
                         val firebaseToken = task.result
