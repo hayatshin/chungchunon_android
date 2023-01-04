@@ -1,9 +1,6 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
-import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,17 +9,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
-import com.chugnchunon.chungchunon_android.DataClass.Mood
-import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
-import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.fragment_all_diary.*
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 class AllDiaryFragment : Fragment() {
 
@@ -47,6 +38,7 @@ class AllDiaryFragment : Fragment() {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
+
         var adapter = DiaryCardAdapter(requireContext(), items)
 
         userDB
@@ -57,19 +49,32 @@ class AllDiaryFragment : Fragment() {
                 userStepCount = document.data?.getValue("todayStepCount").toString()
 
                 diaryDB
+                    .orderBy("writeTime", Query.Direction.DESCENDING)
                     .get()
                     .addOnSuccessListener { documents ->
                         for (document in documents) {
-                            items.add(
-                                DiaryCard(
-                                    username,
-                                    userStepCount,
-                                    (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
-                                    document.data?.getValue("todayDiary").toString(),
-                                )
-                            )
+
+                            var userId = document.data?.getValue("userId")
+
+                            userDB
+                                .document("$userId")
+                                .get()
+                                .addOnSuccessListener { userinfo ->
+                                    var username = userinfo.data?.getValue("name").toString()
+                                    var todayStepCount =
+                                        userinfo.data?.getValue("todayStepCount").toString()
+                                    items.add(
+                                        DiaryCard(
+                                            document.data?.getValue("writeTime").toString(),
+                                            username,
+                                            todayStepCount,
+                                            (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                            document.data?.getValue("todayDiary").toString(),
+                                        )
+                                    )
+                                    adapter.notifyDataSetChanged()
+                                }
                         }
-                        adapter.notifyDataSetChanged()
                     }
             }
         binding.recyclerDiary.adapter = adapter

@@ -1,15 +1,14 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import com.chugnchunon.chungchunon_android.MyService
+import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCount
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.getIntent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
@@ -21,14 +20,12 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.BroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.Mood
-import com.chugnchunon.chungchunon_android.MyService
-import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCount
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
 import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
@@ -41,7 +38,10 @@ import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.time.LocalDateTime
 import java.util.*
 import androidx.fragment.app.viewModels
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
+import com.chugnchunon.chungchunon_android.DiaryActivity
+import com.google.firebase.firestore.FieldValue
 
 class MyDiaryFragment : Fragment() {
 
@@ -57,11 +57,15 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var step_sensor: Sensor
 
     lateinit var broadcastReceiver: BroadcastReceiver
+    lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
 
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
 
-    @SuppressLint("ClickableViewAccessibility")
+    private var todayTotalStepCount: Int = 0
+
+
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -69,21 +73,20 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-
         var startService = Intent(activity, MyService::class.java)
         activity?.let { ContextCompat.startForegroundService(it, startService) }
 
-        todayTotalStepCount?.observe(viewLifecycleOwner) { value ->
-            binding.todayStepCount.text = value.toString()
-        }
-
-
-        // 오늘 걸음수 초기화
-//        userDB.document("$userId").get().addOnSuccessListener { document ->
-//            var todayStepCountFromDB = document.getLong("todayStepCount")
-//            todayTotalStepCount = todayStepCountFromDB
-//            binding.todayStepCount.text = todayStepCountFromDB.toString()
+//        todayTotalStepCount?.observe(viewLifecycleOwner) { value ->
+//            binding.todayStepCount.text = value.toString()
 //        }
+
+
+         // 오늘 걸음수 초기화
+        userDB.document("$userId").get().addOnSuccessListener { document ->
+            var todayStepCountFromDB = document.getLong("todayStepCount")
+            todayTotalStepCount = todayStepCountFromDB?.toInt() ?: 0
+            binding.todayStepCount.text = "$todayStepCountFromDB 보"
+        }
 
         currentMonth = LocalDateTime.now().toString().substring(0, 7)
 
@@ -105,10 +108,16 @@ class MyDiaryFragment : Fragment() {
 
         // 걸음수 셋업
         broadcastReceiver = BroadcastReceiver()
+        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+
         val intent = IntentFilter()
         intent.addAction(Intent.ACTION_DATE_CHANGED)
         activity?.registerReceiver(broadcastReceiver, intent)
-//
+
+
+        registerBroadCastReceiver()
+
+
 //        sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 //        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 //
@@ -116,6 +125,7 @@ class MyDiaryFragment : Fragment() {
 //            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
 //        } else {
 //        }
+
 
         // 기분 스니퍼
         binding.todayMood.adapter = activity?.applicationContext?.let {
@@ -149,7 +159,7 @@ class MyDiaryFragment : Fragment() {
 
             val diarySet = hashMapOf(
                 "userId" to userId.toString(),
-                "writeTime" to writeTime,
+                "writeTime" to FieldValue.serverTimestamp(),
                 "todayMood" to binding.todayMood.selectedItem,
                 "todayDiary" to (binding.todayDiary.text.toString()),
             )
@@ -158,7 +168,8 @@ class MyDiaryFragment : Fragment() {
                 .document("${userId}_${writeTime.toString().substring(0, 10)}")
                 .set(diarySet, SetOptions.merge())
                 .addOnSuccessListener {
-                    activity?.viewPager?.currentItem = 1
+                    var intent = Intent(activity, DiaryActivity::class.java)
+                    startActivity(intent)
                 }
         }
 
@@ -191,7 +202,33 @@ class MyDiaryFragment : Fragment() {
             if (it == TextToSpeech.SUCCESS) textToSpeechEngine.language = Locale("in_ID")
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+    }
+
+    private fun registerBroadCastReceiver() {
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            receiver,
+            IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
+        )
+    }
+
+    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            intent?.let {
+                val todayTotalStepCount = it.getIntExtra("todayTotalStepCount", 0)
+                binding.todayStepCount.text = "$todayTotalStepCount 보"
+            }
+        }
+    }
 }
+
+
+
 
 
 //

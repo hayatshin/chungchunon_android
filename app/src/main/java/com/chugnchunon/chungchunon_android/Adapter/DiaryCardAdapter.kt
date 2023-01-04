@@ -21,14 +21,15 @@ class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+        var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
         var userNameView: TextView = itemView.findViewById<TextView>(R.id.userName)
         var userStepCountView: TextView = itemView.findViewById<TextView>(R.id.userStepCount)
         var userMoodView: ImageView = itemView.findViewById<ImageView>(R.id.userMood)
         var userDiaryView: TextView = itemView.findViewById<TextView>(R.id.userDiary)
 
         fun bind(position: Int) {
-            Log.d("전체다이어리2", "$items")
 
+            userWriteTime.text = items[position].writeTime
             userNameView.text = items[position].name
             userStepCountView.text = "${items[position].stepCount}보"
             userMoodView.setImageResource((items[position].mood ?: 2131230873).toInt())

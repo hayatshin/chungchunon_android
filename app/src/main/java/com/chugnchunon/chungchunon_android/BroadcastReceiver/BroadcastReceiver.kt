@@ -17,14 +17,13 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.MutableLiveData
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
-import com.chugnchunon.chungchunon_android.MyService
 import com.chugnchunon.chungchunon_android.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class BroadcastReceiver : BroadcastReceiver() {
+open class BroadcastReceiver : BroadcastReceiver() {
 
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
@@ -77,4 +76,3 @@ private fun StepCountNotification(context: Context, stepCount: Int?) {
 
 
 private operator fun <T> MutableLiveData<T>.plus(t: T): MutableLiveData<T> = this + t
-

@@ -46,7 +46,9 @@ class RegisterActivity : AppCompatActivity() {
     private var verificationId = ""
 
     private val calendar = Calendar.getInstance()
-    private var birthDBInput = ""
+    private var birthYear = ""
+    private var birthDay = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +66,7 @@ class RegisterActivity : AppCompatActivity() {
             android.R.layout.simple_spinner_dropdown_item
         )
 
+
         // 생년월일 설정
         val birthDatePicker =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
@@ -74,7 +77,8 @@ class RegisterActivity : AppCompatActivity() {
                 var birthTextView = TextView(applicationContext)
                 var birthScreenInput = ""
                 birthScreenInput = "${year}년 ${monthOfYear+1}월 ${dayOfMonth}일"
-                birthDBInput = "$year/${monthOfYear+1}/$dayOfMonth"
+                birthYear = "$year"
+                birthDay =  "${monthOfYear + 1}$dayOfMonth\""
                 birthTextView.text = birthScreenInput
 
                 val layoutParams = LinearLayout.LayoutParams(
@@ -173,11 +177,12 @@ class RegisterActivity : AppCompatActivity() {
             val userSet = hashMapOf(
                 "loginType" to "app",
                 "userId" to userId,
-                "createTime" to createTime,
+                "createTime" to FieldValue.serverTimestamp(),
                 "name" to (binding.nameInput.text.toString()),
                 "gender" to (binding.genderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
-                "birth" to (birthDBInput),
+                "birthYear" to birthYear,
+                "birthDay" to birthDay,
                 "community" to (binding.communityInput.selectedItem.toString()),
                 "todayStepCount" to 0
             )

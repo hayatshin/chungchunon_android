@@ -1,8 +1,11 @@
 package com.chugnchunon.chungchunon_android
 
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -12,15 +15,10 @@ import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
-import com.kakao.sdk.user.UserApiClient
 import org.json.JSONObject
-import java.time.LocalDateTime
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +33,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val window = window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = getColor(R.color.main_color)
+        }
+
         callback = SessionCallback(this) // Initialize Session
 
         // 일반 자동 로그인
@@ -88,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "http://2dd4-218-147-138-163.ngrok.io/verifyToken"
+        val url = "http://cdb4-218-147-138-163.ngrok.io/verifyToken"
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
         val request: JsonObjectRequest = object : JsonObjectRequest(

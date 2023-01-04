@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:background="@drawable/main_screen"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
@@ -9,7 +10,7 @@
         android:id="@+id/iconImage"
         android:layout_width="0dp"
         android:layout_height="250dp"
-        android:src="@drawable/icon"
+        android:src="@drawable/icon_transparent_text"
         app:layout_constraintBottom_toTopOf="@+id/loginLayout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +50,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center"
             android:text="회원가입 하기"
-            android:textColor="@color/text_color"
+            android:textColor="@color/white"
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"

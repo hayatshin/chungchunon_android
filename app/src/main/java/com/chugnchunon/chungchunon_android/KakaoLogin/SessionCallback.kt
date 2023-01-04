@@ -38,11 +38,12 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                     val userSet = hashMapOf(
                         "loginType" to "kakao",
                         "userId" to (result.id),
-                        "createdTime" to createTime,
+                        "createdTime" to FieldValue.serverTimestamp(),
                         "name" to (result.nickname),
                         "gender" to (result.kakaoAccount?.gender),
                         "phone" to phoneNumber,
-                        "birth" to ("${result.kakaoAccount?.birthyear}/${result.kakaoAccount?.birthday}"),
+                        "birthYear" to result.kakaoAccount?.birthyear,
+                        "birthDay" to result.kakaoAccount?.birthday,
                         "todayStepCount" to 0
                         )
 
