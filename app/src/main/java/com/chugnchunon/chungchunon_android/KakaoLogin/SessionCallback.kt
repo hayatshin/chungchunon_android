@@ -2,8 +2,7 @@ package com.chugnchunon.chungchunon_android.KakaoLogin
 
 import android.content.Intent
 import android.util.Log
-import androidx.core.content.ContextCompat.startActivity
-import com.chugnchunon.chungchunon_android.CommunityRegisterActivity
+import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
@@ -36,7 +35,7 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                     val createTime = LocalDateTime.now()
 
                     val userSet = hashMapOf(
-                        "loginType" to "kakao",
+                        "loginType" to "카카오",
                         "userId" to (result.id),
                         "createdTime" to FieldValue.serverTimestamp(),
                         "name" to (result.nickname),
@@ -44,7 +43,9 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                         "phone" to phoneNumber,
                         "birthYear" to result.kakaoAccount?.birthyear,
                         "birthDay" to result.kakaoAccount?.birthday,
-                        "todayStepCount" to 0
+                        "todayStepCount" to 0,
+                        "numLikes" to 0,
+                        "numComments" to 0,
                         )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->
@@ -58,8 +59,8 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                                 .document("kakao:${result.id}")
                                 .set(userSet, SetOptions.merge())
                                 .addOnSuccessListener {
-                                    var goDiary = Intent(context, CommunityRegisterActivity::class.java)
-                                    context.startActivity(goDiary)
+                                    var goRegionRegister = Intent(context, RegionRegisterActivity::class.java)
+                                    context.startActivity(goRegionRegister)
                                 }
                         }
                         else {

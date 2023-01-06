@@ -56,13 +56,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustPan" />
@@ -70,7 +64,7 @@
             android:name=".DiaryActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".CommunityRegisterActivity"
+            android:name=".RegionRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
 
         <receiver
@@ -78,13 +72,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_DATE_CHANGED" />
-                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".BroadcastReceiver.StepCountBroadcastReceiver"
-            android:exported="true">
-            <intent-filter>
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>
         </receiver>

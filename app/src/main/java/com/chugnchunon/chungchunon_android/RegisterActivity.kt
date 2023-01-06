@@ -16,20 +16,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
 import com.google.firebase.FirebaseException
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.*
-import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -58,11 +52,6 @@ class RegisterActivity : AppCompatActivity() {
         binding.genderInput.adapter = ArrayAdapter.createFromResource(
             this,
             R.array.genderList,
-            android.R.layout.simple_spinner_dropdown_item
-        )
-        binding.communityInput.adapter = ArrayAdapter.createFromResource(
-            this,
-            R.array.communityList,
             android.R.layout.simple_spinner_dropdown_item
         )
 
@@ -172,10 +161,9 @@ class RegisterActivity : AppCompatActivity() {
 
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
-            var createTime = LocalDateTime.now()
 
             val userSet = hashMapOf(
-                "loginType" to "app",
+                "loginType" to "일반",
                 "userId" to userId,
                 "createTime" to FieldValue.serverTimestamp(),
                 "name" to (binding.nameInput.text.toString()),
@@ -183,23 +171,22 @@ class RegisterActivity : AppCompatActivity() {
                 "phone" to phoneNumber,
                 "birthYear" to birthYear,
                 "birthDay" to birthDay,
-                "community" to (binding.communityInput.selectedItem.toString()),
-                "todayStepCount" to 0
+                "todayStepCount" to 0,
+                "numLikes" to 0,
+                "numComments" to 0,
             )
 
             userDB
                 .document(userId)
                 .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    Log.d("파이어베이스2", "$userId")
-                    var goDiary = Intent(this, DiaryActivity::class.java)
-                    startActivity(goDiary)
+                    var intent = Intent(this, RegionRegisterActivity::class.java)
+                    startActivity(intent)
                 }
                 .addOnFailureListener { error ->
                     Log.d("회원가입 실패", "$error")
                 }
         }
-
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {

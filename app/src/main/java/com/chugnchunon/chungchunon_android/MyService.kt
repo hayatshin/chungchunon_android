@@ -214,4 +214,4 @@ class MyService : Service(), SensorEventListener {
 }
 
 
-private operator fun <T> MutableLiveData<T>.plus(t: T): MutableLiveData<T> = this + t
+operator fun <T> MutableLiveData<T>.plus(t: String): MutableLiveData<T> = this + t
