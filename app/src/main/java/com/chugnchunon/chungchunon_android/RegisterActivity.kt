@@ -35,7 +35,6 @@ class RegisterActivity : AppCompatActivity() {
 
     private val userDB = Firebase.firestore.collection("users")
     private val auth = Firebase.auth
-    private lateinit var userId: String
 
     private var verificationId = ""
 
@@ -157,10 +156,11 @@ class RegisterActivity : AppCompatActivity() {
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
 
-            userId = Firebase.auth.currentUser?.uid.toString()
 
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+
+            val userId = Firebase.auth.currentUser?.uid
 
             val userSet = hashMapOf(
                 "loginType" to "일반",
@@ -177,7 +177,7 @@ class RegisterActivity : AppCompatActivity() {
             )
 
             userDB
-                .document(userId)
+                .document("$userId")
                 .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
                     var intent = Intent(this, RegionRegisterActivity::class.java)

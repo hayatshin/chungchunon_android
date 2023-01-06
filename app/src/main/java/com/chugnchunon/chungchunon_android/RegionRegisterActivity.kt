@@ -14,6 +14,7 @@ import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegionBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_diary.*
@@ -49,13 +50,16 @@ class RegionRegisterActivity : AppCompatActivity() {
 
         binding.regionRegisterBtn.setOnClickListener {
             var regionSet = hashMapOf(
+                "userId" to userId,
                 "region" to selectedRegion,
                 "smallRegion" to selectedSmallRegion
             )
-            userDB.document("$userId").set(regionSet)
-
-            var goDiary = Intent(this, DiaryActivity::class.java)
-            startActivity(goDiary)
+            userDB.document("$userId")
+                .set(regionSet, SetOptions.merge())
+                .addOnSuccessListener {
+                    var goDiary = Intent(this, DiaryActivity::class.java)
+                    startActivity(goDiary)
+                }
         }
     }
 
