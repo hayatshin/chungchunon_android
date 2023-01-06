@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
@@ -36,13 +37,19 @@ class DiaryActivity : AppCompatActivity() {
         diaryDB
             .document("${userId}_${writeTime}")
             .get()
-            .addOnSuccessListener {
-                viewPager.currentItem = 1
-                adapter.notifyDataSetChanged()
-            }
-            .addOnFailureListener {
-                viewPager.currentItem = 0
-                adapter.notifyDataSetChanged()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val document = task.result
+                    if(document != null) {
+                        if (document.exists()) {
+                            viewPager.currentItem = 1
+                        } else {
+                            viewPager.currentItem = 0
+                        }
+                    }
+                } else {
+                    viewPager.currentItem = 0
+                }
             }
 
         viewPager.adapter = adapter

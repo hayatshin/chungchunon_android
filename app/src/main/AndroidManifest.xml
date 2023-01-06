@@ -75,6 +75,13 @@
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".BroadcastReceiver.StepCountBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
