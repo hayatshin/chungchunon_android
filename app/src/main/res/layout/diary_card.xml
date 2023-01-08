@@ -6,11 +6,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/diarybox"
+        android:orientation="vertical"
         android:padding="20dp"
         app:cardElevation="10dp">
 
@@ -60,5 +60,58 @@
             app:layout_constraintTop_toBottomOf="@id/userInfo"
             tools:text="보고싶다. 건강하거라" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <RelativeLayout
+            android:id="@+id/likeBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/userDiary">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:gravity="start">
+
+                <ImageView
+                    android:id="@+id/likeIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_emptyheart" />
+
+                <TextView
+                    android:id="@+id/likeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="좋아요 3" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/commentBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/commentIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_filledchat" />
+
+                <TextView
+                    android:id="@+id/commentText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="댓글 2" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
 </androidx.cardview.widget.CardView>

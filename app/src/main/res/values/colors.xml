@@ -11,7 +11,7 @@
     <color name="main_color">#E67D9B</color>
     <color name="light_main_color">#F6CCDA</color>
     <color name="dark_main_color">#440816</color>
-
     <color name="kakao_yellow">#FFFFE812</color>
+    <color name="transparent_gray">#60000000</color>
 
 </resources>

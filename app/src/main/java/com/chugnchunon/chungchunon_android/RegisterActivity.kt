@@ -165,15 +165,13 @@ class RegisterActivity : AppCompatActivity() {
             val userSet = hashMapOf(
                 "loginType" to "일반",
                 "userId" to userId,
-                "createTime" to FieldValue.serverTimestamp(),
+                "timestamp" to FieldValue.serverTimestamp(),
                 "name" to (binding.nameInput.text.toString()),
                 "gender" to (binding.genderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
                 "birthYear" to birthYear,
                 "birthDay" to birthDay,
                 "todayStepCount" to 0,
-                "numLikes" to 0,
-                "numComments" to 0,
             )
 
             userDB

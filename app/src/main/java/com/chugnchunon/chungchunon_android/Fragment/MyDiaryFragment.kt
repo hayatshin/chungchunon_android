@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
@@ -40,8 +41,13 @@ import java.util.*
 import androidx.fragment.app.viewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
+import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
+import kotlinx.android.synthetic.main.diary_card.*
+import org.apache.commons.lang3.StringUtils
+import java.time.LocalDate
 
 class MyDiaryFragment : Fragment() {
 
@@ -63,6 +69,7 @@ class MyDiaryFragment : Fragment() {
     private val model: BaseViewModel by viewModels()
 
     private var todayTotalStepCount: Int = 0
+    private val yearMonthDateFormat = SimpleDateFormat("yyyy-MM")
 
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
@@ -126,6 +133,29 @@ class MyDiaryFragment : Fragment() {
 //        } else {
 //        }
 
+        // 매달 일기 작성
+        var currentdate = System.currentTimeMillis()
+        var currentYearMonth = yearMonthDateFormat.format(currentdate)
+        var currentMonth = SimpleDateFormat("MM").format(currentdate)
+        var removeZeroCurrentMonth = StringUtils.stripStart(currentMonth,"0");
+        var currentMonthDate = MonthDate(currentMonth.toInt()).getDate
+
+
+        var thisMonthCount = diaryDB
+            .whereEqualTo("monthDate", currentYearMonth)
+            .whereEqualTo("userId", userId)
+            .count()
+
+        thisMonthCount.get(AggregateSource.SERVER).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val calendarThisMonthCount = task.result.count
+
+                binding.thisMonth.text = "✅ ${removeZeroCurrentMonth}월 일기 작성일"
+                binding.diaryCount.text = "${calendarThisMonthCount}일 / ${currentMonthDate}일"
+            }
+        }
+
+
 
         // 기분 스니퍼
         binding.todayMood.adapter = activity?.applicationContext?.let {
@@ -155,23 +185,35 @@ class MyDiaryFragment : Fragment() {
         // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
 
-            val writeTime = LocalDateTime.now().toString().substring(0, 10)
+            var currentMilliseconds = System.currentTimeMillis()
+            val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
+            val writeTime = LocalDateTime.now()
+            var diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
+
+//                "timestamp" to System.currentTimeMillis(),
+
 
             val diarySet = hashMapOf(
+                "diaryId" to diaryId,
                 "userId" to userId.toString(),
-                "writeTime" to FieldValue.serverTimestamp(),
+                "monthDate" to writeMonthDate,
+                "timestamp" to FieldValue.serverTimestamp(),
                 "todayMood" to binding.todayMood.selectedItem,
                 "todayDiary" to (binding.todayDiary.text.toString()),
+                "numLikes" to 0,
+                "numComments" to 0,
             )
 
             diaryDB
-                .document("${userId}_${writeTime.toString().substring(0, 10)}")
+                .document(diaryId)
                 .set(diarySet, SetOptions.merge())
                 .addOnSuccessListener {
+                    Log.d("결과77", "성공")
                     var intent = Intent(activity, DiaryActivity::class.java)
                     startActivity(intent)
                 }
         }
+
 
 
         view.setOnTouchListener(object : View.OnTouchListener {

@@ -6,9 +6,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.TabPageAdapter
+import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
+import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -22,11 +25,20 @@ class DiaryActivity : AppCompatActivity() {
     private val userId = Firebase.auth.currentUser?.uid
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
 
+    private val binding by lazy {
+        ActivityDiaryBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_diary)
+        setContentView(binding.root)
+
+        val yourTabLayoutView = binding.tabLayout // If you aren't using data biniding, You can use findViewById to get the view
+        var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(2).layoutParams as LinearLayout.LayoutParams
+        yourTabItemView.weight = 0.3f
 
         setUpTabBar()
+
     }
 
 

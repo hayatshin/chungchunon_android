@@ -37,15 +37,13 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                     val userSet = hashMapOf(
                         "loginType" to "카카오",
                         "userId" to (result.id),
-                        "createdTime" to FieldValue.serverTimestamp(),
+                        "timestamp" to FieldValue.serverTimestamp(),
                         "name" to (result.nickname),
                         "gender" to (result.kakaoAccount?.gender),
                         "phone" to phoneNumber,
                         "birthYear" to result.kakaoAccount?.birthyear,
                         "birthDay" to result.kakaoAccount?.birthday,
                         "todayStepCount" to 0,
-                        "numLikes" to 0,
-                        "numComments" to 0,
                         )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->

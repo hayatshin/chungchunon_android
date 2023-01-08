@@ -95,11 +95,6 @@ class RegionRegisterActivity : AppCompatActivity() {
 
         }
     }
-
-
-
-
-
 }
 
 
