@@ -12,6 +12,9 @@
     <color name="light_main_color">#F6CCDA</color>
     <color name="dark_main_color">#440816</color>
     <color name="kakao_yellow">#FFFFE812</color>
-    <color name="transparent_gray">#60000000</color>
+    <color name="transparent_gray">#50000000</color>
+    <color name="light_gray">#818080</color>
+    <color name="very_light_gray">#CFCCCC</color>
+
 
 </resources>

@@ -37,6 +37,8 @@ class DiaryActivity : AppCompatActivity() {
         var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(2).layoutParams as LinearLayout.LayoutParams
         yourTabItemView.weight = 0.3f
 
+
+
         setUpTabBar()
 
     }

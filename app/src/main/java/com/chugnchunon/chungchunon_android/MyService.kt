@@ -34,8 +34,12 @@ class MyService : Service(), SensorEventListener {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
 
-        //        var todayTotalStepCount: MutableLiveData<Int>? = MutableLiveData()
         var todayTotalStepCount: Int? = 0
+
+        const val SHAKE_THRESHOLD: Int = 800
+        const val DATA_X = SensorManager.DATA_X
+        const val DATA_Y = SensorManager.DATA_Y
+        const val DATA_Z = SensorManager.DATA_Z
     }
 
     override fun onCreate() {
@@ -44,7 +48,7 @@ class MyService : Service(), SensorEventListener {
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
 
         // 오늘 걸음수 초기화
@@ -53,10 +57,18 @@ class MyService : Service(), SensorEventListener {
             todayTotalStepCount = todayStepCountFromDB.toInt()
             StepCountNotification(this, todayTotalStepCount)
         }
-        //  todayTotalStepCount?.value?.let { createNotification("hi", it) };
     }
+
+    override fun onStart(intent: Intent?, startId: Int) {
+        super.onStart(intent, startId)
+
+        if (step_sensor != null) {
+            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_GAME)
+        }
+
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        return super.onStartCommand(intent, flags, startId)
         Log.d("결과gm", "onStartcommand");
         // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
@@ -64,7 +76,6 @@ class MyService : Service(), SensorEventListener {
             todayTotalStepCount = todayStepCountFromDB.toInt()
             StepCountNotification(this, todayTotalStepCount)
         }
-        //        todayTotalStepCount?.value?.let { createNotification("hi", it) };
         return super.onStartCommand(intent, flags, startId)
     }
     override fun onBind(p0: Intent?): IBinder? {
@@ -75,6 +86,7 @@ class MyService : Service(), SensorEventListener {
     override fun onSensorChanged(stepEvent: SensorEvent?) {
         Log.d("결과", "$userId")
         Log.d("결과", "$stepEvent")
+
 
         var currentDate = LocalDate.now()
 
@@ -117,48 +129,7 @@ class MyService : Service(), SensorEventListener {
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d("서비스", "accuracychanged")
     }
-    //    private var mThread: Thread? = object : Thread("My Thread") {
-//        override fun run() {
-//            super.run()
-//
-//            sensorManager = applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//            step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-//
-//            if (step_sensor != null) {
-//               sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
-//            }
-//
-//
-//
-//        }
-//    }
-//
-//    private fun createNotification(channelId: String, todayTotalStepCount: Int) {
-//        val builder = NotificationCompat.Builder(this, "default").setOngoing(true)
-//        builder.setSmallIcon(R.mipmap.ic_launcher)
-//        builder.setContentTitle("$todayTotalStepCount")
-//        builder.setContentText("$todayTotalStepCount")
-//        builder.color = Color.RED
-//        val notificationIntent = Intent(this, MainActivity::class.java)
-//        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-//        val pendingIntent =
-//            PendingIntent.getActivity(this, 20, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
-//        builder.setContentIntent(pendingIntent) // 알림 클릭시 이동
-//
-//        val notificationManager = this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            notificationManager.createNotificationChannel(
-//                NotificationChannel(
-//                    "default",
-//                    "$channelId",
-//                    NotificationManager.IMPORTANCE_DEFAULT
-//                )
-//            )
-//        }
-//        notificationManager.notify(3, builder.build())
-//        val notification = builder.build()
-//        startForeground(3, notification)
-//    }
+
     private fun StepCountNotification(context: Context, stepCount: Int?) {
         if (Build.VERSION.SDK_INT >= 26) {
             val CHANNEL_ID = "my_app"

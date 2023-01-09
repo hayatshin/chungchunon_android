@@ -1,37 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:background="@drawable/main_screen"
     android:layout_height="match_parent"
+    android:background="@drawable/main_screen"
     android:orientation="vertical">
 
     <ImageView
         android:id="@+id/iconImage"
-        android:layout_width="0dp"
+        android:layout_width="400dp"
         android:layout_height="250dp"
-        android:src="@drawable/icon_transparent_text"
-        app:layout_constraintBottom_toTopOf="@+id/loginLayout"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="center"
+        android:layout_marginTop="110dp"
+        android:src="@drawable/icon_transparent_text" />
 
     <LinearLayout
         android:id="@+id/loginLayout"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iconImage">
+        android:layout_gravity="center"
+        android:layout_marginTop="70dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/kakaoLoginBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:text="카톡으로 로그인하기"
             android:textColor="@color/kakao_yellow"
@@ -43,7 +39,16 @@
             app:layout_constraintTop_toBottomOf="@+id/iconImage"
             app:layout_constraintVertical_chainStyle="packed" />
 
+        <ProgressBar
+            android:progressDrawable="@drawable/kakao_progress_drawable"
+            android:id="@+id/kakaoProgressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="250dp"
+            android:layout_height="8dp"
+            android:layout_gravity="center" />
+
         <TextView
+            android:layout_marginTop="30dp"
             android:id="@+id/registerBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,11 +58,8 @@
             android:textColor="@color/white"
             android:textSize="30sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/kakaoLoginBtn" />
+            />
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

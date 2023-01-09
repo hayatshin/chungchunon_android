@@ -2,8 +2,11 @@ package com.chugnchunon.chungchunon_android.KakaoLogin
 
 import android.content.Intent
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
+import com.chugnchunon.chungchunon_android.R
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
 import com.kakao.network.ErrorResult
@@ -16,17 +19,22 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.NonCancellable.cancel
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.concurrent.timer
 
 
 class SessionCallback(val context: MainActivity): ISessionCallback {
     private val TAG : String = "카톡로그인"
     private val userDB = Firebase.firestore.collection("users")
 
+
     override fun onSessionOpened() {
 
             UserManagement.getInstance().me(object : MeV2ResponseCallback(){
             override fun onSuccess(result: MeV2Response?) {
+
                 if(result != null){
                     Log.d(TAG, "세션 오픈")
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
@@ -92,5 +100,7 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
     override fun onSessionOpenFailed(exception: KakaoException?) {
         Log.e(TAG, "onSessionOpenFailed ${exception?.message}")
     }
+
+
 
 }

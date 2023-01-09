@@ -23,11 +23,13 @@
             app:tabIndicatorColor="@color/main_color">
 
             <com.google.android.material.tabs.TabItem
+                android:id="@+id/myDiaryTab"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="내 일기" />
 
             <com.google.android.material.tabs.TabItem
+                android:id="@+id/ourDiaryTab"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="우리 일기" />

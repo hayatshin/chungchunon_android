@@ -6,6 +6,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <TextView
+        android:background="@drawable/recycler_default_item"
+        android:textSize="18sp"
         android:id="@+id/regionSelectText"
         tools:text="서울특별시"
         android:paddingVertical="10dp"

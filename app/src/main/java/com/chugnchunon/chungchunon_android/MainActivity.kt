@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
@@ -19,6 +20,9 @@ import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
 import org.json.JSONObject
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.concurrent.timer
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,11 +32,14 @@ class MainActivity : AppCompatActivity() {
     }
     private val auth = FirebaseAuth.getInstance()
     private lateinit var callback: SessionCallback
-
+    var timer : Timer? = null
+    var deltaTime = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.kakaoProgressBar.visibility = View.GONE
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -54,7 +61,11 @@ class MainActivity : AppCompatActivity() {
 
         // 카톡 로그인 버튼 클릭
         binding.kakaoLoginBtn.setOnClickListener {
-            Log.d("카톡로그인", "클릭")
+            binding.kakaoProgressBar.visibility = View.VISIBLE
+            TimerFun()
+
+            binding.kakaoLoginBtn.isClickable = false
+
             val keyHash = Utility.getKeyHash(this) // keyHash 발급
 
             Session.getCurrentSession().addCallback(callback)
@@ -63,6 +74,8 @@ class MainActivity : AppCompatActivity() {
 
         // 일반 회원가입
         binding.registerBtn.setOnClickListener {
+            binding.registerBtn.isClickable = false
+
             val goRegisterUser = Intent(this, RegisterActivity::class.java)
             startActivity(goRegisterUser)
         }
@@ -118,6 +131,14 @@ class MainActivity : AppCompatActivity() {
         }
         queue.add(request)
         return source.task
+    }
+
+    fun TimerFun() {
+        // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
+        timer = timer(period = 50, initialDelay = 500) {
+            if(deltaTime > 100) cancel()
+            binding.kakaoProgressBar.setProgress(++deltaTime)
+        }
     }
 
 }

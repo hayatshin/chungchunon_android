@@ -21,8 +21,8 @@
 
         <activity
             android:name=".StartActivity"
-            android:theme="@style/Theme.Design.Light.NoActionBar"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -70,6 +70,7 @@
             android:name=".CommentActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
+
         <receiver
             android:name=".BroadcastReceiver.BroadcastReceiver"
             android:exported="true">

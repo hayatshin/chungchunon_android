@@ -5,8 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.text.Spannable
+import android.text.style.BackgroundColorSpan
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.RegionPagerAdapter
@@ -71,12 +75,13 @@ class RegionRegisterActivity : AppCompatActivity() {
         viewPager.adapter = adapter
     }
 
+
     var mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?){
             smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
             selectedRegion = intent?.getStringExtra("selectedRegion").toString()
-            binding.regionResult.text = selectedRegion
-            binding.regionDescription.text="거주지역(읍/면/동 단위)을 목록에서 선택하세요."
+            binding.regionResult.text = spanTextFn(selectedRegion)
+            binding.regionDescription.text="읍/면/동 단위 거주지역을 목록에서 선택하세요."
 
             var pref = getSharedPreferences("REGION_PREF", Context.MODE_PRIVATE).edit()
             pref.putString("selectedRegion", selectedRegion)
@@ -90,11 +95,15 @@ class RegionRegisterActivity : AppCompatActivity() {
     var smMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
-            binding.smallRegionResult.text = selectedSmallRegion
+            binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
             binding.regionDescription.text="앱 시작하기 버튼을 눌러주세요"
-
         }
     }
+    private fun spanTextFn(text: String): Spannable {
+        var spanText = Spannable.Factory.getInstance().newSpannable(text)
+        var color = ContextCompat.getColor(this, R.color.light_main_color)
+        spanText.setSpan(BackgroundColorSpan(color), 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        return spanText
+    }
 }
-
 
