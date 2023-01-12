@@ -2,7 +2,7 @@ package com.chugnchunon.chungchunon_android.DataClass
 
 data class DiaryCard(
     var diaryId: String,
-    var writeTime: String,
+    var writeTime: Long,
     var name: String,
     var stepCount: String,
     var mood: Long? = 2131230873,

@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +38,19 @@ class DiaryActivity : AppCompatActivity() {
         var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(2).layoutParams as LinearLayout.LayoutParams
         yourTabItemView.weight = 0.3f
 
-
+//        binding.viewPager.isUserInputEnabled = false
+//
+//        binding.viewPager.setPageTransformer(object: ViewPager2.PageTransformer {
+//            override fun transformPage(page: View, position: Float) {
+//                page.alpha = 0f
+//                page.visibility = View.VISIBLE
+//
+//                page.animate()
+//                    .withLayer()
+//                    .alpha(1f)
+//                    .setDuration(0)
+//            }
+//        })
 
         setUpTabBar()
 
@@ -77,6 +90,7 @@ class DiaryActivity : AppCompatActivity() {
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 viewPager.currentItem = tab.position
+
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}

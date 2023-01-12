@@ -16,10 +16,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.CommentActivity
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
 import com.chugnchunon.chungchunon_android.R
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -27,14 +29,15 @@ import kotlinx.android.synthetic.main.diary_card.view.*
 import org.apache.commons.lang3.mutable.MutableBoolean
 
 
-class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
+class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     RecyclerView.Adapter<DiaryCardAdapter.CardViewHolder>() {
 
-    var items = items
+
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
     var diaryDB = Firebase.firestore.collection("diary")
-    var likeToggleCheck: HashMap<Int, Boolean> = HashMap()
+
+    var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -51,8 +54,7 @@ class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
-
-            userWriteTime.text = items[position].writeTime
+            userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
             userNameView.text = items[position].name
             userStepCountView.text = "${items[position].stepCount}보"
             userMoodView.setImageResource(items[position].mood!!.toInt())
@@ -73,8 +75,8 @@ class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
                                 likeToggleCheck.put(position, true)
                                 likeIcon.setImageResource(R.drawable.ic_filledheart)
                             } else {
-                                likeToggleCheck.put(position, false)
                                 likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                                likeToggleCheck.put(position, false)
                             }
                         }
                     }
@@ -91,52 +93,50 @@ class DiaryCardAdapter(val context: Context, items: ArrayList<DiaryCard>) :
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder.bind(position)
 
-        Log.d("태건폰11", "$likeNumLikes")
-
         holder.itemView.likeBox.setOnClickListener { view ->
+            Log.d("좋아요토글", "클릭")
+
+            var DiaryRef = diaryDB.document(items[position].diaryId)
 
             var likeUserSet = hashMapOf(
                 "id" to userId
             )
 
-            // 하트 이모티콘
             if (likeToggleCheck[position]!!) {
 
+                DiaryRef.update("numLikes", FieldValue.increment(-1))
+
+
                 likeNumLikes[position] = likeNumLikes[position]!!.toInt() - 1
-
-                var newNumSet = hashMapOf(
-                    "numLikes" to  likeNumLikes[position]
-                )
-
-                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
                 holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
                 diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
                     .delete()
-                diaryDB.document(items[position].diaryId).set(newNumSet, SetOptions.merge())
 
                 likeToggleCheck[position] = false
+
             } else {
 
+                DiaryRef.update("numLikes", FieldValue.increment(1))
+
+
                 likeNumLikes[position] = likeNumLikes[position]!!.toInt() + 1
-
-                var newNumSet = hashMapOf(
-                    "numLikes" to  likeNumLikes[position]
-                )
-
-                holder.likeIcon.setImageResource(R.drawable.ic_filledheart)
                 holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
                 diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
                     .set(likeUserSet, SetOptions.merge())
-                diaryDB.document(items[position].diaryId).set(newNumSet, SetOptions.merge())
 
                 likeToggleCheck[position] = true
+
             }
+
         }
 
+        // 댓글버튼 클릭
         holder.itemView.commentBox.setOnClickListener { view ->
             var openComment = Intent(context, CommentActivity::class.java)
             openComment.putExtra("diaryId", items[position].diaryId)
-            openComment.putExtra("diaryPosition", "${position}")
+            openComment.putExtra("diaryPosition", position)
             context.startActivity(openComment)
         }
     }

@@ -10,35 +10,51 @@
         <entry key="app/src/main/res/drawable/default_button.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/diarybox.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/gender_spinner_item.xml" value="0.116" />
+        <entry key="app/src/main/res/drawable/ic_appIcon_background.xml" value="0.1535" />
         <entry key="app/src/main/res/drawable/ic_arrow_back.xml" value="0.106" />
+        <entry key="app/src/main/res/drawable/ic_arrow_back_main.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_emotion_1.xml" value="0.1145" />
         <entry key="app/src/main/res/drawable/ic_emotion_2.xml" value="0.1145" />
+        <entry key="app/src/main/res/drawable/ic_emptychat.xml" value="0.1565" />
+        <entry key="app/src/main/res/drawable/ic_filledheart.xml" value="0.128" />
+        <entry key="app/src/main/res/drawable/ic_hamburger.xml" value="0.1655" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.14" />
+        <entry key="app/src/main/res/drawable/ic_run.xml" value="0.1565" />
+        <entry key="app/src/main/res/drawable/ic_stepcount_icon_background.xml" value="0.1535" />
         <entry key="app/src/main/res/drawable/kakao_progress_drawable.xml" value="0.166" />
         <entry key="app/src/main/res/drawable/layer_screen.xml" value="0.113" />
         <entry key="app/src/main/res/drawable/main_progress_drawable.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/main_screen.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox.xml" value="0.1415" />
+        <entry key="app/src/main/res/drawable/mindbox_bold.xml" value="0.178" />
         <entry key="app/src/main/res/drawable/more_box.xml" value="0.136" />
+        <entry key="app/src/main/res/drawable/noti_box.xml" value="0.174" />
         <entry key="app/src/main/res/drawable/recycler_default_item.xml" value="0.1555" />
         <entry key="app/src/main/res/drawable/region_box.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/rule_header.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/sub_button.xml" value="0.189" />
+        <entry key="app/src/main/res/drawable/tab_background.xml" value="0.139" />
+        <entry key="app/src/main/res/drawable/tab_background_unselected.xml" value="0.1585" />
+        <entry key="app/src/main/res/drawable/tab_icon_color.xml" value="0.1565" />
+        <entry key="app/src/main/res/layout/activity_application_rule.xml" value="0.1796875" />
         <entry key="app/src/main/res/layout/activity_big_region.xml" value="0.22780797101449277" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.15057220458984374" />
         <entry key="app/src/main/res/layout/activity_community_register.xml" value="0.165" />
-        <entry key="app/src/main/res/layout/activity_diary.xml" value="0.24153594970703127" />
+        <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.15670289855072464" />
         <entry key="app/src/main/res/layout/activity_more.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_personalinfo_rule.xml" value="0.1796875" />
         <entry key="app/src/main/res/layout/activity_region.xml" value="0.23852386474609377" />
         <entry key="app/src/main/res/layout/activity_region_register.xml" value="0.16304347826086957" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.2099395751953125" />
+        <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.15670289855072464" />
-        <entry key="app/src/main/res/layout/comment_list.xml" value="0.16168416341145833" />
-        <entry key="app/src/main/res/layout/diary_card.xml" value="0.16204833984375" />
+        <entry key="app/src/main/res/layout/comment_list.xml" value="0.33099110921223956" />
+        <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.14175724637681159" />
-        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.1265625" />
+        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.30906219482421876" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.20552219999009286" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />
@@ -46,7 +62,12 @@
         <entry key="app/src/main/res/layout/gender_spinner_item.xml" value="0.15520833333333334" />
         <entry key="app/src/main/res/layout/item_region.xml" value="0.28688449583191805" />
         <entry key="app/src/main/res/layout/item_spinner.xml" value="0.15729166666666666" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon.xml" value="0.159" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon_round.xml" value="0.159" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1415" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_stepcount_icon.xml" value="0.1535" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/launcher.xml" value="0.1535" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/launcher_round.xml" value="0.1535" />
       </map>
     </option>
   </component>

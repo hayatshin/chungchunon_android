@@ -10,14 +10,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.MutableData
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -42,7 +47,11 @@ class AllDiaryFragment : Fragment() {
     private var _binding: FragmentAllDiaryBinding? = null
     private val binding get() = _binding!!
 
-    private var items: ArrayList<DiaryCard> = ArrayList()
+    private var diaryItems: ArrayList<DiaryCard> = ArrayList()
+    private var sortItems: ArrayList<DiaryCard> = ArrayList()
+
+    var order = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,24 +59,28 @@ class AllDiaryFragment : Fragment() {
     ): View? {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
-        adapter = DiaryCardAdapter(requireContext(), items)
+
+        adapter = DiaryCardAdapter(requireContext(), diaryItems)
+
 
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            commentNumChangeReceiver,
+            deleteNumChangeReceiver,
             IntentFilter("DELETE_ACTION")
         );
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            commentNumChangeReceiver,
+            createNumChangeReceiver,
             IntentFilter("CREATE_ACTION")
         );
+
 
         diaryDB
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
+
                     var userId = document.data?.getValue("userId")
                     var diaryId = document.data?.getValue("diaryId").toString()
                     var numLikes = document.data?.getValue("numLikes") as Long
@@ -82,20 +95,21 @@ class AllDiaryFragment : Fragment() {
                             var todayStepCount = userInfo.data?.getValue("todayStepCount").toString()
 
                             // items 추가
-                            items.add(
-                                DiaryCard(
-                                    diaryId,
-                                    DateFormat().converDate(timefromdb),
-                                    username,
-                                    todayStepCount,
-                                    (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
-                                    document.data?.getValue("todayDiary").toString(),
-                                    numLikes,
-                                    numComments,
-                                )
+                            var diarySet =  DiaryCard(
+                                diaryId,
+                                DateFormat().convertMillis(timefromdb),
+                                username,
+                                todayStepCount,
+                                (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                document.data?.getValue("todayDiary").toString(),
+                                numLikes,
+                                numComments,
                             )
 
-                            adapter.notifyDataSetChanged()
+                            diaryItems.add(diarySet)
+                            diaryItems.sortWith(compareBy({it.writeTime}))
+                            diaryItems.reverse()
+                           adapter.notifyDataSetChanged()
                         }
                 }
             }
@@ -110,15 +124,25 @@ class AllDiaryFragment : Fragment() {
         return view
     }
 
-    var commentNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    var deleteNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            var diaryPosition = intent?.getIntExtra("diaryPosition", 0)
-            var newNumComments = intent?.getIntExtra("newNumComments", 0)
+            var deleteNumComments = intent?.getIntExtra("deleteNumComments", 0)
+            var deleteDiaryPosition = intent?.getIntExtra("deleteDiaryPosition", 0)
 
-            items[diaryPosition!!].numComments = newNumComments!!.toLong()
+            diaryItems[deleteDiaryPosition!!].numComments = deleteNumComments?.toLong()
             adapter.notifyDataSetChanged()
         }
     }
-}
 
+    var createNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            var createNumComments = intent?.getIntExtra("createNumComments", 0)
+            var createDiaryPosition = intent?.getIntExtra("createDiaryPosition", 0)
+
+            diaryItems[createDiaryPosition!!].numComments = createNumComments?.toLong()
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+}
 

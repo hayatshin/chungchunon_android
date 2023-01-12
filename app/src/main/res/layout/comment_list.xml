@@ -14,6 +14,8 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:textColor="@color/light_gray"
+            android:textSize="14sp"
             android:id="@+id/commentName"
             android:layout_marginRight="20dp"
             tools:text="신혜정"
@@ -21,6 +23,7 @@
             android:layout_height="wrap_content" />
 
         <TextView
+            android:textSize="14sp"
             android:id="@+id/commentTimestamp"
             tools:text="2023-01-07 14:57"
             android:layout_width="wrap_content"
@@ -32,6 +35,7 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:textSize="16sp"
                 android:id="@+id/editBtn"
                 android:layout_marginRight="20dp"
                 android:textColor="@color/main_color"
@@ -41,6 +45,7 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
+                android:textSize="16sp"
                 android:id="@+id/deleteBtn"
                 android:textColor="@color/black"
                 android:textStyle="bold"
@@ -53,6 +58,8 @@
     </LinearLayout>
 
     <TextView
+        android:textColor="@color/black"
+        android:textSize="16sp"
         android:id="@+id/commentDescription"
         tools:text="좋은 글이군요"
         android:layout_width="wrap_content"

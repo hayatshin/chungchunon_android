@@ -35,6 +35,7 @@
             android:layout_height="0dp">
 
         <androidx.recyclerview.widget.RecyclerView
+            app:stackFromEnd="true"
             android:id="@+id/commentRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -51,6 +52,7 @@
             android:orientation="horizontal">
 
             <EditText
+                android:paddingHorizontal="10dp"
                 android:id="@+id/commentWriteText"
                 android:layout_width="0dp"
                 android:layout_height="45dp"
@@ -58,8 +60,11 @@
                 android:background="@drawable/mindbox" />
 
             <Button
+                android:textSize="17sp"
+                android:background="@drawable/default_button"
                 android:id="@+id/commentWriteBtn"
-                android:layout_width="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_width="0dp"
                 android:layout_height="45dp"
                 android:layout_marginStart="10dp"
                 android:text="댓글 작성" />

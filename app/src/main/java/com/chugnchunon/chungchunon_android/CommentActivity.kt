@@ -8,12 +8,17 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,46 +53,37 @@ class CommentActivity : Activity() {
 
     private var username = ""
     private var diaryId: String = ""
-    private var diaryPosition: Int? = 0
-    private var items: ArrayList<Comment> = ArrayList()
+    var commentItems: ArrayList<Comment> = ArrayList()
+
     @SuppressLint("SimpleDateFormat")
     private val simpledateformat = SimpleDateFormat("yyyy-MM-dd HH:mm")
-//    private var numComments: Int = 0
 
     private var editBtn: Boolean = false
     private var editCommentId: String? = ""
     private var editCommentPosition: Int? = 0
     private var originalDescription: String? = ""
 
-    private var deleteCommentId: String? = ""
-    private var deleteCommentPosition: Int? = 0
+    private var diaryPosition: Int? = 0
+
 
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        Log.d("태건폰", "$userId")
+
+        binding.commentWriteBtn.isEnabled = false
 
         binding.commentGobackArrow.setOnClickListener {
             finish()
         }
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            editDescriptionReceiver,
-            IntentFilter("EDIT_INTENT")
-        );
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            deleteCommentReceiver,
-            IntentFilter("DELETE_INTENT")
-        );
-
         diaryId = intent.getStringExtra("diaryId").toString()
-        Log.d("태건폰23", "$diaryId")
         diaryPosition = intent.getIntExtra("diaryPosition", 0)
 
-        adapter = CommentAdapter(this, items)
+
+
+        adapter = CommentAdapter(this, commentItems)
 
         userDB.document("$userId")
             .get()
@@ -104,13 +100,22 @@ class CommentActivity : Activity() {
 
                     var commentId = document.data?.getValue("commentId").toString()
                     var commentUserName = document.data?.getValue("username").toString()
-                    var commentTimestamp = DateFormat().converDate(timeMillis)
+                    var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
                     var commentDescription =
                         document.data?.getValue("description").toString()
 
-                    items.add(Comment(commentId, commentUserName, commentTimestamp, commentDescription))
-
+                    commentItems.add(
+                        Comment(
+                            diaryId,
+                            diaryPosition!!,
+                            commentId,
+                            commentUserName,
+                            commentTimestamp,
+                            commentDescription
+                        )
+                    )
                     adapter.notifyDataSetChanged()
+
                 }
                 binding.commentRecyclerView.adapter = adapter
                 binding.commentRecyclerView.layoutManager = LinearLayoutManager(
@@ -119,6 +124,17 @@ class CommentActivity : Activity() {
                     false
                 )
             }
+
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            editDescriptionReceiver,
+            IntentFilter("EDIT_INTENT")
+        );
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            deleteCommentReceiver,
+            IntentFilter("DELETE_INTENT")
+        );
 
         binding.commentRecyclerView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
@@ -130,59 +146,78 @@ class CommentActivity : Activity() {
             false
         }
 
+        binding.commentWriteText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                // null
+            }
+
+            override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                binding.commentWriteBtn.isEnabled = char?.length != 0
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                // null
+            }
+
+        })
+
 
         binding.commentWriteBtn.setOnClickListener {
             if (!editBtn) {
 
-                // 댓글 작성 버튼
-                diaryDB.document("$diaryId")
-                    .get()
-                    .addOnSuccessListener { document ->
-
-                        // diary 디비 numComments 1 추가
-                        var prevNumComments = document.data?.getValue("numComments").toString().toInt()
-
-                        var commentNumSet = hashMapOf(
-                            "numComments" to prevNumComments + 1
-                        )
-                        diaryDB.document("$diaryId")
-                            .set(commentNumSet, SetOptions.merge())
-
-                        // diary 내 서브클래스 comments 추가
-                        var timestamp = System.currentTimeMillis()
-                        var commentId = "${userId}_${timestamp}"
-                        var description = binding.commentWriteText.text
-                        var commentSet = hashMapOf(
-                            "commentId" to commentId,
-                            "username" to username,
-                            "timestamp" to FieldValue.serverTimestamp(),
-                            "description" to description.toString()
-                        )
-
-                        diaryDB.document("$diaryId").collection("comments").document("${userId}_${timestamp}")
-                            .set(commentSet, SetOptions.merge())
-                            .addOnSuccessListener {
-                                binding.commentWriteText.text = null
-                                items.add(
-                                    Comment(
-                                        commentId,
-                                        username,
-                                        simpledateformat.format(timestamp),
-                                        description.toString()
-                                    )
-                                )
-                                adapter.notifyDataSetChanged()
-                                binding.commentRecyclerView.scrollToPosition(items.size - 1);
-                            }
-
+                // diary +1
+                var DiaryRef = diaryDB.document(diaryId)
+                DiaryRef.update("numComments", FieldValue.increment(1))
+                    .addOnSuccessListener {
                         // 전체 다이어리 화면
+                        DiaryRef
+                            .get()
+                            .addOnSuccessListener { document ->
+                                var createNumComments =
+                                    document.data?.getValue("numComments").toString().toInt()
 
-                        var intent = Intent(this, AllDiaryFragment::class.java)
-                        intent.setAction("CREATE_ACTION")
-                        intent.putExtra("diaryPosition", diaryPosition)
-                        intent.putExtra("newNumComments", (prevNumComments+1))
-                        LocalBroadcastManager.getInstance(this!!).sendBroadcast(intent)
+                                var createIntent = Intent(this, AllDiaryFragment::class.java)
+                                createIntent.setAction("CREATE_ACTION")
+                                createIntent.putExtra("createDiaryPosition", diaryPosition)
+                                createIntent.putExtra("createNumComments", createNumComments)
+                                LocalBroadcastManager.getInstance(this!!)
+                                    .sendBroadcast(createIntent)
+                            }
                     }
+
+
+                // diary DB 내 comments 추가
+                var timestamp = System.currentTimeMillis()
+                var commentId = "${userId}_${timestamp}"
+                var description = binding.commentWriteText.text
+                var commentSet = hashMapOf(
+                    "commentId" to commentId,
+                    "username" to username,
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "description" to description.toString()
+                )
+                DiaryRef.collection("comments").document(commentId)
+                    .set(commentSet, SetOptions.merge())
+
+                // commentItems 추가
+                commentItems.add(
+                    Comment(
+                        diaryId,
+                        diaryPosition!!,
+                        commentId,
+                        username,
+                        simpledateformat.format(timestamp),
+                        description.toString()
+                    )
+                )
+                Log.d("commentItems", "생성: ${commentItems}")
+
+                adapter.notifyDataSetChanged()
+                binding.commentRecyclerView.scrollToPosition(commentItems.size - 1);
+
+                binding.commentWriteText.text = null
+
+
             } else {
                 // 댓글 수정 버튼
                 var newDescription = binding.commentWriteText.text
@@ -194,7 +229,8 @@ class CommentActivity : Activity() {
                     .set(newDescriptionSet, SetOptions.merge())
                     .addOnSuccessListener {
                         binding.commentWriteText.text = null
-                        items[editCommentPosition!!].commentDescription = newDescription.toString()
+                        commentItems[editCommentPosition!!].commentDescription =
+                            newDescription.toString()
                         adapter.notifyDataSetChanged()
                         editBtn = false
                         binding.commentWriteBtn.text = "댓글 작성"
@@ -215,39 +251,30 @@ class CommentActivity : Activity() {
         }
     }
 
-
     var deleteCommentReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            deleteCommentId = intent?.getStringExtra("deleteCommentId").toString()
-            deleteCommentPosition = intent?.getIntExtra("deleteCommentPosition", 0)
+            var deleteDiaryId = intent?.getStringExtra("deleteDiaryId")
+            var deleteDiaryPosition = intent?.getIntExtra("deleteDiaryPosition", 0)
+            var deleteCommentPosition = intent?.getIntExtra("deleteCommentPosition", 0)
 
-            diaryDB.document("$diaryId").get()
+            if (commentItems.size != 0) {
+                commentItems.removeAt(deleteCommentPosition!!.toInt())
+                adapter.notifyDataSetChanged()
+            }
+
+            diaryDB.document(deleteDiaryId!!).get()
                 .addOnSuccessListener { document ->
-                    var prevNumComments = document.data?.getValue("numComments").toString().toInt()
-
-                    // numComments 1 감소
-                    var newNumCommentSet = hashMapOf(
-                        "numComments" to (prevNumComments-1)
-                    )
-
-                    diaryDB.document("$diaryId").set(newNumCommentSet, SetOptions.merge())
+                    var newNumComments = document.data?.getValue("numComments").toString().toInt()
 
                     // 전체 일기 화면
                     var intent = Intent(context, AllDiaryFragment::class.java)
                     intent.setAction("DELETE_ACTION")
-                    intent.putExtra("diaryPosition", diaryPosition)
-                    intent.putExtra("newNumComments", (prevNumComments-1))
+                    intent.putExtra("deleteDiaryPosition", deleteDiaryPosition)
+                    intent.putExtra("deleteNumComments", newNumComments)
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
                 }
-
-            // comments 삭제
-            diaryDB.document("$diaryId").collection("comments").document("$deleteCommentId").delete()
-
-            // 코멘트 화면
-            items.removeAt(deleteCommentPosition!!.toInt())
-            adapter.notifyDataSetChanged()
-
-
         }
     }
+
 }
+

@@ -9,20 +9,28 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
+import android.text.*
+import android.text.style.BackgroundColorSpan
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.core.text.color
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.BroadcastReceiver
@@ -39,10 +47,15 @@ import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.time.LocalDateTime
 import java.util.*
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
+import com.chugnchunon.chungchunon_android.FillCheckClass
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import kotlinx.android.synthetic.main.diary_card.*
@@ -71,6 +84,10 @@ class MyDiaryFragment : Fragment() {
     private var todayTotalStepCount: Int = 0
     private val yearMonthDateFormat = SimpleDateFormat("yyyy-MM")
 
+    lateinit var diaryFillCheck: DiaryFillClass
+    lateinit var diaryEditCheck: DiaryEditClass
+
+    private var editDiary: Boolean = false
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
@@ -83,12 +100,121 @@ class MyDiaryFragment : Fragment() {
         var startService = Intent(activity, MyService::class.java)
         activity?.let { ContextCompat.startForegroundService(it, startService) }
 
-//        todayTotalStepCount?.observe(viewLifecycleOwner) { value ->
-//            binding.todayStepCount.text = value.toString()
-//        }
+
+        diaryFillCheck = ViewModelProvider(requireActivity()).get(DiaryFillClass::class.java)
+        diaryEditCheck = ViewModelProvider(requireActivity()).get(DiaryEditClass::class.java)
+
+        diaryFillCheck.diaryFill.observe(requireActivity(), Observer { value ->
+//            binding.diaryBtn.isEnabled = value
+            if (value && !editDiary) binding.diaryBtn.isEnabled = true
+        })
+
+        diaryEditCheck.diaryEdit.observe(requireActivity(), Observer { value ->
+            if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
+                binding.diaryBtn.isEnabled = true
+            }
+        })
+
+        diaryEditCheck.moodEdit.observe(requireActivity(), Observer { value ->
+            if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
+                binding.diaryBtn.isEnabled = true
+
+                var nowMood = (binding.todayMood.selectedItem as Mood).image
+                Log.d("체크", "$nowMood")
+            }
+        })
 
 
-         // 오늘 걸음수 초기화
+        // 일기 작성 여부
+        val writeTime = LocalDateTime.now().toString().substring(0, 10)
+
+        diaryDB
+            .document("${userId}_${writeTime}")
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val document = task.result
+                    if (document != null) {
+                        if (document.exists()) {
+                            // 일기 작성을 한 상태
+
+                            editDiary = true
+                            binding.diaryBtn.isEnabled = false
+                            binding.diaryBtn.text = "일기 수정"
+
+                            // 일기 보여주기
+                            var oldDiary = document.data?.getValue("todayDiary").toString()
+                            binding.todayDiary.setText(oldDiary)
+
+                            // 마음 보여주기
+                            var spinnerAdapter = binding.todayMood.adapter
+                            var dbMood =
+                                (document.data?.getValue("todayMood") as Map<*, *>)["image"].toString()
+                                    .toInt()
+                            var selectedPosition = getPositionMood(dbMood).toInt()
+                            binding.todayMood.setSelection(selectedPosition)
+
+                            Log.d("체크", "${dbMood} // ${selectedPosition}")
+
+                            binding.todayMood.setOnItemSelectedListener(object :
+                                AdapterView.OnItemSelectedListener {
+                                override fun onItemSelected(
+                                    p0: AdapterView<*>?,
+                                    p1: View?,
+                                    p2: Int,
+                                    p3: Long
+                                ) {
+                                    var nowMood = (binding.todayMood.selectedItem as Mood).image
+                                    if (nowMood != dbMood) {
+                                        diaryEditCheck.moodEdit.value = true
+                                    }
+                                }
+
+                                override fun onNothingSelected(p0: AdapterView<*>?) {
+                                    // null
+                                }
+
+                            })
+
+
+
+                            binding.todayDiary.addTextChangedListener(object : TextWatcher {
+                                override fun beforeTextChanged(
+                                    p0: CharSequence?,
+                                    p1: Int,
+                                    p2: Int,
+                                    p3: Int
+                                ) {
+                                    // null
+                                }
+
+                                override fun onTextChanged(
+                                    char: CharSequence?,
+                                    p1: Int,
+                                    p2: Int,
+                                    p3: Int
+                                ) {
+                                    if (binding.todayDiary.text.toString() != oldDiary) {
+                                        diaryEditCheck.diaryEdit.value = true
+                                    }
+                                }
+
+                                override fun afterTextChanged(p0: Editable?) {
+                                    // null
+                                }
+                            })
+
+
+                        } else {
+                            // 일기 작성 놉
+                        }
+                    }
+                } else {
+                    // 일기 작성 놉
+                }
+            }
+
+        // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount")
             todayTotalStepCount = todayStepCountFromDB?.toInt() ?: 0
@@ -124,20 +250,11 @@ class MyDiaryFragment : Fragment() {
 
         registerBroadCastReceiver()
 
-
-//        sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-//
-//        if (step_sensor != null) {
-//            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_UI)
-//        } else {
-//        }
-
         // 매달 일기 작성
         var currentdate = System.currentTimeMillis()
         var currentYearMonth = yearMonthDateFormat.format(currentdate)
         var currentMonth = SimpleDateFormat("MM").format(currentdate)
-        var removeZeroCurrentMonth = StringUtils.stripStart(currentMonth,"0");
+        var removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
         var currentMonthDate = MonthDate(currentMonth.toInt()).getDate
 
 
@@ -148,25 +265,26 @@ class MyDiaryFragment : Fragment() {
 
         thisMonthCount.get(AggregateSource.SERVER).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val calendarThisMonthCount = task.result.count
+                val calendarThisMonthCount = "${task.result.count}일"
+                var spanText = SpannableStringBuilder()
+                    .color(Color.RED) { append("${calendarThisMonthCount}") }
+                    .append(" / ${currentMonthDate}일")
 
-                binding.thisMonth.text = "✅ ${removeZeroCurrentMonth}월 일기 작성일"
-                binding.diaryCount.text = "${calendarThisMonthCount}일 / ${currentMonthDate}일"
+                binding.thisMonth.text = "${removeZeroCurrentMonth}월 일기 작성일"
+                binding.diaryCount.text = spanText
             }
         }
-
-
 
         // 기분 스니퍼
         binding.todayMood.adapter = activity?.applicationContext?.let {
             MoodArrayAdapter(
                 it,
                 listOf(
-                    Mood(R.drawable.ic_emotion_1, "많이 슬퍼요"),
-                    Mood(R.drawable.ic_emotion_2, "슬퍼요"),
-                    Mood(R.drawable.ic_emotion_3, "평범해요"),
-                    Mood(R.drawable.ic_emotion_4, "좋아요"),
                     Mood(R.drawable.ic_emotion_5, "많이 좋아요"),
+                    Mood(R.drawable.ic_emotion_4, "좋아요"),
+                    Mood(R.drawable.ic_emotion_3, "평범해요"),
+                    Mood(R.drawable.ic_emotion_2, "슬퍼요"),
+                    Mood(R.drawable.ic_emotion_1, "많이 슬퍼요"),
                 )
             )
         }
@@ -177,13 +295,30 @@ class MyDiaryFragment : Fragment() {
 
         binding.recordBtn.setOnClickListener {
             model.displaySpeechRecognizer()
-            val text = todayDiary.text?.trim().toString()
-            model.speak(if (text.isNotEmpty()) text else "Text tidak boleh kosong")
-
+//            val text = todayDiary.text?.trim().toString()
+//            model.speak(if (text.isNotEmpty()) text else "일기를 써보세요")
         }
+
+        // 다이어리 작성
+        binding.todayDiary.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                // null
+            }
+
+            override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                diaryFillCheck.diaryFill.value = char?.length != 0
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                // null
+            }
+
+        })
 
         // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
+
+            binding.diaryBtn.isEnabled = false
 
             var currentMilliseconds = System.currentTimeMillis()
             val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
@@ -225,7 +360,6 @@ class MyDiaryFragment : Fragment() {
             }
         })
         return view
-
     }
 
     private val startForResult = registerForActivityResult(
@@ -267,50 +401,26 @@ class MyDiaryFragment : Fragment() {
             }
         }
     }
+
+    private fun getPositionMood(value: Number): Long {
+        var result: Long = 0
+        when (value) {
+            2131230899 -> result = 4
+            2131230900 -> result = 3
+            2131230901 -> result = 2
+            2131230902 -> result = 1
+            2131230903 -> result = 0
+        }
+        return result
+    }
 }
 
 
+class DiaryFillClass : ViewModel() {
+    val diaryFill by lazy { MutableLiveData<Boolean>(false) }
+}
 
-
-
-//
-//    override fun onSensorChanged(stepEvent: SensorEvent?) {
-//        Log.d("결과아", "sensorEvent ${stepEvent!!.values[0].toInt()}")
-//
-//        var currentDate = LocalDate.now()
-//
-//        todayTotalStepCount = todayTotalStepCount?.plus(stepEvent!!.values[0].toInt())
-//        binding.todayStepCount.text = todayTotalStepCount.toString()
-//
-//        // user 내 todayStepCount
-//        var todayStepCountSet = hashMapOf(
-//            "todayStepCount" to todayTotalStepCount
-//        )
-//
-//        userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
-//
-//        var userStepCountSet = hashMapOf(
-//            "$currentDate" to todayTotalStepCount
-//        )
-//
-//        var periodStepCountSet = hashMapOf(
-//            "$userId" to todayTotalStepCount
-//        )
-//
-//        // user_step_count
-//        db.collection("user_step_count")
-//            .document("$userId")
-//            .set(userStepCountSet, SetOptions.merge())
-//
-//        // period_step_count
-//        db.collection("period_step_count")
-//            .document("$currentDate")
-//            .set(periodStepCountSet, SetOptions.merge())
-//
-//    }
-//
-//    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-//        Log.d("걸음수", "아직")
-//    }
-
-
+class DiaryEditClass : ViewModel() {
+    val diaryEdit by lazy { MutableLiveData<Boolean>(false) }
+    val moodEdit by lazy { MutableLiveData<Boolean>(false) }
+}

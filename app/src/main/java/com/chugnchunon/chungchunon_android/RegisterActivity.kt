@@ -323,7 +323,6 @@ class RegisterActivity : AppCompatActivity() {
             veriProgress.getIndeterminateDrawable().setColorFilter(colorResouce, PorterDuff.Mode.MULTIPLY)
 
             // 인증 확인 클릭
-
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {

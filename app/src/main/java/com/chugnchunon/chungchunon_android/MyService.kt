@@ -141,7 +141,7 @@ class MyService : Service(), SensorEventListener {
                 channel
             )
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_logo)
+                .setSmallIcon(R.mipmap.ic_stepcount_noti)
                 .setContentTitle("$todayTotalStepCount 걸음")
                 .setColor(ContextCompat.getColor(context, R.color.main_color))
                 .setDefaults(Notification.DEFAULT_LIGHTS)
