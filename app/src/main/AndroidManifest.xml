@@ -76,9 +76,18 @@
         <activity
             android:name=".PersonalInfoRuleActivity"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Partner.PartnerRegisterActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Partner.PartnerRegionRegisterActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Partner.PartnerDiaryActivity"
+            android:windowSoftInputMode="adjustPan" />
 
         <receiver
-            android:name=".BroadcastReceiver.BroadcastReceiver"
+            android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_DATE_CHANGED" />
@@ -90,6 +99,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".BroadcastReceiver.DiaryUpdateBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.chungchunon.chunchunon_android.DIARY_UPDATE_STEPCOUNT" />
             </intent-filter>
         </receiver>
     </application>

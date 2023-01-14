@@ -52,6 +52,8 @@ class CommentActivity : Activity() {
     private val userId = Firebase.auth.currentUser?.uid
 
     private var username = ""
+    private var userType = ""
+
     private var diaryId: String = ""
     var commentItems: ArrayList<Comment> = ArrayList()
 
@@ -81,14 +83,13 @@ class CommentActivity : Activity() {
         diaryId = intent.getStringExtra("diaryId").toString()
         diaryPosition = intent.getIntExtra("diaryPosition", 0)
 
-
-
         adapter = CommentAdapter(this, commentItems)
 
         userDB.document("$userId")
             .get()
             .addOnSuccessListener { document ->
                 username = document.data?.getValue("name").toString()
+                userType = document.data?.getValue("userType").toString()
             }
 
         diaryDB.document(diaryId).collection("comments")
@@ -100,6 +101,7 @@ class CommentActivity : Activity() {
 
                     var commentId = document.data?.getValue("commentId").toString()
                     var commentUserName = document.data?.getValue("username").toString()
+                    var commentUserType = document.data?.getValue("userType").toString()
                     var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
                     var commentDescription =
                         document.data?.getValue("description").toString()
@@ -110,6 +112,7 @@ class CommentActivity : Activity() {
                             diaryPosition!!,
                             commentId,
                             commentUserName,
+                            commentUserType,
                             commentTimestamp,
                             commentDescription
                         )
@@ -193,6 +196,7 @@ class CommentActivity : Activity() {
                 var commentSet = hashMapOf(
                     "commentId" to commentId,
                     "username" to username,
+                    "userType" to userType,
                     "timestamp" to FieldValue.serverTimestamp(),
                     "description" to description.toString()
                 )
@@ -206,6 +210,7 @@ class CommentActivity : Activity() {
                         diaryPosition!!,
                         commentId,
                         username,
+                        userType,
                         simpledateformat.format(timestamp),
                         description.toString()
                     )

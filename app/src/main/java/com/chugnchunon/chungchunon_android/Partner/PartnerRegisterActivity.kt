@@ -1,4 +1,4 @@
-package com.chugnchunon.chungchunon_android
+package com.chugnchunon.chungchunon_android.Partner
 
 import android.app.DatePickerDialog
 import android.content.Context
@@ -27,7 +27,9 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
+import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
+import com.chugnchunon.chungchunon_android.databinding.PartnerActivityRegisterBinding
 import com.firebase.ui.auth.ui.ProgressView
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
@@ -45,10 +47,10 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.concurrent.timer
 
-class RegisterActivity : AppCompatActivity() {
+class PartnerRegisterActivity : AppCompatActivity() {
 
     private val binding by lazy {
-        ActivityRegisterBinding.inflate(layoutInflater)
+        PartnerActivityRegisterBinding.inflate(layoutInflater)
     }
 
     private val userDB = Firebase.firestore.collection("users")
@@ -75,36 +77,36 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        binding.authProgressBar.visibility = View.GONE
-        binding.phoneAuthBtn.isEnabled = false
-        binding.registerBtn.isEnabled = false
+        binding.partnerAuthProgressBar.visibility = View.GONE
+        binding.partnerPhoneAuthBtn.isEnabled = false
+        binding.partnerRegisterBtn.isEnabled = false
 
         totalTxtCheck = ViewModelProvider(this).get(FillCheckClass::class.java)
         phoneTxtCheck = ViewModelProvider(this).get(PhoneFillClass::class.java)
 
         totalTxtCheck.nameFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
+            binding.partnerRegisterBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
                     totalTxtCheck.genderFill.value == true &&
                     totalTxtCheck.birthFill.value == true &&
                     totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.genderFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
+            binding.partnerRegisterBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
                     totalTxtCheck.genderFill.value == true &&
                     totalTxtCheck.birthFill.value == true &&
                     totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.birthFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
+            binding.partnerRegisterBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
                     totalTxtCheck.genderFill.value == true &&
                     totalTxtCheck.birthFill.value == true &&
                     totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.phoneFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
+            binding.partnerRegisterBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
                     totalTxtCheck.genderFill.value == true &&
                     totalTxtCheck.birthFill.value == true &&
                     totalTxtCheck.phoneFill.value == true
@@ -112,19 +114,19 @@ class RegisterActivity : AppCompatActivity() {
 
         phoneTxtCheck.phoneEditText1.observe(this, Observer { value ->
             Log.d("9일", "$value")
-            binding.phoneAuthBtn.isEnabled =
+            binding.partnerPhoneAuthBtn.isEnabled =
                 phoneTxtCheck.phoneEditText1.value == true && phoneTxtCheck.phoneEditText2.value == true
         })
 
         phoneTxtCheck.phoneEditText2.observe(this, Observer { value ->
             Log.d("9일", "$value")
-            binding.phoneAuthBtn.isEnabled =
+            binding.partnerPhoneAuthBtn.isEnabled =
                 phoneTxtCheck.phoneEditText1.value == true && phoneTxtCheck.phoneEditText2.value == true
         })
 
 
         // 이름 입력창
-        binding.nameInput.addTextChangedListener(object : TextWatcher {
+        binding.partnerNameInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 // null
             }
@@ -140,16 +142,16 @@ class RegisterActivity : AppCompatActivity() {
         })
 
         // 성별
-       binding.genderInput.adapter = ArrayAdapter.createFromResource(
+       binding.partnerGenderInput.adapter = ArrayAdapter.createFromResource(
             this,
             R.array.genderList,
             android.R.layout.simple_spinner_dropdown_item
         )
 
 
-        binding.genderInput.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+        binding.partnerGenderInput.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                totalTxtCheck.genderFill.value =  binding.genderInput.selectedItem != null
+                totalTxtCheck.genderFill.value =  binding.partnerGenderInput.selectedItem != null
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -169,7 +171,7 @@ class RegisterActivity : AppCompatActivity() {
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
 
                 if (editBirth) {
-                    binding.birthResultBox.removeAllViews()
+                    binding.partnerBirthResultBox.removeAllViews()
                 }
 
                 calendar.set(Calendar.YEAR, year)
@@ -189,16 +191,16 @@ class RegisterActivity : AppCompatActivity() {
                 birthTextView.setTextColor(resources.getColor(R.color.dark_main_color))
 //                birthTextView.gravity = Gravity.END
 
-                binding.birthResultBox.addView(birthTextView)
+                binding.partnerBirthResultBox.addView(birthTextView)
 
                 // 수정 버튼
                 editBirth = true
-                binding.birthInput.text = "수정하기"
+                binding.partnerBirthInput.text = "수정하기"
                 totalTxtCheck.birthFill.value = true
             }
 
         var datePickerResult = DatePickerDialog(
-            this@RegisterActivity,
+            this,
             android.R.style.Theme_Holo_Light_Dialog_MinWidth,
             birthDatePicker,
             calendar.get(Calendar.YEAR),
@@ -208,15 +210,15 @@ class RegisterActivity : AppCompatActivity() {
         datePickerResult.datePicker.spinnersShown = true
         datePickerResult.datePicker.calendarViewShown = false
 
-        binding.birthInput.setOnClickListener {
+        binding.partnerBirthInput.setOnClickListener {
             datePickerResult.show()
         }
 
 
         // 휴대폰 글자수 제한
-        binding.errorMessage.visibility = View.GONE
+        binding.partnerErrorMessage.visibility = View.GONE
 
-        binding.phoneInput1.addTextChangedListener(object : TextWatcher {
+        binding.partnerPhoneInput1.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 //null
@@ -225,11 +227,11 @@ class RegisterActivity : AppCompatActivity() {
             override fun onTextChanged(char: CharSequence?, start: Int, before: Int, count: Int) {
 
                 if (char?.length == 4) {
-                    binding.errorMessage.visibility = View.GONE
-                    binding.phoneInput2.requestFocus()
+                    binding.partnerErrorMessage.visibility = View.GONE
+                    binding.partnerPhoneInput2.requestFocus()
                     phoneTxtCheck.phoneEditText1.value = true
                 } else {
-                    binding.errorMessage.visibility = View.VISIBLE
+                    binding.partnerErrorMessage.visibility = View.VISIBLE
                     phoneTxtCheck.phoneEditText1.value = false
                 }
             }
@@ -239,7 +241,7 @@ class RegisterActivity : AppCompatActivity() {
             }
         })
 
-        binding.phoneInput2.addTextChangedListener(
+        binding.partnerPhoneInput2.addTextChangedListener(
             object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     // null
@@ -251,10 +253,10 @@ class RegisterActivity : AppCompatActivity() {
                     count: Int
                 ) {
                     if (char?.length == 4) {
-                        binding.errorMessage.visibility = View.GONE
+                        binding.partnerErrorMessage.visibility = View.GONE
                         phoneTxtCheck.phoneEditText2.value = true
                     } else {
-                        binding.errorMessage.visibility = View.VISIBLE
+                        binding.partnerErrorMessage.visibility = View.VISIBLE
                         phoneTxtCheck.phoneEditText2.value = false
                     }
                 }
@@ -266,10 +268,10 @@ class RegisterActivity : AppCompatActivity() {
 
 
         // 휴대폰 인증번호 받기
-        binding.phoneAuthBtn.setOnClickListener {
+        binding.partnerPhoneAuthBtn.setOnClickListener {
 
-            binding.phoneAuthLayout.removeView(binding.phoneAuthBtn)
-            binding.authProgressBar.visibility = View.VISIBLE
+            binding.partnerPhoneAuthLayout.removeView(binding.partnerPhoneAuthBtn)
+            binding.partnerAuthProgressBar.visibility = View.VISIBLE
             TimerFun()
 
             // 인증 입력
@@ -314,8 +316,8 @@ class RegisterActivity : AppCompatActivity() {
 
             } )
 
-            binding.phoneAuthLayout.addView(authEditTextView)
-            binding.phoneAuthLayout.addView(authBtn)
+            binding.partnerPhoneAuthLayout.addView(authEditTextView)
+            binding.partnerPhoneAuthLayout.addView(authBtn)
 
             var veriProgress = ProgressBar(applicationContext)
             veriProgress.layoutParams = layoutParams
@@ -326,8 +328,8 @@ class RegisterActivity : AppCompatActivity() {
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    binding.phoneAuthLayout.removeView(veriProgress)
-                    binding.phoneAuthLayout.addView(authBtn)
+                    binding.partnerPhoneAuthLayout.removeView(veriProgress)
+                    binding.partnerPhoneAuthLayout.addView(authBtn)
                 }
 
                 override fun onVerificationFailed(p0: FirebaseException) {
@@ -339,12 +341,12 @@ class RegisterActivity : AppCompatActivity() {
                     token: PhoneAuthProvider.ForceResendingToken
                 ) {
                     super.onCodeSent(verificationId, token)
-                    this@RegisterActivity.verificationId = verificationId
+                    this@PartnerRegisterActivity.verificationId = verificationId
 
                     authBtn.setOnClickListener {
-                        binding.authProgressBar.visibility = View.GONE
-                        binding.phoneAuthLayout.removeView(authBtn)
-                        binding.phoneAuthLayout.addView(veriProgress)
+                        binding.partnerAuthProgressBar.visibility = View.GONE
+                        binding.partnerPhoneAuthLayout.removeView(authBtn)
+                        binding.partnerPhoneAuthLayout.addView(veriProgress)
 
                         val credential = PhoneAuthProvider.getCredential(
                             verificationId,
@@ -356,7 +358,7 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             val authphone =
-                "+82 10${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+                "+82 10${binding.partnerPhoneInput1.text.toString()}-${binding.partnerPhoneInput2.text.toString()}"
 
             Log.d("번호", authphone)
 
@@ -373,21 +375,21 @@ class RegisterActivity : AppCompatActivity() {
 
 
         // 회원가입 버튼 클릭
-        binding.registerBtn.setOnClickListener {
+        binding.partnerRegisterBtn.setOnClickListener {
 
 
             val phoneNumber =
-                "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+                "010-${binding.partnerPhoneInput1.text.toString()}-${binding.partnerPhoneInput2.text.toString()}"
 
             val userId = Firebase.auth.currentUser?.uid
 
             val userSet = hashMapOf(
-                "userType" to "치매예방자",
+                "userType" to "파트너",
                 "loginType" to "일반",
                 "userId" to userId,
                 "timestamp" to FieldValue.serverTimestamp(),
-                "name" to (binding.nameInput.text.toString()),
-                "gender" to (binding.genderInput.selectedItem.toString()),
+                "name" to (binding.partnerNameInput.text.toString()),
+                "gender" to (binding.partnerGenderInput.selectedItem.toString()),
                 "phone" to phoneNumber,
                 "birthYear" to birthYear,
                 "birthDay" to birthDay,
@@ -398,7 +400,7 @@ class RegisterActivity : AppCompatActivity() {
                 .document("$userId")
                 .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    var intent = Intent(this, RegionRegisterActivity::class.java)
+                    var intent = Intent(this, PartnerRegionRegisterActivity::class.java)
                     startActivity(intent)
                 }
                 .addOnFailureListener { error ->
@@ -418,7 +420,7 @@ class RegisterActivity : AppCompatActivity() {
         // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
         timer = timer(period = 100, initialDelay = 500) {
             if(deltaTime > 100) cancel()
-            binding.authProgressBar.setProgress(++deltaTime)
+            binding.partnerAuthProgressBar.setProgress(++deltaTime)
         }
     }
 
@@ -436,8 +438,8 @@ class RegisterActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // 인증 성공
-                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
-                    binding.authProgressBar.visibility = View.GONE
+                    binding.partnerPhoneLayout.removeView(binding.partnerPhoneAuthLayout)
+                    binding.partnerAuthProgressBar.visibility = View.GONE
 
                     var successTextView = TextView(applicationContext)
                     successTextView.text = "인증에 성공했습니다."
@@ -446,12 +448,12 @@ class RegisterActivity : AppCompatActivity() {
                     successTextView.layoutParams = resultparams
                     successTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
                     successTextView.setTypeface(null, Typeface.BOLD)
-                    binding.phoneLayout.addView(successTextView)
+                    binding.partnerPhoneLayout.addView(successTextView)
                     totalTxtCheck.phoneFill.value = true
 
                 } else {
                     // 인증 실패
-                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
+                    binding.partnerPhoneLayout.removeView(binding.partnerPhoneLayout)
 
                     var successTextView = TextView(applicationContext)
                     successTextView.text = "인증에 실패했습니다."
@@ -460,7 +462,7 @@ class RegisterActivity : AppCompatActivity() {
                     successTextView.layoutParams = resultparams
                     successTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
                     successTextView.setTypeface(null, Typeface.BOLD)
-                    binding.phoneLayout.addView(successTextView)
+                    binding.partnerPhoneLayout.addView(successTextView)
                     totalTxtCheck.phoneFill.value = false
 
                 }

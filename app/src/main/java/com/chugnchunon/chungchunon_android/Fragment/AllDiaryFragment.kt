@@ -26,6 +26,7 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -60,8 +61,8 @@ class AllDiaryFragment : Fragment() {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        adapter = DiaryCardAdapter(requireContext(), diaryItems)
 
+        adapter = DiaryCardAdapter(requireContext(), diaryItems)
 
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
@@ -74,32 +75,36 @@ class AllDiaryFragment : Fragment() {
             IntentFilter("CREATE_ACTION")
         );
 
-
-        diaryDB
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+        userDB.document("$userId")
             .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
+            .addOnSuccessListener { document ->
+                var userRegion = document.data?.getValue("region")
+                var userSmallRegion = document.data?.getValue("smallRegion")
+                var userRegionGroup = "${userRegion} ${userSmallRegion}"
+                Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
 
-                    var userId = document.data?.getValue("userId")
-                    var diaryId = document.data?.getValue("diaryId").toString()
-                    var numLikes = document.data?.getValue("numLikes") as Long
-                    var numComments = document.data?.getValue("numComments") as Long
-                    var timefromdb = document.data?.getValue("timestamp") as com.google.firebase.Timestamp
-
-                    userDB
-                        .document("$userId")
-                        .get()
-                        .addOnSuccessListener { userInfo ->
-                            var username = userInfo.data?.getValue("name").toString()
-                            var todayStepCount = userInfo.data?.getValue("todayStepCount").toString()
+                diaryDB
+                    .whereEqualTo("regionGroup", userRegionGroup)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        for (document in documents) {
+                            var userId = document.data?.getValue("userId").toString()
+                            var username = document.data?.getValue("username").toString()
+                            var stepCount = document.data?.getValue("stepCount") as Long
+                            var diaryId = document.data?.getValue("diaryId").toString()
+                            var numLikes = document.data?.getValue("numLikes") as Long
+                            var numComments = document.data?.getValue("numComments") as Long
+                            var timefromdb =
+                                document.data?.getValue("timestamp") as com.google.firebase.Timestamp
 
                             // items 추가
-                            var diarySet =  DiaryCard(
+                            var diarySet = DiaryCard(
+                                userId,
+                                username,
                                 diaryId,
                                 DateFormat().convertMillis(timefromdb),
                                 username,
-                                todayStepCount,
+                                stepCount,
                                 (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
                                 document.data?.getValue("todayDiary").toString(),
                                 numLikes,
@@ -107,20 +112,21 @@ class AllDiaryFragment : Fragment() {
                             )
 
                             diaryItems.add(diarySet)
-                            diaryItems.sortWith(compareBy({it.writeTime}))
+                            diaryItems.sortWith(compareBy({ it.writeTime }))
                             diaryItems.reverse()
-                           adapter.notifyDataSetChanged()
+                            adapter.notifyDataSetChanged()
                         }
-                }
+                    }
+                binding.recyclerDiary.adapter = adapter
+                binding.recyclerDiary.layoutManager = LinearLayoutManager(
+                    context,
+                    RecyclerView.VERTICAL,
+                    false)
+
             }
 
 
-        binding.recyclerDiary.adapter = adapter
-        binding.recyclerDiary.layoutManager = LinearLayoutManager(
-            context,
-            RecyclerView.VERTICAL,
-            false
-        )
+
         return view
     }
 

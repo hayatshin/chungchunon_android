@@ -4,7 +4,8 @@ data class Comment(
     var diaryId: String,
     var diaryPosition: Int,
     val commentId: String,
-    val commentName: String,
+    val commentUserName: String,
+    val commentUserType: String,
     val commentTimestamp: String,
     var commentDescription: String
 )

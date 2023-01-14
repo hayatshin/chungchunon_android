@@ -8,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,11 +29,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.diary_card.view.*
 import org.apache.commons.lang3.mutable.MutableBoolean
+import java.time.LocalDate
 
 
 class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     RecyclerView.Adapter<DiaryCardAdapter.CardViewHolder>() {
-
 
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
@@ -42,6 +44,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+        var diaryCardView: LinearLayout = itemView.findViewById(R.id.diaryCard)
         var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
         var userNameView: TextView = itemView.findViewById<TextView>(R.id.userName)
         var userStepCountView: TextView = itemView.findViewById<TextView>(R.id.userStepCount)
@@ -54,6 +57,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
+
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
             userNameView.text = items[position].name
             userStepCountView.text = "${items[position].stepCount}보"
@@ -62,8 +66,14 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
 
-            likeNumLikes.put(position, items[position].numLikes!!.toInt())
+            // 내가 쓴 글 백그라운드 처리
+//            if(items[position].userId == userId) {
+//                var backgroundDrawable = ContextCompat.getDrawable(context, R.drawable.my_diary_background)
+//                diaryCardView.setBackgroundDrawable(backgroundDrawable)
+//            }
 
+            // 좋아요 토글 작업
+            likeNumLikes.put(position, items[position].numLikes!!.toInt())
 
             diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
                 .get()
@@ -94,7 +104,6 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         holder.bind(position)
 
         holder.itemView.likeBox.setOnClickListener { view ->
-            Log.d("좋아요토글", "클릭")
 
             var DiaryRef = diaryDB.document(items[position].diaryId)
 

@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.persistableBundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -33,12 +34,17 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
         var commentNameView: TextView = itemView.findViewById(R.id.commentName)
         var commentTimeStampView: TextView = itemView.findViewById(R.id.commentTimestamp)
         var commentDescriptionView: TextView = itemView.findViewById(R.id.commentDescription)
+        var commentPartnerCheckImage: ImageView = itemView.findViewById(R.id.partnerCheckImg)
 
         fun bind(position: Int) {
-//            diaryId = items[position].diaryId
-//            diaryPosition = items[position].diaryPosition
-//            commentId = items[position].commentId
-            commentNameView.text = items[position].commentName
+            var commentUserType = items[position].commentUserType
+
+            if(commentUserType == "치매예방자") {
+                commentPartnerCheckImage.visibility = View.GONE
+            } else if (commentUserType == "파트너") {
+                commentPartnerCheckImage.visibility = View.VISIBLE
+            }
+            commentNameView.text = items[position].commentUserName
             commentTimeStampView.text = items[position].commentTimestamp
             commentDescriptionView.text = items[position].commentDescription
             originalDescription = items[position].commentDescription

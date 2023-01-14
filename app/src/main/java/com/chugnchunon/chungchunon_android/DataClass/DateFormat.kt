@@ -27,6 +27,16 @@ class DateFormat {
         return date
     }
 
+    fun convertTimeStampToDate (timefromdb: com.google.firebase.Timestamp): String {
+        val timestamp = timefromdb as com.google.firebase.Timestamp
+        val milliseconds = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+        @SuppressLint("SimpleDateFormat")
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        val netDate = Date(milliseconds)
+        val date = sdf.format(netDate).toString()
+        return date
+    }
+
     fun convertMillisToDate (milliseconds: Long): String {
         @SuppressLint("SimpleDateFormat")
         val sdf = SimpleDateFormat("yyyy-MM-dd")

@@ -23,7 +23,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-open class BroadcastReceiver : BroadcastReceiver() {
+open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
@@ -31,7 +31,6 @@ open class BroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
-        var stepCount = intent?.getIntExtra("stepCount", 0)
 
         when (intentAction) {
             Intent.ACTION_DATE_CHANGED -> {
@@ -48,29 +47,6 @@ open class BroadcastReceiver : BroadcastReceiver() {
                     }
             }
         }
-    }
-}
-
-
-private fun StepCountNotification(context: Context, stepCount: Int?) {
-
-    if (Build.VERSION.SDK_INT >= 26) {
-        val CHANNEL_ID = "my_app"
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "MyApp", NotificationManager.IMPORTANCE_DEFAULT
-        )
-        (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
-            channel
-        )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_logo)
-            .setContentTitle("$stepCount 걸음")
-            .setColor(ContextCompat.getColor(context, R.color.main_color))
-            .setDefaults(Notification.DEFAULT_LIGHTS)
-            .setVibrate(longArrayOf(0L))
-
-            .build()
     }
 }
 

@@ -5,6 +5,7 @@ import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCou
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -33,7 +34,6 @@ import androidx.core.text.color
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.BroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
@@ -52,6 +52,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
@@ -77,6 +79,7 @@ class MyDiaryFragment : Fragment() {
 
     lateinit var broadcastReceiver: BroadcastReceiver
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
+    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
@@ -240,13 +243,17 @@ class MyDiaryFragment : Fragment() {
 
 
         // 걸음수 셋업
-        broadcastReceiver = BroadcastReceiver()
+        broadcastReceiver = DateChangeBroadcastReceiver()
         stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
 
-        val intent = IntentFilter()
-        intent.addAction(Intent.ACTION_DATE_CHANGED)
-        activity?.registerReceiver(broadcastReceiver, intent)
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_DATE_CHANGED)
+        activity?.registerReceiver(broadcastReceiver, dateChangeIntent)
 
+        val diaryChangeIntent = IntentFilter()
+        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
 
         registerBroadCastReceiver()
 
@@ -325,27 +332,36 @@ class MyDiaryFragment : Fragment() {
             val writeTime = LocalDateTime.now()
             var diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
-//                "timestamp" to System.currentTimeMillis(),
 
+            userDB.document("$userId").get()
+                .addOnSuccessListener { document ->
+                    var username = document.data?.getValue("name")
+                    var stepCount = document.data?.getValue("todayStepCount")
+                    var region = document.data?.getValue("region")
+                    var smallRegion = document.data?.getValue("smallRegion")
+                    var regionGroup = "${region} ${smallRegion}"
 
-            val diarySet = hashMapOf(
-                "diaryId" to diaryId,
-                "userId" to userId.toString(),
-                "monthDate" to writeMonthDate,
-                "timestamp" to FieldValue.serverTimestamp(),
-                "todayMood" to binding.todayMood.selectedItem,
-                "todayDiary" to (binding.todayDiary.text.toString()),
-                "numLikes" to 0,
-                "numComments" to 0,
-            )
+                    val diarySet = hashMapOf(
+                        "regionGroup" to regionGroup,
+                        "diaryId" to diaryId,
+                        "userId" to userId.toString(),
+                        "username" to username,
+                        "monthDate" to writeMonthDate,
+                        "timestamp" to FieldValue.serverTimestamp(),
+                        "stepCount" to stepCount,
+                        "todayMood" to binding.todayMood.selectedItem,
+                        "todayDiary" to (binding.todayDiary.text.toString()),
+                        "numLikes" to 0,
+                        "numComments" to 0,
+                    )
 
-            diaryDB
-                .document(diaryId)
-                .set(diarySet, SetOptions.merge())
-                .addOnSuccessListener {
-                    Log.d("결과77", "성공")
-                    var intent = Intent(activity, DiaryActivity::class.java)
-                    startActivity(intent)
+                    diaryDB
+                        .document(diaryId)
+                        .set(diarySet, SetOptions.merge())
+                        .addOnSuccessListener {
+                            var intent = Intent(activity, DiaryActivity::class.java)
+                            startActivity(intent)
+                        }
                 }
         }
 
@@ -382,6 +398,7 @@ class MyDiaryFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
     }
 
     private fun registerBroadCastReceiver() {

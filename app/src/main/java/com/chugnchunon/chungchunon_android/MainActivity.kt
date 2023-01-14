@@ -11,11 +11,17 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.chugnchunon.chungchunon_android.KakaoLogin.PartnerSessionCallback
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerRegisterActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
@@ -31,7 +37,10 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
     private val auth = FirebaseAuth.getInstance()
+    private val userDB = Firebase.firestore.collection("users")
     private lateinit var callback: SessionCallback
+    private lateinit var partnerCallback: PartnerSessionCallback
+
     var timer : Timer? = null
     var deltaTime = 0
 
@@ -40,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.kakaoProgressBar.visibility = View.GONE
+        binding.partnerKakaoProgressBar.visibility = View.GONE
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -48,15 +58,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         callback = SessionCallback(this) // Initialize Session
+        partnerCallback = PartnerSessionCallback(this)
 
         // 일반 자동 로그인
         val currentUser = auth.currentUser
         Log.d("로그인", "$currentUser")
 
         if (currentUser != null) {
-            val goDiaryActivity = Intent(this, DiaryActivity::class.java)
-            startActivity(goDiaryActivity)
-            finish()
+             val userId = Firebase.auth.currentUser?.uid
+            userDB.document("$userId").get()
+                .addOnSuccessListener { document ->
+                    var userType = document.data?.getValue("userType")
+                    if(userType == "치매예방자") {
+                        val goDiaryActivity = Intent(this, DiaryActivity::class.java)
+                        startActivity(goDiaryActivity)
+                        finish()
+                    } else if (userType == "파트너") {
+                        val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
+                        startActivity(goPartnerDiaryActivity)
+                        finish()
+                    }
+                }
         }
 
         // 카톡 로그인 버튼 클릭
@@ -79,6 +101,41 @@ class MainActivity : AppCompatActivity() {
             val goRegisterUser = Intent(this, RegisterActivity::class.java)
             startActivity(goRegisterUser)
         }
+
+
+        // 파트너 회원가입
+        binding.partnerBtn.setOnClickListener {
+            binding.loginLayout.visibility = View.GONE
+            binding.partnerLayout.visibility = View.VISIBLE
+
+            // 파트너 - 카톡 로그인 버튼 클릭
+            binding.partnerKakaoLoginBtn.setOnClickListener {
+                binding.partnerKakaoProgressBar.visibility = View.VISIBLE
+                TimerFun()
+
+                binding.partnerKakaoLoginBtn.isClickable = false
+
+                val keyHash = Utility.getKeyHash(this) // keyHash 발급
+
+                Session.getCurrentSession().addCallback(partnerCallback)
+                Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
+            }
+
+            // 파트너 - 일반 회원가입
+            binding.partnerRegisterBtn.setOnClickListener {
+                binding.registerBtn.isClickable = false
+
+                val goPartnerRegisterUser = Intent(this, PartnerRegisterActivity::class.java)
+                startActivity(goPartnerRegisterUser)
+            }
+
+            binding.partnerBack.setOnClickListener {
+                binding.loginLayout.visibility = View.VISIBLE
+                binding.partnerLayout.visibility = View.GONE
+            }
+
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

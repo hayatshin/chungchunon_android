@@ -25,7 +25,7 @@ import java.util.*
 import kotlin.concurrent.timer
 
 
-class SessionCallback(val context: MainActivity): ISessionCallback {
+class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
     private val TAG : String = "카톡로그인"
     private val userDB = Firebase.firestore.collection("users")
 
@@ -43,7 +43,7 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                     val createTime = LocalDateTime.now()
 
                     val userSet = hashMapOf(
-                        "userType" to "치매예방자",
+                        "userType" to "파트너",
                         "loginType" to "카카오",
                         "userId" to (result.id),
                         "timestamp" to FieldValue.serverTimestamp(),

@@ -29,6 +29,9 @@ class MyService : Service(), SensorEventListener {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
+    // 걸음수
+    private var MagnitudePrevious: Double = 0.0
+    private var stepCount: Int = 0
 
     companion object {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
@@ -36,19 +39,21 @@ class MyService : Service(), SensorEventListener {
 
         var todayTotalStepCount: Int? = 0
 
-        const val SHAKE_THRESHOLD: Int = 800
-        const val DATA_X = SensorManager.DATA_X
-        const val DATA_Y = SensorManager.DATA_Y
-        const val DATA_Z = SensorManager.DATA_Z
+        const val STEP_THRESHOLD: Int = 6
     }
 
     override fun onCreate() {
         super.onCreate()
 
+//        sensorManager =
+//            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_GAME)
+
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
 
 
         // 오늘 걸음수 초기화
@@ -83,29 +88,64 @@ class MyService : Service(), SensorEventListener {
     }
 
 
-    override fun onSensorChanged(stepEvent: SensorEvent?) {
-        Log.d("결과", "$userId")
-        Log.d("결과", "$stepEvent")
+    override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-
-        var currentDate = LocalDate.now()
+//        if(sensorEvent != null) {
+//            var x_acceleration: Double = sensorEvent.values[0].toDouble()
+//            var y_acceleration: Double = sensorEvent.values[1].toDouble()
+//            var z_acceleration: Double = sensorEvent.values[2].toDouble()
+//
+//            var Magnitude: Double = Math.sqrt(x_acceleration * x_acceleration + y_acceleration * y_acceleration + z_acceleration * z_acceleration)
+//            var MagnitudeDelta: Double = Magnitude - MagnitudePrevious
+//            MagnitudePrevious = Magnitude
+//
+//            if(MagnitudeDelta > STEP_THRESHOLD){
+//                 todayTotalStepCount = todayTotalStepCount?.plus(1)
+//
+//                var currentDate = LocalDate.now()
+//                StepCountNotification(this, todayTotalStepCount)
+//
+//                // user 내 todayStepCount
+//                var todayStepCountSet = hashMapOf(
+//                    "todayStepCount" to todayTotalStepCount
+//                )
+//                userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
+//
+//                var userStepCountSet = hashMapOf(
+//                    "$currentDate" to todayTotalStepCount
+//                )
+//
+//                var periodStepCountSet = hashMapOf(
+//                    "$userId" to todayTotalStepCount
+//                )
+//
+//                // user_step_count
+//                db.collection("user_step_count")
+//                    .document("$userId")
+//                    .set(userStepCountSet, SetOptions.merge())
+//
+//                // period_step_count
+//                db.collection("period_step_count")
+//                    .document("$currentDate")
+//                    .set(periodStepCountSet, SetOptions.merge())
+//
+//                var intent = Intent(this, StepCountBroadcastReceiver::class.java)
+//                intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+//                intent.putExtra("todayTotalStepCount", todayTotalStepCount)
+//                sendBroadcast(intent)
+//            }
+//        }
 
         todayTotalStepCount = todayTotalStepCount?.plus(1)
+
+        var currentDate = LocalDate.now()
         StepCountNotification(this, todayTotalStepCount)
-
-
-        var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-        intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-        intent.putExtra("todayTotalStepCount", todayTotalStepCount)
-        sendBroadcast(intent)
 
         // user 내 todayStepCount
         var todayStepCountSet = hashMapOf(
             "todayStepCount" to todayTotalStepCount
         )
         userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
-        Log.d("결과6", "$todayTotalStepCount")
-
 
         var userStepCountSet = hashMapOf(
             "$currentDate" to todayTotalStepCount
@@ -124,6 +164,12 @@ class MyService : Service(), SensorEventListener {
         db.collection("period_step_count")
             .document("$currentDate")
             .set(periodStepCountSet, SetOptions.merge())
+
+        var intent = Intent(this, StepCountBroadcastReceiver::class.java)
+        intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+        intent.putExtra("todayTotalStepCount", todayTotalStepCount)
+        sendBroadcast(intent)
+
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {

@@ -8,10 +8,19 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
+        android:gravity="center"
         android:layout_marginBottom="8dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/partnerCheckImg"
+            android:visibility="gone"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_partner"
+            android:layout_width="20dp"
+            android:layout_height="20dp" />
 
         <TextView
             android:textColor="@color/light_gray"
