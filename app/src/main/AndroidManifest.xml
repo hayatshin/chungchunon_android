@@ -77,13 +77,14 @@
             android:name=".PersonalInfoRuleActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Partner.PartnerRegisterActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".Partner.PartnerRegionRegisterActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
             android:name=".Partner.PartnerDiaryActivity"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
+            android:name=".EditProfileActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".EditRegionRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
 
         <receiver

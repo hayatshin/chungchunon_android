@@ -13,6 +13,7 @@
         android:layout_above="@+id/tabLayout" />
 
         <com.google.android.material.tabs.TabLayout
+            android:elevation="5dp"
             app:tabIconTint="@color/tab_icon_color"
             app:tabTextColor="@color/text_color"
             app:tabBackground="@drawable/tab_background"

@@ -38,7 +38,7 @@ class DiaryActivity : AppCompatActivity() {
         var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(2).layoutParams as LinearLayout.LayoutParams
         yourTabItemView.weight = 0.3f
 
-//        binding.viewPager.isUserInputEnabled = false
+        binding.viewPager.isUserInputEnabled = false
 //
 //        binding.viewPager.setPageTransformer(object: ViewPager2.PageTransformer {
 //            override fun transformPage(page: View, position: Float) {

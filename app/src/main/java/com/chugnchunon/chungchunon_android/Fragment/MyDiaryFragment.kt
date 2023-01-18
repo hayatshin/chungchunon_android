@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -30,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.color
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -103,22 +105,38 @@ class MyDiaryFragment : Fragment() {
         var startService = Intent(activity, MyService::class.java)
         activity?.let { ContextCompat.startForegroundService(it, startService) }
 
+        binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+        binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+
 
         diaryFillCheck = ViewModelProvider(requireActivity()).get(DiaryFillClass::class.java)
         diaryEditCheck = ViewModelProvider(requireActivity()).get(DiaryEditClass::class.java)
+        binding.diaryBtn.isEnabled = false
 
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer { value ->
-//            binding.diaryBtn.isEnabled = value
-            if (value && !editDiary) binding.diaryBtn.isEnabled = true
+            if(diaryFillCheck.diaryFill.value!! && !editDiary) {
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            } else {
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+            }
+
+            binding.diaryBtn.isEnabled = diaryFillCheck.diaryFill.value!! && !editDiary
         })
 
+        // 수정
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer { value ->
+
+            if(diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
             }
         })
 
         diaryEditCheck.moodEdit.observe(requireActivity(), Observer { value ->
+
+            if(diaryEditCheck.moodEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
 
@@ -130,6 +148,13 @@ class MyDiaryFragment : Fragment() {
 
         // 일기 작성 여부
         val writeTime = LocalDateTime.now().toString().substring(0, 10)
+        val year = writeTime.substring(0, 4)
+        val month = writeTime.substring(5, 7)
+        val date = writeTime.substring(8, 10)
+        val monthUI = StringUtils.stripStart(month, "0");
+        val dateUI = StringUtils.stripStart(date, "0");
+
+        binding.todayDate.text = "${monthUI}월 ${dateUI}일"
 
         diaryDB
             .document("${userId}_${writeTime}")
@@ -221,7 +246,9 @@ class MyDiaryFragment : Fragment() {
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount")
             todayTotalStepCount = todayStepCountFromDB?.toInt() ?: 0
-            binding.todayStepCount.text = "$todayStepCountFromDB 보"
+            var decimal = DecimalFormat("#,###")
+            var step = decimal.format(todayTotalStepCount)
+            binding.todayStepCount.text = "$step 보"
         }
 
         currentMonth = LocalDateTime.now().toString().substring(0, 7)
@@ -277,7 +304,7 @@ class MyDiaryFragment : Fragment() {
                     .color(Color.RED) { append("${calendarThisMonthCount}") }
                     .append(" / ${currentMonthDate}일")
 
-                binding.thisMonth.text = "${removeZeroCurrentMonth}월 일기 작성일"
+                binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일"
                 binding.diaryCount.text = spanText
             }
         }
@@ -287,14 +314,25 @@ class MyDiaryFragment : Fragment() {
             MoodArrayAdapter(
                 it,
                 listOf(
-                    Mood(R.drawable.ic_emotion_5, "많이 좋아요"),
-                    Mood(R.drawable.ic_emotion_4, "좋아요"),
-                    Mood(R.drawable.ic_emotion_3, "평범해요"),
-                    Mood(R.drawable.ic_emotion_2, "슬퍼요"),
-                    Mood(R.drawable.ic_emotion_1, "많이 슬퍼요"),
-                )
+                    Mood(R.drawable.ic_joy, "기뻐요"),
+                    Mood(R.drawable.ic_shalom, "평온해요"),
+                    Mood(R.drawable.ic_throb, "설레요"),
+                    Mood(R.drawable.ic_soso, "그냥 그래요"),
+                    Mood(R.drawable.ic_anxious, "걱정돼요"),
+                    Mood(R.drawable.ic_sad, "슬퍼요"),
+                    Mood(R.drawable.ic_gloomy, "우울해요"),
+                    Mood(R.drawable.ic_angry, "화나요"),
+                    )
             )
         }
+
+
+        binding.todayMood.setOnTouchListener (object : View.OnTouchListener {
+            override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
+                binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+                return false
+            }
+        })
 
         // 음성녹음
 
@@ -319,7 +357,6 @@ class MyDiaryFragment : Fragment() {
             override fun afterTextChanged(p0: Editable?) {
                 // null
             }
-
         })
 
         // 다이어리 작성 버튼
@@ -414,7 +451,13 @@ class MyDiaryFragment : Fragment() {
 
             intent?.let {
                 val todayTotalStepCount = it.getIntExtra("todayTotalStepCount", 0)
-                binding.todayStepCount.text = "$todayTotalStepCount 보"
+                var decimal = DecimalFormat("#,###")
+                var step = decimal.format(todayTotalStepCount)
+                binding.todayStepCount.text = "$step 보"
+            }
+            Log.d("걸음수", "$todayTotalStepCount")
+            if(todayTotalStepCount >= 3000) {
+                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
             }
         }
     }
@@ -422,11 +465,14 @@ class MyDiaryFragment : Fragment() {
     private fun getPositionMood(value: Number): Long {
         var result: Long = 0
         when (value) {
-            2131230899 -> result = 4
-            2131230900 -> result = 3
-            2131230901 -> result = 2
-            2131230902 -> result = 1
-            2131230903 -> result = 0
+            2131231067 -> result = 0
+            2131231069 -> result = 1
+            2131231071 -> result = 2
+            2131231070 -> result = 3
+            2131231065 -> result = 4
+            2131231068 -> result = 5
+            2131231066 -> result = 6
+            2131231064 -> result = 7
         }
         return result
     }
@@ -435,6 +481,7 @@ class MyDiaryFragment : Fragment() {
 
 class DiaryFillClass : ViewModel() {
     val diaryFill by lazy { MutableLiveData<Boolean>(false) }
+    val moodFill by lazy { MutableLiveData<Boolean>(false) }
 }
 
 class DiaryEditClass : ViewModel() {

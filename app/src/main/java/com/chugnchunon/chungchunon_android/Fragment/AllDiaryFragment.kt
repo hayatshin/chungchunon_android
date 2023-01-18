@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -20,6 +22,7 @@ import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.MutableData
@@ -51,6 +54,8 @@ class AllDiaryFragment : Fragment() {
     private var diaryItems: ArrayList<DiaryCard> = ArrayList()
     private var sortItems: ArrayList<DiaryCard> = ArrayList()
 
+
+    lateinit var dataGroupSelection: DataGroupSelection
     var order = 0
 
 
@@ -61,30 +66,29 @@ class AllDiaryFragment : Fragment() {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        // 토글버튼
+//        var contexThemeWrappter: Context = ContextThemeWrapper(activity, R.style.MaterialAppTheme)
+//        var localinflater = inflater.cloneInContext(contexThemeWrappter)
+//        var rootview = localinflater.inflate(R.layout.fragment_all_diary,container, false)
 
-        adapter = DiaryCardAdapter(requireContext(), diaryItems)
+        binding.toggleBtnGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            diaryItems.clear()
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.allData -> dataGroupSelection.regionCheck.value = false
+                    R.id.regionData -> dataGroupSelection.regionCheck.value = true
+                }
+            }
+        }
 
+        dataGroupSelection =
+            ViewModelProvider(requireActivity()).get(DataGroupSelection::class.java)
 
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            deleteNumChangeReceiver,
-            IntentFilter("DELETE_ACTION")
-        );
-
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            createNumChangeReceiver,
-            IntentFilter("CREATE_ACTION")
-        );
-
-        userDB.document("$userId")
-            .get()
-            .addOnSuccessListener { document ->
-                var userRegion = document.data?.getValue("region")
-                var userSmallRegion = document.data?.getValue("smallRegion")
-                var userRegionGroup = "${userRegion} ${userSmallRegion}"
-                Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
+        dataGroupSelection.regionCheck.observe(requireActivity(), Observer { value ->
+            if (!dataGroupSelection.regionCheck.value!!) {
+                // 전체 보기
 
                 diaryDB
-                    .whereEqualTo("regionGroup", userRegionGroup)
                     .get()
                     .addOnSuccessListener { documents ->
                         for (document in documents) {
@@ -116,15 +120,131 @@ class AllDiaryFragment : Fragment() {
                             diaryItems.reverse()
                             adapter.notifyDataSetChanged()
                         }
+                        binding.recyclerDiary.adapter = adapter
+                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
+                            context,
+                            RecyclerView.VERTICAL,
+                            false
+                        )
                     }
-                binding.recyclerDiary.adapter = adapter
-                binding.recyclerDiary.layoutManager = LinearLayoutManager(
-                    context,
-                    RecyclerView.VERTICAL,
-                    false)
+            } else {
+                userDB.document("$userId")
+                    .get()
+                    .addOnSuccessListener { document ->
+                        var userRegion = document.data?.getValue("region")
+                        var userSmallRegion = document.data?.getValue("smallRegion")
+                        var userRegionGroup = "${userRegion} ${userSmallRegion}"
+                        Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
 
+                        diaryDB
+                            .whereEqualTo("regionGroup", userRegionGroup)
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                for (document in documents) {
+                                    var userId = document.data?.getValue("userId").toString()
+                                    var username = document.data?.getValue("username").toString()
+                                    var stepCount = document.data?.getValue("stepCount") as Long
+                                    var diaryId = document.data?.getValue("diaryId").toString()
+                                    var numLikes = document.data?.getValue("numLikes") as Long
+                                    var numComments = document.data?.getValue("numComments") as Long
+                                    var timefromdb =
+                                        document.data?.getValue("timestamp") as com.google.firebase.Timestamp
+
+                                    // items 추가
+                                    var diarySet = DiaryCard(
+                                        userId,
+                                        username,
+                                        diaryId,
+                                        DateFormat().convertMillis(timefromdb),
+                                        username,
+                                        stepCount,
+                                        (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                        document.data?.getValue("todayDiary").toString(),
+                                        numLikes,
+                                        numComments,
+                                    )
+
+                                    diaryItems.add(diarySet)
+                                    diaryItems.sortWith(compareBy({ it.writeTime }))
+                                    diaryItems.reverse()
+                                    adapter.notifyDataSetChanged()
+                                }
+                            }
+                        binding.recyclerDiary.adapter = adapter
+                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
+                            context,
+                            RecyclerView.VERTICAL,
+                            false
+                        )
+
+                    }
             }
+        })
 
+
+        adapter = DiaryCardAdapter(requireContext(), diaryItems)
+
+
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+            deleteNumChangeReceiver,
+            IntentFilter("DELETE_ACTION")
+        );
+
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+            createNumChangeReceiver,
+            IntentFilter("CREATE_ACTION")
+        );
+
+//            userDB.document("$userId")
+//                .get()
+//                .addOnSuccessListener { document ->
+//                    var userRegion = document.data?.getValue("region")
+//                    var userSmallRegion = document.data?.getValue("smallRegion")
+//                    var userRegionGroup = "${userRegion} ${userSmallRegion}"
+//                    Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
+//
+//                    diaryDB
+//                        .whereEqualTo("regionGroup", userRegionGroup)
+//                        .get()
+//                        .addOnSuccessListener { documents ->
+//                            for (document in documents) {
+//                                var userId = document.data?.getValue("userId").toString()
+//                                var username = document.data?.getValue("username").toString()
+//                                var stepCount = document.data?.getValue("stepCount") as Long
+//                                var diaryId = document.data?.getValue("diaryId").toString()
+//                                var numLikes = document.data?.getValue("numLikes") as Long
+//                                var numComments = document.data?.getValue("numComments") as Long
+//                                var timefromdb =
+//                                    document.data?.getValue("timestamp") as com.google.firebase.Timestamp
+//
+//                                // items 추가
+//                                var diarySet = DiaryCard(
+//                                    userId,
+//                                    username,
+//                                    diaryId,
+//                                    DateFormat().convertMillis(timefromdb),
+//                                    username,
+//                                    stepCount,
+//                                    (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+//                                    document.data?.getValue("todayDiary").toString(),
+//                                    numLikes,
+//                                    numComments,
+//                                )
+//
+//                                diaryItems.add(diarySet)
+//                                diaryItems.sortWith(compareBy({ it.writeTime }))
+//                                diaryItems.reverse()
+//                                adapter.notifyDataSetChanged()
+//                            }
+//                        }
+//                    binding.recyclerDiary.adapter = adapter
+//                    binding.recyclerDiary.layoutManager = LinearLayoutManager(
+//                        context,
+//                        RecyclerView.VERTICAL,
+//                        false
+//                    )
+//
+//                }
 
 
         return view
@@ -149,6 +269,8 @@ class AllDiaryFragment : Fragment() {
             adapter.notifyDataSetChanged()
         }
     }
-
 }
 
+class DataGroupSelection : ViewModel() {
+    val regionCheck by lazy { MutableLiveData<Boolean>(false) }
+}

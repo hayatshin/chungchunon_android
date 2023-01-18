@@ -14,7 +14,6 @@ import com.android.volley.toolbox.Volley
 import com.chugnchunon.chungchunon_android.KakaoLogin.PartnerSessionCallback
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
 import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
-import com.chugnchunon.chungchunon_android.Partner.PartnerRegisterActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -60,26 +59,7 @@ class MainActivity : AppCompatActivity() {
         callback = SessionCallback(this) // Initialize Session
         partnerCallback = PartnerSessionCallback(this)
 
-        // 일반 자동 로그인
-        val currentUser = auth.currentUser
-        Log.d("로그인", "$currentUser")
 
-        if (currentUser != null) {
-             val userId = Firebase.auth.currentUser?.uid
-            userDB.document("$userId").get()
-                .addOnSuccessListener { document ->
-                    var userType = document.data?.getValue("userType")
-                    if(userType == "치매예방자") {
-                        val goDiaryActivity = Intent(this, DiaryActivity::class.java)
-                        startActivity(goDiaryActivity)
-                        finish()
-                    } else if (userType == "파트너") {
-                        val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
-                        startActivity(goPartnerDiaryActivity)
-                        finish()
-                    }
-                }
-        }
 
         // 카톡 로그인 버튼 클릭
         binding.kakaoLoginBtn.setOnClickListener {
@@ -99,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             binding.registerBtn.isClickable = false
 
             val goRegisterUser = Intent(this, RegisterActivity::class.java)
+            goRegisterUser.putExtra("userType", "치매예방자")
             startActivity(goRegisterUser)
         }
 
@@ -125,8 +106,9 @@ class MainActivity : AppCompatActivity() {
             binding.partnerRegisterBtn.setOnClickListener {
                 binding.registerBtn.isClickable = false
 
-                val goPartnerRegisterUser = Intent(this, PartnerRegisterActivity::class.java)
-                startActivity(goPartnerRegisterUser)
+                val goRegisterUser = Intent(this, RegisterActivity::class.java)
+                goRegisterUser.putExtra("userType", "파트너")
+                startActivity(goRegisterUser)
             }
 
             binding.partnerBack.setOnClickListener {

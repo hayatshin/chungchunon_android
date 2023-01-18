@@ -1,4 +1,4 @@
-package com.chugnchunon.chungchunon_android.Partner
+package com.chugnchunon.chungchunon_android
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,26 +10,21 @@ import android.text.style.BackgroundColorSpan
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.FragmentTransaction
+import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.RegionPagerAdapter
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
-import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
-import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegionBinding
-import com.chugnchunon.chungchunon_android.databinding.PartnerActivityRegionBinding
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_diary.*
 
 
-class PartnerRegionRegisterActivity : AppCompatActivity() {
+class EditRegionRegisterActivity : AppCompatActivity() {
 
     private val binding by lazy {
-        PartnerActivityRegionBinding.inflate(layoutInflater)
+        ActivityRegionBinding.inflate(layoutInflater)
     }
 
     var userDB = Firebase.firestore.collection("users")
@@ -41,6 +36,30 @@ class PartnerRegionRegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.regionRegisterBtn.isEnabled = false
+
+        binding.backBtn.setOnClickListener {
+            if(!RegionRegisterFragment.smallRegionCheck)  {
+                // 첫번째 화면
+
+                binding.regionResult.text = ""
+                finish()
+            } else {
+                // 두번째 화면 -> 첫번째 화면
+                Log.d("결과", "클릭")
+                binding.regionRegisterBtn.isEnabled = false
+                RegionRegisterFragment.smallRegionCheck = false
+
+                binding.regionDescription.text = "거주지역을 목록에서 선택하세요."
+                binding.smallRegionResult.text = ""
+
+                setupViewPager()
+            }
+        }
+
+
+        binding.regionRegisterBtn.text = "지역 수정하기"
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             mMessageReceiver,
@@ -54,18 +73,23 @@ class PartnerRegionRegisterActivity : AppCompatActivity() {
 
         setupViewPager()
 
-        binding.partnerRegionRegisterBtn.setOnClickListener {
-            var regionSet = hashMapOf(
-                "userId" to userId,
-                "region" to selectedRegion,
-                "smallRegion" to selectedSmallRegion
+        binding.regionRegisterBtn.setOnClickListener {
+
+            var intent = Intent(this, EditProfileActivity::class.java)
+            intent.setFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             )
-            userDB.document("$userId")
-                .set(regionSet, SetOptions.merge())
-                .addOnSuccessListener {
-                    var goDiary = Intent(this, PartnerDiaryActivity::class.java)
-                    startActivity(goDiary)
-                }
+            intent.putExtra("region", selectedRegion)
+            intent.putExtra("smallRegion", selectedSmallRegion)
+            setResult(RESULT_OK, intent)
+            finish()
+
+
+//            var regionIntent = Intent(this, EditProfileActivity::class.java)
+//            regionIntent.setAction("EDIT_REGION")
+//            regionIntent.putExtra("region", selectedRegion)
+//            regionIntent.putExtra("smallRegion", selectedSmallRegion)
+//            startActivity(regionIntent)
         }
     }
 
@@ -73,17 +97,19 @@ class PartnerRegionRegisterActivity : AppCompatActivity() {
     private fun setupViewPager() {
         Log.d("리지온", "뷰페이저 $smallRegionCheck")
         val adapter = RegionPagerAdapter(this, smallRegionCheck)
-        val viewPager = binding.partnerRegionViewPager
+        val viewPager = binding.regionViewPager
         viewPager.adapter = adapter
     }
 
 
     var mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?){
+            binding.regionRegisterBtn.isEnabled = false
+
             smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
             selectedRegion = intent?.getStringExtra("selectedRegion").toString()
-            binding.partnerRegionResult.text = spanTextFn(selectedRegion)
-            binding.partnerRegionDescription.text="읍/면/동 단위 거주지역을 목록에서 선택하세요."
+            binding.regionResult.text = spanTextFn(selectedRegion)
+            binding.regionDescription.text="읍/면/동 단위 거주지역을 목록에서 선택하세요."
 
             var pref = getSharedPreferences("REGION_PREF", Context.MODE_PRIVATE).edit()
             pref.putString("selectedRegion", selectedRegion)
@@ -96,9 +122,11 @@ class PartnerRegionRegisterActivity : AppCompatActivity() {
 
     var smMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            binding.regionRegisterBtn.isEnabled = true
+
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
-            binding.partnerSmallRegionResult.text = spanTextFn(selectedSmallRegion)
-            binding.partnerRegionDescription.text="앱 시작하기 버튼을 눌러주세요"
+            binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
+            binding.regionDescription.text="지역 수정하기 버튼을 눌러주세요"
         }
     }
     private fun spanTextFn(text: String): Spannable {
@@ -107,5 +135,7 @@ class PartnerRegionRegisterActivity : AppCompatActivity() {
         spanText.setSpan(BackgroundColorSpan(color), 0, text.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spanText
     }
+
+
 }
 

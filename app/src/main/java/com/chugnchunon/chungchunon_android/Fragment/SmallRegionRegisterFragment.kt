@@ -45,6 +45,8 @@ class SmallRegionRegisterFragment : Fragment() {
         _binding = FragmentRegionListBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        Log.d("결과", "스몰리지온프래그먼트")
+
 
         var pref = activity?.getSharedPreferences("REGION_PREF", MODE_PRIVATE)
         selectedRegion = pref?.getString("selectedRegion", "강원도").toString()

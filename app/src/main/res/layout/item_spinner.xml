@@ -8,6 +8,7 @@
     android:padding="8dp">
 
     <ImageView
+        android:layout_marginRight="10dp"
         android:layout_gravity="center"
         android:id="@+id/moodImage"
         android:layout_width="30dp"
@@ -16,12 +17,14 @@
          />
 
     <TextView
-        android:textSize="18sp"
+        android:gravity="end"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
         tools:text="기뻐요"
         android:id="@+id/moodText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         />
 
 </LinearLayout>

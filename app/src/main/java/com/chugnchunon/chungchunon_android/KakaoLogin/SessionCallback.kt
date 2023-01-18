@@ -35,12 +35,15 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
             UserManagement.getInstance().me(object : MeV2ResponseCallback(){
             override fun onSuccess(result: MeV2Response?) {
 
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
                 if(result != null){
-                    Log.d(TAG, "세션 오픈")
+
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
                     val phoneNumber = "010-${
                         result.kakaoAccount?.phoneNumber?.substring(7)}"
-                    val createTime = LocalDateTime.now()
+                    var birthYear = result.kakaoAccount?.birthyear
+                    var userAge =  currentYear - birthYear!!.toInt() + 1
 
                     val userSet = hashMapOf(
                         "userType" to "치매예방자",
@@ -53,6 +56,7 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                         "birthYear" to result.kakaoAccount?.birthyear,
                         "birthDay" to result.kakaoAccount?.birthday,
                         "todayStepCount" to 0,
+                        "userAge" to userAge,
                         )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->
@@ -67,6 +71,8 @@ class SessionCallback(val context: MainActivity): ISessionCallback {
                                 .set(userSet, SetOptions.merge())
                                 .addOnSuccessListener {
                                     var goRegionRegister = Intent(context, RegionRegisterActivity::class.java)
+                                    goRegionRegister.putExtra("userType", "치매예방자")
+                                    goRegionRegister.putExtra("userAge", userAge)
                                     context.startActivity(goRegionRegister)
                                 }
                         }

@@ -1,58 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/moreBack"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:background="@drawable/layer_screen"
     android:animateLayoutChanges="true"
-    android:weightSum="1"
+    android:background="@drawable/layer_screen"
     android:gravity="end"
-    >
+    android:orientation="horizontal"
+    android:weightSum="1">
 
     <LinearLayout
-        android:paddingLeft="30dp"
-        android:layout_weight="0.8"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="0.8"
         android:background="@drawable/more_box"
         android:orientation="vertical">
 
         <LinearLayout
-            android:gravity="center_vertical"
-            android:id="@+id/application"
-            android:layout_marginTop="100dp"
+            android:paddingBottom="20dp"
+            android:background="@drawable/diarybox"
+            android:paddingLeft="30dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <ImageView
-                android:layout_marginRight="10dp"
-                android:src="@drawable/ic_sm_arrow"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/profileName"
+                    android:textColor="@color/black"
+                    android:layout_marginRight="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="23sp"
+                    android:textStyle="bold"
+                    tools:text="신혜정" />
+
+                <TextView
+                    android:id="@+id/profileAge"
+                    android:textColor="@color/black"
+                    tools:text="51세"
+                    android:textSize="18sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/profileRegion"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/black"
+                tools:text="서울특별시 광진구"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-            <TextView
-                android:textSize="16sp"
-                android:text="이용약관"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_sm_arrow" />
+
+                <TextView
+                    android:id="@+id/profileEditBtn"
+                    android:textColor="@color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="개인정보 수정하기"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
-            android:gravity="center_vertical"
-            android:id="@+id/personalInfo"
-            android:layout_marginTop="20dp"
+            android:paddingLeft="30dp"
+            android:id="@+id/application"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:gravity="center_vertical">
+
             <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/ic_sm_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:src="@drawable/ic_sm_arrow" />
+
             <TextView
-                android:textSize="16sp"
-                android:text="개인정보 처리방침"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="이용약관"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:paddingLeft="30dp"
+            android:id="@+id/personalInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_sm_arrow" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="개인정보 처리방침"
+                android:textSize="16sp" />
         </LinearLayout>
 
     </LinearLayout>

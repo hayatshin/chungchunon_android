@@ -13,9 +13,10 @@ class RegionPagerAdapter(activity: FragmentActivity, smallRegionCheck: Boolean):
 
     private val COUNT = 2
 
-    override fun createFragment(position: Int): Fragment {
-        Log.d("리지온0", "$smallRegionCheck")
 
+    override fun createFragment(position: Int): Fragment {
+
+        Log.d("결과", "페이지어댑터: ${smallRegionCheck}")
         return when(smallRegionCheck) {
             false -> RegionRegisterFragment()
             true -> SmallRegionRegisterFragment()

@@ -7,12 +7,20 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class StartActivity : AppCompatActivity() {
+
+    private val auth = FirebaseAuth.getInstance()
+    private val userDB = Firebase.firestore.collection("users")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
@@ -27,10 +35,32 @@ class StartActivity : AppCompatActivity() {
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
 
-            finish()
-        }, 1000)
+
+            // 일반 자동 로그인
+            val currentUser = auth.currentUser
+            Log.d("로그인", "$currentUser")
+
+            if (currentUser != null) {
+                val userId = Firebase.auth.currentUser?.uid
+                userDB.document("$userId").get()
+                    .addOnSuccessListener { document ->
+                        var userType = document.data?.getValue("userType")
+                        if(userType == "치매예방자") {
+                            val goDiaryActivity = Intent(this, DiaryActivity::class.java)
+                            startActivity(goDiaryActivity)
+                            finish()
+                        } else if (userType == "파트너") {
+                            val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
+                            startActivity(goPartnerDiaryActivity)
+                            finish()
+                        }
+                    }
+            } else {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+            }
+
+        }, 0)
     }
 }

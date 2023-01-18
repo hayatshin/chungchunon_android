@@ -261,6 +261,7 @@
 
 
     <Button
+        android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="20sp"
         android:id="@+id/partnerRegisterBtn"
@@ -268,6 +269,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="60dp"
         android:background="@drawable/default_button"
-        android:text="다음" />
+        android:text="회원가입 완료" />
 
 </LinearLayout>

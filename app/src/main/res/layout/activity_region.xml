@@ -17,12 +17,36 @@
         app:layout_constraintBottom_toTopOf="@+id/regionViewPager"
         app:layout_constraintTop_toTopOf="parent">
 
+        <LinearLayout
+            android:id="@+id/backBtn"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_marginRight="12dp"
+                android:src="@drawable/ic_arrow_back_gray"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+
+            <TextView
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:text="뒤로 가기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
         <TextView
+            android:textColor="@color/black"
             android:id="@+id/regionDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
-            android:text="시/군/구 단위 거주지역을 목록에서 선택하세요."
+            android:text="거주지역을 목록에서 선택하세요."
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -32,6 +56,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:textColor="@color/black"
                 android:id="@+id/regionResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -41,6 +66,7 @@
                 tools:text="서울특별시" />
 
             <TextView
+                android:textColor="@color/black"
                 android:id="@+id/smallRegionResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,6 +85,7 @@
         app:layout_constraintTop_toBottomOf="@+id/regionResultLayout" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginTop="20dp"

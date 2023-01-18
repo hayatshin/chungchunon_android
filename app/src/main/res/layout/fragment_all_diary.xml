@@ -3,8 +3,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".Fragment.AllDiaryFragment">
+
+    <LinearLayout
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"
+        android:paddingHorizontal="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleBtnGroup"
+            android:gravity="end"
+            app:checkedButton="@+id/allData"
+            app:selectionRequired="true"
+            app:singleSelection="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:textStyle="bold"
+                android:id="@+id/allData"
+                style="?attr/materialButtonOutlinedStyle"
+                android:text="전체 보기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:textStyle="bold"
+                android:id="@+id/regionData"
+                style="?attr/materialButtonOutlinedStyle"
+                android:text="지역 보기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDiary"

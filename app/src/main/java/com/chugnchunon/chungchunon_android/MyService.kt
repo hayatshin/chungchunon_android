@@ -6,6 +6,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.icu.text.DecimalFormat
 import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -39,21 +40,23 @@ class MyService : Service(), SensorEventListener {
 
         var todayTotalStepCount: Int? = 0
 
-        const val STEP_THRESHOLD: Int = 6
+        const val STEP_THRESHOLD: Int = 7
     }
 
     override fun onCreate() {
         super.onCreate()
 
+        // 가속도 센서
 //        sensorManager =
 //            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 //        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 //        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_GAME)
 
+        // 기본
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
 
         // 오늘 걸음수 초기화
@@ -68,7 +71,7 @@ class MyService : Service(), SensorEventListener {
         super.onStart(intent, startId)
 
         if (step_sensor != null) {
-            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_GAME)
+            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
         }
 
     }
@@ -79,6 +82,7 @@ class MyService : Service(), SensorEventListener {
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
             todayTotalStepCount = todayStepCountFromDB.toInt()
+
             StepCountNotification(this, todayTotalStepCount)
         }
         return super.onStartCommand(intent, flags, startId)
@@ -186,9 +190,12 @@ class MyService : Service(), SensorEventListener {
             (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
                 channel
             )
+            var decimal = DecimalFormat("#,###")
+            var step = decimal.format(todayTotalStepCount)
+
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_stepcount_noti)
-                .setContentTitle("$todayTotalStepCount 걸음")
+                .setContentTitle("$step 걸음")
                 .setColor(ContextCompat.getColor(context, R.color.main_color))
                 .setDefaults(Notification.DEFAULT_LIGHTS)
                 .build()

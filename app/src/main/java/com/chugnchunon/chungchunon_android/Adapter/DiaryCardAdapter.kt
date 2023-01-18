@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android.Adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.icu.text.DecimalFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -58,9 +59,12 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
 
+            var decimal = DecimalFormat("#,###")
+            var step = decimal.format(items[position].stepCount)
+
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
             userNameView.text = items[position].name
-            userStepCountView.text = "${items[position].stepCount}보"
+            userStepCountView.text = "${step}보"
             userMoodView.setImageResource(items[position].mood!!.toInt())
             userDiaryView.text = items[position].diary
             userLikeView.text = "좋아요 ${items[position].numLikes}"

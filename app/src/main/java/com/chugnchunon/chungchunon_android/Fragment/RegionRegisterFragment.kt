@@ -41,6 +41,8 @@ class RegionRegisterFragment : Fragment() {
         _binding = FragmentRegionListBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        Log.d("결과", "리지온프래그먼트")
+
         regionModel = ViewModelProvider(requireActivity()).get(MyViewModel::class.java)
 
         regionDB.get()

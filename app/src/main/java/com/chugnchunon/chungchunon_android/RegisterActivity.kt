@@ -59,6 +59,7 @@ class RegisterActivity : AppCompatActivity() {
     private val calendar = Calendar.getInstance()
     private var birthYear = ""
     private var birthDay = ""
+    private var userAge = 0
 
     lateinit var phoneTxtCheck: PhoneFillClass
     lateinit var totalTxtCheck: FillCheckClass
@@ -75,12 +76,16 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        var userType = intent.getStringExtra("userType")
+
         binding.authProgressBar.visibility = View.GONE
         binding.phoneAuthBtn.isEnabled = false
-        binding.registerBtn.isEnabled = false
+        // 변경
+        binding.registerBtn.isEnabled = true
 
         totalTxtCheck = ViewModelProvider(this).get(FillCheckClass::class.java)
         phoneTxtCheck = ViewModelProvider(this).get(PhoneFillClass::class.java)
+
 
         totalTxtCheck.nameFill.observe(this, Observer { value ->
             binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
@@ -161,9 +166,13 @@ class RegisterActivity : AppCompatActivity() {
         // 생년월일 설정
         var editBirth: Boolean = false
 
+
+
         calendar.apply {
             set(1960, 0, 1)
         }
+
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
         val birthDatePicker =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
@@ -180,16 +189,28 @@ class RegisterActivity : AppCompatActivity() {
                 var birthScreenInput = ""
                 birthScreenInput = "${year}년 ${monthOfYear + 1}월 ${dayOfMonth}일"
                 birthYear = "$year"
-                birthDay = "${monthOfYear + 1}$dayOfMonth\""
+                userAge = currentYear - birthYear.toInt() + 1
+                birthDay = "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
                 birthTextView.text = birthScreenInput
 
                 birthTextView.layoutParams = layoutParams
                 birthTextView.setTypeface(null, Typeface.BOLD)
                 birthTextView.textSize = 20f
-                birthTextView.setTextColor(resources.getColor(R.color.dark_main_color))
-//                birthTextView.gravity = Gravity.END
-
+                birthTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
                 binding.birthResultBox.addView(birthTextView)
+
+                // 나이 50세 이하
+                var ageTextView = TextView(applicationContext)
+                ageTextView.layoutParams = layoutParams
+                ageTextView.setTypeface(null, Typeface.BOLD)
+                ageTextView.textSize = 20f
+                ageTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
+                ageTextView.text = "50세 이하는 일기 쓰기가 제한됩니다."
+
+                if(userAge < 50) {
+                    binding.birthResultBox.addView(ageTextView)
+                }
+
 
                 // 수정 버튼
                 editBirth = true
@@ -292,7 +313,10 @@ class RegisterActivity : AppCompatActivity() {
 
             // 인증 확인
             var authBtn = Button(applicationContext)
+            authBtn.setBackgroundResource(R.drawable.default_button)
             authBtn.layoutParams = layoutParams
+            authBtn.textSize = 17f
+            authBtn.setTextColor(ContextCompat.getColor(this, R.color.white))
             authBtn.setTag("verificationBtn")
             authBtn.text = "확인"
 
@@ -376,13 +400,19 @@ class RegisterActivity : AppCompatActivity() {
         binding.registerBtn.setOnClickListener {
 
 
+
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
             val userId = Firebase.auth.currentUser?.uid
 
+            var intent = Intent(this, RegionRegisterActivity::class.java)
+            intent.putExtra("userType", userType)
+            intent.putExtra("userAge", userAge)
+            startActivity(intent)
+
             val userSet = hashMapOf(
-                "userType" to "치매예방자",
+                "userType" to userType,
                 "loginType" to "일반",
                 "userId" to userId,
                 "timestamp" to FieldValue.serverTimestamp(),
@@ -391,6 +421,7 @@ class RegisterActivity : AppCompatActivity() {
                 "phone" to phoneNumber,
                 "birthYear" to birthYear,
                 "birthDay" to birthDay,
+                "userAge" to userAge,
                 "todayStepCount" to 0,
             )
 
@@ -399,6 +430,8 @@ class RegisterActivity : AppCompatActivity() {
                 .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
                     var intent = Intent(this, RegionRegisterActivity::class.java)
+                    intent.putExtra("userType", userType)
+                    intent.putExtra("userAge", userAge)
                     startActivity(intent)
                 }
                 .addOnFailureListener { error ->
@@ -444,7 +477,7 @@ class RegisterActivity : AppCompatActivity() {
                     successTextView.textSize = 20f
                     successTextView.gravity = Gravity.END
                     successTextView.layoutParams = resultparams
-                    successTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
+                    successTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
                     successTextView.setTypeface(null, Typeface.BOLD)
                     binding.phoneLayout.addView(successTextView)
                     totalTxtCheck.phoneFill.value = true

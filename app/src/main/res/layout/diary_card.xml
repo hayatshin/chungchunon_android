@@ -10,17 +10,11 @@
         android:id="@+id/diaryCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/diarybox"
+        android:background="@drawable/diarybox_bold"
         android:orientation="vertical"
         android:padding="20dp"
         app:cardElevation="10dp">
 
-        <TextView
-            android:textSize="15sp"
-            android:id="@+id/userWriteTime"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:text="2023-01-04" />
 
         <LinearLayout
             android:id="@+id/userInfo"
@@ -31,7 +25,9 @@
             app:layout_constraintTop_toBottomOf="@id/userWriteTime">
 
             <TextView
-                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:textSize="23sp"
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,6 +35,7 @@
                 tools:text="신순국" />
 
             <TextView
+                android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:id="@+id/userStepCount"
@@ -56,10 +53,18 @@
 
         </LinearLayout>
 
+
+        <TextView
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:id="@+id/userWriteTime"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:text="2023-01-04" />
+
         <TextView
             android:textColor="@color/black"
             android:textSize="23sp"
-            android:fontFamily="@font/room703"
             android:id="@+id/userDiary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,6 +95,7 @@
                     android:src="@drawable/ic_emptyheart" />
 
                 <TextView
+                    android:textColor="@color/black"
                     android:textSize="16sp"
                     android:id="@+id/likeText"
                     android:layout_width="wrap_content"
@@ -112,6 +118,7 @@
                     android:src="@drawable/ic_emptychat" />
 
                 <TextView
+                    android:textColor="@color/black"
                     android:textSize="16sp"
                     android:id="@+id/commentText"
                     android:layout_width="wrap_content"
