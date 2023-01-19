@@ -112,7 +112,8 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             var DiaryRef = diaryDB.document(items[position].diaryId)
 
             var likeUserSet = hashMapOf(
-                "id" to userId
+                "id" to userId,
+                "timestamp" to FieldValue.serverTimestamp(),
             )
 
             if (likeToggleCheck[position]!!) {

@@ -86,6 +86,9 @@
         <activity
             android:name=".EditRegionRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".AgreementActivity"
+            android:windowSoftInputMode="adjustPan" />
 
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"

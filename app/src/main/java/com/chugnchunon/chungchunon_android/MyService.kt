@@ -1,5 +1,9 @@
 package com.chugnchunon.chungchunon_android
-import android.app.*
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
@@ -12,14 +16,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
-import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDate
+
 class MyService : Service(), SensorEventListener {
     private lateinit var sensorThread: HandlerThread
     private lateinit var sensorHandler: Handler
@@ -33,30 +36,37 @@ class MyService : Service(), SensorEventListener {
     // 걸음수
     private var MagnitudePrevious: Double = 0.0
     private var stepCount: Int = 0
+    private val gravity = FloatArray(3)
+    private var smoothed = FloatArray(3)
+    private val bearing = 0.0
+    private val toggle = false
+    private var prevY = 0.0
+    private val ignore = false
+    private val countdown = 0
 
     companion object {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
 
         var todayTotalStepCount: Int? = 0
-
-        const val STEP_THRESHOLD: Int = 7
+        const val STEP_THRESHOLD: Double = 6.0
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        // 가속도 센서
-//        sensorManager =
-//            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_GAME)
 
-        // 기본
+        // 가속도 센서
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
+
+        // 기본
+//        sensorManager =
+//            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
 
         // 오늘 걸음수 초기화
@@ -65,6 +75,8 @@ class MyService : Service(), SensorEventListener {
             todayTotalStepCount = todayStepCountFromDB.toInt()
             StepCountNotification(this, todayTotalStepCount)
         }
+
+
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -87,60 +99,68 @@ class MyService : Service(), SensorEventListener {
         }
         return super.onStartCommand(intent, flags, startId)
     }
+
     override fun onBind(p0: Intent?): IBinder? {
         return Binder()
     }
 
+    private fun lowPassFilter(input: FloatArray, output: FloatArray): FloatArray {
+        if (output == null) return input
+        for (i in input.indices) {
+            output[i] = output[i] + 1.0f * (input[i] - output[i])
+        }
+        return output
+    }
 
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-//        if(sensorEvent != null) {
-//            var x_acceleration: Double = sensorEvent.values[0].toDouble()
-//            var y_acceleration: Double = sensorEvent.values[1].toDouble()
-//            var z_acceleration: Double = sensorEvent.values[2].toDouble()
-//
-//            var Magnitude: Double = Math.sqrt(x_acceleration * x_acceleration + y_acceleration * y_acceleration + z_acceleration * z_acceleration)
-//            var MagnitudeDelta: Double = Magnitude - MagnitudePrevious
-//            MagnitudePrevious = Magnitude
-//
-//            if(MagnitudeDelta > STEP_THRESHOLD){
-//                 todayTotalStepCount = todayTotalStepCount?.plus(1)
-//
-//                var currentDate = LocalDate.now()
-//                StepCountNotification(this, todayTotalStepCount)
-//
-//                // user 내 todayStepCount
-//                var todayStepCountSet = hashMapOf(
-//                    "todayStepCount" to todayTotalStepCount
-//                )
-//                userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
-//
-//                var userStepCountSet = hashMapOf(
-//                    "$currentDate" to todayTotalStepCount
-//                )
-//
-//                var periodStepCountSet = hashMapOf(
-//                    "$userId" to todayTotalStepCount
-//                )
-//
-//                // user_step_count
-//                db.collection("user_step_count")
-//                    .document("$userId")
-//                    .set(userStepCountSet, SetOptions.merge())
-//
-//                // period_step_count
-//                db.collection("period_step_count")
-//                    .document("$currentDate")
-//                    .set(periodStepCountSet, SetOptions.merge())
-//
-//                var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-//                intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-//                intent.putExtra("todayTotalStepCount", todayTotalStepCount)
-//                sendBroadcast(intent)
-//            }
-//        }
+        if (sensorEvent?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            smoothed = lowPassFilter(sensorEvent.values, gravity)
+            gravity[0] = smoothed[0];
+            gravity[1] = smoothed[1];
+            gravity[2] = smoothed[2];
 
-        todayTotalStepCount = todayTotalStepCount?.plus(1)
+            if (Math.abs(prevY - gravity[1]) > STEP_THRESHOLD) {
+                todayTotalStepCount = todayTotalStepCount?.plus(1)
+
+                var currentDate = LocalDate.now()
+                StepCountNotification(this, todayTotalStepCount)
+
+                // user 내 todayStepCount
+                var todayStepCountSet = hashMapOf(
+                    "todayStepCount" to todayTotalStepCount
+                )
+                userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
+
+                var userStepCountSet = hashMapOf(
+                    "$currentDate" to todayTotalStepCount
+                )
+
+                var periodStepCountSet = hashMapOf(
+                    "$userId" to todayTotalStepCount
+                )
+
+                // user_step_count
+                db.collection("user_step_count")
+                    .document("$userId")
+                    .set(userStepCountSet, SetOptions.merge())
+
+                // period_step_count
+                db.collection("period_step_count")
+                    .document("$currentDate")
+                    .set(periodStepCountSet, SetOptions.merge())
+
+
+                var intent = Intent(this, StepCountBroadcastReceiver::class.java)
+                intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+                intent.putExtra("todayTotalStepCount", todayTotalStepCount)
+                sendBroadcast(intent)
+
+            }
+            prevY = gravity[1].toDouble();
+        }
+
+//        todayTotalStepCount = todayTotalStepCount?.plus(1)
 
         var currentDate = LocalDate.now()
         StepCountNotification(this, todayTotalStepCount)
@@ -203,4 +223,5 @@ class MyService : Service(), SensorEventListener {
         }
     }
 }
+
 operator fun <T> MutableLiveData<T>.plus(t: String): MutableLiveData<T> = this + t

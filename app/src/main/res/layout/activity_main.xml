@@ -39,15 +39,15 @@
             app:layout_constraintTop_toBottomOf="@+id/iconImage"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <ProgressBar
-            android:id="@+id/kakaoProgressBar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="250dp"
-            android:layout_height="8dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:progressDrawable="@drawable/kakao_progress_drawable"
-            android:visibility="gone" />
+<!--        <ProgressBar-->
+<!--            android:id="@+id/kakaoProgressBar"-->
+<!--            style="@style/Widget.AppCompat.ProgressBar.Horizontal"-->
+<!--            android:layout_width="250dp"-->
+<!--            android:layout_height="8dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_marginTop="20dp"-->
+<!--            android:progressDrawable="@drawable/kakao_progress_drawable"-->
+<!--            android:visibility="gone" />-->
 
         <TextView
             android:id="@+id/registerBtn"
@@ -110,13 +110,13 @@
             app:layout_constraintTop_toBottomOf="@+id/iconImage"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <ProgressBar
-            android:id="@+id/partnerKakaoProgressBar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="200dp"
-            android:layout_height="5dp"
-            android:layout_gravity="center"
-            android:progressDrawable="@drawable/kakao_progress_drawable" />
+<!--        <ProgressBar-->
+<!--            android:id="@+id/partnerKakaoProgressBar"-->
+<!--            style="@style/Widget.AppCompat.ProgressBar.Horizontal"-->
+<!--            android:layout_width="200dp"-->
+<!--            android:layout_height="5dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:progressDrawable="@drawable/kakao_progress_drawable" />-->
 
         <TextView
             android:id="@+id/partnerRegisterBtn"

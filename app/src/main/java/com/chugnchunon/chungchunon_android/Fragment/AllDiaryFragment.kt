@@ -4,13 +4,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
+import android.graphics.Typeface
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
@@ -29,6 +38,7 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.fragment_all_diary.*
 import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -119,7 +129,15 @@ class AllDiaryFragment : Fragment() {
                             diaryItems.sortWith(compareBy({ it.writeTime }))
                             diaryItems.reverse()
                             adapter.notifyDataSetChanged()
+
                         }
+
+//                        if(diaryItems.size == 0) {
+//                            binding.noItemText.visibility = View.VISIBLE
+//                        } else {
+//                            binding.noItemText.visibility = View.GONE
+//                        }
+
                         binding.recyclerDiary.adapter = adapter
                         binding.recyclerDiary.layoutManager = LinearLayoutManager(
                             context,
@@ -127,6 +145,7 @@ class AllDiaryFragment : Fragment() {
                             false
                         )
                     }
+
             } else {
                 userDB.document("$userId")
                     .get()
@@ -169,6 +188,13 @@ class AllDiaryFragment : Fragment() {
                                     diaryItems.reverse()
                                     adapter.notifyDataSetChanged()
                                 }
+
+//                                if(diaryItems.size == 0) {
+//                                    binding.noItemText.visibility = View.VISIBLE
+//                                } else {
+//                                    binding.noItemText.visibility = View.GONE
+//                                }
+
                             }
                         binding.recyclerDiary.adapter = adapter
                         binding.recyclerDiary.layoutManager = LinearLayoutManager(
@@ -176,7 +202,6 @@ class AllDiaryFragment : Fragment() {
                             RecyclerView.VERTICAL,
                             false
                         )
-
                     }
             }
         })
@@ -250,6 +275,7 @@ class AllDiaryFragment : Fragment() {
         return view
     }
 
+
     var deleteNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             var deleteNumComments = intent?.getIntExtra("deleteNumComments", 0)
@@ -274,3 +300,4 @@ class AllDiaryFragment : Fragment() {
 class DataGroupSelection : ViewModel() {
     val regionCheck by lazy { MutableLiveData<Boolean>(false) }
 }
+

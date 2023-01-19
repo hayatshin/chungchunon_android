@@ -34,6 +34,7 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 
         when (intentAction) {
             Intent.ACTION_DATE_CHANGED -> {
+
                 var todayStepCountSet = hashMapOf<String, Int?>(
                     "todayStepCount" to 0
                 )

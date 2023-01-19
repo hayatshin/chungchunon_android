@@ -1,51 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/allDiaryLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".Fragment.AllDiaryFragment">
 
     <LinearLayout
+        android:id="@+id/regionSelection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rule_header"
+        android:paddingHorizontal="30dp"
         android:paddingTop="10dp"
         android:paddingBottom="5dp"
-        android:paddingHorizontal="30dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleBtnGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="end"
             app:checkedButton="@+id/allData"
             app:selectionRequired="true"
-            app:singleSelection="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            app:singleSelection="true">
 
             <Button
-                android:textStyle="bold"
                 android:id="@+id/allData"
                 style="?attr/materialButtonOutlinedStyle"
-                android:text="전체 보기"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="전체 보기"
+                android:textStyle="bold" />
 
             <Button
-                android:textStyle="bold"
                 android:id="@+id/regionData"
                 style="?attr/materialButtonOutlinedStyle"
-                android:text="지역 보기"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="지역 보기"
+                android:textStyle="bold" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDiary"
-        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintTop_toBottomOf="@id/regionSelection" />
 
-</LinearLayout>
+
+<!--    <TextView-->
+<!--        android:textAlignment="center"-->
+<!--        android:lineSpacingExtra="10dp"-->
+<!--        android:visibility="gone"-->
+<!--        android:id="@+id/noItemText"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/all_diary_no_item"-->
+<!--        android:textColor="@color/light_gray"-->
+<!--        android:textSize="17sp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/regionSelection" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

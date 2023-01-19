@@ -6,6 +6,8 @@
         <entry key="../../Library/Android/sdk/platforms/android-32/data/res/layout/simple_spinner_dropdown_item.xml" value="0.24583333333333332" />
         <entry key="../../Library/Android/sdk/platforms/android-32/data/res/layout/simple_spinner_item.xml" value="0.24583333333333332" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1415" />
+        <entry key="app/src/main/res/drawable/agreement_box.xml" value="0.169" />
+        <entry key="app/src/main/res/drawable/agreement_sub_box.xml" value="0.182" />
         <entry key="app/src/main/res/drawable/comment_box.xml" value="0.106" />
         <entry key="app/src/main/res/drawable/default_button.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/diarybox.xml" value="0.1" />
@@ -15,6 +17,8 @@
         <entry key="app/src/main/res/drawable/ic_arrow_back.xml" value="0.106" />
         <entry key="app/src/main/res/drawable/ic_arrow_back_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_arrow_back_main.xml" value="0.126" />
+        <entry key="app/src/main/res/drawable/ic_check_agreement.xml" value="0.169" />
+        <entry key="app/src/main/res/drawable/ic_check_agreement_main.xml" value="0.1865" />
         <entry key="app/src/main/res/drawable/ic_checkbox_no.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_checkbox_yes.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_emotion_1.xml" value="0.1145" />
@@ -39,31 +43,33 @@
         <entry key="app/src/main/res/drawable/noti_box.xml" value="0.174" />
         <entry key="app/src/main/res/drawable/recycler_default_item.xml" value="0.1555" />
         <entry key="app/src/main/res/drawable/region_box.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/register_fill_box.xml" value="0.1495" />
         <entry key="app/src/main/res/drawable/rule_header.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/sub_button.xml" value="0.189" />
         <entry key="app/src/main/res/drawable/tab_background.xml" value="0.139" />
         <entry key="app/src/main/res/drawable/tab_background_unselected.xml" value="0.1585" />
         <entry key="app/src/main/res/drawable/tab_icon_color.xml" value="0.1565" />
+        <entry key="app/src/main/res/layout/activity_agreement.xml" value="0.1793502844743195" />
         <entry key="app/src/main/res/layout/activity_application_rule.xml" value="0.1796875" />
         <entry key="app/src/main/res/layout/activity_big_region.xml" value="0.22780797101449277" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.15057220458984374" />
         <entry key="app/src/main/res/layout/activity_community_register.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
-        <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.2611531575520834" />
+        <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.19738820393880213" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.15670289855072464" />
         <entry key="app/src/main/res/layout/activity_more.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_personalinfo_rule.xml" value="0.1796875" />
         <entry key="app/src/main/res/layout/activity_region.xml" value="0.23852386474609377" />
         <entry key="app/src/main/res/layout/activity_region_register.xml" value="0.16304347826086957" />
-        <entry key="app/src/main/res/layout/activity_register.xml" value="0.2099395751953125" />
+        <entry key="app/src/main/res/layout/activity_register.xml" value="0.17695770263671878" />
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.15670289855072464" />
         <entry key="app/src/main/res/layout/comment_list.xml" value="0.33099110921223956" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
-        <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.25389561307603037" />
-        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.3156585693359375" />
-        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.2736847366111867" />
+        <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.1241669143455616" />
+        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.2101165771484375" />
+        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.15936737060546877" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />
         <entry key="app/src/main/res/layout/gender_item_spinner.xml" value="0.14945652173913043" />

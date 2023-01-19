@@ -24,6 +24,7 @@ import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
+import com.kakao.sdk.user.UserApiClient
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
@@ -47,8 +48,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        binding.kakaoProgressBar.visibility = View.GONE
-        binding.partnerKakaoProgressBar.visibility = View.GONE
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -60,13 +59,10 @@ class MainActivity : AppCompatActivity() {
         partnerCallback = PartnerSessionCallback(this)
 
 
-
         // 카톡 로그인 버튼 클릭
         binding.kakaoLoginBtn.setOnClickListener {
-            binding.kakaoProgressBar.visibility = View.VISIBLE
-            TimerFun()
+//            TimerFun()
 
-            binding.kakaoLoginBtn.isClickable = false
 
             val keyHash = Utility.getKeyHash(this) // keyHash 발급
 
@@ -76,9 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         // 일반 회원가입
         binding.registerBtn.setOnClickListener {
-            binding.registerBtn.isClickable = false
-
-            val goRegisterUser = Intent(this, RegisterActivity::class.java)
+            val goRegisterUser = Intent(this, AgreementActivity::class.java)
             goRegisterUser.putExtra("userType", "치매예방자")
             startActivity(goRegisterUser)
         }
@@ -91,10 +85,7 @@ class MainActivity : AppCompatActivity() {
 
             // 파트너 - 카톡 로그인 버튼 클릭
             binding.partnerKakaoLoginBtn.setOnClickListener {
-                binding.partnerKakaoProgressBar.visibility = View.VISIBLE
-                TimerFun()
-
-                binding.partnerKakaoLoginBtn.isClickable = false
+//                TimerFun()
 
                 val keyHash = Utility.getKeyHash(this) // keyHash 발급
 
@@ -104,9 +95,8 @@ class MainActivity : AppCompatActivity() {
 
             // 파트너 - 일반 회원가입
             binding.partnerRegisterBtn.setOnClickListener {
-                binding.registerBtn.isClickable = false
 
-                val goRegisterUser = Intent(this, RegisterActivity::class.java)
+                val goRegisterUser = Intent(this, AgreementActivity::class.java)
                 goRegisterUser.putExtra("userType", "파트너")
                 startActivity(goRegisterUser)
             }
@@ -124,7 +114,9 @@ class MainActivity : AppCompatActivity() {
         Log.d("카톡로그인", "LoginActivity - onActivityResult() called")
 
         if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
-            Log.i("카톡로그인", "Session get current session")
+            if(resultCode == -1) {
+                // null
+            }
             return
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -145,7 +137,7 @@ class MainActivity : AppCompatActivity() {
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "http://8184-218-147-138-163.ngrok.io/verifyToken"
+        val url = "http://6a41-218-147-138-163.ngrok.io/verifyToken"
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
         val request: JsonObjectRequest = object : JsonObjectRequest(
@@ -172,13 +164,13 @@ class MainActivity : AppCompatActivity() {
         return source.task
     }
 
-    fun TimerFun() {
-        // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
-        timer = timer(period = 50, initialDelay = 500) {
-            if(deltaTime > 100) cancel()
-            binding.kakaoProgressBar.setProgress(++deltaTime)
-        }
-    }
+//    fun TimerFun() {
+//        // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
+//        timer = timer(period = 50, initialDelay = 500) {
+//            if(deltaTime > 100) cancel()
+//            binding.kakaoProgressBar.setProgress(++deltaTime)
+//        }
+//    }
 
 }
 

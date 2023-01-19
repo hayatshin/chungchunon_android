@@ -78,6 +78,10 @@ class RegisterActivity : AppCompatActivity() {
 
         var userType = intent.getStringExtra("userType")
 
+        binding.goBackBtn.setOnClickListener {
+            finish()
+        }
+
         binding.authProgressBar.visibility = View.GONE
         binding.phoneAuthBtn.isEnabled = false
         // 변경
@@ -193,7 +197,13 @@ class RegisterActivity : AppCompatActivity() {
                 birthDay = "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
                 birthTextView.text = birthScreenInput
 
-                birthTextView.layoutParams = layoutParams
+                val birthTextViewLayoutParams = RelativeLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                )
+                birthTextViewLayoutParams.setMargins(0, 10, 0, 0)
+
+                birthTextView.layoutParams = birthTextViewLayoutParams
                 birthTextView.setTypeface(null, Typeface.BOLD)
                 birthTextView.textSize = 20f
                 birthTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
@@ -201,7 +211,7 @@ class RegisterActivity : AppCompatActivity() {
 
                 // 나이 50세 이하
                 var ageTextView = TextView(applicationContext)
-                ageTextView.layoutParams = layoutParams
+                ageTextView.layoutParams = birthTextViewLayoutParams
                 ageTextView.setTypeface(null, Typeface.BOLD)
                 ageTextView.textSize = 20f
                 ageTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
