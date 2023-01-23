@@ -4,8 +4,10 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import com.chugnchunon.chungchunon_android.DiaryActivity
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
 import com.chugnchunon.chungchunon_android.R
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
@@ -25,24 +27,25 @@ import java.util.*
 import kotlin.concurrent.timer
 
 
-class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
-    private val TAG : String = "카톡로그인"
+class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
+    private val TAG: String = "카톡로그인"
     private val userDB = Firebase.firestore.collection("users")
 
 
     override fun onSessionOpened() {
 
-            UserManagement.getInstance().me(object : MeV2ResponseCallback(){
+        UserManagement.getInstance().me(object : MeV2ResponseCallback() {
             override fun onSuccess(result: MeV2Response?) {
 
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-                if(result != null){
+                if (result != null) {
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
                     val phoneNumber = "010-${
-                        result.kakaoAccount?.phoneNumber?.substring(7)}"
+                        result.kakaoAccount?.phoneNumber?.substring(7)
+                    }"
                     var birthYear = result.kakaoAccount?.birthyear
-                    var userAge =  currentYear - birthYear!!.toInt() + 1
+                    var userAge = currentYear - birthYear!!.toInt() + 1
 
                     val userSet = hashMapOf(
                         "userType" to "파트너",
@@ -56,7 +59,7 @@ class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
                         "birthDay" to result.kakaoAccount?.birthday,
                         "todayStepCount" to 0,
                         "userAge" to userAge,
-                        )
+                    )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->
                         val firebaseToken = task.result
@@ -64,18 +67,48 @@ class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
                         auth.signInWithCustomToken(firebaseToken!!)
                     }.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Log.d(TAG, "성공성공")
+                            var userId = "kakao:${result.id}"
                             userDB
-                                .document("kakao:${result.id}")
-                                .set(userSet, SetOptions.merge())
-                                .addOnSuccessListener {
-                                    var goRegionRegister = Intent(context, RegionRegisterActivity::class.java)
-                                    goRegionRegister.putExtra("userType", "파트너")
-                                    goRegionRegister.putExtra("userAge", userAge)
-                                    context.startActivity(goRegionRegister)
+                                .document("$userId")
+                                .get()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        var userDocument = task.result
+                                        if (userDocument.exists()) {
+                                            // user 이미 존재
+                                            var userAge =
+                                                (userDocument.data?.getValue("userAge") as Long).toInt()
+                                            var userType = userDocument.data?.getValue("userType")
+
+                                            if (userAge < 50 || userType == "파트너") {
+                                                var goDiary = Intent(
+                                                    context,
+                                                    PartnerDiaryActivity::class.java
+                                                )
+                                                context.startActivity(goDiary)
+                                            } else {
+                                                var goDiary =
+                                                    Intent(context, DiaryActivity::class.java)
+                                                context.startActivity(goDiary)
+                                            }
+                                        } else {
+                                            // user 존재 x
+                                            userDB
+                                                .document("kakao:${result.id}")
+                                                .set(userSet, SetOptions.merge())
+                                                .addOnSuccessListener {
+                                                    var goRegionRegister = Intent(
+                                                        context,
+                                                        RegionRegisterActivity::class.java
+                                                    )
+                                                    goRegionRegister.putExtra("userType", "파트너")
+                                                    goRegionRegister.putExtra("userAge", userAge)
+                                                    context.startActivity(goRegionRegister)
+                                                }
+                                        }
+                                    }
                                 }
-                        }
-                        else {
+                        } else {
                             if (task.exception != null) {
                                 Log.e(TAG, task.exception.toString())
                             }
@@ -92,9 +125,9 @@ class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
                 val errorCode = errorResult?.errorCode
                 val clientErrorCode = -777
 
-                if(errorCode == clientErrorCode){
+                if (errorCode == clientErrorCode) {
                     Log.e(TAG, "카카오톡 서버의 네트워크가 불안정합니다. 잠시 후 다시 시도해주세요.")
-                }else{
+                } else {
                     Log.e(TAG, "알 수 없는 오류로 카카오로그인 실패 \n${errorResult?.errorMessage}")
                 }
 
@@ -106,7 +139,6 @@ class PartnerSessionCallback(val context: MainActivity): ISessionCallback {
     override fun onSessionOpenFailed(exception: KakaoException?) {
         Log.e(TAG, "onSessionOpenFailed ${exception?.message}")
     }
-
 
 
 }

@@ -501,7 +501,8 @@ class RegisterActivity : AppCompatActivity() {
                                     if (userAge < 50 || userType == "파트너") {
                                         var goDiary = Intent(
                                             applicationContext,
-                                            Telephony.Mms.Part::class.java
+//                                            Telephony.Mms.Part::class.java
+                                        PartnerDiaryActivity::class.java
                                         )
                                         startActivity(goDiary)
                                     } else {
