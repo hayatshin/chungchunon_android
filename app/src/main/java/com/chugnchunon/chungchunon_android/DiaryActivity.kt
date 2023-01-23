@@ -9,6 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginTop
+import androidx.fragment.app.FragmentManager
+import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.TabPageAdapter
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
@@ -39,7 +42,7 @@ class DiaryActivity : AppCompatActivity() {
         yourTabItemView.weight = 0.3f
 
         binding.viewPager.isUserInputEnabled = false
-//
+
 //        binding.viewPager.setPageTransformer(object: ViewPager2.PageTransformer {
 //            override fun transformPage(page: View, position: Float) {
 //                page.alpha = 0f
@@ -55,6 +58,7 @@ class DiaryActivity : AppCompatActivity() {
         setUpTabBar()
 
     }
+
 
 
     @SuppressLint("NotifyDataSetChanged")

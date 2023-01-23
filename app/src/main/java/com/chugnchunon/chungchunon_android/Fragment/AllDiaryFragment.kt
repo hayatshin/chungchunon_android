@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.opengl.Visibility
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import androidx.fragment.app.Fragment
@@ -76,6 +77,7 @@ class AllDiaryFragment : Fragment() {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
+
         // 토글버튼
 //        var contexThemeWrappter: Context = ContextThemeWrapper(activity, R.style.MaterialAppTheme)
 //        var localinflater = inflater.cloneInContext(contexThemeWrappter)
@@ -95,6 +97,8 @@ class AllDiaryFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(DataGroupSelection::class.java)
 
         dataGroupSelection.regionCheck.observe(requireActivity(), Observer { value ->
+            binding.noItemText.visibility = View.GONE
+
             if (!dataGroupSelection.regionCheck.value!!) {
                 // 전체 보기
 
@@ -131,19 +135,22 @@ class AllDiaryFragment : Fragment() {
                             adapter.notifyDataSetChanged()
 
                         }
-
-//                        if(diaryItems.size == 0) {
-//                            binding.noItemText.visibility = View.VISIBLE
-//                        } else {
-//                            binding.noItemText.visibility = View.GONE
-//                        }
-
                         binding.recyclerDiary.adapter = adapter
-                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
-                            context,
+//                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
+//                            context,
+//                            RecyclerView.VERTICAL,
+//                            false
+//                        )
+                        binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
+                            requireContext(),
                             RecyclerView.VERTICAL,
                             false
                         )
+                        if (diaryItems.size == 0) {
+                            binding.noItemText.visibility = View.VISIBLE
+                        } else {
+                            binding.noItemText.visibility = View.GONE
+                        }
                     }
 
             } else {
@@ -188,20 +195,19 @@ class AllDiaryFragment : Fragment() {
                                     diaryItems.reverse()
                                     adapter.notifyDataSetChanged()
                                 }
-
-//                                if(diaryItems.size == 0) {
-//                                    binding.noItemText.visibility = View.VISIBLE
-//                                } else {
-//                                    binding.noItemText.visibility = View.GONE
-//                                }
-
                             }
                         binding.recyclerDiary.adapter = adapter
-                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
-                            context,
+                        binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
+                            requireContext(),
                             RecyclerView.VERTICAL,
                             false
                         )
+
+                        if (diaryItems.size == 0) {
+                            binding.noItemText.visibility = View.VISIBLE
+                        } else {
+                            binding.noItemText.visibility = View.GONE
+                        }
                     }
             }
         })
@@ -299,5 +305,12 @@ class AllDiaryFragment : Fragment() {
 
 class DataGroupSelection : ViewModel() {
     val regionCheck by lazy { MutableLiveData<Boolean>(false) }
+}
+
+class LinearLayoutManagerWrapper: LinearLayoutManager {
+    constructor(context: Context) : super(context) {}
+    constructor(context: Context, orientation: Int, reverseLayout: Boolean) : super(context, orientation, reverseLayout) {}
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {}
+    override fun supportsPredictiveItemAnimations(): Boolean { return false }
 }
 

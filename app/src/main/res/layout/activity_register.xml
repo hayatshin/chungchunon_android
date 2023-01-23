@@ -49,11 +49,11 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_weight="1"
                 android:id="@+id/nameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="50dp"
+                android:layout_weight="1"
                 android:text="이름"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -63,10 +63,10 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:backgroundTint="@color/light_gray"
                 android:id="@+id/nameInput"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/light_gray"
                 android:gravity="center"
                 android:inputType="text"
                 android:paddingBottom="15dp"
@@ -136,7 +136,7 @@
                     android:background="@drawable/sub_button"
                     android:text="달력 보기"
                     android:textColor="@color/white"
-                    android:textSize="17sp"/>
+                    android:textSize="17sp" />
 
             </LinearLayout>
 
@@ -185,52 +185,74 @@
             </LinearLayout>
 
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:gravity="center">
+                android:layout_marginTop="30dp">
 
                 <TextView
+                    android:id="@+id/defaultphone"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:text="010"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/slashone"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/slashone"
                     android:layout_width="5dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="10dp"
-                    android:text="-" />
+                    android:text="-"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/defaultphone"
+                    app:layout_constraintRight_toLeftOf="@id/phoneInput1"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <EditText
                     android:id="@+id/phoneInput1"
-                    android:layout_width="100dp"
+                    android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:background="@drawable/register_fill_box"
                     android:gravity="center"
                     android:inputType="number"
                     android:maxLength="4"
                     android:textSize="18sp"
-                    android:theme="@style/EditTheme" />
+                    android:theme="@style/EditTheme"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@+id/slashone"
+                    app:layout_constraintRight_toLeftOf="@id/slashtwo"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/slashtwo"
                     android:layout_width="5dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="10dp"
-                    android:text="-" />
+                    android:text="-"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toRightOf="@+id/phoneInput1"
+                    app:layout_constraintRight_toLeftOf="@id/phoneInput2" />
 
                 <EditText
                     android:id="@+id/phoneInput2"
-                    android:layout_width="100dp"
+                    android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:background="@drawable/register_fill_box"
                     android:gravity="center"
                     android:inputType="number"
                     android:maxLength="4"
                     android:textSize="18sp"
-                    android:theme="@style/EditTheme" />
-            </LinearLayout>
+                    android:theme="@style/EditTheme"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/slashtwo"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
             <LinearLayout

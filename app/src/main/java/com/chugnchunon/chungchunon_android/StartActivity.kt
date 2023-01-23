@@ -25,9 +25,6 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        Firebase.firestore.clearPersistence()
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -46,7 +43,7 @@ class StartActivity : AppCompatActivity() {
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
                         var userType = document.data?.getValue("userType")
-                        if(userType == "치매예방자") {
+                        if(userType == "치매예방자" || userType == "마스터") {
                             val goDiaryActivity = Intent(this, DiaryActivity::class.java)
                             startActivity(goDiaryActivity)
                             finish()

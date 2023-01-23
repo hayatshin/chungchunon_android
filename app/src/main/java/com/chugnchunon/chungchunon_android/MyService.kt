@@ -4,70 +4,86 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.icu.text.DecimalFormat
+import android.icu.text.SimpleDateFormat
 import android.os.*
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.time.LocalDate
+import java.util.*
 
 class MyService : Service(), SensorEventListener {
-    private lateinit var sensorThread: HandlerThread
-    private lateinit var sensorHandler: Handler
-    private lateinit var sensorManager: SensorManager
-    private lateinit var step_sensor: Sensor
+    lateinit var sensorManager: SensorManager
+    lateinit var step_sensor: Sensor
     private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-    // 걸음수
-    private var MagnitudePrevious: Double = 0.0
-    private var stepCount: Int = 0
-    private val gravity = FloatArray(3)
-    private var smoothed = FloatArray(3)
-    private val bearing = 0.0
-    private val toggle = false
-    private var prevY = 0.0
-    private val ignore = false
-    private val countdown = 0
+    private var todayStepCountFromDB = 0
 
     companion object {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
 
         var todayTotalStepCount: Int? = 0
-        const val STEP_THRESHOLD: Double = 6.0
+        const val STEP_THRESHOLD: Double = 6.5
     }
+
+    private val initialCountKey = "InitialCountKey"
+    lateinit var prefs: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
 
+        prefs = getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
+
+        var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                StepCountNotification(context!!, 0)
+            }
+
+        }
+
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
+
+
+
+        // 오늘 걸음수 초기화
+//        userDB.document("$userId").get().addOnSuccessListener { document ->
+//            todayStepCountFromDB =
+//                ((document.data?.getValue("todayStepCount") ?: 0) as Long).toInt()
+//            todayTotalStepCount = todayStepCountFromDB.toInt()
+//
+//            StepCountNotification(this, todayTotalStepCount)
+//        }
 
         // 가속도 센서
-        sensorManager =
-            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
-
-        // 기본
 //        sensorManager =
 //            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
 
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
         // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
@@ -75,8 +91,6 @@ class MyService : Service(), SensorEventListener {
             todayTotalStepCount = todayStepCountFromDB.toInt()
             StepCountNotification(this, todayTotalStepCount)
         }
-
-
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -88,15 +102,14 @@ class MyService : Service(), SensorEventListener {
 
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d("결과gm", "onStartcommand");
-        // 오늘 걸음수 초기화
-        userDB.document("$userId").get().addOnSuccessListener { document ->
-            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
-            todayTotalStepCount = todayStepCountFromDB.toInt()
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 
-            StepCountNotification(this, todayTotalStepCount)
-        }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+
+
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -104,97 +117,29 @@ class MyService : Service(), SensorEventListener {
         return Binder()
     }
 
-    private fun lowPassFilter(input: FloatArray, output: FloatArray): FloatArray {
-        if (output == null) return input
-        for (i in input.indices) {
-            output[i] = output[i] + 1.0f * (input[i] - output[i])
-        }
-        return output
-    }
-
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-        if (sensorEvent?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            smoothed = lowPassFilter(sensorEvent.values, gravity)
-            gravity[0] = smoothed[0];
-            gravity[1] = smoothed[1];
-            gravity[2] = smoothed[2];
+        var stepCount = sensorEvent!!.values[0].toInt()
 
-            if (Math.abs(prevY - gravity[1]) > STEP_THRESHOLD) {
-                todayTotalStepCount = todayTotalStepCount?.plus(1)
-
-                var currentDate = LocalDate.now()
-                StepCountNotification(this, todayTotalStepCount)
-
-                // user 내 todayStepCount
-                var todayStepCountSet = hashMapOf(
-                    "todayStepCount" to todayTotalStepCount
-                )
-                userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
-
-                var userStepCountSet = hashMapOf(
-                    "$currentDate" to todayTotalStepCount
-                )
-
-                var periodStepCountSet = hashMapOf(
-                    "$userId" to todayTotalStepCount
-                )
-
-                // user_step_count
-                db.collection("user_step_count")
-                    .document("$userId")
-                    .set(userStepCountSet, SetOptions.merge())
-
-                // period_step_count
-                db.collection("period_step_count")
-                    .document("$currentDate")
-                    .set(periodStepCountSet, SetOptions.merge())
-
-
-                var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-                intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-                intent.putExtra("todayTotalStepCount", todayTotalStepCount)
-                sendBroadcast(intent)
-
-            }
-            prevY = gravity[1].toDouble();
+        if (!prefs.contains(userId)) {
+            val editor = prefs.edit()
+            editor.putInt(userId, stepCount)
+            editor.commit()
         }
 
-//        todayTotalStepCount = todayTotalStepCount?.plus(1)
+        var startingStepCount = prefs.getInt(userId, -1)
+        var todayStepCount = stepCount - startingStepCount
 
-        var currentDate = LocalDate.now()
-        StepCountNotification(this, todayTotalStepCount)
+        Log.d("걸음수마지막 111", "stepCount: ${stepCount} // prefStepCount: ${startingStepCount} // stepCount-prefStepCount: ${todayStepCount}")
 
-        // user 내 todayStepCount
-        var todayStepCountSet = hashMapOf(
-            "todayStepCount" to todayTotalStepCount
-        )
-        userDB.document("$userId").set(todayStepCountSet, SetOptions.merge())
-
-        var userStepCountSet = hashMapOf(
-            "$currentDate" to todayTotalStepCount
-        )
-
-        var periodStepCountSet = hashMapOf(
-            "$userId" to todayTotalStepCount
-        )
-
-        // user_step_count
-        db.collection("user_step_count")
-            .document("$userId")
-            .set(userStepCountSet, SetOptions.merge())
-
-        // period_step_count
-        db.collection("period_step_count")
-            .document("$currentDate")
-            .set(periodStepCountSet, SetOptions.merge())
+        StepCountNotification(this, todayStepCount)
 
         var intent = Intent(this, StepCountBroadcastReceiver::class.java)
         intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-        intent.putExtra("todayTotalStepCount", todayTotalStepCount)
+        intent.putExtra("todayTotalStepCount", todayStepCount)
         sendBroadcast(intent)
-
     }
+
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d("서비스", "accuracychanged")
@@ -211,7 +156,7 @@ class MyService : Service(), SensorEventListener {
                 channel
             )
             var decimal = DecimalFormat("#,###")
-            var step = decimal.format(todayTotalStepCount)
+            var step = decimal.format(stepCount)
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_stepcount_noti)
@@ -224,4 +169,5 @@ class MyService : Service(), SensorEventListener {
     }
 }
 
-operator fun <T> MutableLiveData<T>.plus(t: String): MutableLiveData<T> = this + t
+
+

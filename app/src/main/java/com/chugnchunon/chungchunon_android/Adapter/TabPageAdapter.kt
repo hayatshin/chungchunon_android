@@ -13,7 +13,6 @@ class TabPageAdapter(activity: FragmentActivity, private val tabCount: Int): Fra
     override fun getItemCount(): Int  = tabCount
 
     override fun createFragment(position: Int): Fragment {
-
         return when(position) {
             0 -> MyDiaryFragment()
             1 -> AllDiaryFragment()

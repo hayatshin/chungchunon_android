@@ -60,6 +60,8 @@ import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastR
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
 import com.chugnchunon.chungchunon_android.FillCheckClass
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.Scopes
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import kotlinx.android.synthetic.main.diary_card.*
@@ -79,7 +81,7 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var sensorManager: SensorManager
 //    private lateinit var step_sensor: Sensor
 
-    lateinit var broadcastReceiver: BroadcastReceiver
+    lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
     lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
@@ -144,7 +146,6 @@ class MyDiaryFragment : Fragment() {
                 Log.d("체크", "$nowMood")
             }
         })
-
 
         // 일기 작성 여부
         val writeTime = LocalDateTime.now().toString().substring(0, 10)
@@ -243,9 +244,25 @@ class MyDiaryFragment : Fragment() {
             }
 
         // 오늘 걸음수 초기화
+
+        var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                binding.todayStepCount.text = "0 보"
+            }
+
+        }
+
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
+
+
         userDB.document("$userId").get().addOnSuccessListener { document ->
-            var todayStepCountFromDB = document.getLong("todayStepCount")
-            todayTotalStepCount = todayStepCountFromDB?.toInt() ?: 0
+            var todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
+            Log.d("걸음수 결과", "$todayStepCountFromDB")
+            todayTotalStepCount = todayStepCountFromDB
             var decimal = DecimalFormat("#,###")
             var step = decimal.format(todayTotalStepCount)
             binding.todayStepCount.text = "$step 보"
@@ -270,19 +287,19 @@ class MyDiaryFragment : Fragment() {
 
 
         // 걸음수 셋업
-        broadcastReceiver = DateChangeBroadcastReceiver()
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
         stepCountBroadcastReceiver = StepCountBroadcastReceiver()
         diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
 
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_DATE_CHANGED)
-        activity?.registerReceiver(broadcastReceiver, dateChangeIntent)
+        activity?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
         val diaryChangeIntent = IntentFilter()
         diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
 
-        registerBroadCastReceiver()
+        registerStepCountNotificationBroadCastReceiver()
 
         // 매달 일기 작성
         var currentdate = System.currentTimeMillis()
@@ -438,7 +455,7 @@ class MyDiaryFragment : Fragment() {
         activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
     }
 
-    private fun registerBroadCastReceiver() {
+    private fun registerStepCountNotificationBroadCastReceiver() {
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             receiver,
             IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)

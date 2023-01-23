@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1046391219452",
+    "firebase_url": "https://chungchunon-android-dd695-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "chungchunon-android-dd695",
     "storage_bucket": "chungchunon-android-dd695.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1046391219452-t4lqir8bc49gjnh82797q5epkecl4kkb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chugnchunon.chungchunon_android",
+            "certificate_hash": "ef6ca63f1ac20a77ee670cf957b6a0e3fb3c4a83"
+          }
+        },
         {
           "client_id": "1046391219452-2qtgtrhdis67eql78r5cipb71muevvbm.apps.googleusercontent.com",
           "client_type": 3

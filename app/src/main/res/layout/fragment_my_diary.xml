@@ -243,7 +243,7 @@
                 android:layout_marginBottom="40dp"
                 android:paddingHorizontal="20dp"
                 android:paddingTop="20dp"
-                android:paddingBottom="150dp"
+                android:paddingBottom="100dp"
                 android:textSize="20sp" />
 
         </LinearLayout>

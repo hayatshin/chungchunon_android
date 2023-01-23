@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android.Adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.icu.text.DecimalFormat
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -43,6 +45,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
+
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var diaryCardView: LinearLayout = itemView.findViewById(R.id.diaryCard)
@@ -55,6 +58,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
+
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
@@ -160,7 +164,5 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
 operator fun <T> MutableLiveData<T>.plus(t: Int): MutableLiveData<T> = this + t
 operator fun <T> MutableLiveData<T>.minus(t: Int): MutableLiveData<T> = this - t
-
-
 
 

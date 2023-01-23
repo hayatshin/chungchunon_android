@@ -1,13 +1,16 @@
 package com.chugnchunon.chungchunon_android
 
 import android.app.DatePickerDialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.os.Bundle
+import android.provider.Telephony
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -26,10 +29,13 @@ import androidx.core.view.setMargins
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
 import com.firebase.ui.auth.ui.ProgressView
 import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
@@ -69,8 +75,10 @@ class RegisterActivity : AppCompatActivity() {
         LinearLayout.LayoutParams.WRAP_CONTENT,
     )
 
-    var timer : Timer? = null
+    var timer: Timer? = null
     var deltaTime = 0
+
+    lateinit var authEditTextView: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +89,7 @@ class RegisterActivity : AppCompatActivity() {
         binding.goBackBtn.setOnClickListener {
             finish()
         }
+
 
         binding.authProgressBar.visibility = View.GONE
         binding.phoneAuthBtn.isEnabled = false
@@ -149,7 +158,7 @@ class RegisterActivity : AppCompatActivity() {
         })
 
         // 성별
-       binding.genderInput.adapter = ArrayAdapter.createFromResource(
+        binding.genderInput.adapter = ArrayAdapter.createFromResource(
             this,
             R.array.genderList,
             android.R.layout.simple_spinner_dropdown_item
@@ -158,7 +167,7 @@ class RegisterActivity : AppCompatActivity() {
 
         binding.genderInput.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                totalTxtCheck.genderFill.value =  binding.genderInput.selectedItem != null
+                totalTxtCheck.genderFill.value = binding.genderInput.selectedItem != null
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -194,7 +203,8 @@ class RegisterActivity : AppCompatActivity() {
                 birthScreenInput = "${year}년 ${monthOfYear + 1}월 ${dayOfMonth}일"
                 birthYear = "$year"
                 userAge = currentYear - birthYear.toInt() + 1
-                birthDay = "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
+                birthDay =
+                    "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
                 birthTextView.text = birthScreenInput
 
                 val birthTextViewLayoutParams = RelativeLayout.LayoutParams(
@@ -217,7 +227,7 @@ class RegisterActivity : AppCompatActivity() {
                 ageTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
                 ageTextView.text = "50세 이하는 일기 쓰기가 제한됩니다."
 
-                if(userAge < 50) {
+                if (userAge < 50) {
                     binding.birthResultBox.addView(ageTextView)
                 }
 
@@ -275,6 +285,7 @@ class RegisterActivity : AppCompatActivity() {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     // null
                 }
+
                 override fun onTextChanged(
                     char: CharSequence?,
                     start: Int,
@@ -304,7 +315,7 @@ class RegisterActivity : AppCompatActivity() {
             TimerFun()
 
             // 인증 입력
-            var authEditTextView = EditText(applicationContext)
+            authEditTextView = EditText(applicationContext)
             authEditTextView.setRawInputType(InputType.TYPE_CLASS_NUMBER)
             var drawableBox = ResourcesCompat.getDrawable(resources, R.drawable.mindbox, null)
 
@@ -331,9 +342,8 @@ class RegisterActivity : AppCompatActivity() {
             authBtn.text = "확인"
 
 
-
             // 인증번호 입력창 -> 인증 확인 버튼 활성화
-            authEditTextView.addTextChangedListener ( object :TextWatcher {
+            authEditTextView.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     // null
                 }
@@ -346,7 +356,7 @@ class RegisterActivity : AppCompatActivity() {
                     // null
                 }
 
-            } )
+            })
 
             binding.phoneAuthLayout.addView(authEditTextView)
             binding.phoneAuthLayout.addView(authBtn)
@@ -354,18 +364,19 @@ class RegisterActivity : AppCompatActivity() {
             var veriProgress = ProgressBar(applicationContext)
             veriProgress.layoutParams = layoutParams
             var colorResouce = ContextCompat.getColor(this, R.color.main_color)
-            veriProgress.getIndeterminateDrawable().setColorFilter(colorResouce, PorterDuff.Mode.MULTIPLY)
+            veriProgress.getIndeterminateDrawable()
+                .setColorFilter(colorResouce, PorterDuff.Mode.MULTIPLY)
 
             // 인증 확인 클릭
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    binding.phoneAuthLayout.removeView(veriProgress)
-                    binding.phoneAuthLayout.addView(authBtn)
-                }
 
-                override fun onVerificationFailed(p0: FirebaseException) {
-                    Log.d("인증번호", "실호")
+
+                        }
+
+                override fun onVerificationFailed(exception: FirebaseException) {
+                    Log.d("로그인 중복", "$exception")
                 }
 
                 override fun onCodeSent(
@@ -375,6 +386,7 @@ class RegisterActivity : AppCompatActivity() {
                     super.onCodeSent(verificationId, token)
                     this@RegisterActivity.verificationId = verificationId
 
+                    Log.d("인증번호", "${verificationId}")
                     authBtn.setOnClickListener {
                         binding.authProgressBar.visibility = View.GONE
                         binding.phoneAuthLayout.removeView(authBtn)
@@ -392,7 +404,6 @@ class RegisterActivity : AppCompatActivity() {
             val authphone =
                 "+82 10${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
-            Log.d("번호", authphone)
 
             val optionCompat = PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber(authphone)
@@ -408,8 +419,6 @@ class RegisterActivity : AppCompatActivity() {
 
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
-
-
 
             val phoneNumber =
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
@@ -459,8 +468,8 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun TimerFun() {
         // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
-        timer = timer(period = 100, initialDelay = 500) {
-            if(deltaTime > 100) cancel()
+        timer = timer(period = 400, initialDelay = 1000) {
+            if (deltaTime > 100) cancel()
             binding.authProgressBar.setProgress(++deltaTime)
         }
     }
@@ -478,20 +487,45 @@ class RegisterActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // 인증 성공
-                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
-                    binding.authProgressBar.visibility = View.GONE
+                    val userId = Firebase.auth.currentUser?.uid
 
-                    var successTextView = TextView(applicationContext)
-                    successTextView.text = "인증에 성공했습니다."
-                    successTextView.textSize = 20f
-                    successTextView.gravity = Gravity.END
-                    successTextView.layoutParams = resultparams
-                    successTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
-                    successTextView.setTypeface(null, Typeface.BOLD)
-                    binding.phoneLayout.addView(successTextView)
-                    totalTxtCheck.phoneFill.value = true
+                    userDB.document("$userId").get()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                var document = task.result
+                                if (document.exists()) {
+                                    var userAge =
+                                        (document.data?.getValue("userAge") as Long).toInt()
+                                    var userType = document.data?.getValue("userType")
 
+                                    if (userAge < 50 || userType == "파트너") {
+                                        var goDiary = Intent(
+                                            applicationContext,
+                                            Telephony.Mms.Part::class.java
+                                        )
+                                        startActivity(goDiary)
+                                    } else {
+                                        var goDiary =
+                                            Intent(applicationContext, DiaryActivity::class.java)
+                                        startActivity(goDiary)
+                                    }
+                                } else {
+                                    // 인증 성공
+                                    binding.phoneLayout.removeView(binding.phoneAuthLayout)
+                                    binding.authProgressBar.visibility = View.GONE
+
+                                    var successTextView = TextView(applicationContext)
+                                    successTextView.text = "인증에 성공했습니다."
+                                    successTextView.textSize = 20f
+                                    successTextView.gravity = Gravity.END
+                                    successTextView.layoutParams = resultparams
+                                    successTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
+                                    successTextView.setTypeface(null, Typeface.BOLD)
+                                    binding.phoneLayout.addView(successTextView)
+                                    totalTxtCheck.phoneFill.value = true
+                                }
+                            }
+                        }
                 } else {
                     // 인증 실패
                     binding.phoneLayout.removeView(binding.phoneAuthLayout)
@@ -501,7 +535,12 @@ class RegisterActivity : AppCompatActivity() {
                     successTextView.textSize = 20f
                     successTextView.gravity = Gravity.END
                     successTextView.layoutParams = resultparams
-                    successTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
+                    successTextView.setTextColor(
+                        ContextCompat.getColor(
+                            this,
+                            R.color.dark_main_color
+                        )
+                    )
                     successTextView.setTypeface(null, Typeface.BOLD)
                     binding.phoneLayout.addView(successTextView)
                     totalTxtCheck.phoneFill.value = false

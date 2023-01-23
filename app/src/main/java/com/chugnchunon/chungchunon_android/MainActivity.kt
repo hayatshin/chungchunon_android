@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
 
 
             val keyHash = Utility.getKeyHash(this) // keyHash 발급
+            Log.d("키", "${keyHash}")
 
             Session.getCurrentSession().addCallback(callback)
             Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
@@ -137,7 +138,7 @@ class MainActivity : AppCompatActivity() {
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "http://6a41-218-147-138-163.ngrok.io/verifyToken"
+        val url = "http://4fd9-218-147-138-163.ngrok.io/verifyToken"
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
         val request: JsonObjectRequest = object : JsonObjectRequest(
