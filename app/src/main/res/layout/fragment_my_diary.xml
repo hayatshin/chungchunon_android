@@ -25,15 +25,11 @@
             android:gravity="start"
             android:orientation="vertical">
 
-            <TextView
+            <ImageView
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/ic_headline"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginBottom="5dp"
-                android:text="청춘일기"
-                android:textColor="@color/main_color"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/todayDate"
@@ -259,7 +255,7 @@
         android:background="@drawable/default_button"
         android:text="일기 작성"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="23sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

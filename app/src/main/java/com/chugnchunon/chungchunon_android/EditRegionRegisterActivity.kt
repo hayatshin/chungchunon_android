@@ -29,9 +29,12 @@ class EditRegionRegisterActivity : AppCompatActivity() {
 
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
-    var smallRegionCheck: Boolean = false
     var selectedRegion: String = ""
     var selectedSmallRegion: String = ""
+
+    companion object {
+        var editRegionCheck: Boolean = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,8 +98,7 @@ class EditRegionRegisterActivity : AppCompatActivity() {
 
 
     private fun setupViewPager() {
-        Log.d("리지온", "뷰페이저 $smallRegionCheck")
-        val adapter = RegionPagerAdapter(this, smallRegionCheck)
+        val adapter = RegionPagerAdapter(this)
         val viewPager = binding.regionViewPager
         viewPager.adapter = adapter
     }
@@ -106,10 +108,12 @@ class EditRegionRegisterActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?){
             binding.regionRegisterBtn.isEnabled = false
 
-            smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
+            var smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
             selectedRegion = intent?.getStringExtra("selectedRegion").toString()
+            Log.d("지역수정5", "$selectedRegion")
+
             binding.regionResult.text = spanTextFn(selectedRegion)
-            binding.regionDescription.text="읍/면/동 단위 거주지역을 목록에서 선택하세요."
+            binding.regionDescription.text="세부 거주지역을 목록에서 선택하세요."
 
             var pref = getSharedPreferences("REGION_PREF", Context.MODE_PRIVATE).edit()
             pref.putString("selectedRegion", selectedRegion)
@@ -125,6 +129,8 @@ class EditRegionRegisterActivity : AppCompatActivity() {
             binding.regionRegisterBtn.isEnabled = true
 
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
+            Log.d("지역수정6", "$selectedSmallRegion")
+
             binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
             binding.regionDescription.text="지역 수정하기 버튼을 눌러주세요"
         }

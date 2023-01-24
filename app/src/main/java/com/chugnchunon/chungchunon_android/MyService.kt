@@ -18,6 +18,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -25,16 +27,19 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 
 class MyService : Service(), SensorEventListener {
-    lateinit var sensorManager: SensorManager
-    lateinit var step_sensor: Sensor
+
     private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
     private var todayStepCountFromDB = 0
+    lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
 
     companion object {
+        lateinit var sensorManager: SensorManager
+        lateinit var step_sensor: Sensor
+
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
 
@@ -48,42 +53,30 @@ class MyService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
+        // shared preference 설정
         prefs = getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
+        var dummyData = prefs.getInt(userId, 0)
+        Log.d("걸음수확인", "$dummyData")
 
-        var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                StepCountNotification(context!!, 0)
-            }
+        // 매일 걸음수 0
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
 
-        }
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        );
-
-
-
-        // 오늘 걸음수 초기화
-//        userDB.document("$userId").get().addOnSuccessListener { document ->
-//            todayStepCountFromDB =
-//                ((document.data?.getValue("todayStepCount") ?: 0) as Long).toInt()
-//            todayTotalStepCount = todayStepCountFromDB.toInt()
-//
-//            StepCountNotification(this, todayTotalStepCount)
-//        }
-
-        // 가속도 센서
-//        sensorManager =
-//            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-//        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL)
 
         // 기본
         sensorManager =
             applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
 
         // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
@@ -95,21 +88,11 @@ class MyService : Service(), SensorEventListener {
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
-
-        if (step_sensor != null) {
-            sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-        }
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-
-
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -120,29 +103,48 @@ class MyService : Service(), SensorEventListener {
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
         var stepCount = sensorEvent!!.values[0].toInt()
+        Log.d("걸음수 체크체크", "$stepCount")
 
         if (!prefs.contains(userId)) {
+            // 걸음수 pref 저장 안 된 상태
+
+            // 1. 걸음수 초기화
             val editor = prefs.edit()
             editor.putInt(userId, stepCount)
             editor.commit()
+
+            StepCountNotification(this, stepCount)
+
+            var intent = Intent(this, StepCountBroadcastReceiver::class.java)
+            intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+            intent.putExtra("todayTotalStepCount", stepCount)
+            sendBroadcast(intent)
+
+        } else {
+
+            // 걸음수 pref 저장 된 상태
+
+            var startingStepCount = prefs.getInt(userId, -1)
+            var todayStepCount = stepCount - startingStepCount
+
+            StepCountNotification(this, todayStepCount)
+
+            var intent = Intent(this, StepCountBroadcastReceiver::class.java)
+            intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+            intent.putExtra("todayTotalStepCount", todayStepCount)
+            sendBroadcast(intent)
         }
-
-        var startingStepCount = prefs.getInt(userId, -1)
-        var todayStepCount = stepCount - startingStepCount
-
-        Log.d("걸음수마지막 111", "stepCount: ${stepCount} // prefStepCount: ${startingStepCount} // stepCount-prefStepCount: ${todayStepCount}")
-
-        StepCountNotification(this, todayStepCount)
-
-        var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-        intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-        intent.putExtra("todayTotalStepCount", todayStepCount)
-        sendBroadcast(intent)
     }
 
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d("서비스", "accuracychanged")
+    }
+
+    var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            StepCountNotification(context!!, 0)
+        }
     }
 
     private fun StepCountNotification(context: Context, stepCount: Int?) {
@@ -159,10 +161,10 @@ class MyService : Service(), SensorEventListener {
             var step = decimal.format(stepCount)
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_stepcount_noti)
+                .setSmallIcon(R.drawable.ic_new_alarm_icon)
                 .setContentTitle("$step 걸음")
-                .setColor(ContextCompat.getColor(context, R.color.main_color))
                 .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setOngoing(true)
                 .build()
             startForeground(1, notification)
         }

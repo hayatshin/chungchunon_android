@@ -21,7 +21,6 @@ class DiaryUpdateBroadcastReceiver : BroadcastReceiver() {
         when (intentAction) {
             Intent.ACTION_TIME_TICK -> {
 
-
                 diaryDB.document("${userId}_${currentDate}")
                     .get()
                     .addOnCompleteListener { task ->

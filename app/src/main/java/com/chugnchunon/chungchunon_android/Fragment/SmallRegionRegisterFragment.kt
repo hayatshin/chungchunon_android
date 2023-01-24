@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -47,11 +48,48 @@ class SmallRegionRegisterFragment : Fragment() {
 
         Log.d("결과", "스몰리지온프래그먼트")
 
+        var regionModel = ViewModelProvider(requireActivity()).get(SmallRegionRegisterFragment.MyViewModel::class.java)
+
+        regionModel.regionModelData.observe(viewLifecycleOwner) { value ->
+            adapter = RegionAdapter(requireActivity(), value, true)
+            binding.regionRecycler.adapter = adapter
+            binding.regionRecycler.layoutManager = LinearLayoutManager(activity)
+        }
+
 
         var pref = activity?.getSharedPreferences("REGION_PREF", MODE_PRIVATE)
         selectedRegion = pref?.getString("selectedRegion", "강원도").toString()
 
-        var regionModel = ViewModelProvider(requireActivity()).get(SmallRegionRegisterFragment.MyViewModel::class.java)
+        var regionRegister: BroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                regionModel.clearRegion()
+
+                var changeRegion = intent!!.getStringExtra("selectedRegion").toString()
+
+                Log.d("지역확인", "${changeRegion}")
+
+                regionDB
+                    .document("4ggk4cR82mz46CjrLg60")
+                    .collection("small_region")
+                    .document(changeRegion)
+                    .get()
+                    .addOnSuccessListener { documents ->
+
+                        documents.data?.forEach { (k, v) ->
+                            regionModel.addRegion(v.toString())
+                        }
+                        Log.d("리지온", "${documents.data}", )
+                        adapter.notifyDataSetChanged()
+                    }
+
+            }
+        }
+
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+            regionRegister,
+            IntentFilter("REGION_REGISTER")
+        )
+
 
         regionDB
             .document("4ggk4cR82mz46CjrLg60")
@@ -66,12 +104,7 @@ class SmallRegionRegisterFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
 
-        regionModel.regionModelData.observe(viewLifecycleOwner) { value ->
-            Log.d("리지온6", "$value")
-            adapter = RegionAdapter(requireActivity(), value, true)
-            binding.regionRecycler.adapter = adapter
-            binding.regionRecycler.layoutManager = LinearLayoutManager(activity)
-        }
+
 
         return view
 
@@ -88,6 +121,12 @@ class SmallRegionRegisterFragment : Fragment() {
             }
             templateList.add(text)
             regionModelData.value = templateList
+        }
+
+        fun clearRegion() {
+            regionModelData.value?.toMutableList()?.clear()
+            regionDataList?.toMutableList()?.clear()
+            templateList.clear()
         }
     }
 

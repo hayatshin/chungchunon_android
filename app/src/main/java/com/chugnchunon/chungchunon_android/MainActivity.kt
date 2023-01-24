@@ -2,8 +2,10 @@ package com.chugnchunon.chungchunon_android
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.os.Build
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -52,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = getColor(R.color.main_color)
+            window.statusBarColor = Color.WHITE
         }
 
         callback = SessionCallback(this) // Initialize Session
@@ -138,7 +140,7 @@ class MainActivity : AppCompatActivity() {
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "http://4fd9-218-147-138-163.ngrok.io/verifyToken"
+        val url = "http://6cc7-218-147-138-163.ngrok.io/verifyToken"
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
         val request: JsonObjectRequest = object : JsonObjectRequest(

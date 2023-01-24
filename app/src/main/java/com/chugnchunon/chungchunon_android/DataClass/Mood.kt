@@ -4,4 +4,4 @@ package com.chugnchunon.chungchunon_android.DataClass
 //    val properties: Map<String, Any>
 //}
 
-data class Mood(val image: Int, val description: String)
+data class Mood(val image: Int, val description: String, var position: Int)

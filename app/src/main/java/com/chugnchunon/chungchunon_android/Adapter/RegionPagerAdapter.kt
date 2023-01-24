@@ -9,7 +9,7 @@ import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
 import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
 
-class RegionPagerAdapter(activity: FragmentActivity, smallRegionCheck: Boolean): FragmentStateAdapter(activity) {
+class RegionPagerAdapter(activity: FragmentActivity): FragmentStateAdapter(activity) {
 
     private val COUNT = 2
 

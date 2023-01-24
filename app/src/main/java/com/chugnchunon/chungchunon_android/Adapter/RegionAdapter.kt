@@ -13,19 +13,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
-import com.chugnchunon.chungchunon_android.DiaryActivity
+import com.chugnchunon.chungchunon_android.*
+import com.chugnchunon.chungchunon_android.EditRegionRegisterActivity.Companion.editRegionCheck
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
 import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
-import com.chugnchunon.chungchunon_android.MyService
-import com.chugnchunon.chungchunon_android.R
-import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_region.view.*
 
-class RegionAdapter(private var context: Context, private var regionData: List<String>, smallRegionCheck: Boolean)
+class RegionAdapter(private var context: Context, private var regionData: List<String>?, smallRegionCheck: Boolean)
     : RecyclerView.Adapter<RegionAdapter.RegionViewHolder>() {
 
     var userDB = Firebase.firestore.collection("users")
@@ -43,7 +41,7 @@ class RegionAdapter(private var context: Context, private var regionData: List<S
         val regionView: TextView = itemView.findViewById(R.id.regionSelectText)
 
         fun bind (position: Int) {
-            regionView.text =  regionData[position]
+            regionView.text = regionData?.get(position).toString()
         }
     }
 
@@ -55,15 +53,20 @@ class RegionAdapter(private var context: Context, private var regionData: List<S
 
     override fun onBindViewHolder(holder: RegionViewHolder, position: Int) {
         holder.bind(position)
+        var intent : Intent
 
-        var intent = Intent(context, RegionRegisterActivity::class.java)
+        if(editRegionCheck) {
+             intent = Intent(context, EditRegionRegisterActivity::class.java)
+        } else {
+            intent = Intent(context, RegionRegisterActivity::class.java)
+        }
         intent.setAction(REGION_BROADCAST)
 
         holder.itemView.setOnClickListener { view ->
 
             if(!smallRegionCheck) {
                 // users의 region 값 저장
-                selectedRegion = regionData[position]
+                selectedRegion = regionData?.get(position).toString()
                 smallRegionCheck = true
 
                 Log.d("리지온", "첫번째 $selectedRegion")
@@ -73,9 +76,16 @@ class RegionAdapter(private var context: Context, private var regionData: List<S
                 intent.putExtra("smallRegionCheck", smallRegionCheck)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
+                var regionIntent = Intent(context, SmallRegionRegisterFragment::class.java)
+                regionIntent.setAction("REGION_REGISTER")
+                regionIntent.putExtra("selectedRegion", selectedRegion)
+                LocalBroadcastManager.getInstance(context).sendBroadcast(regionIntent)
+
             }  else {
                 // users의 smallRegion 값 저장
-                selectedSmallRegion = regionData[position]
+                selectedSmallRegion = regionData?.get(position).toString()
+
+                Log.d("리지온", "두번째 $selectedSmallRegion")
 
                 intent.setAction("SMALL_REGION_BROADCAST")
                 intent.putExtra("selectedSmallRegion", selectedSmallRegion)
@@ -86,7 +96,7 @@ class RegionAdapter(private var context: Context, private var regionData: List<S
     }
 
     override fun getItemCount(): Int {
-        return regionData.size
+        return regionData?.size ?: 0
     }
 
 

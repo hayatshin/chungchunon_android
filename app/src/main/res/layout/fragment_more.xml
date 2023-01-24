@@ -19,64 +19,69 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:paddingBottom="20dp"
-            android:background="@drawable/rule_header"
-            android:paddingLeft="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:orientation="vertical">
+            android:layout_marginTop="40dp"
+            android:background="@drawable/rule_header"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingBottom="20dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_new_icon" />
 
             <LinearLayout
-                android:layout_marginBottom="30dp"
-                android:paddingLeft="30dp"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:gravity="bottom"
-                android:layout_marginBottom="10dp"
+                android:paddingLeft="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginBottom="30dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="bottom"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/profileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="23sp"
+                        android:textStyle="bold"
+                        tools:text="신혜정" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="10dp"
+                        android:textColor="@color/black"
+                        android:textSize="17sp"
+                        tools:text="|" />
+
+                    <TextView
+                        android:id="@+id/profileAge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:textSize="17sp"
+                        tools:text="51세" />
+
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/profileName"
-                    android:textColor="@color/black"
+                    android:id="@+id/profileRegion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="23sp"
-                    android:textStyle="bold"
-                    tools:text="신혜정" />
-
-                <TextView
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp"
                     android:textColor="@color/black"
-                    tools:text="|"
                     android:textSize="17sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/profileAge"
-                    android:textColor="@color/black"
-                    tools:text="51세"
-                    android:textSize="17sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <TextView
-                android:textSize="17sp"
-                android:id="@+id/profileRegion"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black"
-                tools:text="서울특별시 광진구"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                    tools:text="서울특별시 광진구" />
 
             </LinearLayout>
 
@@ -103,12 +108,12 @@
         </LinearLayout>
 
         <LinearLayout
-            android:paddingLeft="30dp"
             android:id="@+id/application"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -124,12 +129,12 @@
         </LinearLayout>
 
         <LinearLayout
-            android:paddingLeft="30dp"
             android:id="@+id/personalInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp">
 
             <ImageView
                 android:layout_width="wrap_content"

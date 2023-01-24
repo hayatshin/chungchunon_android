@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.util.AttributeSet
@@ -123,7 +124,7 @@ class AllDiaryFragment : Fragment() {
                                 DateFormat().convertMillis(timefromdb),
                                 username,
                                 stepCount,
-                                (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
                                 document.data?.getValue("todayDiary").toString(),
                                 numLikes,
                                 numComments,
@@ -135,6 +136,13 @@ class AllDiaryFragment : Fragment() {
                             adapter.notifyDataSetChanged()
 
                         }
+
+                        if (diaryItems.size == 0) {
+                            binding.noItemText.visibility = View.VISIBLE
+                        } else {
+                            binding.noItemText.visibility = View.GONE
+                        }
+
                         binding.recyclerDiary.adapter = adapter
 //                        binding.recyclerDiary.layoutManager = LinearLayoutManager(
 //                            context,
@@ -146,21 +154,17 @@ class AllDiaryFragment : Fragment() {
                             RecyclerView.VERTICAL,
                             false
                         )
-                        if (diaryItems.size == 0) {
-                            binding.noItemText.visibility = View.VISIBLE
-                        } else {
-                            binding.noItemText.visibility = View.GONE
-                        }
+
                     }
 
             } else {
+                // 지역 보기
                 userDB.document("$userId")
                     .get()
                     .addOnSuccessListener { document ->
                         var userRegion = document.data?.getValue("region")
                         var userSmallRegion = document.data?.getValue("smallRegion")
                         var userRegionGroup = "${userRegion} ${userSmallRegion}"
-                        Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
 
                         diaryDB
                             .whereEqualTo("regionGroup", userRegionGroup)
@@ -184,7 +188,7 @@ class AllDiaryFragment : Fragment() {
                                         DateFormat().convertMillis(timefromdb),
                                         username,
                                         stepCount,
-                                        (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
+                                        (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
                                         document.data?.getValue("todayDiary").toString(),
                                         numLikes,
                                         numComments,
@@ -195,6 +199,16 @@ class AllDiaryFragment : Fragment() {
                                     diaryItems.reverse()
                                     adapter.notifyDataSetChanged()
                                 }
+
+                                Log.d("지역보기1", "${diaryItems.size}")
+
+                                if (diaryItems.size == 0) {
+                                    Log.d("지역보기", "0 임")
+                                    binding.noItemText.visibility = View.VISIBLE
+                                } else {
+                                    Log.d("지역보기", "0 이 아님")
+                                    binding.noItemText.visibility = View.GONE
+                                }
                             }
                         binding.recyclerDiary.adapter = adapter
                         binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
@@ -202,12 +216,8 @@ class AllDiaryFragment : Fragment() {
                             RecyclerView.VERTICAL,
                             false
                         )
+                        Log.d("지역보기2", "${diaryItems.size}")
 
-                        if (diaryItems.size == 0) {
-                            binding.noItemText.visibility = View.VISIBLE
-                        } else {
-                            binding.noItemText.visibility = View.GONE
-                        }
                     }
             }
         })

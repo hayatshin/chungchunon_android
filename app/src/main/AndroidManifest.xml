@@ -16,9 +16,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_icon"
+        android:icon="@mipmap/ic_new_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_icon_round"
+        android:roundIcon="@mipmap/ic_new_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Chugnchunon_android">
 
@@ -97,7 +97,7 @@
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_TICK" />
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>
         </receiver>

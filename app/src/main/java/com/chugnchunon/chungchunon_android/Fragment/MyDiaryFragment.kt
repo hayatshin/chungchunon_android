@@ -5,10 +5,7 @@ import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCou
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.icu.text.DecimalFormat
@@ -57,6 +54,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
+import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
 import com.chugnchunon.chungchunon_android.FillCheckClass
@@ -81,7 +79,6 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var sensorManager: SensorManager
 //    private lateinit var step_sensor: Sensor
 
-    lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
     lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
@@ -105,7 +102,9 @@ class MyDiaryFragment : Fragment() {
         val view = binding.root
 
         var startService = Intent(activity, MyService::class.java)
+//        context?.startService(startService)
         activity?.let { ContextCompat.startForegroundService(it, startService) }
+
 
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
         binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
@@ -155,7 +154,11 @@ class MyDiaryFragment : Fragment() {
         val monthUI = StringUtils.stripStart(month, "0");
         val dateUI = StringUtils.stripStart(date, "0");
 
-        binding.todayDate.text = "${monthUI}월 ${dateUI}일"
+        // 요일
+        val sdf = java.text.SimpleDateFormat("EEEE")
+        val dayOfTheWeek = sdf.format(Date())
+
+        binding.todayDate.text = "${monthUI}월 ${dateUI}일 ${dayOfTheWeek}"
 
         diaryDB
             .document("${userId}_${writeTime}")
@@ -177,13 +180,11 @@ class MyDiaryFragment : Fragment() {
 
                             // 마음 보여주기
                             var spinnerAdapter = binding.todayMood.adapter
-                            var dbMood =
-                                (document.data?.getValue("todayMood") as Map<*, *>)["image"].toString()
+                            var dbMoodPosition =
+                                (document.data?.getValue("todayMood") as Map<*, *>)["position"].toString()
                                     .toInt()
-                            var selectedPosition = getPositionMood(dbMood).toInt()
-                            binding.todayMood.setSelection(selectedPosition)
-
-                            Log.d("체크", "${dbMood} // ${selectedPosition}")
+                            binding.todayMood.setSelection(dbMoodPosition)
+//                            binding.todayMood.setSelection(selectedPosition)
 
                             binding.todayMood.setOnItemSelectedListener(object :
                                 AdapterView.OnItemSelectedListener {
@@ -193,8 +194,8 @@ class MyDiaryFragment : Fragment() {
                                     p2: Int,
                                     p3: Long
                                 ) {
-                                    var nowMood = (binding.todayMood.selectedItem as Mood).image
-                                    if (nowMood != dbMood) {
+                                    var nowMood = (binding.todayMood.selectedItem as Mood).position
+                                    if (nowMood != dbMoodPosition) {
                                         diaryEditCheck.moodEdit.value = true
                                     }
                                 }
@@ -243,7 +244,7 @@ class MyDiaryFragment : Fragment() {
                 }
             }
 
-        // 오늘 걸음수 초기화
+        // 하루 걸음수 초기화
 
         var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -252,12 +253,10 @@ class MyDiaryFragment : Fragment() {
 
         }
 
-
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             stepInitializeReceiver,
             IntentFilter("NEW_DATE_STEP_ZERO")
         );
-
 
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
@@ -285,19 +284,16 @@ class MyDiaryFragment : Fragment() {
             )
         }
 
-
-        // 걸음수 셋업
-        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+        // 다이어리 업데이트
         diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-
-        val dateChangeIntent = IntentFilter()
-        dateChangeIntent.addAction(Intent.ACTION_DATE_CHANGED)
-        activity?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
         val diaryChangeIntent = IntentFilter()
         diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
+
+
+        // 걸음수 셋업
+        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
 
         registerStepCountNotificationBroadCastReceiver()
 
@@ -331,14 +327,14 @@ class MyDiaryFragment : Fragment() {
             MoodArrayAdapter(
                 it,
                 listOf(
-                    Mood(R.drawable.ic_joy, "기뻐요"),
-                    Mood(R.drawable.ic_shalom, "평온해요"),
-                    Mood(R.drawable.ic_throb, "설레요"),
-                    Mood(R.drawable.ic_soso, "그냥 그래요"),
-                    Mood(R.drawable.ic_anxious, "걱정돼요"),
-                    Mood(R.drawable.ic_sad, "슬퍼요"),
-                    Mood(R.drawable.ic_gloomy, "우울해요"),
-                    Mood(R.drawable.ic_angry, "화나요"),
+                    Mood(R.drawable.ic_joy, "기뻐요", 0),
+                    Mood(R.drawable.ic_shalom, "평온해요", 1),
+                    Mood(R.drawable.ic_throb, "설레요", 2),
+                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
+                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
+                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
+                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
+                    Mood(R.drawable.ic_angry, "화나요", 7),
                     )
             )
         }
@@ -394,7 +390,6 @@ class MyDiaryFragment : Fragment() {
                     var region = document.data?.getValue("region")
                     var smallRegion = document.data?.getValue("smallRegion")
                     var regionGroup = "${region} ${smallRegion}"
-
                     val diarySet = hashMapOf(
                         "regionGroup" to regionGroup,
                         "diaryId" to diaryId,
@@ -439,7 +434,7 @@ class MyDiaryFragment : Fragment() {
             val spokenText: String? =
                 result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     .let { text -> text?.get(0) }
-            binding.todayDiary.setText(spokenText)
+            binding.todayDiary.setText("${binding.todayDiary.text} ${spokenText}")
         }
     }
 
@@ -477,21 +472,6 @@ class MyDiaryFragment : Fragment() {
                 binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
             }
         }
-    }
-
-    private fun getPositionMood(value: Number): Long {
-        var result: Long = 0
-        when (value) {
-            2131231067 -> result = 0
-            2131231069 -> result = 1
-            2131231071 -> result = 2
-            2131231070 -> result = 3
-            2131231065 -> result = 4
-            2131231068 -> result = 5
-            2131231066 -> result = 6
-            2131231064 -> result = 7
-        }
-        return result
     }
 }
 

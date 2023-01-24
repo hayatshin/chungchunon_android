@@ -21,6 +21,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.Fragment.MoreFragment
+import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
@@ -188,6 +190,19 @@ class EditProfileActivity: AppCompatActivity() {
 
             userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
                 .addOnSuccessListener {
+                    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                    var newUserAge = currentYear - newBirthYear.toInt() + 1
+
+
+                    Log.d("지역수정1", "${newRegion} ${newSmallRegion}")
+
+                    var intent = Intent(this, MoreFragment::class.java)
+                    intent.setAction("EDIT_PROFILE")
+                    intent.putExtra("newName", newName)
+                    intent.putExtra("newUserAge", newUserAge)
+                    intent.putExtra("newRegionSmallRegion", "${newRegion} ${newSmallRegion}")
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
                     finish()
                 }
         }
@@ -209,7 +224,7 @@ class EditProfileActivity: AppCompatActivity() {
                 var smallRegion = data!!.getStringExtra("smallRegion")
                 binding.editRegion.text = "$region $smallRegion"
                 newRegion = region.toString()
-                newSmallRegion = region.toString()
+                newSmallRegion = smallRegion.toString()
                 editFillClass.regionFill.value = true
             }
         }

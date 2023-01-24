@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
 import com.chugnchunon.chungchunon_android.R
 import com.google.firebase.auth.ktx.auth
@@ -69,7 +70,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
             userNameView.text = items[position].name
             userStepCountView.text = "${step}보"
-            userMoodView.setImageResource(items[position].mood!!.toInt())
+            userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
             userDiaryView.text = items[position].diary
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
@@ -164,5 +165,3 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
 operator fun <T> MutableLiveData<T>.plus(t: Int): MutableLiveData<T> = this + t
 operator fun <T> MutableLiveData<T>.minus(t: Int): MutableLiveData<T> = this - t
-
-

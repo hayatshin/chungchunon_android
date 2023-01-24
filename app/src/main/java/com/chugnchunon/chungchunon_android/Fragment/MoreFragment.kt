@@ -2,8 +2,10 @@ package com.chugnchunon.chungchunon_android.Fragment
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +15,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.ApplicationRuleActivity
 import com.chugnchunon.chungchunon_android.EditProfileActivity
 import com.chugnchunon.chungchunon_android.PersonalInfoRuleActivity
@@ -45,6 +48,11 @@ class MoreFragment: Fragment() {
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            editProfileWithNewInfo,
+            IntentFilter("EDIT_PROFILE")
+        )
+
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 var userName = document.data?.getValue("name").toString()
@@ -76,4 +84,18 @@ class MoreFragment: Fragment() {
         return view
     }
 
+    var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            var newName = intent?.getStringExtra("newName")
+            var newUserAge = intent?.getIntExtra("newUserAge", 0)
+            var newRegionSmallRegion = intent?.getStringExtra("newRegionSmallRegion")
+
+            Log.d("지역수정2", "${newRegionSmallRegion}")
+            binding.profileName.text = newName
+            binding.profileAge.text = "${newUserAge}세"
+            binding.profileRegion.text = newRegionSmallRegion
+        }
+    }
+
 }
+

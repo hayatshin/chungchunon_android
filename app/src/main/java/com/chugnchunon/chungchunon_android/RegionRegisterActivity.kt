@@ -37,6 +37,10 @@ class RegionRegisterActivity : AppCompatActivity() {
         ActivityRegionBinding.inflate(layoutInflater)
     }
 
+    companion object {
+        var editRegionCheck: Boolean = false
+    }
+
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
     var selectedRegion: String = ""
@@ -110,7 +114,7 @@ class RegionRegisterActivity : AppCompatActivity() {
 
 
     private fun setupViewPager() {
-        adapter = RegionPagerAdapter(this, smallRegionCheck)
+        adapter = RegionPagerAdapter(this)
         val viewPager = binding.regionViewPager
         viewPager.adapter = adapter
     }

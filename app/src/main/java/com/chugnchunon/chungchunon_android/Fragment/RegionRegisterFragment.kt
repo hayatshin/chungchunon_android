@@ -30,6 +30,7 @@ class RegionRegisterFragment : Fragment() {
     private lateinit var adapter: RegionAdapter
 
     lateinit var regionModel: MyViewModel
+
     companion object {
         var smallRegionCheck:Boolean = false
     }

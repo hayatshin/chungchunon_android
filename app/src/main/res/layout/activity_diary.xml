@@ -14,7 +14,7 @@
 
         <com.google.android.material.tabs.TabLayout
             android:background="@drawable/menu_box"
-            android:elevation="10dp"
+            android:elevation="15dp"
             app:tabIconTint="@color/tab_icon_color"
             app:tabTextColor="@color/text_color"
             app:tabBackground="@drawable/tab_background"
@@ -30,12 +30,12 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="내 일기" />
+                android:text="나의 오늘" />
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="우리 일기" />
+                android:text="우리의 오늘" />
 
 
             <com.google.android.material.tabs.TabItem
