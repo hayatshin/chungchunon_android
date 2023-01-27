@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:gravity="end">
 
     <ImageView
         android:layout_marginRight="10dp"
@@ -19,8 +19,7 @@
     <TextView
         android:gravity="end"
         android:textColor="@color/black"
-        android:textSize="25sp"
-        android:textStyle="bold"
+        android:textSize="22sp"
         tools:text="기뻐요"
         android:id="@+id/moodText"
         android:layout_width="wrap_content"

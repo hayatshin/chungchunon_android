@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "http://6cc7-218-147-138-163.ngrok.io/verifyToken"
+        val url = "https://ochungchun-kakaologin.herokuapp.com/verifyToken"
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
         val request: JsonObjectRequest = object : JsonObjectRequest(

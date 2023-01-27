@@ -102,6 +102,7 @@ class AllDiaryFragment : Fragment() {
 
             if (!dataGroupSelection.regionCheck.value!!) {
                 // 전체 보기
+                binding.regionInfo.text = ""
 
                 diaryDB
                     .get()
@@ -165,6 +166,7 @@ class AllDiaryFragment : Fragment() {
                         var userRegion = document.data?.getValue("region")
                         var userSmallRegion = document.data?.getValue("smallRegion")
                         var userRegionGroup = "${userRegion} ${userSmallRegion}"
+                        binding.regionInfo.text = "${userRegion} ${userSmallRegion}"
 
                         diaryDB
                             .whereEqualTo("regionGroup", userRegionGroup)
