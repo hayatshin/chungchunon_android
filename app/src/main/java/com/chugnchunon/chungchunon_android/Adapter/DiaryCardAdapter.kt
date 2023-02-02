@@ -20,6 +20,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.chugnchunon.chungchunon_android.BlockActivity
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -59,6 +61,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
+//        var imageViewPager: ViewPager2 = itemView.findViewById(R.id.imageViewPager)
 
 
         @SuppressLint("SetTextI18n")
@@ -74,6 +77,15 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             userDiaryView.text = items[position].diary
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
+
+            // 이미지 작업
+//            if (items[position].imageList != null) {
+//                imageViewPager.visibility = View.VISIBLE
+//                imageViewPager.adapter = DisplayImageAdapter(context, items[position].imageList)
+//
+//            } else {
+//                imageViewPager.visibility = View.GONE
+//            }
 
             // 내가 쓴 글 백그라운드 처리
 //            if(items[position].userId == userId) {
@@ -157,6 +169,14 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             openComment.putExtra("diaryId", items[position].diaryId)
             openComment.putExtra("diaryPosition", position)
             context.startActivity(openComment)
+        }
+
+        // 차단 아이콘 클릭
+        holder.itemView.moreIcon.setOnClickListener { view ->
+            var openBlockActivity = Intent(context, BlockActivity::class.java)
+            openBlockActivity.putExtra("diaryId", items[position].diaryId)
+            openBlockActivity.putExtra("diaryUserId", items[position].userId)
+            context.startActivity(openBlockActivity)
         }
     }
 

@@ -8,9 +8,13 @@ import android.app.Activity.RESULT_OK
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.Insets.add
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
@@ -24,7 +28,10 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.registerForActivityResult
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
@@ -51,6 +58,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
@@ -58,13 +69,23 @@ import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryActivity
 import com.chugnchunon.chungchunon_android.FillCheckClass
+import com.google.android.gms.auth.account.WorkAccount.API
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.Scopes
+import com.google.android.gms.fido.fido2.api.common.RequestOptions
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.diary_card.*
 import org.apache.commons.lang3.StringUtils
+import java.io.File
+import java.lang.Exception
 import java.time.LocalDate
+import kotlin.collections.ArrayList
 
 class MyDiaryFragment : Fragment() {
 
@@ -93,6 +114,15 @@ class MyDiaryFragment : Fragment() {
 
     private var editDiary: Boolean = false
 
+    // 갤러리 사진 열람
+    companion object {
+        const val REQ_GALLERY = 200
+    }
+
+    private var imageArray = ArrayList<Uri>()
+    lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    lateinit var adapter : UploadPhotosAdapter
+
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,8 +131,16 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        // 이미지 삭제 로컬 브로드캐스트
+        adapter  = UploadPhotosAdapter(requireActivity(), imageArray)
+        binding.imageRecyclerView.adapter = adapter
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            deleteImageFunction,
+            IntentFilter("DELETE_IMAGE")
+        );
+
         var startService = Intent(activity, MyService::class.java)
-//        context?.startService(startService)
         activity?.let { ContextCompat.startForegroundService(it, startService) }
 
 
@@ -169,6 +207,24 @@ class MyDiaryFragment : Fragment() {
                     if (document != null) {
                         if (document.exists()) {
                             // 일기 작성을 한 상태
+
+                            // 이미지 보여주기
+                            try {
+                                var imageList = document.data?.getValue("images") as ArrayList<String>
+
+                                for (i in 0 until imageList.size){
+                                    var uriParseImage = Uri.parse(imageList[i])
+                                    imageArray.add(uriParseImage)
+                                }
+
+                                binding.imageRecyclerView.adapter = adapter
+
+                            } catch (e: Exception) {
+                                // null
+                                Log.d("이미지결과2", "no")
+
+                            }
+
 
                             editDiary = true
                             binding.diaryBtn.isEnabled = false
@@ -283,6 +339,55 @@ class MyDiaryFragment : Fragment() {
                 100
             )
         }
+
+
+
+        fun openGalleryForImages() {
+            Log.d("이미지", "오픈갤러리")
+            var intent = Intent(Intent.ACTION_PICK)
+            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            intent.type = "image/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+
+            activityResultLauncher.launch(intent)
+        }
+
+        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if(it.resultCode == RESULT_OK) {
+                if (it.data?.clipData != null) {
+                    val count = it.data!!.clipData!!.itemCount
+                    for(i in 0 until count) {
+                        val imageUri = it.data?.clipData!!.getItemAt(i).uri
+                        imageArray.add(imageUri)
+                    }
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+
+        fun selectGallery() {
+            val writePermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val readPermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
+
+            // 권한 확인
+            if(writePermission == PackageManager.PERMISSION_DENIED || readPermission == PackageManager.PERMISSION_DENIED){
+                // 권한 요청
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+                // 권한이 있는 경우 실행
+                openGalleryForImages()
+            } else {
+                openGalleryForImages()
+            }
+        }
+
+
+        // 사진 가져오기 권한 체크
+//        binding.uploadPhoto.setOnClickListener {
+//            selectGallery()
+//        }
+
 
         // 다이어리 업데이트
         diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
@@ -402,6 +507,7 @@ class MyDiaryFragment : Fragment() {
                         "todayDiary" to (binding.todayDiary.text.toString()),
                         "numLikes" to 0,
                         "numComments" to 0,
+                        "images" to imageArray,
                     )
 
                     diaryDB
@@ -412,6 +518,10 @@ class MyDiaryFragment : Fragment() {
                             startActivity(intent)
                         }
                 }
+
+            for (i in 0 until imageArray.size){
+                uploadImageToFirebase(imageArray[i])
+            }
         }
 
 
@@ -473,6 +583,14 @@ class MyDiaryFragment : Fragment() {
             }
         }
     }
+
+    var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            var deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
+            imageArray.removeAt(deleteImagePosition!!)
+            adapter.notifyDataSetChanged()
+        }
+    }
 }
 
 
@@ -485,3 +603,24 @@ class DiaryEditClass : ViewModel() {
     val diaryEdit by lazy { MutableLiveData<Boolean>(false) }
     val moodEdit by lazy { MutableLiveData<Boolean>(false) }
 }
+
+private fun uploadImageToFirebase(fileUri: Uri) {
+    if(fileUri != null) {
+        val fileName = UUID.randomUUID().toString()+".jpg"
+        val database = FirebaseDatabase.getInstance()
+        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+
+        refStorage.putFile(fileUri)
+            .addOnSuccessListener(
+                OnSuccessListener<UploadTask.TaskSnapshot> {taskSnapshot ->
+                    taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                        val imageUrl = it.toString()
+                        Log.d("이미지 업로드", "$imageUrl")
+                    }
+                }
+            )
+            ?.addOnFailureListener(OnFailureListener { e ->
+                print(e.message)
+            })
+    }
+ }

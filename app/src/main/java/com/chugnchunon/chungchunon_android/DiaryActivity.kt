@@ -28,6 +28,7 @@ class DiaryActivity : AppCompatActivity() {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
+    private var from = ""
 
     private val binding by lazy {
         ActivityDiaryBinding.inflate(layoutInflater)
@@ -37,53 +38,50 @@ class DiaryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        from = intent.getStringExtra("from").toString()
+
         val yourTabLayoutView = binding.tabLayout // If you aren't using data biniding, You can use findViewById to get the view
         var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(2).layoutParams as LinearLayout.LayoutParams
         yourTabItemView.weight = 0.3f
 
         binding.viewPager.isUserInputEnabled = false
 
-//        binding.viewPager.setPageTransformer(object: ViewPager2.PageTransformer {
-//            override fun transformPage(page: View, position: Float) {
-//                page.alpha = 0f
-//                page.visibility = View.VISIBLE
-//
-//                page.animate()
-//                    .withLayer()
-//                    .alpha(1f)
-//                    .setDuration(0)
-//            }
-//        })
-
         setUpTabBar()
-
     }
 
 
 
     @SuppressLint("NotifyDataSetChanged")
     private fun setUpTabBar() {
+        Log.d("결과결과", "$from")
+
         val adapter = TabPageAdapter(this, tabLayout.tabCount)
-
-        diaryDB
-            .document("${userId}_${writeTime}")
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val document = task.result
-                    if(document != null) {
-                        if (document.exists()) {
-                            viewPager.currentItem = 1
-                        } else {
-                            viewPager.currentItem = 0
-                        }
-                    }
-                } else {
-                    viewPager.currentItem = 0
-                }
-            }
-
         viewPager.adapter = adapter
+
+//        if(from == "BlockActivity") {
+//            viewPager.currentItem = 1
+//        } else {
+//            Log.d("결과결과", "흠")
+
+            diaryDB
+                .document("${userId}_${writeTime}")
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val document = task.result
+                        if(document != null) {
+                            if (document.exists()) {
+                                viewPager.currentItem = 1
+                            } else {
+                                viewPager.currentItem = 0
+                            }
+                        }
+                    } else {
+                        viewPager.currentItem = 0
+                    }
+                }
+
+
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {

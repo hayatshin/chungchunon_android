@@ -2,6 +2,7 @@ package com.chugnchunon.chungchunon_android
 
 import android.content.Intent
 import android.graphics.Color
+import android.icu.text.AlphabeticIndex
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +11,10 @@ import android.os.Looper
 import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import com.algolia.search.client.ClientSearch
+import com.algolia.search.model.APIKey
+import com.algolia.search.model.ApplicationID
+import com.algolia.search.model.IndexName
 import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth

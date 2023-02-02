@@ -26,10 +26,10 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/ic_headline"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/ic_headline" />
 
             <TextView
                 android:id="@+id/todayDate"
@@ -74,11 +74,11 @@
     </LinearLayout>
 
     <LinearLayout
-        app:layout_constraintBottom_toTopOf="@id/diaryBtn"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
         android:paddingHorizontal="30dp"
+        app:layout_constraintBottom_toTopOf="@id/diaryBtn"
         app:layout_constraintTop_toBottomOf="@+id/header">
 
         <LinearLayout
@@ -186,11 +186,11 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_marginBottom="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:gravity="start">
 
                     <ImageView
                         android:id="@+id/diaryCheckBox"
@@ -199,29 +199,69 @@
                         android:layout_marginRight="15dp"
                         android:src="@drawable/ic_checkbox_no" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="내 이야기"
-                        android:textColor="@color/black"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical">
 
+                        <TextView
+                            android:id="@+id/diaryHeader"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="내 이야기"
+                            android:textColor="@color/black"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toTopOf="@id/imageRecyclerView"/>
 
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/recordBtn"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/imageRecyclerView"
+                            android:layout_marginTop="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/diaryHeader"
+                            tools:listitem="@layout/image_card" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_marginLeft="10dp"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_gravity="end"
-                        android:background="@drawable/register_fill_box"
-                        android:drawableStart="@drawable/ic_mic"
-                        android:paddingHorizontal="15dp"
-                        android:text="말로 쓰기"
-                        android:textSize="18sp">
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                    </androidx.appcompat.widget.AppCompatButton>
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:id="@+id/recordBtn"
+                            android:layout_width="130dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/register_fill_box"
+                            android:drawableStart="@drawable/ic_mic"
+                            android:paddingHorizontal="15dp"
+                            android:text="말로 쓰기"
+                            android:textSize="18sp" />
+
+<!--                        <androidx.appcompat.widget.AppCompatButton-->
+<!--                            style="@style/Widget.AppCompat.Button.Borderless"-->
+<!--                            android:layout_marginTop="10dp"-->
+<!--                            android:id="@+id/uploadPhoto"-->
+<!--                            android:layout_width="130dp"-->
+<!--                            android:layout_height="40dp"-->
+<!--                            android:layout_gravity="end"-->
+<!--                            android:background="@drawable/register_fill_box"-->
+<!--                            android:text="사진 올리기"-->
+<!--                            android:textSize="18sp" />-->
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -232,11 +272,11 @@
                 android:id="@+id/todayDiary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 android:background="@drawable/mindbox_bold"
                 android:fitsSystemWindows="true"
                 android:gravity="top"
-                android:layout_marginBottom="40dp"
                 android:paddingHorizontal="20dp"
                 android:paddingTop="20dp"
                 android:paddingBottom="50dp"
@@ -248,10 +288,10 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/diaryBtn"
-        android:layout_marginHorizontal="30dp"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="30dp"
         android:background="@drawable/default_button"
         android:text="일기 작성"
         android:textColor="@color/white"

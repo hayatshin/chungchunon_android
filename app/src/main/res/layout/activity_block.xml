@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/layer_screen"
+    android:animateLayoutChanges="true"
+    >
+
+    <ImageView
+        android:id="@+id/blockGobackArrow"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="80dp"
+        android:src="@drawable/ic_arrow_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    <LinearLayout
+        android:gravity="center"
+        android:id="@+id/blockBox"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/comment_box"
+        android:paddingTop="30dp"
+        android:paddingBottom="20dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/reportLayout"
+            android:gravity="center"
+            android:background="@drawable/rule_header"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:text="신고하기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blockDiaryLayout"
+            android:gravity="center"
+            android:background="@drawable/rule_header"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:text="일기 차단하기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blockUserLayout"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:text="유저 차단하기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -56,7 +56,7 @@ class MyService : Service(), SensorEventListener {
         // shared preference 설정
         prefs = getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
         var dummyData = prefs.getInt(userId, 0)
-        Log.d("걸음수확인", "$dummyData")
+        Log.d("걸음수 체크체크 1", "$dummyData")
 
         // 매일 걸음수 0
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
@@ -103,7 +103,7 @@ class MyService : Service(), SensorEventListener {
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
         var stepCount = sensorEvent!!.values[0].toInt()
-        Log.d("걸음수 체크체크", "$stepCount")
+        Log.d("걸음수 체크체크 2", "$stepCount")
 
         if (!prefs.contains(userId)) {
             // 걸음수 pref 저장 안 된 상태
