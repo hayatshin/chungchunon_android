@@ -537,6 +537,7 @@ class MyDiaryFragment : Fragment() {
         return view
     }
 
+    @SuppressLint("SetTextI18n")
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -544,7 +545,8 @@ class MyDiaryFragment : Fragment() {
             val spokenText: String? =
                 result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     .let { text -> text?.get(0) }
-            binding.todayDiary.setText("${binding.todayDiary.text} ${spokenText}")
+            var recordDiaryText = if("${binding.todayDiary.text}" == "") "${spokenText}" else "${binding.todayDiary.text} ${spokenText}"
+            binding.todayDiary.setText(recordDiaryText)
         }
     }
 

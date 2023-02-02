@@ -48,6 +48,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                     }"
                     var birthYear = result.kakaoAccount?.birthyear
                     var userAge = currentYear - birthYear!!.toInt() + 1
+                    var gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
                     val userSet = hashMapOf(
                         "userType" to "치매예방자",
@@ -55,7 +56,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         "userId" to (result.id),
                         "timestamp" to FieldValue.serverTimestamp(),
                         "name" to (result.nickname),
-                        "gender" to (result.kakaoAccount?.gender),
+                        "gender" to gender,
                         "phone" to phoneNumber,
                         "birthYear" to result.kakaoAccount?.birthyear,
                         "birthDay" to result.kakaoAccount?.birthday,

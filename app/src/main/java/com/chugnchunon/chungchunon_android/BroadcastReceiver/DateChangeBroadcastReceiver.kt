@@ -57,6 +57,7 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 
                 if (!todayChecking) {
                     // 새로운 날
+                    Log.d("새로운 날", "$REFRESH_DAILY")
 
                     // todayStepCount = 0
                     var todayStepCountSet = hashMapOf<String, Int?>(

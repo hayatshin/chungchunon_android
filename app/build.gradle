@@ -104,3 +104,7 @@ dependencies {
 
     apply plugin: 'kotlin-android-extensions'
 }
+
+configurations.all {
+    exclude group: 'com.google.android.gms', module: 'play-services-safetynet'
+}
