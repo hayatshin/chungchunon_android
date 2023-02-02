@@ -507,7 +507,7 @@ class MyDiaryFragment : Fragment() {
                         "todayDiary" to (binding.todayDiary.text.toString()),
                         "numLikes" to 0,
                         "numComments" to 0,
-                        "images" to imageArray,
+                        "blockedBy" to ArrayList<String>(),
                     )
 
                     diaryDB
