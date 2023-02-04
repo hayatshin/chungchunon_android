@@ -18,9 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -35,6 +33,7 @@ class MyService : Service(), SensorEventListener {
 
     private var todayStepCountFromDB = 0
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
+    lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
 
     companion object {
         lateinit var sensorManager: SensorManager
@@ -50,6 +49,9 @@ class MyService : Service(), SensorEventListener {
     private val initialCountKey = "InitialCountKey"
     lateinit var prefs: SharedPreferences
 
+    private var startingStepCount : Int = 0
+    private var stepCount : Int = 0
+
     override fun onCreate() {
         super.onCreate()
 
@@ -58,12 +60,20 @@ class MyService : Service(), SensorEventListener {
         var dummyData = prefs.getInt(userId, 0)
         Log.d("걸음수 체크체크 1", "$dummyData")
 
+
         // 매일 걸음수 0
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
 
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
 
         // 기본
@@ -102,14 +112,16 @@ class MyService : Service(), SensorEventListener {
 
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-        var stepCount = sensorEvent!!.values[0].toInt()
+        startingStepCount = prefs.getInt(userId, -1)
+        stepCount = sensorEvent!!.values[0].toInt()
+        val editor = prefs.edit()
+
         Log.d("걸음수 체크체크 2", "$stepCount")
 
         if (!prefs.contains(userId)) {
             // 걸음수 pref 저장 안 된 상태
 
             // 1. 걸음수 초기화
-            val editor = prefs.edit()
             editor.putInt(userId, stepCount)
             editor.commit()
 
@@ -123,8 +135,8 @@ class MyService : Service(), SensorEventListener {
         } else {
 
             // 걸음수 pref 저장 된 상태
+            Log.d("걸음수 체크체크 3", "${prefs.contains(userId)}")
 
-            var startingStepCount = prefs.getInt(userId, -1)
             var todayStepCount = stepCount - startingStepCount
 
             StepCountNotification(this, todayStepCount)
@@ -170,6 +182,7 @@ class MyService : Service(), SensorEventListener {
         }
     }
 }
+
 
 
 
