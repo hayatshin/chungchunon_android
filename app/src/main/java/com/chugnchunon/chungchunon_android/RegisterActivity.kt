@@ -498,18 +498,18 @@ class RegisterActivity : AppCompatActivity() {
                                         (document.data?.getValue("userAge") as Long).toInt()
                                     var userType = document.data?.getValue("userType")
 
-                                    if (userAge < 50 || userType == "파트너") {
-                                        var goDiary = Intent(
-                                            applicationContext,
-//                                            Telephony.Mms.Part::class.java
-                                        PartnerDiaryActivity::class.java
-                                        )
-                                        startActivity(goDiary)
-                                    } else {
+                                    if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
                                         var goDiary =
                                             Intent(applicationContext, DiaryActivity::class.java)
                                         startActivity(goDiary)
+                                    } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
+                                        var goDiary = Intent(
+                                            applicationContext,
+                                            PartnerDiaryActivity::class.java
+                                        )
+                                        startActivity(goDiary)
                                     }
+
                                 } else {
                                     // 인증 성공
                                     binding.phoneLayout.removeView(binding.phoneAuthLayout)

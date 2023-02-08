@@ -48,6 +48,8 @@ class StartActivity : AppCompatActivity() {
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
                         var userType = document.data?.getValue("userType")
+                        Log.d("userType", "$userType")
+
                         if(userType == "치매예방자" || userType == "마스터") {
                             val goDiaryActivity = Intent(this, DiaryActivity::class.java)
                             startActivity(goDiaryActivity)

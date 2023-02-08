@@ -34,6 +34,7 @@ import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.MyService
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.google.firebase.auth.ktx.auth
@@ -82,6 +83,10 @@ class AllDiaryFragment : Fragment() {
     ): View? {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+
+//        var startService = Intent(activity, MyService::class.java)
+//        activity?.let { ContextCompat.startForegroundService(it, startService) }
 
         swipeRefreshLayout = binding.swipeRecyclerDiary
 

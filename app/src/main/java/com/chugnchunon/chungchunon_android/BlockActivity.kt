@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -41,6 +42,13 @@ class BlockActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.blockBackground.setOnClickListener {
+            finish()
+        }
+
+        var animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        binding.blockBox.startAnimation(animation)
 
         diaryId = intent.getStringExtra("diaryId").toString()
         diaryUserId = intent.getStringExtra("diaryUserId").toString()

@@ -140,13 +140,20 @@ class MyDiaryFragment : Fragment() {
             IntentFilter("DELETE_IMAGE")
         );
 
-        var startService = Intent(activity, MyService::class.java)
-        activity?.let { ContextCompat.startForegroundService(it, startService) }
+//        var startService = Intent(activity, MyService::class.java)
+//        activity?.let { ContextCompat.startForegroundService(it, startService) }
 
 
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
         binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
 
+//        if(!editDiary) {
+//            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+//            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+//        } else {
+//            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+//            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+//        }
 
         diaryFillCheck = ViewModelProvider(requireActivity()).get(DiaryFillClass::class.java)
         diaryEditCheck = ViewModelProvider(requireActivity()).get(DiaryEditClass::class.java)
@@ -155,7 +162,7 @@ class MyDiaryFragment : Fragment() {
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer { value ->
             if(diaryFillCheck.diaryFill.value!! && !editDiary) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-            } else {
+            } else if(!diaryFillCheck.diaryFill.value!! && !editDiary) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
@@ -209,22 +216,24 @@ class MyDiaryFragment : Fragment() {
                             // 일기 작성을 한 상태
 
                             // 이미지 보여주기
-                            try {
-                                var imageList = document.data?.getValue("images") as ArrayList<String>
+//                            try {
+//                                var imageList = document.data?.getValue("images") as ArrayList<String>
+//
+//                                for (i in 0 until imageList.size){
+//                                    var uriParseImage = Uri.parse(imageList[i])
+//                                    imageArray.add(uriParseImage)
+//                                }
+//
+//                                binding.imageRecyclerView.adapter = adapter
+//
+//                            } catch (e: Exception) {
+//                                // null
+//                                Log.d("이미지결과2", "no")
+//
+//                            }
 
-                                for (i in 0 until imageList.size){
-                                    var uriParseImage = Uri.parse(imageList[i])
-                                    imageArray.add(uriParseImage)
-                                }
-
-                                binding.imageRecyclerView.adapter = adapter
-
-                            } catch (e: Exception) {
-                                // null
-                                Log.d("이미지결과2", "no")
-
-                            }
-
+                            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+                            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
                             editDiary = true
                             binding.diaryBtn.isEnabled = false
@@ -326,19 +335,7 @@ class MyDiaryFragment : Fragment() {
         currentMonth = LocalDateTime.now().toString().substring(0, 7)
 
 
-        // 걸음수 권한
-        if (ContextCompat.checkSelfPermission(
-                requireActivity(),
-                Manifest.permission.ACTIVITY_RECOGNITION,
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
-            //ask for permission
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                100
-            )
-        }
+
 
 
 
@@ -480,6 +477,7 @@ class MyDiaryFragment : Fragment() {
         // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
 
+            editDiary = true
             binding.diaryBtn.isEnabled = false
 
             var currentMilliseconds = System.currentTimeMillis()

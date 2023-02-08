@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.style.BackgroundColorSpan
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -53,7 +54,10 @@ class RegionRegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        binding.regionViewPager.isUserInputEnabled = false
+
         binding.regionRegisterBtn.isEnabled = false
+        binding.backBtn.visibility = View.GONE
 
         binding.backBtn.setOnClickListener {
             if(!RegionRegisterFragment.smallRegionCheck)  {
@@ -63,6 +67,9 @@ class RegionRegisterActivity : AppCompatActivity() {
                 finish()
             } else {
                 // 두번째 화면 -> 첫번째 화면
+
+                binding.backBtn.visibility = View.GONE
+
                 Log.d("결과", "클릭")
                 binding.regionRegisterBtn.isEnabled = false
                 RegionRegisterFragment.smallRegionCheck = false
@@ -101,13 +108,19 @@ class RegionRegisterActivity : AppCompatActivity() {
             userDB.document("$userId")
                 .set(regionSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    if (userAge < 50 || userType == "파트너") {
-                        var goDiary = Intent(this, PartnerDiaryActivity::class.java)
+
+                    if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
+                        var goDiary =
+                            Intent(applicationContext, DiaryActivity::class.java)
                         startActivity(goDiary)
-                    } else {
-                        var goDiary = Intent(this, DiaryActivity::class.java)
+                    } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
+                        var goDiary = Intent(
+                            applicationContext,
+                            PartnerDiaryActivity::class.java
+                        )
                         startActivity(goDiary)
                     }
+
                 }
         }
     }
@@ -123,6 +136,8 @@ class RegionRegisterActivity : AppCompatActivity() {
     var mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             binding.regionRegisterBtn.isEnabled = false
+            binding.backBtn.visibility = View.VISIBLE
+
 
             smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
             selectedRegion = intent?.getStringExtra("selectedRegion").toString()

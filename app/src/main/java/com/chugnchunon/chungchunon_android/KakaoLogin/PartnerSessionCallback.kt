@@ -81,17 +81,18 @@ class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
                                                 (userDocument.data?.getValue("userAge") as Long).toInt()
                                             var userType = userDocument.data?.getValue("userType")
 
-                                            if (userAge < 50 || userType == "파트너") {
+                                            if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
+                                                var goDiary =
+                                                    Intent(context, DiaryActivity::class.java)
+                                                context.startActivity(goDiary)
+                                            } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
                                                 var goDiary = Intent(
                                                     context,
                                                     PartnerDiaryActivity::class.java
                                                 )
                                                 context.startActivity(goDiary)
-                                            } else {
-                                                var goDiary =
-                                                    Intent(context, DiaryActivity::class.java)
-                                                context.startActivity(goDiary)
                                             }
+
                                         } else {
                                             // user 존재 x
                                             userDB

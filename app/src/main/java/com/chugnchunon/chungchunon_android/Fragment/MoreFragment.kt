@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -48,6 +49,9 @@ class MoreFragment: Fragment() {
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
+        var animation = AnimationUtils.loadAnimation(requireActivity(), R.anim.slide_left_enter)
+        binding.moreBox.startAnimation(animation)
+
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             editProfileWithNewInfo,
             IntentFilter("EDIT_PROFILE")
@@ -82,6 +86,25 @@ class MoreFragment: Fragment() {
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        var leftAnimation = AnimationUtils.loadAnimation(requireActivity(), R.anim.slide_left_enter)
+        binding.moreBox.startAnimation(leftAnimation)
+
+        binding.moreBox.alpha = 0.0f
+        binding.moreBox.animate()
+            .alpha(1.0f)
+            .setDuration(500)
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        binding.moreBox.alpha = 0.0f
     }
 
     var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {

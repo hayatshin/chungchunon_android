@@ -62,6 +62,8 @@
         <entry key="app/src/main/res/drawable/region_box.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/register_fill_box.xml" value="0.1495" />
         <entry key="app/src/main/res/drawable/rule_header.xml" value="0.1485" />
+        <entry key="app/src/main/res/drawable/slide_up_enter.xml" value="0.107" />
+        <entry key="app/src/main/res/drawable/slide_up_exit.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/sub_button.xml" value="0.189" />
         <entry key="app/src/main/res/drawable/tab_background.xml" value="0.139" />
         <entry key="app/src/main/res/drawable/tab_background_unselected.xml" value="0.1585" />
@@ -75,7 +77,7 @@
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
         <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.19738820393880213" />
         <entry key="app/src/main/res/layout/activity_extend_image.xml" value="0.12135416666666667" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.21653594970703127" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.27810211181640637" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.15670289855072464" />
         <entry key="app/src/main/res/layout/activity_more.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_personalinfo_rule.xml" value="0.1796875" />
@@ -88,7 +90,7 @@
         <entry key="app/src/main/res/layout/comment_list.xml" value="0.33099110921223956" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.22742619168931155" />
-        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.21891174316406253" />
+        <entry key="app/src/main/res/layout/fragment_more.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.26710815429687507" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />

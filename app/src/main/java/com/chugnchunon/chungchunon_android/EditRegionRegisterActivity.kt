@@ -42,6 +42,9 @@ class EditRegionRegisterActivity : AppCompatActivity() {
 
         binding.regionRegisterBtn.isEnabled = false
 
+        binding.regionViewPager.isUserInputEnabled = false
+
+
         binding.backBtn.setOnClickListener {
             if(!RegionRegisterFragment.smallRegionCheck)  {
                 // 첫번째 화면

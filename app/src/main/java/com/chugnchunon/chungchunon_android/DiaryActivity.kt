@@ -1,14 +1,20 @@
 package com.chugnchunon.chungchunon_android
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.marginTop
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -26,6 +32,8 @@ import java.time.LocalDateTime
 class DiaryActivity : AppCompatActivity() {
 
     private val diaryDB = Firebase.firestore.collection("diary")
+    private val userDB = Firebase.firestore.collection("users")
+
     private val userId = Firebase.auth.currentUser?.uid
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
     private var from = ""
@@ -38,6 +46,27 @@ class DiaryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        Log.d("걸음수", "액티비티 등록")
+
+        // 걸음수 권한
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACTIVITY_RECOGNITION,
+            ) == PackageManager.PERMISSION_DENIED
+        ) {
+            //ask for permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                100
+            )
+        }
+
+
+        var startService = Intent(this, MyService::class.java)
+        startForegroundService(startService)
+
+
         from = intent.getStringExtra("from").toString()
 
         val yourTabLayoutView = binding.tabLayout // If you aren't using data biniding, You can use findViewById to get the view
@@ -47,6 +76,20 @@ class DiaryActivity : AppCompatActivity() {
         binding.viewPager.isUserInputEnabled = false
 
         setUpTabBar()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            Log.d("걸음수", "요청")
+            var startService = Intent(this, MyService::class.java)
+            startForegroundService(startService)
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
 
@@ -63,6 +106,13 @@ class DiaryActivity : AppCompatActivity() {
 //        } else {
 //            Log.d("결과결과", "흠")
 
+//            userDB.document("$userId")
+//                .get()
+//                .addOnSuccessListener { document ->
+//                    var userType = document.data?.getValue("userType")
+//                    if(userType == "마스터") {
+//                }
+
             diaryDB
                 .document("${userId}_${writeTime}")
                 .get()
@@ -71,13 +121,13 @@ class DiaryActivity : AppCompatActivity() {
                         val document = task.result
                         if(document != null) {
                             if (document.exists()) {
-                                viewPager.currentItem = 1
+                                viewPager.setCurrentItem(1, false)
                             } else {
-                                viewPager.currentItem = 0
+                                viewPager.setCurrentItem(0, false)
                             }
                         }
                     } else {
-                        viewPager.currentItem = 0
+                        viewPager.setCurrentItem(0, false)
                     }
                 }
 

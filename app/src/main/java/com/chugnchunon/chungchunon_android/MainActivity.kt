@@ -27,6 +27,7 @@ import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
+import kotlinx.android.synthetic.main.activity_diary.*
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity() {
         binding.kakaoLoginBtn.setOnClickListener {
 //            TimerFun()
 
+            binding.kakaoLoginTextView.visibility = View.GONE
+            binding.kakaoActivityIndicator.visibility = View.VISIBLE
 
             val keyHash = Utility.getKeyHash(this) // keyHash 발급
             Log.d("키", "${keyHash}")
@@ -89,6 +92,9 @@ class MainActivity : AppCompatActivity() {
             // 파트너 - 카톡 로그인 버튼 클릭
             binding.partnerKakaoLoginBtn.setOnClickListener {
 //                TimerFun()
+
+                binding.partnerKakaoTextView.visibility = View.GONE
+                binding.partnerKakaoAcitivityIndicator.visibility = View.VISIBLE
 
                 val keyHash = Utility.getKeyHash(this) // keyHash 발급
 

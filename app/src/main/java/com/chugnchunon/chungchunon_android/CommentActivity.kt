@@ -13,6 +13,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -73,6 +74,12 @@ class CommentActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+       var animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        binding.commentLayout.startAnimation(animation)
+
+        binding.commentBackground.setOnClickListener {
+            finish()
+        }
 
         binding.commentWriteBtn.isEnabled = false
 

@@ -1,10 +1,9 @@
 package com.chugnchunon.chungchunon_android
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.Manifest
+import android.app.*
 import android.content.*
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -14,6 +13,7 @@ import android.icu.text.SimpleDateFormat
 import android.os.*
 import android.preference.PreferenceManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
@@ -55,6 +55,21 @@ class MyService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
+        Log.d("걸음수","처음 가입")
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        // 오늘 걸음수 초기화
+        userDB.document("$userId").get().addOnSuccessListener { document ->
+            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
+            todayTotalStepCount = todayStepCountFromDB.toInt()
+            StepCountNotification(this, todayTotalStepCount)
+        }
+
         // shared preference 설정
         prefs = getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
         var dummyData = prefs.getInt(userId, 0)
@@ -76,38 +91,10 @@ class MyService : Service(), SensorEventListener {
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
 
-        // 기본
-        sensorManager =
-            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-
-
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
             stepInitializeReceiver,
             IntentFilter("NEW_DATE_STEP_ZERO")
         );
-
-        // 오늘 걸음수 초기화
-        userDB.document("$userId").get().addOnSuccessListener { document ->
-            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
-            todayTotalStepCount = todayStepCountFromDB.toInt()
-            StepCountNotification(this, todayTotalStepCount)
-        }
-    }
-
-    override fun onStart(intent: Intent?, startId: Int) {
-        super.onStart(intent, startId)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return Binder()
     }
 
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
@@ -129,7 +116,7 @@ class MyService : Service(), SensorEventListener {
 
             var intent = Intent(this, StepCountBroadcastReceiver::class.java)
             intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intent.putExtra("todayTotalStepCount", stepCount)
+            intent.putExtra("todayTotalStepCount", 0)
             sendBroadcast(intent)
 
         } else {
@@ -152,6 +139,22 @@ class MyService : Service(), SensorEventListener {
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d("서비스", "accuracychanged")
     }
+
+    override fun onStart(intent: Intent?, startId: Int) {
+        super.onStart(intent, startId)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return Binder()
+    }
+
+
 
     var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
