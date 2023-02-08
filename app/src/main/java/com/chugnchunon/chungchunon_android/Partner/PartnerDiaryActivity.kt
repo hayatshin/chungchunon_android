@@ -83,6 +83,22 @@ class PartnerDiaryActivity : AppCompatActivity() {
     }
 
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            Log.d("걸음수", "요청")
+            var startService = Intent(this, MyService::class.java)
+            startForegroundService(startService)
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+
+
     @SuppressLint("NotifyDataSetChanged")
     private fun setUpTabBar() {
         val adapter = PartnerTabPageAdapter(this, partnerTabLayout.tabCount)
