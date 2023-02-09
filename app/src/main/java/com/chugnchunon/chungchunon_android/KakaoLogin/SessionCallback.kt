@@ -50,8 +50,10 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                     var userAge = currentYear - birthYear!!.toInt() + 1
                     var gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
+                    val newUserType = if(userAge < 50) "파트너" else "치매예방자"
+
                     val userSet = hashMapOf(
-                        "userType" to "치매예방자",
+                        "userType" to newUserType,
                         "loginType" to "카카오",
                         "userId" to (result.id),
                         "timestamp" to FieldValue.serverTimestamp(),
@@ -83,11 +85,11 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                                 (userDocument.data?.getValue("userAge") as Long).toInt()
                                             var userType = userDocument.data?.getValue("userType")
 
-                                            if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
+                                            if(userType == "마스터" || userType == "치매예방자") {
                                                 var goDiary =
                                                     Intent(context, DiaryActivity::class.java)
                                                 context.startActivity(goDiary)
-                                            } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
+                                            } else {
                                                 var goDiary = Intent(
                                                     context,
                                                     PartnerDiaryActivity::class.java
@@ -104,7 +106,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                                         context,
                                                         RegionRegisterActivity::class.java
                                                     )
-                                                    goRegionRegister.putExtra("userType", "치매예방자")
+                                                    goRegionRegister.putExtra("userType", newUserType)
                                                     goRegionRegister.putExtra("userAge", userAge)
                                                     context.startActivity(goRegionRegister)
                                                 }

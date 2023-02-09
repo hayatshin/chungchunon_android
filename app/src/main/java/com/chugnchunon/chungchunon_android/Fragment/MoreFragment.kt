@@ -49,9 +49,6 @@ class MoreFragment: Fragment() {
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-        var animation = AnimationUtils.loadAnimation(requireActivity(), R.anim.slide_left_enter)
-        binding.moreBox.startAnimation(animation)
-
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             editProfileWithNewInfo,
             IntentFilter("EDIT_PROFILE")

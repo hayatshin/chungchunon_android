@@ -87,7 +87,7 @@
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.14800844054291212" />
         <entry key="app/src/main/res/layout/big_image_card.xml" value="0.13058494285300926" />
-        <entry key="app/src/main/res/layout/comment_list.xml" value="0.33099110921223956" />
+        <entry key="app/src/main/res/layout/comment_list.xml" value="0.25183461507161453" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.22742619168931155" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.1" />
@@ -99,7 +99,7 @@
         <entry key="app/src/main/res/layout/image_card.xml" value="0.1" />
         <entry key="app/src/main/res/layout/item_region.xml" value="0.28688449583191805" />
         <entry key="app/src/main/res/layout/item_spinner.xml" value="0.15729166666666666" />
-        <entry key="app/src/main/res/layout/partner_activity_diary.xml" value="0.30092592592592593" />
+        <entry key="app/src/main/res/layout/partner_activity_diary.xml" value="0.10083589907045716" />
         <entry key="app/src/main/res/layout/partner_activity_region.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/partner_activity_register.xml" value="0.30092592592592593" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon.xml" value="0.159" />

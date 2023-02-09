@@ -18,33 +18,32 @@ class DiaryUpdateBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
-        when (intentAction) {
-            Intent.ACTION_TIME_TICK -> {
+        if (intentAction == Intent.ACTION_TIME_TICK) {
 
-                diaryDB.document("${userId}_${currentDate}")
-                    .get()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            var document = task.result
-                            if (document != null) {
-                                if (document.exists()) {
-                                    var diaryUserId = document.data?.getValue("userId").toString()
-                                    userDB.document("$diaryUserId").get()
-                                        .addOnSuccessListener { document ->
-                                            var recentStepCount =
-                                                document.data?.getValue("todayStepCount")
-                                            var recentStepCountSet = hashMapOf(
-                                                "stepCount" to recentStepCount
-                                            )
-                                            diaryDB.document("${diaryUserId}_${currentDate}")
-                                                .set(recentStepCountSet, SetOptions.merge())
-                                        }
-                                }
+            diaryDB.document("${userId}_${currentDate}")
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        var document = task.result
+                        if (document != null) {
+                            if (document.exists()) {
+                                var diaryUserId = document.data?.getValue("userId").toString()
+                                userDB.document("$diaryUserId").get()
+                                    .addOnSuccessListener { document ->
+                                        var recentStepCount =
+                                            document.data?.getValue("todayStepCount")
+                                        var recentStepCountSet = hashMapOf(
+                                            "stepCount" to recentStepCount
+                                        )
+                                        diaryDB.document("${diaryUserId}_${currentDate}")
+                                            .set(recentStepCountSet, SetOptions.merge())
+                                    }
                             }
+
 
                         }
                     }
-            }
+                }
         }
 
 

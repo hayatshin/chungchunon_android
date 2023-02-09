@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.os.Handler
+import android.telecom.Call
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -52,6 +54,7 @@ class CommentActivity : Activity() {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
+    private var commentUserId = ""
     private var username = ""
     private var userType = ""
 
@@ -74,17 +77,25 @@ class CommentActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-       var animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-        binding.commentLayout.startAnimation(animation)
+        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        binding.commentLayout.startAnimation(upAnimation)
 
         binding.commentBackground.setOnClickListener {
-            finish()
+            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.commentLayout.startAnimation(downAnimation)
+            Handler().postDelayed({
+                finish()
+            }, 500)
         }
 
         binding.commentWriteBtn.isEnabled = false
 
         binding.commentGobackArrow.setOnClickListener {
-            finish()
+            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.commentLayout.startAnimation(downAnimation)
+            Handler().postDelayed({
+                finish()
+            }, 500)
         }
 
         diaryId = intent.getStringExtra("diaryId").toString()
@@ -95,6 +106,7 @@ class CommentActivity : Activity() {
         userDB.document("$userId")
             .get()
             .addOnSuccessListener { document ->
+                commentUserId = document.data?.getValue("userId").toString()
                 username = document.data?.getValue("name").toString()
                 userType = document.data?.getValue("userType").toString()
             }
@@ -107,6 +119,7 @@ class CommentActivity : Activity() {
                     var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
 
                     var commentId = document.data?.getValue("commentId").toString()
+                    var commentUserId = document.data?.getValue("userId").toString()
                     var commentUserName = document.data?.getValue("username").toString()
                     var commentUserType = document.data?.getValue("userType").toString()
                     var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
@@ -118,6 +131,7 @@ class CommentActivity : Activity() {
                             diaryId,
                             diaryPosition!!,
                             commentId,
+                            commentUserId,
                             commentUserName,
                             commentUserType,
                             commentTimestamp,
@@ -202,6 +216,7 @@ class CommentActivity : Activity() {
                 var description = binding.commentWriteText.text
                 var commentSet = hashMapOf(
                     "commentId" to commentId,
+                    "userId" to commentUserId,
                     "username" to username,
                     "userType" to userType,
                     "timestamp" to FieldValue.serverTimestamp(),
@@ -216,6 +231,7 @@ class CommentActivity : Activity() {
                         diaryId,
                         diaryPosition!!,
                         commentId,
+                        commentUserId,
                         username,
                         userType,
                         simpledateformat.format(timestamp),
@@ -250,6 +266,7 @@ class CommentActivity : Activity() {
             }
         }
     }
+
 
     var editDescriptionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {

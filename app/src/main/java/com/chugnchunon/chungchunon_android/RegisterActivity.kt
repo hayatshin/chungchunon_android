@@ -225,7 +225,7 @@ class RegisterActivity : AppCompatActivity() {
                 ageTextView.setTypeface(null, Typeface.BOLD)
                 ageTextView.textSize = 20f
                 ageTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
-                ageTextView.text = "50세 이하는 일기 쓰기가 제한됩니다."
+                ageTextView.text = "50세 미만은 일기 쓰기가 제한됩니다."
 
                 if (userAge < 50) {
                     binding.birthResultBox.addView(ageTextView)
@@ -424,14 +424,12 @@ class RegisterActivity : AppCompatActivity() {
                 "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
             val userId = Firebase.auth.currentUser?.uid
-
-            var intent = Intent(this, RegionRegisterActivity::class.java)
-            intent.putExtra("userType", userType)
-            intent.putExtra("userAge", userAge)
-            startActivity(intent)
+            val updateUserType = if(userType == "치매예방자" && userAge < 50 ) "파트너"
+            else if (userType == "치매예방자" && userAge >= 50) "치매예방자"
+            else "파트너"
 
             val userSet = hashMapOf(
-                "userType" to userType,
+                "userType" to updateUserType,
                 "loginType" to "일반",
                 "userId" to userId,
                 "timestamp" to FieldValue.serverTimestamp(),
@@ -444,12 +442,17 @@ class RegisterActivity : AppCompatActivity() {
                 "todayStepCount" to 0,
             )
 
+//            var intent = Intent(this, RegionRegisterActivity::class.java)
+//            intent.putExtra("userType", updateUserType)
+//            intent.putExtra("userAge", userAge)
+//            startActivity(intent)
+
             userDB
                 .document("$userId")
                 .set(userSet, SetOptions.merge())
                 .addOnSuccessListener {
                     var intent = Intent(this, RegionRegisterActivity::class.java)
-                    intent.putExtra("userType", userType)
+                    intent.putExtra("userType", updateUserType)
                     intent.putExtra("userAge", userAge)
                     startActivity(intent)
                 }

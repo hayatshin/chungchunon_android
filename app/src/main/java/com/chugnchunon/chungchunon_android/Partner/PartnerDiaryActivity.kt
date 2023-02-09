@@ -22,6 +22,10 @@ import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.chugnchunon.chungchunon_android.databinding.PartnerActivityDiaryBinding
 import com.google.android.material.tabs.TabLayout
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -39,87 +43,24 @@ class PartnerDiaryActivity : AppCompatActivity() {
         PartnerActivityDiaryBinding.inflate(layoutInflater)
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        // 걸음수 권한
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION,
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
-            //ask for permission
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                100
-            )
-        }
-
-        var startService = Intent(this, MyService::class.java)
-        startForegroundService(startService)
 
         val yourTabLayoutView = binding.partnerTabLayout // If you aren't using data biniding, You can use findViewById to get the view
         var yourTabItemView = (yourTabLayoutView.getChildAt(0) as LinearLayout).getChildAt(1).layoutParams as LinearLayout.LayoutParams
         yourTabItemView.weight = 0.3f
 
-//        binding.viewPager.isUserInputEnabled = false
-//
-//        binding.viewPager.setPageTransformer(object: ViewPager2.PageTransformer {
-//            override fun transformPage(page: View, position: Float) {
-//                page.alpha = 0f
-//                page.visibility = View.VISIBLE
-//
-//                page.animate()
-//                    .withLayer()
-//                    .alpha(1f)
-//                    .setDuration(0)
-//            }
-//        })
+        binding.partnerViewPager.isUserInputEnabled = false
 
         setUpTabBar()
 
     }
 
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            Log.d("걸음수", "요청")
-            var startService = Intent(this, MyService::class.java)
-            startForegroundService(startService)
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-
-
     @SuppressLint("NotifyDataSetChanged")
     private fun setUpTabBar() {
         val adapter = PartnerTabPageAdapter(this, partnerTabLayout.tabCount)
-
-//        diaryDB
-//            .document("${userId}_${writeTime}")
-//            .get()
-//            .addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    val document = task.result
-//                    if(document != null) {
-//                        if (document.exists()) {
-//                            viewPager.currentItem = 1
-//                        } else {
-//                            viewPager.currentItem = 0
-//                        }
-//                    }
-//                } else {
-//                    viewPager.currentItem = 0
-//                }
-//            }
 
         partnerViewPager.adapter = adapter
 

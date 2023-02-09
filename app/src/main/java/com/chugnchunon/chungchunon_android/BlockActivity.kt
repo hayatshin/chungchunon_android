@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -44,17 +45,25 @@ class BlockActivity : Activity() {
         setContentView(binding.root)
 
         binding.blockBackground.setOnClickListener {
-            finish()
+            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.blockBox.startAnimation(downAnimation)
+            Handler().postDelayed({
+                finish()
+            }, 500)
         }
 
-        var animation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-        binding.blockBox.startAnimation(animation)
+        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        binding.blockBox.startAnimation(upAnimation)
 
         diaryId = intent.getStringExtra("diaryId").toString()
         diaryUserId = intent.getStringExtra("diaryUserId").toString()
 
         binding.blockGobackArrow.setOnClickListener {
-            finish()
+            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.blockBox.startAnimation(downAnimation)
+            Handler().postDelayed({
+                finish()
+            }, 500)
         }
 
         val layoutParams = RelativeLayout.LayoutParams(

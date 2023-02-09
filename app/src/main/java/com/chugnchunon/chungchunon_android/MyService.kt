@@ -112,7 +112,7 @@ class MyService : Service(), SensorEventListener {
             editor.putInt(userId, stepCount)
             editor.commit()
 
-            StepCountNotification(this, stepCount)
+            StepCountNotification(this, 0)
 
             var intent = Intent(this, StepCountBroadcastReceiver::class.java)
             intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)

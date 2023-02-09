@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.os.persistableBundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.R
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -25,6 +27,8 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
     RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     private val diaryDB = Firebase.firestore.collection("diary")
+    var userId = Firebase.auth.currentUser?.uid
+
     private var originalDescription = ""
     private var commentId = ""
     private var diaryId = ""
@@ -35,9 +39,14 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
         var commentTimeStampView: TextView = itemView.findViewById(R.id.commentTimestamp)
         var commentDescriptionView: TextView = itemView.findViewById(R.id.commentDescription)
         var commentPartnerCheckImage: ImageView = itemView.findViewById(R.id.partnerCheckImg)
+        var commentEditDeleteView = itemView.findViewById<LinearLayout>(R.id.editDeleteLayout)
+
 
         fun bind(position: Int) {
             var commentUserType = items[position].commentUserType
+            var commentUserId = items[position].commentUserId
+
+            if(commentUserId != userId)  commentEditDeleteView.visibility = View.GONE
 
             if(commentUserType == "치매예방자") {
                 commentPartnerCheckImage.visibility = View.GONE
