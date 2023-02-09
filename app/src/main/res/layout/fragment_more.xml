@@ -13,7 +13,6 @@
 
     <LinearLayout
         android:id="@+id/moreBox"
-        android:alpha="0.0"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="0.8"

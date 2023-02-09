@@ -85,24 +85,6 @@ class MoreFragment: Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        var leftAnimation = AnimationUtils.loadAnimation(requireActivity(), R.anim.slide_left_enter)
-        binding.moreBox.startAnimation(leftAnimation)
-
-        binding.moreBox.alpha = 0.0f
-        binding.moreBox.animate()
-            .alpha(1.0f)
-            .setDuration(500)
-
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        binding.moreBox.alpha = 0.0f
-    }
 
     var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {

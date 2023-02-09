@@ -50,7 +50,7 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
 
             if(commentUserType == "치매예방자") {
                 commentPartnerCheckImage.visibility = View.GONE
-            } else if (commentUserType == "파트너") {
+            } else if (commentUserType == "파트너" || commentUserType == "마스터") {
                 commentPartnerCheckImage.visibility = View.VISIBLE
             }
             commentNameView.text = items[position].commentUserName

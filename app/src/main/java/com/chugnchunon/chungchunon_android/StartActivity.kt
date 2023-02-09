@@ -30,19 +30,16 @@ class StartActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
     private val userDB = Firebase.firestore.collection("users")
 
-    private var appUpdateManager: AppUpdateManager
+    lateinit var appUpdateManager: AppUpdateManager
     private val MY_REQUEST_CODE: Int = 200
-    init {
-        appUpdateManager = AppUpdateManagerFactory.create(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
         // 앱 업데이트
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
         // Returns an intent object that you use to check for an update.
+        appUpdateManager = AppUpdateManagerFactory.create(this)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
         // Checks that the platform will allow the specified type of update.

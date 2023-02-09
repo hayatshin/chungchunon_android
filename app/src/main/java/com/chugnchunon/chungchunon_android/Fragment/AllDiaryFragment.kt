@@ -160,58 +160,6 @@ class AllDiaryFragment : Fragment() {
             IntentFilter("CREATE_ACTION")
         );
 
-//            userDB.document("$userId")
-//                .get()
-//                .addOnSuccessListener { document ->
-//                    var userRegion = document.data?.getValue("region")
-//                    var userSmallRegion = document.data?.getValue("smallRegion")
-//                    var userRegionGroup = "${userRegion} ${userSmallRegion}"
-//                    Log.d("1/13", "userRegionGroup: ${userRegionGroup}")
-//
-//                    diaryDB
-//                        .whereEqualTo("regionGroup", userRegionGroup)
-//                        .get()
-//                        .addOnSuccessListener { documents ->
-//                            for (document in documents) {
-//                                var userId = document.data?.getValue("userId").toString()
-//                                var username = document.data?.getValue("username").toString()
-//                                var stepCount = document.data?.getValue("stepCount") as Long
-//                                var diaryId = document.data?.getValue("diaryId").toString()
-//                                var numLikes = document.data?.getValue("numLikes") as Long
-//                                var numComments = document.data?.getValue("numComments") as Long
-//                                var timefromdb =
-//                                    document.data?.getValue("timestamp") as com.google.firebase.Timestamp
-//
-//                                // items 추가
-//                                var diarySet = DiaryCard(
-//                                    userId,
-//                                    username,
-//                                    diaryId,
-//                                    DateFormat().convertMillis(timefromdb),
-//                                    username,
-//                                    stepCount,
-//                                    (document.data?.getValue("todayMood") as Map<*, *>)["image"] as Long,
-//                                    document.data?.getValue("todayDiary").toString(),
-//                                    numLikes,
-//                                    numComments,
-//                                )
-//
-//                                diaryItems.add(diarySet)
-//                                diaryItems.sortWith(compareBy({ it.writeTime }))
-//                                diaryItems.reverse()
-//                                adapter.notifyDataSetChanged()
-//                            }
-//                        }
-//                    binding.recyclerDiary.adapter = adapter
-//                    binding.recyclerDiary.layoutManager = LinearLayoutManager(
-//                        context,
-//                        RecyclerView.VERTICAL,
-//                        false
-//                    )
-//
-//                }
-
-
         return view
     }
 
@@ -311,11 +259,6 @@ class AllDiaryFragment : Fragment() {
                             diaryItems.reverse()
                             adapter.notifyDataSetChanged()
                         }
-                        if (diaryItems.size == 0) {
-                            binding.noItemText.visibility = View.VISIBLE
-                        } else {
-                            binding.noItemText.visibility = View.GONE
-                        }
 
                         binding.recyclerDiary.adapter = adapter
                         binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
@@ -323,6 +266,13 @@ class AllDiaryFragment : Fragment() {
                             RecyclerView.VERTICAL,
                             false
                         )
+                        if (diaryItems.size == 0) {
+                            Log.d("지역보기", "0 임")
+                            binding.noItemText.visibility = View.VISIBLE
+                        } else {
+                            Log.d("지역보기", "0 이 아님")
+                            binding.noItemText.visibility = View.GONE
+                        }
                     }
 
                 }
@@ -416,14 +366,6 @@ class AllDiaryFragment : Fragment() {
                                 }
 
                                 Log.d("지역보기1", "${diaryItems.size}")
-
-                                if (diaryItems.size == 0) {
-                                    Log.d("지역보기", "0 임")
-                                    binding.noItemText.visibility = View.VISIBLE
-                                } else {
-                                    Log.d("지역보기", "0 이 아님")
-                                    binding.noItemText.visibility = View.GONE
-                                }
                             }
                             binding.recyclerDiary.adapter = adapter
                             binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
@@ -432,6 +374,13 @@ class AllDiaryFragment : Fragment() {
                                 false
                             )
                             Log.d("지역보기2", "${diaryItems.size}")
+                            if (diaryItems.size == 0) {
+                                Log.d("지역보기", "0 임")
+                                binding.noItemText.visibility = View.VISIBLE
+                            } else {
+                                Log.d("지역보기", "0 이 아님")
+                                binding.noItemText.visibility = View.GONE
+                            }
                         }
                 }
         }
