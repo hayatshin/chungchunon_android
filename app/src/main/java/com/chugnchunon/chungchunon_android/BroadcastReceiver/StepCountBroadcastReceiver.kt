@@ -29,6 +29,14 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
         var currentDate = LocalDate.now()
         var todayTotalStepCount = intent.getIntExtra("todayTotalStepCount", 0)
 
+//        val intent = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+//            putExtra(
+//                "todayTotalStepCount",
+//                todayTotalStepCount
+//            )
+//        }
+//        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+
         // user 내 todayStepCount
         var todayStepCountSet = hashMapOf(
             "todayStepCount" to todayTotalStepCount
@@ -53,14 +61,6 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
             .document("$currentDate")
             .set(periodStepCountSet, SetOptions.merge())
 
-
-        val intent = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-            putExtra(
-                "todayTotalStepCount",
-                todayTotalStepCount
-            )
-        }
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
     }
 }
 }

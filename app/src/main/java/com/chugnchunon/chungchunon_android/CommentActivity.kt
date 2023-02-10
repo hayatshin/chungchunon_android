@@ -71,7 +71,6 @@ class CommentActivity : Activity() {
 
     private var diaryPosition: Int? = 0
 
-
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

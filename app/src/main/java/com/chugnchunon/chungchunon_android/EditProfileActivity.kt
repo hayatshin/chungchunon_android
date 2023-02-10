@@ -8,10 +8,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Typeface
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -30,7 +32,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
-class EditProfileActivity: AppCompatActivity() {
+class EditProfileActivity : AppCompatActivity() {
 
     private val binding by lazy {
         ActivityEditProfileBinding.inflate(layoutInflater)
@@ -45,7 +47,7 @@ class EditProfileActivity: AppCompatActivity() {
     private var birthMonth = ""
     private var birthDate = ""
 
-    lateinit var editFillClass : EditCheckClass
+    lateinit var editFillClass: EditCheckClass
 
     private var newName = ""
     private var newBirthYear = ""
@@ -54,6 +56,16 @@ class EditProfileActivity: AppCompatActivity() {
     private var newSmallRegion = ""
     private var intentRegion = ""
     private var intentSmallRegion = ""
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        overridePendingTransition(0, R.anim.slide_down_enter)
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_down_enter)
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,13 +83,13 @@ class EditProfileActivity: AppCompatActivity() {
 
 
         editFillClass = ViewModelProvider(this).get(EditCheckClass::class.java)
-        editFillClass.nameFill.observe(this, Observer {value ->
+        editFillClass.nameFill.observe(this, Observer { value ->
             binding.profileEditBtn.isEnabled = true
         })
-        editFillClass.birthFill.observe(this, Observer {value ->
+        editFillClass.birthFill.observe(this, Observer { value ->
             binding.profileEditBtn.isEnabled = true
         })
-        editFillClass.regionFill.observe(this, Observer {value ->
+        editFillClass.regionFill.observe(this, Observer { value ->
             binding.profileEditBtn.isEnabled = true
         })
 
@@ -90,9 +102,10 @@ class EditProfileActivity: AppCompatActivity() {
                 var gender = document.data?.getValue("gender").toString()
                 newBirthYear = document.data?.getValue("birthYear").toString()
                 newBirthDay = document.data?.getValue("birthDay").toString()
-                var showBirth = "${newBirthYear}-${newBirthDay.substring(0, 2)}-${newBirthDay.substring(2,4)}"
+                var showBirth =
+                    "${newBirthYear}-${newBirthDay.substring(0, 2)}-${newBirthDay.substring(2, 4)}"
                 birthMonth = newBirthDay.substring(0, 2)
-                birthDate = newBirthDay.substring(2,4)
+                birthDate = newBirthDay.substring(2, 4)
                 newRegion = document.data?.getValue("region").toString()
                 newSmallRegion = document.data?.getValue("smallRegion").toString()
 
@@ -104,7 +117,7 @@ class EditProfileActivity: AppCompatActivity() {
             }
 
         // 이름 수정
-        binding.editName.addTextChangedListener (object : TextWatcher {
+        binding.editName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 // null
             }
@@ -115,7 +128,7 @@ class EditProfileActivity: AppCompatActivity() {
             }
 
             override fun afterTextChanged(p0: Editable?) {
-               // null
+                // null
             }
 
         })
@@ -127,12 +140,15 @@ class EditProfileActivity: AppCompatActivity() {
                 newBirthYear = document.data?.getValue("birthYear").toString()
                 newBirthDay = document.data?.getValue("birthDay").toString()
                 birthMonth = newBirthDay.substring(0, 2)
-                birthDate = newBirthDay.substring(2,4)
+                birthDate = newBirthDay.substring(2, 4)
 
-                Log.d("체크", "${newBirthYear.toInt()} // ${birthMonth.toInt()-1} // ${birthDate.toInt()} }")
+                Log.d(
+                    "체크",
+                    "${newBirthYear.toInt()} // ${birthMonth.toInt() - 1} // ${birthDate.toInt()} }"
+                )
 
                 calendar.apply {
-                    set(newBirthYear.toInt(), birthMonth.toInt()-1, birthDate.toInt())
+                    set(newBirthYear.toInt(), birthMonth.toInt() - 1, birthDate.toInt())
                 }
 
                 val birthDatePicker =
@@ -142,9 +158,19 @@ class EditProfileActivity: AppCompatActivity() {
                         calendar.set(Calendar.MONTH, monthOfYear)
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
                         var birthScreenInput = ""
-                        birthScreenInput = "${year}-${String.format("%02d", monthOfYear + 1)}-${String.format("%02d", dayOfMonth)}"
+                        birthScreenInput = "${year}-${
+                            String.format(
+                                "%02d",
+                                monthOfYear + 1
+                            )
+                        }-${String.format("%02d", dayOfMonth)}"
                         newBirthYear = "$year"
-                        newBirthDay = "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
+                        newBirthDay = "${String.format("%02d", monthOfYear + 1)}${
+                            String.format(
+                                "%02d",
+                                dayOfMonth
+                            )
+                        }"
                         binding.editBirth.setText(birthScreenInput)
                     }
 
@@ -166,7 +192,6 @@ class EditProfileActivity: AppCompatActivity() {
             }
 
 
-
         // 지역 수정
         binding.editRegion.setOnClickListener {
             var goEditRegion = Intent(this, EditRegionRegisterActivity::class.java)
@@ -176,16 +201,15 @@ class EditProfileActivity: AppCompatActivity() {
         Log.d("확인", "${intentRegion} // ${intentSmallRegion} // ${newRegion} // ${newSmallRegion}")
 
 
-
         // 수정 버튼 클릭
 
         binding.profileEditBtn.setOnClickListener {
-           var newPersonalInfoSet = hashMapOf(
+            var newPersonalInfoSet = hashMapOf(
                 "name" to newName,
-               "birthYear" to newBirthYear,
-               "birthDay" to newBirthDay,
-               "region" to newRegion,
-               "smallRegion" to newSmallRegion,
+                "birthYear" to newBirthYear,
+                "birthDay" to newBirthDay,
+                "region" to newRegion,
+                "smallRegion" to newSmallRegion,
             )
 
             userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
@@ -218,8 +242,8 @@ class EditProfileActivity: AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == 1) {
-            if(resultCode == RESULT_OK) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
                 var region = data!!.getStringExtra("region")
                 var smallRegion = data!!.getStringExtra("smallRegion")
                 binding.editRegion.text = "$region $smallRegion"
@@ -229,6 +253,7 @@ class EditProfileActivity: AppCompatActivity() {
             }
         }
     }
+
 
 }
 

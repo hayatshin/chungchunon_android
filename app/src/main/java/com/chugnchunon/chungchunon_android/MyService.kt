@@ -103,7 +103,7 @@ class MyService : Service(), SensorEventListener {
         stepCount = sensorEvent!!.values[0].toInt()
         val editor = prefs.edit()
 
-        Log.d("걸음수 체크체크 2", "$stepCount")
+        Log.d("걸음수 체크체크 2", "stepCount: ${stepCount} // startingStepCount: ${startingStepCount}")
 
         if (!prefs.contains(userId)) {
             // 걸음수 pref 저장 안 된 상태
@@ -114,10 +114,18 @@ class MyService : Service(), SensorEventListener {
 
             StepCountNotification(this, 0)
 
-            var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-            intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intent.putExtra("todayTotalStepCount", 0)
-            sendBroadcast(intent)
+            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+            intentToFirebase.putExtra("todayTotalStepCount", 0)
+            sendBroadcast(intentToFirebase)
+
+            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                putExtra(
+                    "todayTotalStepCount",
+                    0
+                )
+            }
+            LocalBroadcastManager.getInstance(applicationContext!!).sendBroadcast(intentToMyDiary)
 
         } else {
 
@@ -128,10 +136,18 @@ class MyService : Service(), SensorEventListener {
 
             StepCountNotification(this, todayStepCount)
 
-            var intent = Intent(this, StepCountBroadcastReceiver::class.java)
-            intent.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intent.putExtra("todayTotalStepCount", todayStepCount)
-            sendBroadcast(intent)
+            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+            intentToFirebase.putExtra("todayTotalStepCount", todayStepCount)
+            sendBroadcast(intentToFirebase)
+
+            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                putExtra(
+                    "todayTotalStepCount",
+                    todayStepCount
+                )
+            }
+            LocalBroadcastManager.getInstance(applicationContext!!).sendBroadcast(intentToMyDiary)
         }
     }
 

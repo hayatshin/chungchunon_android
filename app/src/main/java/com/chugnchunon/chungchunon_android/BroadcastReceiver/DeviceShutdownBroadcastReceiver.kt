@@ -32,10 +32,10 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
                 .addOnSuccessListener { document ->
                     var dummyData = prefs.getInt(userId, 0)
                     var previousStepCount = (document.data?.getValue("todayStepCount") as Long).toInt()
-                   var previousShowData = previousStepCount - dummyData
+//                   var previousShowData = previousStepCount - dummyData
 
                     // sharedPref 어제 값 추가
-                    editor.putInt(userId, -previousShowData)
+                    editor.putInt(userId, -previousStepCount)
                     editor.apply()
                 }
 

@@ -9,6 +9,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.opengl.Visibility
 import android.os.Bundle
+import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
@@ -76,6 +77,8 @@ class AllDiaryFragment : Fragment() {
     var order = 0
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
+    lateinit var dataLoadingState: DataLoadingState
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,6 +86,20 @@ class AllDiaryFragment : Fragment() {
     ): View? {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        dataLoadingState =
+            ViewModelProvider(requireActivity()).get(DataLoadingState::class.java)
+
+        dataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
+            if (!value) {
+                binding.swipeRecyclerDiary.visibility = View.GONE
+                binding.dataLoadingProgressBar.visibility = View.VISIBLE
+
+            } else {
+                binding.swipeRecyclerDiary.visibility = View.VISIBLE
+                binding.dataLoadingProgressBar.visibility = View.GONE
+            }
+        })
 
 
 //        var startService = Intent(activity, MyService::class.java)
@@ -96,17 +113,16 @@ class AllDiaryFragment : Fragment() {
             ft.detach(this).attach(this).commitAllowingStateLoss()
         }
 
-        binding.regionInfo.setOnClickListener {
-            Log.d("차단", "클릭")
-            var ft = parentFragmentManager.beginTransaction()
-            ft.detach(this).attach(this).commitAllowingStateLoss()
-        }
-
         var blockReloadFragment: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 diaryItems.clear()
-                if(diaryItems.isEmpty()){
-                    getData()
+                if (diaryItems.isEmpty()) {
+
+                    Handler().postDelayed({
+                        getData()
+                    }, 500)
+
+//                    getData()
                     Log.d("차단", "다이어리: ${diaryItems}")
                 }
             }
@@ -130,10 +146,18 @@ class AllDiaryFragment : Fragment() {
 
         binding.toggleBtnGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
             diaryItems.clear()
+            dataLoadingState.loadingCompleteData.value = false
+
             if (isChecked) {
                 when (checkedId) {
-                    R.id.allData -> dataGroupSelection.regionCheck.value = false
-                    R.id.regionData -> dataGroupSelection.regionCheck.value = true
+                    R.id.allData -> {
+                        dataGroupSelection.regionCheck.value = false
+                        binding.regionInfo.visibility = View.GONE
+                    }
+                    R.id.regionData -> {
+                        dataGroupSelection.regionCheck.value = true
+                        binding.regionInfo.visibility = View.VISIBLE
+                    }
                 }
             }
         }
@@ -143,7 +167,10 @@ class AllDiaryFragment : Fragment() {
 
         dataGroupSelection.regionCheck.observe(requireActivity(), Observer { value ->
             binding.noItemText.visibility = View.GONE
-            getData()
+
+            Handler().postDelayed({
+                getData()
+            }, 500)
         })
 
 
@@ -189,13 +216,13 @@ class AllDiaryFragment : Fragment() {
 
         if (!dataGroupSelection.regionCheck.value!!) {
             // 전체 보기
-            binding.regionInfo.text = ""
             var storeBuilder: Query?
 
             diaryDB
                 .whereNotEqualTo("blockedBy", "$userId")
                 .get()
                 ?.addOnSuccessListener { documents ->
+                    dataLoadingState.loadingCompleteData.value = true
                     for (document in documents) {
                         var blockedList =
                             document.data.getValue("blockedBy") as ArrayList<String>
@@ -291,6 +318,7 @@ class AllDiaryFragment : Fragment() {
                         .whereEqualTo("regionGroup", userRegionGroup)
                         .get()
                         .addOnSuccessListener { documents ->
+                            dataLoadingState.loadingCompleteData.value = true
 
                             for (document in documents) {
                                 var blockedList =
@@ -389,6 +417,10 @@ class AllDiaryFragment : Fragment() {
 
 class DataGroupSelection : ViewModel() {
     val regionCheck by lazy { MutableLiveData<Boolean>(false) }
+}
+
+class DataLoadingState : ViewModel() {
+    val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
 }
 
 class LinearLayoutManagerWrapper : LinearLayoutManager {

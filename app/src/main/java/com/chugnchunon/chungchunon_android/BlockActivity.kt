@@ -40,6 +40,7 @@ class BlockActivity : Activity() {
 
     private var lastUserUpdate: Boolean = false
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)

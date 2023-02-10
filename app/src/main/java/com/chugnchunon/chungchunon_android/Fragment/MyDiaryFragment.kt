@@ -576,10 +576,12 @@ class MyDiaryFragment : Fragment() {
                 var decimal = DecimalFormat("#,###")
                 var step = decimal.format(todayTotalStepCount)
                 binding.todayStepCount.text = "$step 보"
-            }
-            Log.d("걸음수", "$todayTotalStepCount")
-            if(todayTotalStepCount >= 3000) {
-                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+                Log.d("걸음수", "$todayTotalStepCount")
+
+                if(todayTotalStepCount >= 3000) {
+                    binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+                }
             }
         }
     }
