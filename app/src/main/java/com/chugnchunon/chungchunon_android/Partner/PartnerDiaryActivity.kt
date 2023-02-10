@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.PartnerTabPageAdapter
 import com.chugnchunon.chungchunon_android.Adapter.TabPageAdapter
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.MyService
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
@@ -80,4 +82,5 @@ class PartnerDiaryActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
+
 }

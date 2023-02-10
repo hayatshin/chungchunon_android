@@ -32,6 +32,7 @@ class MyService : Service(), SensorEventListener {
     private val userId = Firebase.auth.currentUser?.uid
 
     private var todayStepCountFromDB = 0
+    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
 
@@ -56,6 +57,7 @@ class MyService : Service(), SensorEventListener {
         super.onCreate()
 
         Log.d("걸음수","처음 가입")
+
 
         // 기본
         sensorManager =
@@ -82,6 +84,14 @@ class MyService : Service(), SensorEventListener {
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // 다이어리 업데이트
+        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
+
+        val diaryUpdateIntent = IntentFilter()
+        diaryUpdateIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(diaryUpdateBroadcastReceiver, diaryUpdateIntent)
+
 
         // 핸드폰 꺼질 때
         deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()

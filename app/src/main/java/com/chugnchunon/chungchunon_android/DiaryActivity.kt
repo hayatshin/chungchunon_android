@@ -2,8 +2,10 @@ package com.chugnchunon.chungchunon_android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +22,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.TabPageAdapter
+import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
@@ -52,6 +55,7 @@ class DiaryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
 
         // 걸음수 권한
         if (ContextCompat.checkSelfPermission(
@@ -145,4 +149,5 @@ class DiaryActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
+
 }

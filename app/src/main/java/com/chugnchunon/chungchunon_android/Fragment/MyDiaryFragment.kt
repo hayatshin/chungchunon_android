@@ -101,7 +101,7 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var step_sensor: Sensor
 
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
-    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
@@ -387,11 +387,11 @@ class MyDiaryFragment : Fragment() {
 
 
         // 다이어리 업데이트
-        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-
-        val diaryChangeIntent = IntentFilter()
-        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
+//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
+//
+//        val diaryChangeIntent = IntentFilter()
+//        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+//        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
 
 
         // 걸음수 셋업
@@ -557,7 +557,7 @@ class MyDiaryFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
-        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
+//        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
     }
 
     private fun registerStepCountNotificationBroadCastReceiver() {

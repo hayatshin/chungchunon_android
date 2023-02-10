@@ -122,7 +122,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_TICK" />
-                <action android:name="com.chungchunon.chunchunon_android.DIARY_UPDATE_STEPCOUNT" />
+                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>
         </receiver>
     </application>
