@@ -7,6 +7,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -17,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityBlockBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -40,7 +42,6 @@ class BlockActivity : Activity() {
 
     private var lastUserUpdate: Boolean = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -58,6 +59,49 @@ class BlockActivity : Activity() {
 
         diaryId = intent.getStringExtra("diaryId").toString()
         diaryUserId = intent.getStringExtra("diaryUserId").toString()
+
+        // 내 글인 경우 수정하기, 삭제하기 보이기
+        if (diaryUserId == userId) {
+            binding.editLayout.visibility = View.VISIBLE
+            binding.deleteLayout.visibility = View.VISIBLE
+        } else {
+            binding.editLayout.visibility = View.GONE
+            binding.deleteLayout.visibility = View.GONE
+        }
+
+        binding.editLayout.setOnClickListener {
+            var goMyFragment = Intent(this, DiaryActivity::class.java)
+            goMyFragment.putExtra("from", "edit")
+            startActivity(goMyFragment)
+        }
+
+        binding.deleteLayout.setOnClickListener {
+
+            // 좋아요 삭제
+            diaryDB.document("$diaryId").collection("likes").get().addOnSuccessListener { documents ->
+                for (document in documents) {
+                    var diaryUserId = document.data.getValue("id")
+                    diaryDB.document("$diaryId").collection("likes").document("$diaryUserId").delete()
+                }
+            }
+
+            // 댓글 삭제
+            diaryDB.document("$diaryId").collection("comments").get().addOnSuccessListener { documents ->
+                for (document in documents) {
+                    var commentId = document.data.getValue("commentId")
+                    diaryDB.document("$diaryId").collection("comments").document("$commentId").delete()
+                }
+            }
+
+            // 글 삭제
+            diaryDB.document("$diaryId").delete()
+
+
+            var goMyFragment = Intent(this, DiaryActivity::class.java)
+            goMyFragment.putExtra("from", "delete")
+            startActivity(goMyFragment)
+        }
+
 
         binding.blockGobackArrow.setOnClickListener {
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
@@ -126,10 +170,11 @@ class BlockActivity : Activity() {
                         diaryDB.document("$documentId")
                             .update("blockedBy", (FieldValue.arrayUnion("$userId")))
                             .addOnSuccessListener {
-                                if(index == documents.size()-1){
+                                if (index == documents.size() - 1) {
                                     var blockUserDiary = Intent(this, AllDiaryFragment::class.java)
                                     blockUserDiary.setAction("BLOCK_USER_INTENT")
-                                    LocalBroadcastManager.getInstance(this).sendBroadcast(blockUserDiary)
+                                    LocalBroadcastManager.getInstance(this)
+                                        .sendBroadcast(blockUserDiary)
                                     finish()
                                 }
                             }

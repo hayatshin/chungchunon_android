@@ -5,10 +5,12 @@ import android.graphics.Color
 import android.graphics.Color.WHITE
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.CalendarContract
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -88,6 +90,14 @@ class MainActivity : AppCompatActivity() {
         binding.partnerBtn.setOnClickListener {
             binding.loginLayout.visibility = View.GONE
             binding.partnerLayout.visibility = View.VISIBLE
+            binding.partnerLayout.alpha = 0f
+
+            var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+            binding.partnerLayout.startAnimation(upAnimation)
+
+            binding.partnerLayout.animate()
+                .alpha(1f)
+                .setDuration(500)
 
             // 파트너 - 카톡 로그인 버튼 클릭
             binding.partnerKakaoLoginBtn.setOnClickListener {
@@ -111,8 +121,37 @@ class MainActivity : AppCompatActivity() {
             }
 
             binding.partnerBack.setOnClickListener {
-                binding.loginLayout.visibility = View.VISIBLE
-                binding.partnerLayout.visibility = View.GONE
+
+                Handler().postDelayed({
+                    binding.loginLayout.visibility = View.VISIBLE
+                    binding.partnerLayout.visibility = View.GONE
+
+                }, 500)
+
+
+                var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+                binding.partnerLayout.startAnimation(downAnimation)
+
+                binding.partnerLayout.animate()
+                    .alpha(0f)
+                    .setDuration(500)
+            }
+
+            binding.partnerBackArrow.setOnClickListener {
+
+                Handler().postDelayed({
+                    binding.loginLayout.visibility = View.VISIBLE
+                    binding.partnerLayout.visibility = View.GONE
+
+                }, 500)
+
+
+                var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+                binding.partnerLayout.startAnimation(downAnimation)
+
+                binding.partnerLayout.animate()
+                    .alpha(0f)
+                    .setDuration(500)
             }
 
         }

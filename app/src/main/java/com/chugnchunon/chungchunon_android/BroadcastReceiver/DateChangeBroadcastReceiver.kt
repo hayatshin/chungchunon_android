@@ -35,13 +35,13 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
     private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
-    private val initialCountKey = "InitialCountKey"
+    private val dateStoreSharedPref = "DateStoreSharedPref"
     lateinit var prefs: SharedPreferences
 
     @SuppressLint("SimpleDateFormat")
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
-        prefs = context!!.getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
+        prefs = context!!.getSharedPreferences(dateStoreSharedPref, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
         var dateFormat = SimpleDateFormat("yyyy-MM-dd")
@@ -79,25 +79,32 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                             LocalBroadcastManager.getInstance(context!!).sendBroadcast(goService);
                         }
 
-                    // sharedPref 어제 값 추가
-                    db.collection("user_step_count").document("${userId}")
-                        .get()
-                        .addOnSuccessListener { document ->
-                            if (document.exists()) {
-                                var snapShot = document.data
-                                if (snapShot!!.containsKey(yesterday)) {
 
-                                    // yesterday 값 있는 경우
-                                    var yesterdayStep = (snapShot[yesterday] as Long).toInt()
-                                    var dummyStep = prefs.getInt(userId, 0)
-                                    editor.putInt(userId, dummyStep + yesterdayStep)
-                                    editor.apply()
+                    // dateChangedPref DB 첫번재 값인지 체크
+                    var allDatePref: Map<String, *> = prefs.all
 
-                                } else {
-                                    // yesterday 값 없는 경우
+                    if(allDatePref.size != 0) {
+
+                        // sharedPref 어제 값 추가
+                        db.collection("user_step_count").document("${userId}")
+                            .get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    var snapShot = document.data
+                                    if (snapShot!!.containsKey(yesterday)) {
+
+                                        // yesterday 값 있는 경우
+                                        var yesterdayStep = (snapShot[yesterday] as Long).toInt()
+                                        var dummyStep = prefs.getInt(userId, 0)
+                                        editor.putInt(userId, dummyStep + yesterdayStep)
+                                        editor.apply()
+
+                                    } else {
+                                        // yesterday 값 없는 경우
+                                    }
                                 }
                             }
-                        }
+                    }
 
                     // 새로운 날 값 sharedPref에 저장
                     editor.putBoolean(REFRESH_DAILY, true)

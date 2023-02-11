@@ -75,7 +75,6 @@ class DiaryActivity : AppCompatActivity() {
         var startService = Intent(this, MyService::class.java)
         startForegroundService(startService)
 
-
         from = intent.getStringExtra("from").toString()
 
         val yourTabLayoutView =
@@ -112,23 +111,34 @@ class DiaryActivity : AppCompatActivity() {
         viewPager.adapter = adapter
 
 
-        diaryDB
-            .document("${userId}_${writeTime}")
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val document = task.result
-                    if (document != null) {
-                        if (document.exists()) {
-                            viewPager.setCurrentItem(1, false)
-                        } else {
-                            viewPager.setCurrentItem(0, false)
+        if (from == "edit") {
+            viewPager.setCurrentItem(0, false)
+            binding.tabLayout.getTabAt(0)?.select()
+        } else if (from == "delete") {
+            viewPager.setCurrentItem(1, false)
+            binding.tabLayout.getTabAt(1)?.select()
+        } else {
+            diaryDB
+                .document("${userId}_${writeTime}")
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val document = task.result
+                        if (document != null) {
+                            if (document.exists()) {
+                                viewPager.setCurrentItem(1, false)
+                                binding.tabLayout.getTabAt(1)?.select()
+                            } else {
+                                viewPager.setCurrentItem(0, false)
+                                binding.tabLayout.getTabAt(0)?.select()
+                            }
                         }
+                    } else {
+                        viewPager.setCurrentItem(0, false)
+                        binding.tabLayout.getTabAt(0)?.select()
                     }
-                } else {
-                    viewPager.setCurrentItem(0, false)
                 }
-            }
+        }
 
 
 
@@ -144,9 +154,11 @@ class DiaryActivity : AppCompatActivity() {
 
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
         })
     }
 

@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.NonCancellable.cancel
 import java.time.LocalDateTime
 import java.util.*
@@ -124,6 +125,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
             override fun onSessionClosed(errorResult: ErrorResult?) {
                 Log.e(TAG, "세션 종료")
+                context.kakaoActivityIndicator.visibility = View.GONE
+                context.kakaoLoginTextView.visibility = View.VISIBLE
             }
 
             override fun onFailure(errorResult: ErrorResult?) {
@@ -132,8 +135,12 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
                 if (errorCode == clientErrorCode) {
                     Log.e(TAG, "카카오톡 서버의 네트워크가 불안정합니다. 잠시 후 다시 시도해주세요.")
+                    context.kakaoActivityIndicator.visibility = View.GONE
+                    context.kakaoLoginTextView.visibility = View.VISIBLE
                 } else {
                     Log.e(TAG, "알 수 없는 오류로 카카오로그인 실패 \n${errorResult?.errorMessage}")
+                    context.kakaoActivityIndicator.visibility = View.GONE
+                    context.kakaoLoginTextView.visibility = View.VISIBLE
                 }
 
             }
@@ -143,6 +150,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
     override fun onSessionOpenFailed(exception: KakaoException?) {
         Log.e(TAG, "onSessionOpenFailed ${exception?.message}")
+        context.kakaoActivityIndicator.visibility = View.GONE
+        context.kakaoLoginTextView.visibility = View.VISIBLE
     }
 
 

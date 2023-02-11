@@ -41,7 +41,6 @@ class StartActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-
             // 일반 자동 로그인
             val currentUser = auth.currentUser
             Log.d("로그인", "$currentUser")
@@ -59,6 +58,9 @@ class StartActivity : AppCompatActivity() {
                         } else if (userType == "파트너") {
                             val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
                             startActivity(goPartnerDiaryActivity)
+                        } else {
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
                         }
                     }
             } else {

@@ -20,7 +20,7 @@ class DiaryUpdateBroadcastReceiver : BroadcastReceiver() {
 
     private val userDB = Firebase.firestore.collection("users")
     private val diaryDB = Firebase.firestore.collection("diary")
-    private val currentDate = LocalDate.now()
+    private val currentDate = LocalDate.now().toString()
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
@@ -33,9 +33,12 @@ class DiaryUpdateBroadcastReceiver : BroadcastReceiver() {
                         // 오늘 쓴 글
                         var timeStamp = document.data.getValue("timestamp") as com.google.firebase.Timestamp
                         var date = DateFormat().convertTimeStampToDate(timeStamp)
-                        if(date == currentDate.toString()) {
+
+                        if(date == currentDate) {
                             var diaryId = document.data.getValue("diaryId")
                             var diaryUserId = document.data.getValue("userId")
+
+                            Log.d("걸음수 다이어리 55", "${diaryId} // ${diaryUserId}")
 
                             userDB.document("$diaryUserId").get()
                                 .addOnSuccessListener { document ->
@@ -47,9 +50,11 @@ class DiaryUpdateBroadcastReceiver : BroadcastReceiver() {
                                     diaryDB.document("$diaryId")
                                         .set(newStepCountSet, SetOptions.merge())
 
+                                    Log.d("걸음수 다이어리 66", "$userStepCount")
+
                                 }
 
-                        }
+                        } else null
                     }
                 }
 

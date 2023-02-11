@@ -117,13 +117,5 @@
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".BroadcastReceiver.DiaryUpdateBroadcastReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.TIME_TICK" />
-                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>

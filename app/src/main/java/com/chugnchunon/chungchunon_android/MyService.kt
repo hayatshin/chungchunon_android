@@ -32,7 +32,7 @@ class MyService : Service(), SensorEventListener {
     private val userId = Firebase.auth.currentUser?.uid
 
     private var todayStepCountFromDB = 0
-    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
 
@@ -86,11 +86,11 @@ class MyService : Service(), SensorEventListener {
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
         // 다이어리 업데이트
-        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-
-        val diaryUpdateIntent = IntentFilter()
-        diaryUpdateIntent.addAction(Intent.ACTION_TIME_TICK)
-        applicationContext?.registerReceiver(diaryUpdateBroadcastReceiver, diaryUpdateIntent)
+//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
+//
+//        val diaryUpdateIntent = IntentFilter()
+//        diaryUpdateIntent.addAction(Intent.ACTION_TIME_TICK)
+//        applicationContext?.registerReceiver(diaryUpdateBroadcastReceiver, diaryUpdateIntent)
 
 
         // 핸드폰 꺼질 때
@@ -109,7 +109,7 @@ class MyService : Service(), SensorEventListener {
 
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-        startingStepCount = prefs.getInt(userId, -1)
+        startingStepCount = prefs.getInt(userId, 0)
         stepCount = sensorEvent!!.values[0].toInt()
         val editor = prefs.edit()
 

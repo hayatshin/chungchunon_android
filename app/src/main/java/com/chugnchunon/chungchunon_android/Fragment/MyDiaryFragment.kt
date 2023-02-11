@@ -500,7 +500,6 @@ class MyDiaryFragment : Fragment() {
                         "username" to username,
                         "monthDate" to writeMonthDate,
                         "timestamp" to FieldValue.serverTimestamp(),
-                        "stepCount" to stepCount,
                         "todayMood" to binding.todayMood.selectedItem,
                         "todayDiary" to (binding.todayDiary.text.toString()),
                         "numLikes" to 0,

@@ -256,6 +256,7 @@
 
 
             <LinearLayout
+                android:textAlignment="textEnd"
                 android:id="@+id/phoneAuthLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -282,7 +283,8 @@
                 android:layout_height="8dp"
                 android:layout_gravity="end"
                 android:layout_marginTop="20dp"
-                android:progressDrawable="@drawable/main_progress_drawable" />
+                android:progressDrawable="@drawable/main_progress_drawable"
+                />
 
         </LinearLayout>
 

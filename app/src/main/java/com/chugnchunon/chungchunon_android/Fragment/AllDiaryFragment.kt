@@ -91,16 +91,24 @@ class AllDiaryFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(DataLoadingState::class.java)
 
         dataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
-            if (!value) {
+            Log.d("지역보기 66", "${dataLoadingState.loadingCompleteData.value}")
+
+            if (!dataLoadingState.loadingCompleteData.value!!) {
                 binding.swipeRecyclerDiary.visibility = View.GONE
                 binding.dataLoadingProgressBar.visibility = View.VISIBLE
-
             } else {
                 binding.swipeRecyclerDiary.visibility = View.VISIBLE
                 binding.dataLoadingProgressBar.visibility = View.GONE
             }
         })
 
+        dataGroupSelection =
+            ViewModelProvider(requireActivity()).get(DataGroupSelection::class.java)
+
+        dataGroupSelection.regionCheck.observe(requireActivity(), Observer { value ->
+            binding.noItemText.visibility = View.GONE
+            getData()
+        })
 
 //        var startService = Intent(activity, MyService::class.java)
 //        activity?.let { ContextCompat.startForegroundService(it, startService) }
@@ -117,13 +125,7 @@ class AllDiaryFragment : Fragment() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 diaryItems.clear()
                 if (diaryItems.isEmpty()) {
-
-                    Handler().postDelayed({
-                        getData()
-                    }, 500)
-
-//                    getData()
-                    Log.d("차단", "다이어리: ${diaryItems}")
+                    getData()
                 }
             }
         }
@@ -161,18 +163,6 @@ class AllDiaryFragment : Fragment() {
                 }
             }
         }
-
-        dataGroupSelection =
-            ViewModelProvider(requireActivity()).get(DataGroupSelection::class.java)
-
-        dataGroupSelection.regionCheck.observe(requireActivity(), Observer { value ->
-            binding.noItemText.visibility = View.GONE
-
-            Handler().postDelayed({
-                getData()
-            }, 500)
-        })
-
 
         adapter = DiaryCardAdapter(requireContext(), diaryItems)
 
@@ -222,85 +212,71 @@ class AllDiaryFragment : Fragment() {
                 .whereNotEqualTo("blockedBy", "$userId")
                 .get()
                 ?.addOnSuccessListener { documents ->
-                    dataLoadingState.loadingCompleteData.value = true
                     for (document in documents) {
                         var blockedList =
                             document.data.getValue("blockedBy") as ArrayList<String>
                         if (!blockedList.contains(userId)) {
-                            try {
-                                var userId = document.data?.getValue("userId").toString()
-                                var username =
-                                    document.data?.getValue("username").toString()
-                                var stepCount = document.data?.getValue("stepCount") as Long
-                                var diaryId = document.data?.getValue("diaryId").toString()
-                                var numLikes = document.data?.getValue("numLikes") as Long
-                                var numComments =
-                                    document.data?.getValue("numComments") as Long
-                                var timefromdb =
-                                    document.data?.getValue("timestamp") as com.google.firebase.Timestamp
-                                var imageList =
-                                    document.data?.getValue("images") as ArrayList<String>
+                            var diaryUserId = document.data?.getValue("userId").toString()
+                            var username =
+                                document.data?.getValue("username").toString()
+                            var diaryId = document.data?.getValue("diaryId").toString()
+                            var numLikes = document.data?.getValue("numLikes") as Long
+                            var numComments =
+                                document.data?.getValue("numComments") as Long
+                            var timefromdb =
+                                document.data?.getValue("timestamp") as com.google.firebase.Timestamp
+                            var timeDate = DateFormat().convertTimeStampToDate(timefromdb)
+                            var diaryMood =
+                                (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long
+                            var diaryDiary = document.data?.getValue("todayDiary").toString()
 
-                                // items 추가
-                                diarySet = DiaryCard(
-                                    userId,
-                                    username,
-                                    diaryId,
-                                    DateFormat().convertMillis(timefromdb),
-                                    username,
-                                    stepCount,
-                                    (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
-                                    document.data?.getValue("todayDiary").toString(),
-                                    numLikes,
-                                    numComments,
-                                    imageList
-                                )
-                            } catch (e: Exception) {
-                                var userId = document.data?.getValue("userId").toString()
-                                var username =
-                                    document.data?.getValue("username").toString()
-                                var stepCount = document.data?.getValue("stepCount") as Long
-                                var diaryId = document.data?.getValue("diaryId").toString()
-                                var numLikes = document.data?.getValue("numLikes") as Long
-                                var numComments =
-                                    document.data?.getValue("numComments") as Long
-                                var timefromdb =
-                                    document.data?.getValue("timestamp") as com.google.firebase.Timestamp
+                            db.collection("user_step_count")
+                                .document("$diaryUserId")
+                                .get()
+                                .addOnCompleteListener { task ->
+                                    var stepDocuments = task.result
+                                    stepDocuments.data?.forEach { stepDoc ->
+                                        if (stepDoc.key == timeDate) {
+                                            var stepValue = stepDoc.value as Long
 
-                                // items 추가
-                                diarySet = DiaryCard(
-                                    userId,
-                                    username,
-                                    diaryId,
-                                    DateFormat().convertMillis(timefromdb),
-                                    username,
-                                    stepCount,
-                                    (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
-                                    document.data?.getValue("todayDiary").toString(),
-                                    numLikes,
-                                    numComments,
-                                )
-                            }
-                            diaryItems.add(diarySet)
-                            diaryItems.sortWith(compareBy({ it.writeTime }))
-                            diaryItems.reverse()
-                            adapter.notifyDataSetChanged()
+                                            // items 추가
+                                            diarySet = DiaryCard(
+                                                diaryUserId,
+                                                username,
+                                                diaryId,
+                                                DateFormat().convertMillis(timefromdb),
+                                                username,
+                                                stepValue,
+                                                diaryMood,
+                                                diaryDiary,
+                                                numLikes,
+                                                numComments,
+                                            )
+                                            diaryItems.add(diarySet)
+                                        }
+                                    }
+                                    diaryItems.sortWith(compareBy({ it.writeTime }))
+                                    diaryItems.reverse()
+                                    adapter.notifyDataSetChanged()
+
+                                    binding.recyclerDiary.adapter = adapter
+                                    binding.recyclerDiary.layoutManager =
+                                        LinearLayoutManagerWrapper(
+                                            requireContext(),
+                                            RecyclerView.VERTICAL,
+                                            false
+                                        )
+                                    if (diaryItems.size == 0) {
+                                        binding.noItemText.visibility = View.VISIBLE
+                                    } else {
+                                        binding.noItemText.visibility = View.GONE
+                                    }
+                                    dataLoadingState.loadingCompleteData.value = true
+                                }
                         }
 
-                        binding.recyclerDiary.adapter = adapter
-                        binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
-                            requireContext(),
-                            RecyclerView.VERTICAL,
-                            false
-                        )
-                        if (diaryItems.size == 0) {
-                            Log.d("지역보기", "0 임")
-                            binding.noItemText.visibility = View.VISIBLE
-                        } else {
-                            Log.d("지역보기", "0 이 아님")
-                            binding.noItemText.visibility = View.GONE
-                        }
                     }
+
 
                 }
         } else {
@@ -317,97 +293,77 @@ class AllDiaryFragment : Fragment() {
                     diaryDB
                         .whereEqualTo("regionGroup", userRegionGroup)
                         .get()
-                        .addOnSuccessListener { documents ->
-                            dataLoadingState.loadingCompleteData.value = true
-
-                            for (document in documents) {
-                                var blockedList =
-                                    document.data?.getValue("blockedBy") as ArrayList<String>
-                                if (!blockedList.contains(userId)) {
-                                    try {
-                                        var userId =
+                        .addOnCompleteListener { task ->
+                            var regionDocuments = task.result
+                            if (!regionDocuments.isEmpty) {
+                                for (document in regionDocuments) {
+                                    var blockedList =
+                                        document.data?.getValue("blockedBy") as ArrayList<String>
+                                    if (!blockedList.contains(userId)) {
+                                        var diaryUserId =
                                             document.data?.getValue("userId").toString()
                                         var username =
                                             document.data?.getValue("username").toString()
-                                        var stepCount =
-                                            document.data?.getValue("stepCount") as Long
-                                        var diaryId =
-                                            document.data?.getValue("diaryId").toString()
-                                        var numLikes =
-                                            document.data?.getValue("numLikes") as Long
+                                        var diaryId = document.data?.getValue("diaryId").toString()
+                                        var numLikes = document.data?.getValue("numLikes") as Long
                                         var numComments =
                                             document.data?.getValue("numComments") as Long
                                         var timefromdb =
                                             document.data?.getValue("timestamp") as com.google.firebase.Timestamp
-                                        var imageList =
-                                            document.data?.getValue("images") as ArrayList<String>
+                                        var timeDate =
+                                            DateFormat().convertTimeStampToDate(timefromdb)
+                                        var diaryMood =
+                                            (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long
+                                        var diaryDiary =
+                                            document.data?.getValue("todayDiary").toString()
 
-                                        // items 추가
-                                        diarySet = DiaryCard(
-                                            userId,
-                                            username,
-                                            diaryId,
-                                            DateFormat().convertMillis(timefromdb),
-                                            username,
-                                            stepCount,
-                                            (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
-                                            document.data?.getValue("todayDiary").toString(),
-                                            numLikes,
-                                            numComments,
-                                            imageList
-                                        )
-                                    } catch (e: Exception) {
-                                        var userId =
-                                            document.data?.getValue("userId").toString()
-                                        var username =
-                                            document.data?.getValue("username").toString()
-                                        var stepCount =
-                                            document.data?.getValue("stepCount") as Long
-                                        var diaryId =
-                                            document.data?.getValue("diaryId").toString()
-                                        var numLikes =
-                                            document.data?.getValue("numLikes") as Long
-                                        var numComments =
-                                            document.data?.getValue("numComments") as Long
-                                        var timefromdb =
-                                            document.data?.getValue("timestamp") as com.google.firebase.Timestamp
+                                        db.collection("user_step_count")
+                                            .document("$diaryUserId")
+                                            .get()
+                                            .addOnCompleteListener { task ->
+                                                var stepDocuments = task.result
+                                                stepDocuments.data?.forEach { stepDoc ->
+                                                    if (stepDoc.key == timeDate) {
+                                                        var stepValue = stepDoc.value as Long
 
-                                        // items 추가
-                                        diarySet = DiaryCard(
-                                            userId,
-                                            username,
-                                            diaryId,
-                                            DateFormat().convertMillis(timefromdb),
-                                            username,
-                                            stepCount,
-                                            (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long,
-                                            document.data?.getValue("todayDiary").toString(),
-                                            numLikes,
-                                            numComments,
-                                        )
+                                                        // items 추가
+                                                        diarySet = DiaryCard(
+                                                            diaryUserId,
+                                                            username,
+                                                            diaryId,
+                                                            DateFormat().convertMillis(timefromdb),
+                                                            username,
+                                                            stepValue,
+                                                            diaryMood,
+                                                            diaryDiary,
+                                                            numLikes,
+                                                            numComments,
+                                                        )
+                                                        diaryItems.add(diarySet)
+                                                    }
+                                                }
+
+                                                diaryItems.sortWith(compareBy({ it.writeTime }))
+                                                diaryItems.reverse()
+                                                adapter.notifyDataSetChanged()
+
+                                                binding.recyclerDiary.adapter = adapter
+                                                binding.recyclerDiary.layoutManager =
+                                                    LinearLayoutManagerWrapper(
+                                                        requireContext(),
+                                                        RecyclerView.VERTICAL,
+                                                        false
+                                                    )
+                                                binding.noItemText.visibility = View.GONE
+                                                dataLoadingState.loadingCompleteData.value = true
+                                            }
                                     }
-
-                                    diaryItems.add(diarySet)
-                                    diaryItems.sortWith(compareBy({ it.writeTime }))
-                                    diaryItems.reverse()
-                                    adapter.notifyDataSetChanged()
                                 }
-
-                                Log.d("지역보기1", "${diaryItems.size}")
-                            }
-                            binding.recyclerDiary.adapter = adapter
-                            binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
-                                requireContext(),
-                                RecyclerView.VERTICAL,
-                                false
-                            )
-                            Log.d("지역보기2", "${diaryItems.size}")
-                            if (diaryItems.size == 0) {
-                                Log.d("지역보기", "0 임")
-                                binding.noItemText.visibility = View.VISIBLE
                             } else {
-                                Log.d("지역보기", "0 이 아님")
-                                binding.noItemText.visibility = View.GONE
+                                // 다이어리가 비었을 때
+                                adapter.notifyDataSetChanged()
+                                binding.noItemText.visibility = View.VISIBLE
+                                dataLoadingState.loadingCompleteData.value = true
                             }
                         }
                 }

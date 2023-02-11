@@ -4,7 +4,7 @@
         <layer-list>
             <item>
                 <shape android:shape="oval">
-                    <solid android:color="#4DACABAB" />
+                    <solid android:color="#66ACABAB" />
                 </shape>
             </item>
             <item android:drawable="@drawable/ic_arrow_back_gray" />
@@ -14,7 +14,7 @@
         <layer-list>
             <item>
                 <shape android:shape="oval">
-                    <solid android:color="#4DACABAB" />
+                    <solid android:color="#66ACABAB" />
                 </shape>
             </item>
             <item android:drawable="@drawable/ic_arrow_back_gray" />
