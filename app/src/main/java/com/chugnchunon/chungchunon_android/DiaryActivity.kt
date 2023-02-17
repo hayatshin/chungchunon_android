@@ -2,41 +2,24 @@ package com.chugnchunon.chungchunon_android
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.marginTop
-import androidx.fragment.app.FragmentManager
-import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.chugnchunon.chungchunon_android.Adapter.TabPageAdapter
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
+import com.chugnchunon.chungchunon_android.Adapter.PartnerTabPageAdapter
+import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
-import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_diary.*
 import java.time.LocalDateTime
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class DiaryActivity : AppCompatActivity() {
 
@@ -107,7 +90,7 @@ class DiaryActivity : AppCompatActivity() {
     private fun setUpTabBar() {
         Log.d("결과결과", "$from")
 
-        val adapter = TabPageAdapter(this, tabLayout.tabCount)
+        val adapter = PartnerTabPageAdapter(this, tabLayout.tabCount)
         viewPager.adapter = adapter
 
 

@@ -1,57 +1,59 @@
 package com.chugnchunon.chungchunon_android
 
-import android.animation.ObjectAnimator
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.content.pm.PackageManager
 import android.graphics.PorterDuff
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.provider.Telephony
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.DecelerateInterpolator
+import android.view.View.OnTouchListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.marginRight
-import androidx.core.view.marginTop
-import androidx.core.view.setMargins
-import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
-import com.firebase.ui.auth.ui.ProgressView
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
-import com.google.firebase.auth.*
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_register.*
-import org.checkerframework.checker.units.qual.Angle
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.concurrent.timer
+
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -82,22 +84,45 @@ class RegisterActivity : AppCompatActivity() {
     var deltaTime = 0
 
     lateinit var authEditTextView: EditText
+    lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    lateinit var avatarUri: Uri
 
+    private val REQUEST_PHOTO_PERMISSION = 300
+    lateinit var metrics : DisplayMetrics
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        openGalleryForImages()
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+
         var userType = intent.getStringExtra("userType")
 
-        binding.goBackBtn.setOnClickListener {
-            finish()
-        }
+//        binding.nameInput.inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+
+        binding.innerScrollView.setOnTouchListener(OnTouchListener { v, event ->
+            if (event != null && event.action == MotionEvent.ACTION_MOVE) {
+                val imm = this.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                val isKeyboardUp = imm.isAcceptingText
+                if (isKeyboardUp) {
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+            false
+        })
 
         binding.authProgressBar.progress = 0
-//        var progressAnimation = ObjectAnimator.ofInt(binding.authProgressBar, "progress", 0, 100)
-//        progressAnimation.setDuration(20000)
-//        progressAnimation.interpolator = DecelerateInterpolator()
-
 
         binding.authProgressBar.visibility = View.GONE
         binding.phoneAuthBtn.isEnabled = false
@@ -108,32 +133,44 @@ class RegisterActivity : AppCompatActivity() {
         phoneTxtCheck = ViewModelProvider(this).get(PhoneFillClass::class.java)
 
 
+        totalTxtCheck.avatarFill.observe(this, Observer { value ->
+            binding.registerBtn.isEnabled =
+                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                        totalTxtCheck.genderFill.value == true &&
+                        totalTxtCheck.birthFill.value == true &&
+                        totalTxtCheck.phoneFill.value == true
+        })
+
         totalTxtCheck.nameFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
-                    totalTxtCheck.genderFill.value == true &&
-                    totalTxtCheck.birthFill.value == true &&
-                    totalTxtCheck.phoneFill.value == true
+            binding.registerBtn.isEnabled =
+                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                        totalTxtCheck.genderFill.value == true &&
+                        totalTxtCheck.birthFill.value == true &&
+                        totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.genderFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
-                    totalTxtCheck.genderFill.value == true &&
-                    totalTxtCheck.birthFill.value == true &&
-                    totalTxtCheck.phoneFill.value == true
+            binding.registerBtn.isEnabled =
+                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                        totalTxtCheck.genderFill.value == true &&
+                        totalTxtCheck.birthFill.value == true &&
+                        totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.birthFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
-                    totalTxtCheck.genderFill.value == true &&
-                    totalTxtCheck.birthFill.value == true &&
-                    totalTxtCheck.phoneFill.value == true
+            binding.registerBtn.isEnabled =
+                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                        totalTxtCheck.genderFill.value == true &&
+                        totalTxtCheck.birthFill.value == true &&
+                        totalTxtCheck.phoneFill.value == true
         })
 
         totalTxtCheck.phoneFill.observe(this, Observer { value ->
-            binding.registerBtn.isEnabled = totalTxtCheck.nameFill.value == true &&
-                    totalTxtCheck.genderFill.value == true &&
-                    totalTxtCheck.birthFill.value == true &&
-                    totalTxtCheck.phoneFill.value == true
+            binding.registerBtn.isEnabled =
+                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                        totalTxtCheck.genderFill.value == true &&
+                        totalTxtCheck.birthFill.value == true &&
+                        totalTxtCheck.phoneFill.value == true
         })
 
         phoneTxtCheck.phoneEditText1.observe(this, Observer { value ->
@@ -148,6 +185,35 @@ class RegisterActivity : AppCompatActivity() {
                 phoneTxtCheck.phoneEditText1.value == true && phoneTxtCheck.phoneEditText2.value == true
         })
 
+
+        // 사진 업로드
+        activityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == RESULT_OK) {
+                    avatarUri = it.data?.data!!
+                    binding.avatarImage.setImageURI(avatarUri)
+                    totalTxtCheck.avatarFill.value = true
+                }
+            }
+
+
+        binding.avatarButton.setOnClickListener {
+            // 권한 질문
+
+            val readPermission =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+            if (readPermission == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_PHOTO_PERMISSION
+                )
+            } else {
+                // 권한 수락
+                openGalleryForImages()
+            }
+        }
 
         // 이름 입력창
         binding.nameInput.addTextChangedListener(object : TextWatcher {
@@ -169,7 +235,7 @@ class RegisterActivity : AppCompatActivity() {
         binding.genderInput.adapter = ArrayAdapter.createFromResource(
             this,
             R.array.genderList,
-            android.R.layout.simple_spinner_dropdown_item
+            R.layout.item_spinner_gender
         )
 
 
@@ -223,17 +289,17 @@ class RegisterActivity : AppCompatActivity() {
 
                 birthTextView.layoutParams = birthTextViewLayoutParams
                 birthTextView.setTypeface(null, Typeface.BOLD)
-                birthTextView.textSize = 20f
+                birthTextView.setTextSize(dpTextSize(12f))
                 birthTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
                 binding.birthResultBox.addView(birthTextView)
 
                 // 나이 50세 이하
                 var ageTextView = TextView(applicationContext)
                 ageTextView.layoutParams = birthTextViewLayoutParams
-                ageTextView.setTypeface(null, Typeface.BOLD)
-                ageTextView.textSize = 20f
-                ageTextView.setTextColor(ContextCompat.getColor(this, R.color.dark_main_color))
+                ageTextView.setTextColor(ContextCompat.getColor(this, R.color.light_gray))
                 ageTextView.text = "50세 미만은 일기 쓰기가 제한됩니다."
+                ageTextView.setTextSize(dpTextSize(10f))
+
 
                 if (userAge < 50) {
                     binding.birthResultBox.addView(ageTextView)
@@ -353,7 +419,7 @@ class RegisterActivity : AppCompatActivity() {
 
                     var failTextView = TextView(applicationContext)
                     failTextView.text = "인증에 실패했습니다."
-                    failTextView.textSize = 20f
+                    failTextView.setTextSize(dpTextSize(12f))
                     failTextView.gravity = Gravity.END
                     failTextView.layoutParams = resultparams
                     failTextView.setTextColor(
@@ -368,7 +434,7 @@ class RegisterActivity : AppCompatActivity() {
                     if (exception is FirebaseTooManyRequestsException) {
                         var tooManyTextView = TextView(applicationContext)
                         tooManyTextView.text = "인증요청 제한 횟수를 초과했습니다.\n추후에 다시 시도해주세요."
-                        tooManyTextView.textSize = 14f
+                        tooManyTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10f)
                         tooManyTextView.gravity = Gravity.END
                         tooManyTextView.layoutParams = resultparams
                         tooManyTextView.setTextColor(
@@ -397,26 +463,29 @@ class RegisterActivity : AppCompatActivity() {
                     authEditTextView = EditText(applicationContext)
                     authEditTextView.setRawInputType(InputType.TYPE_CLASS_NUMBER)
                     var drawableBox =
-                        ResourcesCompat.getDrawable(resources, R.drawable.mindbox, null)
+                        ResourcesCompat.getDrawable(resources, R.drawable.register_fill_box, null)
+
+                    val authParams = RelativeLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    )
+                    authParams.setMargins(0, 0, 20, 0)
+                    authEditTextView.layoutParams = authParams
+                    authEditTextView.background = drawableBox
+                    authEditTextView.hint = "인증번호 입력하기"
+                    authEditTextView.setTextSize(dpTextSize(10f))
+                    authEditTextView.gravity = Gravity.CENTER
+
+                    // 인증 확인
 
                     val params = RelativeLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                     )
-                    params.setMargins(0, 0, 15, 0)
-                    authEditTextView.layoutParams = params
-                    authEditTextView.background = drawableBox
-                    authEditTextView.hint = "인증번호 입력하기"
-                    authEditTextView.paddingLeft.plus(10)
-                    authEditTextView.paddingRight.plus(10)
-                    authEditTextView.width = 400
-                    authEditTextView.gravity = Gravity.CENTER
-
-                    // 인증 확인
                     var authBtn = Button(applicationContext)
-                    authBtn.setBackgroundResource(R.drawable.default_button)
+                    authBtn.setBackgroundResource(R.drawable.sub_button)
                     authBtn.layoutParams = layoutParams
-                    authBtn.textSize = 17f
+                    authBtn.setTextSize(dpTextSize(11f))
                     authBtn.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
                     authBtn.setTag("verificationBtn")
                     authBtn.text = "확인"
@@ -481,53 +550,71 @@ class RegisterActivity : AppCompatActivity() {
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
 
-            val phoneNumber =
-                "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+            if(avatarUri != null) {
+                val fileName = UUID.randomUUID().toString()+".jpg"
+                val database = FirebaseDatabase.getInstance()
+                val refStorage = FirebaseStorage.getInstance().reference.child("avatars/$fileName")
 
-            val userId = Firebase.auth.currentUser?.uid
-            val updateUserType = if (userType == "치매예방자" && userAge < 50) "파트너"
-            else if (userType == "치매예방자" && userAge >= 50) "치매예방자"
-            else "파트너"
+                refStorage.putFile(avatarUri)
+                    .addOnSuccessListener(
+                        OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                            taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                                val imageUrl = it.toString()
+                                val phoneNumber =
+                                    "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
-            val userSet = hashMapOf(
-                "userType" to updateUserType,
-                "loginType" to "일반",
-                "userId" to userId,
-                "timestamp" to FieldValue.serverTimestamp(),
-                "name" to (binding.nameInput.text.toString()),
-                "gender" to (binding.genderInput.selectedItem.toString()),
-                "phone" to phoneNumber,
-                "birthYear" to birthYear,
-                "birthDay" to birthDay,
-                "userAge" to userAge,
-                "todayStepCount" to 0,
-            )
+                                val userId = Firebase.auth.currentUser?.uid
+                                val updateUserType = if (userType == "치매예방자" && userAge < 50) "파트너"
+                                else if (userType == "치매예방자" && userAge >= 50) "치매예방자"
+                                else "파트너"
 
-//            var intent = Intent(this, RegionRegisterActivity::class.java)
-//            intent.putExtra("userType", updateUserType)
-//            intent.putExtra("userAge", userAge)
-//            startActivity(intent)
+                                val userSet = hashMapOf(
+                                    "userType" to updateUserType,
+                                    "loginType" to "일반",
+                                    "userId" to userId,
+                                    "timestamp" to FieldValue.serverTimestamp(),
+                                    "name" to (binding.nameInput.text.toString()),
+                                    "avatar" to imageUrl,
+                                    "gender" to (binding.genderInput.selectedItem.toString()),
+                                    "phone" to phoneNumber,
+                                    "birthYear" to birthYear,
+                                    "birthDay" to birthDay,
+                                    "userAge" to userAge,
+                                    "todayStepCount" to 0,
+                                )
 
-            userDB
-                .document("$userId")
-                .set(userSet, SetOptions.merge())
-                .addOnSuccessListener {
-                    var intent = Intent(this, RegionRegisterActivity::class.java)
-                    intent.putExtra("userType", updateUserType)
-                    intent.putExtra("userAge", userAge)
-                    startActivity(intent)
-                }
-                .addOnFailureListener { error ->
-                    Log.d("회원가입 실패", "$error")
-                }
+                                userDB
+                                    .document("$userId")
+                                    .set(userSet, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        var intent = Intent(this, RegionRegisterActivity::class.java)
+                                        intent.putExtra("userType", updateUserType)
+                                        intent.putExtra("userAge", userAge)
+                                        startActivity(intent)
+                                    }
+                                    .addOnFailureListener { error ->
+                                        Log.d("회원가입 실패", "$error")
+                                    }
+                            }
+                        }
+                    )
+                    ?.addOnFailureListener(OnFailureListener { e ->
+                        print(e.message)
+                    })
+            }
+
         }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        hideKeyBoard()
+        return true
+    }
+
+    private fun hideKeyBoard() {
         val imm: InputMethodManager =
             getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-        return true
     }
 
     private fun TimerFun() {
@@ -544,6 +631,15 @@ class RegisterActivity : AppCompatActivity() {
             }
         }.start()
 
+    }
+
+
+    private fun openGalleryForImages() {
+        var intent = Intent(Intent.ACTION_PICK)
+        intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        intent.type = "image/*"
+
+        activityResultLauncher.launch(intent)
     }
 
 
@@ -572,12 +668,12 @@ class RegisterActivity : AppCompatActivity() {
 
                                     if (userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
                                         var goDiary =
-                                            Intent(applicationContext, DiaryActivity::class.java)
+                                            Intent(applicationContext, DiaryTwoActivity::class.java)
                                         startActivity(goDiary)
                                     } else if (userType == "파트너" || (userAge < 50 && userType == "치매예방자")) {
                                         var goDiary = Intent(
                                             applicationContext,
-                                            PartnerDiaryActivity::class.java
+                                            PartnerDiaryTwoActivity::class.java
                                         )
                                         startActivity(goDiary)
                                     }
@@ -589,7 +685,7 @@ class RegisterActivity : AppCompatActivity() {
 
                                     var successTextView = TextView(applicationContext)
                                     successTextView.text = "인증에 성공했습니다."
-                                    successTextView.textSize = 20f
+                                    successTextView.setTextSize(dpTextSize(12f))
                                     successTextView.gravity = Gravity.END
                                     successTextView.layoutParams = phoneResultparams
                                     successTextView.setTextColor(
@@ -610,7 +706,7 @@ class RegisterActivity : AppCompatActivity() {
 
                     var successTextView = TextView(applicationContext)
                     successTextView.text = "인증에 실패했습니다."
-                    successTextView.textSize = 20f
+                    successTextView.setTextSize(dpTextSize(12f))
                     successTextView.gravity = Gravity.END
                     successTextView.layoutParams = phoneResultparams
                     successTextView.setTextColor(
@@ -627,10 +723,19 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
+
+
+    private fun dpTextSize(dp: Float) : Float {
+        metrics = applicationContext.resources.displayMetrics
+        var fpixels = metrics.density * dp
+        var pixels = fpixels * 0.5f
+        return pixels
+    }
 }
 
 
 class FillCheckClass : ViewModel() {
+    val avatarFill by lazy { MutableLiveData<Boolean>(false) }
     val nameFill by lazy { MutableLiveData<Boolean>(false) }
     val genderFill by lazy { MutableLiveData<Boolean>(false) }
     val birthFill by lazy { MutableLiveData<Boolean>(false) }

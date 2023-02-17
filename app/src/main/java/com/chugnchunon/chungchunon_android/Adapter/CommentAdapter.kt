@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.core.os.persistableBundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.R
@@ -40,7 +41,7 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
         var commentDescriptionView: TextView = itemView.findViewById(R.id.commentDescription)
         var commentPartnerCheckImage: ImageView = itemView.findViewById(R.id.partnerCheckImg)
         var commentEditDeleteView = itemView.findViewById<LinearLayout>(R.id.editDeleteLayout)
-
+        var commentAvatar: ImageView = itemView.findViewById(R.id.commentAvatar)
 
         fun bind(position: Int) {
             var commentUserType = items[position].commentUserType
@@ -57,6 +58,10 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
             commentTimeStampView.text = items[position].commentTimestamp
             commentDescriptionView.text = items[position].commentDescription
             originalDescription = items[position].commentDescription
+
+            Glide.with(context)
+                .load(items[position].commentUserAvatar)
+                .into(commentAvatar)
         }
     }
 

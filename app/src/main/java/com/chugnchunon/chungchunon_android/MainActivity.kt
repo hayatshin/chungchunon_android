@@ -17,7 +17,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.chugnchunon.chungchunon_android.KakaoLogin.PartnerSessionCallback
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        enterIconAnimation()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -175,6 +176,25 @@ class MainActivity : AppCompatActivity() {
         Session.getCurrentSession().removeCallback(callback)
     }
 
+    override fun onResume() {
+        super.onResume()
+        enterIconAnimation()
+    }
+
+    private fun enterIconAnimation() {
+        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+//        binding.iconImage.startAnimation(upAnimation)
+
+        binding.iconImage.y = 100f
+        binding.iconImage.animate()
+            .translationY(0f)
+            .setDuration(700)
+
+        binding.iconImage.alpha = 0f
+        binding.iconImage.animate()
+            .alpha(1f)
+            .setDuration(1000)
+    }
 
     // FireAuth 로그아웃
     private fun firebaseLogout() {

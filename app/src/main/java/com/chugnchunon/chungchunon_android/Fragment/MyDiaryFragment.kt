@@ -1,43 +1,34 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
 import com.chugnchunon.chungchunon_android.MyService
-import com.chugnchunon.chungchunon_android.MyService.Companion.todayTotalStepCount
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.Insets.add
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
-import android.text.style.BackgroundColorSpan
-import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
-import android.widget.TextView
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.registerForActivityResult
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.color
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Mood
@@ -48,31 +39,17 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_diary.*
-import kotlinx.android.synthetic.main.fragment_my_diary.*
 import java.time.LocalDateTime
 import java.util.*
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.DateChangeBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
-import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
-import com.chugnchunon.chungchunon_android.DiaryActivity
-import com.chugnchunon.chungchunon_android.FillCheckClass
-import com.google.android.gms.auth.account.WorkAccount.API
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.Scopes
-import com.google.android.gms.fido.fido2.api.common.RequestOptions
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.FirebaseDatabase
@@ -80,11 +57,7 @@ import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
-import kotlinx.android.synthetic.main.diary_card.*
 import org.apache.commons.lang3.StringUtils
-import java.io.File
-import java.lang.Exception
-import java.time.LocalDate
 import kotlin.collections.ArrayList
 
 class MyDiaryFragment : Fragment() {
@@ -101,7 +74,7 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var step_sensor: Sensor
 
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
-//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
@@ -111,17 +84,19 @@ class MyDiaryFragment : Fragment() {
 
     lateinit var diaryFillCheck: DiaryFillClass
     lateinit var diaryEditCheck: DiaryEditClass
+    lateinit var imageSizeCheck: ImageSizeCheck
 
     private var editDiary: Boolean = false
 
     // 갤러리 사진 열람
     companion object {
+        //        var imageArray = ArrayList<Uri>()
         const val REQ_GALLERY = 200
     }
 
-    private var imageArray = ArrayList<Uri>()
     lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
-    lateinit var adapter : UploadPhotosAdapter
+    lateinit var photoAdapter: UploadPhotosAdapter
+    lateinit var photoStringList: ArrayList<String>
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
@@ -131,14 +106,30 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        // 이미지 삭제 로컬 브로드캐스트
-        adapter  = UploadPhotosAdapter(requireActivity(), imageArray)
-        binding.imageRecyclerView.adapter = adapter
+        // 이미지 애니메이션
+        var womanIcon = binding.womanIcon
+        var manIcon = binding.manIcon
 
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            deleteImageFunction,
-            IntentFilter("DELETE_IMAGE")
-        );
+        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
+        womananimation.setDuration(300)
+        womananimation.repeatCount = 2
+        womananimation.interpolator = LinearInterpolator()
+        womananimation.start()
+
+        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
+        manAnimation.setDuration(300)
+        manAnimation.repeatCount = 2
+        manAnimation.interpolator = LinearInterpolator()
+        manAnimation.start()
+
+        diaryFillCheck = ViewModelProvider(requireActivity()).get(DiaryFillClass::class.java)
+        diaryEditCheck = ViewModelProvider(requireActivity()).get(DiaryEditClass::class.java)
+        imageSizeCheck = ViewModelProvider(requireActivity()).get(ImageSizeCheck::class.java)
+
+
+        // 이미지 삭제 로컬 브로드캐스트
+
+
 
 //        var startService = Intent(activity, MyService::class.java)
 //        activity?.let { ContextCompat.startForegroundService(it, startService) }
@@ -155,14 +146,13 @@ class MyDiaryFragment : Fragment() {
 //            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 //        }
 
-        diaryFillCheck = ViewModelProvider(requireActivity()).get(DiaryFillClass::class.java)
-        diaryEditCheck = ViewModelProvider(requireActivity()).get(DiaryEditClass::class.java)
+
         binding.diaryBtn.isEnabled = false
 
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer { value ->
-            if(diaryFillCheck.diaryFill.value!! && !editDiary) {
+            if (diaryFillCheck.diaryFill.value!! && !editDiary) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-            } else if(!diaryFillCheck.diaryFill.value!! && !editDiary) {
+            } else if (!diaryFillCheck.diaryFill.value!! && !editDiary) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
@@ -172,7 +162,7 @@ class MyDiaryFragment : Fragment() {
         // 수정
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer { value ->
 
-            if(diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            if (diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
@@ -181,13 +171,20 @@ class MyDiaryFragment : Fragment() {
 
         diaryEditCheck.moodEdit.observe(requireActivity(), Observer { value ->
 
-            if(diaryEditCheck.moodEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            if (diaryEditCheck.moodEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
 
                 var nowMood = (binding.todayMood.selectedItem as Mood).image
                 Log.d("체크", "$nowMood")
+            }
+        })
+
+        imageSizeCheck.imageList.observe(requireActivity(), Observer { value ->
+            if (imageSizeCheck.imageList.value!!.size == 0) {
+                binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+                binding.photoRecyclerView.visibility = View.GONE
             }
         })
 
@@ -200,10 +197,11 @@ class MyDiaryFragment : Fragment() {
         val dateUI = StringUtils.stripStart(date, "0");
 
         // 요일
-        val sdf = java.text.SimpleDateFormat("EEEE")
+        val sdf = java.text.SimpleDateFormat("EEE")
         val dayOfTheWeek = sdf.format(Date())
 
-        binding.todayDate.text = "${monthUI}월 ${dateUI}일 ${dayOfTheWeek}"
+        binding.todayDate.text = "${monthUI}월 ${dateUI}일 (${dayOfTheWeek})"
+
 
         diaryDB
             .document("${userId}_${writeTime}")
@@ -216,21 +214,24 @@ class MyDiaryFragment : Fragment() {
                             // 일기 작성을 한 상태
 
                             // 이미지 보여주기
-//                            try {
-//                                var imageList = document.data?.getValue("images") as ArrayList<String>
-//
-//                                for (i in 0 until imageList.size){
-//                                    var uriParseImage = Uri.parse(imageList[i])
-//                                    imageArray.add(uriParseImage)
-//                                }
-//
-//                                binding.imageRecyclerView.adapter = adapter
-//
-//                            } catch (e: Exception) {
-//                                // null
-//                                Log.d("이미지결과2", "no")
-//
-//                            }
+                            if (document.data?.contains("images") == true) {
+                                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+                                var imageList =
+                                    document.data?.getValue("images") as ArrayList<String>
+                                binding.photoRecyclerView.visibility = View.VISIBLE
+
+                                for (i in 0 until imageList.size) {
+                                    var uriParseImage = Uri.parse(imageList[i])
+                                    imageSizeCheck.addImage(uriParseImage)
+                                }
+                                photoAdapter.notifyDataSetChanged()
+
+                            } else {
+                                // null
+                                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+                                binding.photoRecyclerView.visibility = View.GONE
+                            }
 
                             binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
                             binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -335,10 +336,7 @@ class MyDiaryFragment : Fragment() {
         currentMonth = LocalDateTime.now().toString().substring(0, 7)
 
 
-
-
-
-
+        // 사진 업로드
         fun openGalleryForImages() {
             Log.d("이미지", "오픈갤러리")
             var intent = Intent(Intent.ACTION_PICK)
@@ -349,28 +347,63 @@ class MyDiaryFragment : Fragment() {
             activityResultLauncher.launch(intent)
         }
 
-        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if(it.resultCode == RESULT_OK) {
-                if (it.data?.clipData != null) {
-                    val count = it.data!!.clipData!!.itemCount
-                    for(i in 0 until count) {
-                        val imageUri = it.data?.clipData!!.getItemAt(i).uri
-                        imageArray.add(imageUri)
+        activityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == RESULT_OK) {
+                    if (it.data?.clipData != null) {
+                        binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+                        val count = it.data!!.clipData!!.itemCount
+                        for (i in 0 until count) {
+                            val imageUri = it.data?.clipData!!.getItemAt(i).uri
+                            imageSizeCheck.addImage(imageUri)
+                        }
+
+                        photoAdapter = UploadPhotosAdapter(requireActivity(), imageSizeCheck.imageList.value!!)
+                        binding.photoRecyclerView.adapter = photoAdapter
+                        photoAdapter.notifyDataSetChanged()
+
+                        binding.photoRecyclerView.visibility = View.VISIBLE
+                        binding.photoRecyclerView.alpha = 0f
+                        binding.photoRecyclerView.y = -50f
+
+                        binding.photoRecyclerView.animate()
+                            .translationY(0f)
+                            .setDuration(500)
+                            .setInterpolator(LinearInterpolator())
+                            .start()
+
+                        binding.photoRecyclerView.animate()
+                            .alpha(1f)
+                            .setDuration(600)
+                            .setInterpolator(LinearInterpolator())
+                            .start()
                     }
-                    adapter.notifyDataSetChanged()
                 }
             }
-        }
 
 
         fun selectGallery() {
-            val writePermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            val readPermission = ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
+            val writePermission = ContextCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            val readPermission = ContextCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
 
             // 권한 확인
-            if(writePermission == PackageManager.PERMISSION_DENIED || readPermission == PackageManager.PERMISSION_DENIED){
+            if (writePermission == PackageManager.PERMISSION_DENIED || readPermission == PackageManager.PERMISSION_DENIED) {
                 // 권한 요청
-                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ),
+                    1
+                )
 
                 // 권한이 있는 경우 실행
                 openGalleryForImages()
@@ -381,17 +414,17 @@ class MyDiaryFragment : Fragment() {
 
 
         // 사진 가져오기 권한 체크
-//        binding.uploadPhoto.setOnClickListener {
-//            selectGallery()
-//        }
+        binding.photoButton.setOnClickListener {
+            selectGallery()
+        }
 
 
-        // 다이어리 업데이트
-//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-//
-//        val diaryChangeIntent = IntentFilter()
-//        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-//        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
+//         다이어리 업데이트
+        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
+
+        val diaryChangeIntent = IntentFilter()
+        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
 
 
         // 걸음수 셋업
@@ -437,12 +470,12 @@ class MyDiaryFragment : Fragment() {
                     Mood(R.drawable.ic_sad, "슬퍼요", 5),
                     Mood(R.drawable.ic_gloomy, "우울해요", 6),
                     Mood(R.drawable.ic_angry, "화나요", 7),
-                    )
+                )
             )
         }
 
 
-        binding.todayMood.setOnTouchListener (object : View.OnTouchListener {
+        binding.todayMood.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
                 binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
                 return false
@@ -485,6 +518,11 @@ class MyDiaryFragment : Fragment() {
             val writeTime = LocalDateTime.now()
             var diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
+            if(imageSizeCheck.imageList.value != null) {
+                for (i in 0 until imageSizeCheck.imageList.value!!.size) {
+                    uploadImageToFirebase(imageSizeCheck.imageList.value!![i])
+                }
+            }
 
             userDB.document("$userId").get()
                 .addOnSuccessListener { document ->
@@ -497,11 +535,11 @@ class MyDiaryFragment : Fragment() {
                         "regionGroup" to regionGroup,
                         "diaryId" to diaryId,
                         "userId" to userId.toString(),
-                        "username" to username,
                         "monthDate" to writeMonthDate,
                         "timestamp" to FieldValue.serverTimestamp(),
                         "todayMood" to binding.todayMood.selectedItem,
                         "todayDiary" to (binding.todayDiary.text.toString()),
+                        "images" to photoStringList,
                         "numLikes" to 0,
                         "numComments" to 0,
                         "blockedBy" to ArrayList<String>(),
@@ -511,14 +549,10 @@ class MyDiaryFragment : Fragment() {
                         .document(diaryId)
                         .set(diarySet, SetOptions.merge())
                         .addOnSuccessListener {
-                            var intent = Intent(activity, DiaryActivity::class.java)
+                            var intent = Intent(activity, DiaryTwoActivity::class.java)
                             startActivity(intent)
                         }
                 }
-
-            for (i in 0 until imageArray.size){
-                uploadImageToFirebase(imageArray[i])
-            }
         }
 
 
@@ -542,7 +576,8 @@ class MyDiaryFragment : Fragment() {
             val spokenText: String? =
                 result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     .let { text -> text?.get(0) }
-            var recordDiaryText = if("${binding.todayDiary.text}" == "") "${spokenText}" else "${binding.todayDiary.text} ${spokenText}"
+            var recordDiaryText =
+                if ("${binding.todayDiary.text}" == "") "${spokenText}" else "${binding.todayDiary.text} ${spokenText}"
             binding.todayDiary.setText(recordDiaryText)
         }
     }
@@ -553,10 +588,63 @@ class MyDiaryFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 이미지 애니메이션
+        var womanIcon = binding.womanIcon
+        var manIcon = binding.manIcon
+
+        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
+        womananimation.setDuration(300)
+        womananimation.repeatCount = 2
+        womananimation.interpolator = LinearInterpolator()
+        womananimation.start()
+
+        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
+        manAnimation.setDuration(300)
+        manAnimation.repeatCount = 2
+        manAnimation.interpolator = LinearInterpolator()
+        manAnimation.start()
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            deleteImageFunction,
+            IntentFilter("DELETE_IMAGE")
+        );
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(requireActivity())
+            .unregisterReceiver(deleteImageFunction);
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
-//        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
+        LocalBroadcastManager.getInstance(requireActivity())
+            .unregisterReceiver(deleteImageFunction);
+    }
+
+
+    private fun uploadImageToFirebase(fileUri: Uri) {
+        if (fileUri != null) {
+            val fileName = UUID.randomUUID().toString() + ".jpg"
+            val database = FirebaseDatabase.getInstance()
+            val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+
+            refStorage.putFile(fileUri)
+                .addOnSuccessListener(
+                    OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                        taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                            val imageUrl = it.toString()
+                            photoStringList.add(imageUrl)
+                        }
+                    }
+                )
+                ?.addOnFailureListener(OnFailureListener { e ->
+                    print(e.message)
+                })
+        }
     }
 
     private fun registerStepCountNotificationBroadCastReceiver() {
@@ -578,22 +666,45 @@ class MyDiaryFragment : Fragment() {
 
                 Log.d("걸음수", "$todayTotalStepCount")
 
-                if(todayTotalStepCount >= 3000) {
+                if (todayTotalStepCount >= 3000) {
                     binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
                 }
             }
         }
     }
 
-    var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver(){
+
+    // 갤러리
+
+    private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             var deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
-            imageArray.removeAt(deleteImagePosition!!)
-            adapter.notifyDataSetChanged()
+
+            imageSizeCheck.removeImage(deleteImagePosition!!.toInt())
+            photoAdapter.notifyDataSetChanged()
+
         }
     }
 }
 
+class ImageSizeCheck : ViewModel() {
+    var imageList = MutableLiveData<List<Uri>>()
+    var imageListValue = imageList.value
+    var templateList = mutableListOf<Uri>()
+
+    fun addImage(addImage: Uri) {
+        imageListValue?.forEach { data ->
+            templateList.add(data)
+        }
+        templateList.add(addImage)
+        imageList.value = templateList
+    }
+
+    fun removeImage(removePosition: Int) {
+        templateList.removeAt(removePosition)
+        imageList.value = templateList
+    }
+}
 
 class DiaryFillClass : ViewModel() {
     val diaryFill by lazy { MutableLiveData<Boolean>(false) }
@@ -605,23 +716,3 @@ class DiaryEditClass : ViewModel() {
     val moodEdit by lazy { MutableLiveData<Boolean>(false) }
 }
 
-private fun uploadImageToFirebase(fileUri: Uri) {
-    if(fileUri != null) {
-        val fileName = UUID.randomUUID().toString()+".jpg"
-        val database = FirebaseDatabase.getInstance()
-        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
-
-        refStorage.putFile(fileUri)
-            .addOnSuccessListener(
-                OnSuccessListener<UploadTask.TaskSnapshot> {taskSnapshot ->
-                    taskSnapshot.storage.downloadUrl.addOnSuccessListener {
-                        val imageUrl = it.toString()
-                        Log.d("이미지 업로드", "$imageUrl")
-                    }
-                }
-            )
-            ?.addOnFailureListener(OnFailureListener { e ->
-                print(e.message)
-            })
-    }
- }

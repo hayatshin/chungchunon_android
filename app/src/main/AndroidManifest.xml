@@ -7,8 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>-->
-<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".GlobalApplication"
@@ -63,7 +62,7 @@
             android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".DiaryActivity"
+            android:name=".DiaryTwoActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".RegionRegisterActivity"
@@ -79,7 +78,7 @@
             android:name=".PersonalInfoRuleActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Partner.PartnerDiaryActivity"
+            android:name=".Partner.PartnerDiaryTwoActivity"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
@@ -95,6 +94,9 @@
             android:name=".BlockActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".EditDiaryActivity"
+            android:windowSoftInputMode="adjustPan" />
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:exported="true">

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/myTodayMenu"
+        android:icon="@drawable/menu_diary"
+        android:title="일기"  />
+    <item
+        android:id="@+id/ourTodayMenu"
+        android:icon="@drawable/menu_our_diary"
+        android:title="모음" />
+    <item
+        android:id="@+id/missionMenu"
+        android:icon="@drawable/menu_trophy"
+        android:title="미션" />
+    <item
+        android:id="@+id/moreMenu"
+        android:icon="@drawable/ic_hamburger"
+        tools:ignore="MenuTitle" />
+</menu>

@@ -3,6 +3,8 @@ package com.chugnchunon.chungchunon_android.Adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.icu.text.DecimalFormat
 import android.util.Log
@@ -14,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.BlockActivity
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
@@ -28,6 +32,7 @@ import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
 import com.chugnchunon.chungchunon_android.R
+import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -49,11 +54,13 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
 
+
+
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        var diaryCardView: LinearLayout = itemView.findViewById(R.id.diaryCard)
         var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
         var userNameView: TextView = itemView.findViewById<TextView>(R.id.userName)
+        var userAvatarView: ImageView = itemView.findViewById<ImageView>(R.id.userAvatar)
         var userStepCountView: TextView = itemView.findViewById<TextView>(R.id.userStepCount)
         var userMoodView: ImageView = itemView.findViewById<ImageView>(R.id.userMood)
         var userDiaryView: TextView = itemView.findViewById<TextView>(R.id.userDiary)
@@ -61,14 +68,21 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
-//        var imageViewPager: ViewPager2 = itemView.findViewById(R.id.imageViewPager)
-
+        var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
 
             var decimal = DecimalFormat("#,###")
             var step = decimal.format(items[position].stepCount)
+
+            if (items[position].userAvatar != null) {
+                Glide.with(context)
+                    .load(items[position].userAvatar)
+                    .into(userAvatarView)
+            } else {
+                // nothing
+            }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
             userNameView.text = items[position].name
@@ -78,16 +92,26 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
 
-            // 이미지 작업
-//            if (items[position].imageList != null) {
-//                imageViewPager.visibility = View.VISIBLE
-//                imageViewPager.adapter = DisplayImageAdapter(context, items[position].imageList)
-//
-//            } else {
-//                imageViewPager.visibility = View.GONE
-//            }
+            when(items[position].mood!!.toInt()) {
+                0 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.main_color))
+                1 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.shalom_color))
+                2 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.throb_color))
+                3 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.soso_color))
+                4 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.anxious_color))
+                5 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.sad_color))
+                6 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.gloomy_color))
+                7 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.angry_color))
+            }
 
-            // 내가 쓴 글 백그라운드 처리
+            // 이미지 작업
+
+            if(items[position].images == null || items[position].images?.size == 0) {
+                imageDisplayRecyclerView.visibility = View.GONE
+            } else {
+                imageDisplayRecyclerView.visibility = View.VISIBLE
+                imageDisplayRecyclerView.adapter = DisplayPhotosAdapter(context, items[position].images!!)
+            }
+
 //            if(items[position].userId == userId) {
 //                var backgroundDrawable = ContextCompat.getDrawable(context, R.drawable.my_diary_background)
 //                diaryCardView.setBackgroundDrawable(backgroundDrawable)
@@ -116,13 +140,15 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.diary_card, parent, false)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.diary_card_two, parent, false)
         return CardViewHolder(v)
     }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder.bind(position)
+
+
 
         holder.itemView.likeBox.setOnClickListener { view ->
 

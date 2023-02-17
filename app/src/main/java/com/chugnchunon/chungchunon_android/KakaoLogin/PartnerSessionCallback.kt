@@ -4,10 +4,10 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import com.chugnchunon.chungchunon_android.DiaryActivity
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.R
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
@@ -55,6 +55,7 @@ class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
                         "userId" to (result.id),
                         "timestamp" to FieldValue.serverTimestamp(),
                         "name" to (result.nickname),
+                        "avatar" to result.thumbnailImagePath,
                         "gender" to gender,
                         "phone" to phoneNumber,
                         "birthYear" to result.kakaoAccount?.birthyear,
@@ -84,12 +85,12 @@ class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
 
                                             if(userType == "마스터" || userType == "치매예방자") {
                                                 var goDiary =
-                                                    Intent(context, DiaryActivity::class.java)
+                                                    Intent(context, DiaryTwoActivity::class.java)
                                                 context.startActivity(goDiary)
                                             } else {
                                                 var goDiary = Intent(
                                                     context,
-                                                    PartnerDiaryActivity::class.java
+                                                    PartnerDiaryTwoActivity::class.java
                                                 )
                                                 context.startActivity(goDiary)
                                             }

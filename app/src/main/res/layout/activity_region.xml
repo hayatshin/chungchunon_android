@@ -33,7 +33,7 @@
 
             <TextView
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="15dp"
                 android:text="뒤로 가기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
             android:text="거주지역을 목록에서 선택하세요."
-            android:textSize="16sp"
+            android:textSize="16dp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -61,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="15dp"
-                android:textSize="23sp"
+                android:textSize="23dp"
                 android:textStyle="bold"
                 tools:text="서울특별시" />
 
@@ -70,7 +70,7 @@
                 android:id="@+id/smallRegionResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="23sp"
+                android:textSize="23dp"
                 android:textStyle="bold"
                 tools:text="광진구" />
         </LinearLayout>
@@ -86,13 +86,13 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         android:layout_marginTop="20dp"
         android:id="@+id/regionRegisterBtn"
         android:background="@drawable/default_button"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:text="앱 시작하기"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

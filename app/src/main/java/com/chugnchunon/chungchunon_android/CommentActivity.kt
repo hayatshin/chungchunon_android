@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.os.Handler
-import android.telecom.Call
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -17,20 +16,16 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
-import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -40,9 +35,9 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.diary_card.*
-import java.time.LocalDateTime
+import kotlinx.android.synthetic.main.fragment_region_data.view.*
 
-class CommentActivity : Activity() {
+class CommentActivity : FragmentActivity() {
 
     private val binding by lazy {
         ActivityCommentBinding.inflate(layoutInflater)
@@ -57,6 +52,7 @@ class CommentActivity : Activity() {
     private var commentUserId = ""
     private var username = ""
     private var userType = ""
+    private var userAvatar = ""
 
     private var diaryId: String = ""
     var commentItems: ArrayList<Comment> = ArrayList()
@@ -70,6 +66,7 @@ class CommentActivity : Activity() {
     private var originalDescription: String? = ""
 
     private var diaryPosition: Int? = 0
+    lateinit var commentDataLoading: CommentDataLoading
 
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +76,23 @@ class CommentActivity : Activity() {
         var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.commentLayout.startAnimation(upAnimation)
 
+        commentDataLoading = ViewModelProvider(this).get(CommentDataLoading::class.java)
+
+        commentDataLoading.loadingCompleteData.observe(this, Observer { value ->
+
+            if (!commentDataLoading.loadingCompleteData.value!!) {
+                Log.d("댓글", "로딩 false")
+                binding.commentRecyclerView.visibility = View.GONE
+                binding.dataLoadingProgressBar.visibility = View.VISIBLE
+            } else {
+                Log.d("댓글", "로딩 true")
+
+                binding.commentRecyclerView.visibility = View.VISIBLE
+                binding.dataLoadingProgressBar.visibility = View.GONE
+            }
+        })
+
+
         binding.commentBackground.setOnClickListener {
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
@@ -86,6 +100,20 @@ class CommentActivity : Activity() {
                 finish()
             }, 500)
         }
+
+        binding.commentLayout.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                binding.commentWriteText.clearFocus()
+
+                val imm: InputMethodManager =
+                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+
+                true
+            }
+            false
+        }
+
 
         binding.commentWriteBtn.isEnabled = false
 
@@ -101,6 +129,7 @@ class CommentActivity : Activity() {
         diaryPosition = intent.getIntExtra("diaryPosition", 0)
 
         adapter = CommentAdapter(this, commentItems)
+        binding.commentRecyclerView.adapter = adapter
 
         userDB.document("$userId")
             .get()
@@ -108,44 +137,73 @@ class CommentActivity : Activity() {
                 commentUserId = document.data?.getValue("userId").toString()
                 username = document.data?.getValue("name").toString()
                 userType = document.data?.getValue("userType").toString()
+                userAvatar = document.data?.getValue("avatar").toString()
             }
 
         diaryDB.document(diaryId).collection("comments")
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
 
-                    var commentId = document.data?.getValue("commentId").toString()
-                    var commentUserId = document.data?.getValue("userId").toString()
-                    var commentUserName = document.data?.getValue("username").toString()
-                    var commentUserType = document.data?.getValue("userType").toString()
-                    var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
-                    var commentDescription =
-                        document.data?.getValue("description").toString()
+                if (documents.size() != 0) {
+                    for (document in documents) {
+                        var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
+                        var commentId = document.data?.getValue("commentId").toString()
+                        var commentUserId = document.data?.getValue("userId").toString()
+                        var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
+                        var commentDescription =
+                            document.data?.getValue("description").toString()
 
-                    commentItems.add(
-                        Comment(
-                            diaryId,
-                            diaryPosition!!,
-                            commentId,
-                            commentUserId,
-                            commentUserName,
-                            commentUserType,
-                            commentTimestamp,
-                            commentDescription
-                        )
-                    )
-                    adapter.notifyDataSetChanged()
+                        userDB.document("$commentUserId")
+                            .get()
+                            .addOnSuccessListener { userDocument ->
+                                var commentUserName = userDocument.data?.getValue("name").toString()
+                                var commentUserAvatar =
+                                    userDocument.data?.getValue("avatar").toString()
+                                var commentUserType =
+                                    userDocument.data?.getValue("userType").toString()
 
+                                commentItems.add(
+                                    Comment(
+                                        diaryId,
+                                        diaryPosition!!,
+                                        commentId,
+                                        commentUserId,
+                                        commentUserAvatar,
+                                        commentUserName,
+                                        commentUserType,
+                                        commentTimestamp,
+                                        commentDescription
+                                    )
+                                )
+
+                                binding.commentRecyclerView.layoutManager = LinearLayoutManager(
+                                    this,
+                                    RecyclerView.VERTICAL,
+                                    false
+                                )
+
+                                adapter.notifyDataSetChanged()
+
+                                commentDataLoading.loadingCompleteData.value = true
+
+                                binding.commentRecyclerView.visibility = View.VISIBLE
+                                binding.noItemText.visibility = View.GONE
+
+
+                            }
+                    }
+                } else {
+                    // 0인 경우
+                    commentDataLoading.loadingCompleteData.value = true
+
+                    binding.commentRecyclerView.visibility = View.GONE
+                    binding.noItemText.visibility = View.VISIBLE
                 }
-                binding.commentRecyclerView.adapter = adapter
-                binding.commentRecyclerView.layoutManager = LinearLayoutManager(
-                    this,
-                    RecyclerView.VERTICAL,
-                    false
-                )
+
+
+//                commentDataLoading.loadingCompleteData.value = true
+
             }
 
 
@@ -158,16 +216,6 @@ class CommentActivity : Activity() {
             deleteCommentReceiver,
             IntentFilter("DELETE_INTENT")
         );
-
-        binding.commentRecyclerView.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                val imm: InputMethodManager =
-                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-                true
-            }
-            false
-        }
 
         binding.commentWriteText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -216,8 +264,6 @@ class CommentActivity : Activity() {
                 var commentSet = hashMapOf(
                     "commentId" to commentId,
                     "userId" to commentUserId,
-                    "username" to username,
-                    "userType" to userType,
                     "timestamp" to FieldValue.serverTimestamp(),
                     "description" to description.toString()
                 )
@@ -231,6 +277,7 @@ class CommentActivity : Activity() {
                         diaryPosition!!,
                         commentId,
                         commentUserId,
+                        userAvatar,
                         username,
                         userType,
                         simpledateformat.format(timestamp),
@@ -306,3 +353,7 @@ class CommentActivity : Activity() {
 
 }
 
+
+class CommentDataLoading : ViewModel() {
+    val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
+}

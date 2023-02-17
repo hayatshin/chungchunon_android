@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#888787"
-            android:textSize="17sp"
+            android:textSize="17dp"
             android:textStyle="bold"
             tools:text="서울특별시 광진구" />
 
@@ -84,7 +84,7 @@
         android:text="@string/all_diary_no_item"
         android:textAlignment="center"
         android:textColor="@color/light_gray"
-        android:textSize="17sp"
+        android:textSize="17dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

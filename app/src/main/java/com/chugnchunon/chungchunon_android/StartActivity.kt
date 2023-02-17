@@ -1,5 +1,6 @@
 package com.chugnchunon.chungchunon_android
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.Color
 import android.icu.text.AlphabeticIndex
@@ -12,12 +13,13 @@ import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.APIKey
 import com.algolia.search.model.ApplicationID
 import com.algolia.search.model.IndexName
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -34,45 +36,83 @@ class StartActivity : AppCompatActivity() {
     lateinit var appUpdateManager: AppUpdateManager
     private val MY_REQUEST_CODE: Int = 200
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        var intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            // 일반 자동 로그인
-            val currentUser = auth.currentUser
-            Log.d("로그인", "$currentUser")
-
-            if (currentUser != null) {
-                val userId = Firebase.auth.currentUser?.uid
-                userDB.document("$userId").get()
-                    .addOnSuccessListener { document ->
-                        var userType = document.data?.getValue("userType")
-                        Log.d("userType", "$userType")
-
-                        if(userType == "치매예방자" || userType == "마스터") {
-                            val goDiaryActivity = Intent(this, DiaryActivity::class.java)
-                            startActivity(goDiaryActivity)
-                        } else if (userType == "파트너") {
-                            val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
-                            startActivity(goPartnerDiaryActivity)
-                        } else {
-                            val intent = Intent(this, MainActivity::class.java)
-                            startActivity(intent)
-                        }
-                    }
-            } else {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-            }
-
-        }, 0)
+//        var womanIcon = findViewById<ImageView>(R.id.womanIcon)
+//        var manIcon = findViewById<ImageView>(R.id.manIcon)
+//
+//        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
+//        womananimation.setDuration(300)
+//        womananimation.repeatCount = 2
+//        womananimation.interpolator = LinearInterpolator()
+//        womananimation.start()
+//
+//        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
+//        manAnimation.setDuration(300)
+//        manAnimation.repeatCount = 2
+//        manAnimation.interpolator = LinearInterpolator()
+//        manAnimation.start()
+//
+//        Handler(Looper.getMainLooper()).postDelayed({
+//
+//            // 일반 자동 로그인
+//            val currentUser = auth.currentUser
+//            Log.d("로그인", "$currentUser")
+//
+//            if (currentUser != null) {
+//                val userId = Firebase.auth.currentUser?.uid
+//                userDB.document("$userId").get()
+//                    .addOnSuccessListener { document ->
+//                        var userType = document.data?.getValue("userType")
+//                        Log.d("userType", "$userType")
+//
+//                        if(userType == "치매예방자" || userType == "마스터") {
+//                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+//                            startActivity(goDiaryTwoActivity)
+//                        } else if (userType == "파트너") {
+//                            val goPartnerDiaryTwoActivity = Intent(this, PartnerDiaryTwoActivity::class.java)
+//                            startActivity(goPartnerDiaryTwoActivity)
+//                        } else {
+//                            val intent = Intent(this, MainActivity::class.java)
+//                            startActivity(intent)
+//                        }
+//                    }
+//            } else {
+//                val intent = Intent(this, MainActivity::class.java)
+//                startActivity(intent)
+//            }
+//
+//        }, 600)
     }
 
     override fun onResume() {
         super.onResume()
+
+        var womanIcon = findViewById<ImageView>(R.id.womanIcon)
+        var manIcon = findViewById<ImageView>(R.id.manIcon)
+
+        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
+        womananimation.setDuration(300)
+        womananimation.repeatCount = 2
+        womananimation.interpolator = LinearInterpolator()
+        womananimation.start()
+
+        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
+        manAnimation.setDuration(300)
+        manAnimation.repeatCount = 2
+        manAnimation.interpolator = LinearInterpolator()
+        manAnimation.start()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -93,11 +133,11 @@ class StartActivity : AppCompatActivity() {
                         Log.d("userType", "$userType")
 
                         if(userType == "치매예방자" || userType == "마스터") {
-                            val goDiaryActivity = Intent(this, DiaryActivity::class.java)
-                            startActivity(goDiaryActivity)
+                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+                            startActivity(goDiaryTwoActivity)
                         } else if (userType == "파트너") {
-                            val goPartnerDiaryActivity = Intent(this, PartnerDiaryActivity::class.java)
-                            startActivity(goPartnerDiaryActivity)
+                            val goPartnerDiaryTwoActivity = Intent(this, PartnerDiaryTwoActivity::class.java)
+                            startActivity(goPartnerDiaryTwoActivity)
                         }
                     }
             } else {

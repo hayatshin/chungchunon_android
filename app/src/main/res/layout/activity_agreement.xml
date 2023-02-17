@@ -27,7 +27,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:text="회원가입"
-            android:textSize="18sp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
     </RelativeLayout>
@@ -40,11 +40,12 @@
         app:layout_constraintTop_toBottomOf="@+id/header">
 
         <TextView
+            android:lineHeight="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/agreement_header"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -59,7 +60,7 @@
             android:paddingHorizontal="20dp"
             android:text="약관 전체동의"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="20dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -81,6 +82,7 @@
                     android:src="@drawable/ic_sub_check_agreement" />
 
                 <TextView
+                    android:textSize="14dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -88,6 +90,7 @@
                     android:textColor="@color/black" />
 
                 <TextView
+                    android:textSize="14dp"
                     android:id="@+id/appRuleBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -110,6 +113,7 @@
                     android:src="@drawable/ic_sub_check_agreement" />
 
                 <TextView
+                    android:textSize="14dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -117,6 +121,7 @@
                     android:textColor="@color/black" />
 
                 <TextView
+                    android:textSize="14dp"
                     android:id="@+id/personalInfoBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -133,12 +138,12 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/nextBtn"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/default_button"
         android:text="다음"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />

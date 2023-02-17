@@ -64,15 +64,20 @@ class BlockActivity : Activity() {
         if (diaryUserId == userId) {
             binding.editLayout.visibility = View.VISIBLE
             binding.deleteLayout.visibility = View.VISIBLE
+            binding.blockDiaryLayout.visibility = View.GONE
+            binding.blockUserLayout.visibility = View.GONE
+            binding.deleteLayout.setBackgroundResource(R.drawable.transparent_fill_box)
         } else {
             binding.editLayout.visibility = View.GONE
             binding.deleteLayout.visibility = View.GONE
+            binding.blockDiaryLayout.visibility = View.VISIBLE
+            binding.blockUserLayout.visibility = View.VISIBLE
         }
 
         binding.editLayout.setOnClickListener {
-            var goMyFragment = Intent(this, DiaryActivity::class.java)
-            goMyFragment.putExtra("from", "edit")
-            startActivity(goMyFragment)
+            var goEditActivity = Intent(this, EditDiaryActivity::class.java)
+            goEditActivity.putExtra("editDiaryId", diaryId)
+            startActivity(goEditActivity)
         }
 
         binding.deleteLayout.setOnClickListener {
@@ -97,7 +102,7 @@ class BlockActivity : Activity() {
             diaryDB.document("$diaryId").delete()
 
 
-            var goMyFragment = Intent(this, DiaryActivity::class.java)
+            var goMyFragment = Intent(this, DiaryTwoActivity::class.java)
             goMyFragment.putExtra("from", "delete")
             startActivity(goMyFragment)
         }
@@ -129,12 +134,12 @@ class BlockActivity : Activity() {
         resultView.setTextColor(Color.BLACK)
 
         // 신고하기
-        binding.reportLayout.setOnClickListener {
-            binding.blockBox.removeAllViews()
-            binding.blockBox.addView(blockCheckIcon)
-            resultView.text = "신고가 완료되었습니다."
-            binding.blockBox.addView(resultView)
-        }
+//        binding.reportLayout.setOnClickListener {
+//            binding.blockBox.removeAllViews()
+//            binding.blockBox.addView(blockCheckIcon)
+//            resultView.text = "신고가 완료되었습니다."
+//            binding.blockBox.addView(resultView)
+//        }
 
 
         // 일기 차단하기

@@ -23,7 +23,7 @@ import com.chugnchunon.chungchunon_android.Adapter.RegionPagerAdapter
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
 import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryActivity
+import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegionBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
@@ -111,12 +111,12 @@ class RegionRegisterActivity : AppCompatActivity() {
 
                     if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
                         var goDiary =
-                            Intent(applicationContext, DiaryActivity::class.java)
+                            Intent(applicationContext, DiaryTwoActivity::class.java)
                         startActivity(goDiary)
                     } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
                         var goDiary = Intent(
                             applicationContext,
-                            PartnerDiaryActivity::class.java
+                            PartnerDiaryTwoActivity::class.java
                         )
                         startActivity(goDiary)
                     }

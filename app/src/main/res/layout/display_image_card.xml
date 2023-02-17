@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dispalyImageLayout"
+    android:layout_width="match_parent"
+    android:overScrollMode="never"
+    android:layout_marginRight="20dp"
+    android:clipToOutline="true"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
+    android:background="@drawable/mindbox"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_weight="1"
+        android:id="@+id/displayImageCard"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@drawable/mindbox"
+        android:clipToOutline="true"
+        android:scaleType="fitXY" />
+
+</LinearLayout>

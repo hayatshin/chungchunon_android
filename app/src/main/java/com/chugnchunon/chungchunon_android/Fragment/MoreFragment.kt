@@ -17,12 +17,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.ApplicationRuleActivity
 import com.chugnchunon.chungchunon_android.EditProfileActivity
 import com.chugnchunon.chungchunon_android.PersonalInfoRuleActivity
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentMoreBinding
+import com.chugnchunon.chungchunon_android.databinding.FragmentMoreTwoBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -32,7 +34,7 @@ import java.util.*
 
 class MoreFragment: Fragment() {
 
-    private var _binding: FragmentMoreBinding? = null
+    private var _binding: FragmentMoreTwoBinding? = null
     private val binding get() = _binding!!
 
     private val userDB = Firebase.firestore.collection("users")
@@ -45,7 +47,7 @@ class MoreFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentMoreBinding.inflate(inflater, container, false)
+        _binding = FragmentMoreTwoBinding.inflate(inflater, container, false)
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
@@ -57,10 +59,15 @@ class MoreFragment: Fragment() {
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 var userName = document.data?.getValue("name").toString()
+                var userAvatar = document.data?.getValue("avatar").toString()
                 var userAge = document.data?.getValue("userAge").toString().toInt()
                 var dbRegion = document.data?.getValue("region")
                 var dbSmallRegion = document.data?.getValue("smallRegion")
                 var userRegion = "${dbRegion} ${dbSmallRegion}"
+
+                Glide.with(this)
+                    .load(userAvatar)
+                    .into(binding.profileAvatar)
 
                 binding.profileName.text = userName
                 binding.profileAge.text = "${userAge}세"

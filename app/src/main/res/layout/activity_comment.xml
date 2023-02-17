@@ -4,75 +4,97 @@
     android:id="@+id/commentBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@drawable/layer_screen"
-    android:animateLayoutChanges="true"
-    >
+    android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/commentGobackArrow"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="80dp"
-            android:background="@drawable/ic_arrow_circle_white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/commentGobackArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/ic_arrow_circle_white" />
 
-    <LinearLayout
+    <RelativeLayout
+        android:clickable="true"
+        android:focusable="true"
         android:id="@+id/commentLayout"
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/comment_box"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="50dp"
-        android:paddingBottom="20dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingHorizontal="10dp"
+        android:paddingTop="40dp"
+        android:paddingBottom="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/commentTotalBox"
-            android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="wrap_content"
+            android:visibility="visible">
 
-        <androidx.recyclerview.widget.RecyclerView
-            app:stackFromEnd="true"
-            android:id="@+id/commentRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintVertical_weight="6" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/commentRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintVertical_weight="6"
+                app:stackFromEnd="true" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/noItemText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:lineSpacingExtra="10dp"
+            android:text="@string/comment_no_item"
+            android:textAlignment="center"
+            android:textColor="@color/light_gray"
+            android:textSize="17dp"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/dataLoadingProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminateOnly="true"
+            android:indeterminateTint="@color/custom_gray"
+            android:keepScreenOn="true" />
 
         <LinearLayout
             android:id="@+id/commentWriteBox"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
             android:layout_marginTop="20dp"
             android:gravity="center"
             android:orientation="horizontal">
 
             <EditText
-                android:paddingHorizontal="10dp"
                 android:id="@+id/commentWriteText"
                 android:layout_width="0dp"
-                android:layout_height="45dp"
+                android:layout_height="50dp"
                 android:layout_weight="0.8"
-                android:background="@drawable/mindbox" />
+                android:background="@drawable/mindbox"
+                android:paddingHorizontal="20dp"
+                android:textSize="20dp" />
 
             <Button
-                android:textColor="@color/white"
-                android:textSize="17sp"
-                android:background="@drawable/default_button"
                 android:id="@+id/commentWriteBtn"
-                android:layout_weight="0.3"
                 android:layout_width="0dp"
-                android:layout_height="45dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="10dp"
-                android:text="댓글 작성" />
+                android:layout_weight="0.3"
+                android:background="@drawable/default_button_comment"
+                android:text="댓글 작성"
+                android:textColor="@color/white"
+                android:textSize="17dp" />
 
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

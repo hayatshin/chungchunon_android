@@ -28,12 +28,18 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:text="개인정보 처리방침"
-            android:textSize="18sp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
     </RelativeLayout>
 
+    <ScrollView
+        app:layout_constraintTop_toBottomOf="@id/totalHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <TextView
+        android:textSize="15dp"
         android:id="@+id/personalScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,5 +49,6 @@
         android:scrollbars="vertical"
         android:text="@string/personal_info_rule"
         app:layout_constraintTop_toBottomOf="@id/totalHeader" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

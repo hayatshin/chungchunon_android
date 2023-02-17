@@ -27,20 +27,26 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:text="우블 이용약관"
-            android:textSize="18sp"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/ruleScroll"
+    <ScrollView
+        app:layout_constraintTop_toBottomOf="@id/totalHeader"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="20dp"
-        android:scrollbars="vertical"
-        android:text="@string/use_rule"
-        app:layout_constraintTop_toBottomOf="@id/totalHeader" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/ruleScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:scrollbars="vertical"
+            android:text="@string/use_rule"
+            android:textSize="15dp" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

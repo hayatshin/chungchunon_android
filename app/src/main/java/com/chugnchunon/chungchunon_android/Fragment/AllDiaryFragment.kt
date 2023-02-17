@@ -4,25 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.Typeface
-import android.graphics.drawable.Drawable
-import android.opengl.Visibility
 import android.os.Bundle
-import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
-import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
@@ -32,24 +20,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
-import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
-import com.chugnchunon.chungchunon_android.MyService
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.MutableData
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_all_diary.*
 import kotlinx.android.synthetic.main.fragment_my_diary.*
-import java.lang.Exception
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class AllDiaryFragment : Fragment() {
 
@@ -78,7 +59,12 @@ class AllDiaryFragment : Fragment() {
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     lateinit var dataLoadingState: DataLoadingState
+    lateinit var mcontext: Context
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mcontext = context
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -86,6 +72,7 @@ class AllDiaryFragment : Fragment() {
     ): View? {
         _binding = FragmentAllDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
 
         dataLoadingState =
             ViewModelProvider(requireActivity()).get(DataLoadingState::class.java)
@@ -243,6 +230,7 @@ class AllDiaryFragment : Fragment() {
                                             diarySet = DiaryCard(
                                                 diaryUserId,
                                                 username,
+                                                null,
                                                 diaryId,
                                                 DateFormat().convertMillis(timefromdb),
                                                 username,
@@ -262,7 +250,7 @@ class AllDiaryFragment : Fragment() {
                                     binding.recyclerDiary.adapter = adapter
                                     binding.recyclerDiary.layoutManager =
                                         LinearLayoutManagerWrapper(
-                                            requireContext(),
+                                            mcontext,
                                             RecyclerView.VERTICAL,
                                             false
                                         )
@@ -330,6 +318,7 @@ class AllDiaryFragment : Fragment() {
                                                         diarySet = DiaryCard(
                                                             diaryUserId,
                                                             username,
+                                                            null,
                                                             diaryId,
                                                             DateFormat().convertMillis(timefromdb),
                                                             username,
@@ -350,7 +339,7 @@ class AllDiaryFragment : Fragment() {
                                                 binding.recyclerDiary.adapter = adapter
                                                 binding.recyclerDiary.layoutManager =
                                                     LinearLayoutManagerWrapper(
-                                                        requireContext(),
+                                                       mcontext,
                                                         RecyclerView.VERTICAL,
                                                         false
                                                     )

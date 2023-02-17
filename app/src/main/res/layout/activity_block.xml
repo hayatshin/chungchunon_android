@@ -34,11 +34,18 @@
             android:gravity="center"
             android:background="@drawable/rule_header"
             android:layout_width="match_parent"
-            android:layout_height="60dp">
+            android:layout_height="50dp">
+
+            <ImageView
+                app:tint="@color/main_color"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_edit"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
 
             <TextView
                 android:textColor="@color/main_color"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:text="수정하기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -50,28 +57,20 @@
             android:gravity="center"
             android:background="@drawable/rule_header"
             android:layout_width="match_parent"
-            android:layout_height="60dp">
+            android:layout_height="50dp">
+
+            <ImageView
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_trash"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:tint="@color/main_color" />
+
 
             <TextView
                 android:textColor="@color/main_color"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:text="삭제하기"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/reportLayout"
-            android:gravity="center"
-            android:background="@drawable/rule_header"
-            android:layout_width="match_parent"
-            android:layout_height="60dp">
-
-            <TextView
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:text="신고하기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -86,7 +85,7 @@
 
             <TextView
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:text="일기 차단하기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -97,11 +96,11 @@
             android:id="@+id/blockUserLayout"
             android:gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="60dp">
+            android:layout_height="50dp">
 
             <TextView
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="20dp"
                 android:text="유저 차단하기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

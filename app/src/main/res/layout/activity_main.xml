@@ -12,8 +12,7 @@
         android:layout_height="100dp"
         android:layout_gravity="start"
         android:layout_marginTop="60dp"
-        android:layout_marginBottom="20dp"
-        android:src="@drawable/ic_headline" />
+        android:src="@drawable/ic_titleimage" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,7 +20,7 @@
         android:layout_marginBottom="120dp"
         android:text="가입을 시작하시겠습니까?"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -39,8 +38,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:text="50세 이하는 일기 쓰기 작성이 제한됩니다."
-            android:textColor="@color/light_gray"
-            android:textSize="14sp" />
+            android:textColor="@color/custom_gray"
+            android:textSize="14dp" />
 
         <LinearLayout
             android:id="@+id/kakaoLoginBtn"
@@ -69,7 +68,7 @@
                     android:layout_height="wrap_content"
                     android:text="카카오톡으로 쉽게 가입하기"
                     android:textColor="@color/black"
-                    android:textSize="17sp"
+                    android:textSize="17dp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -96,7 +95,7 @@
             android:padding="10dp"
             android:text="일반 회원가입 하기"
             android:textColor="@color/white"
-            android:textSize="17sp"
+            android:textSize="17dp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -118,18 +117,18 @@
                 android:layout_gravity="center_horizontal"
                 android:text="파트너로 가입하기"
                 android:textColor="@color/black"
-                android:textSize="17sp" />
+                android:textSize="17dp" />
         </LinearLayout>
 
     </LinearLayout>
 
 
     <LinearLayout
+        android:layout_marginTop="-40dp"
         android:id="@+id/partnerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/register_fill_box"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingTop="30dp"
@@ -159,6 +158,23 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_marginBottom="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_marginRight="20dp"
+                android:src="@drawable/ic_womanimage"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+
+            <TextView
+                android:textColor="@color/custom_gray"
+                android:text="@string/partner_introduction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/partner_register_main"
@@ -184,7 +200,7 @@
                     android:gravity="center"
                     android:text="카카오톡으로 쉽게 가입하기"
                     android:textColor="@color/kakao_yellow"
-                    android:textSize="16sp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -212,7 +228,7 @@
             android:padding="6dp"
             android:text="일반 회원가입 하기"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="16dp"
             android:textStyle="bold" />
     </LinearLayout>
 

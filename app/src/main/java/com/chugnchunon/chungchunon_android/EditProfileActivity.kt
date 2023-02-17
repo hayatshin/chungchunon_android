@@ -23,9 +23,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.Fragment.MoreFragment
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileBinding
+import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileTwoBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -35,7 +37,7 @@ import java.util.*
 class EditProfileActivity : AppCompatActivity() {
 
     private val binding by lazy {
-        ActivityEditProfileBinding.inflate(layoutInflater)
+        ActivityEditProfileTwoBinding.inflate(layoutInflater)
     }
 
     private val db = Firebase.firestore
@@ -49,6 +51,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     lateinit var editFillClass: EditCheckClass
 
+    private var newAvatar = ""
     private var newName = ""
     private var newBirthYear = ""
     private var newBirthDay = ""
@@ -98,6 +101,7 @@ class EditProfileActivity : AppCompatActivity() {
 
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
+                newAvatar = document.data?.getValue("avatar").toString()
                 newName = document.data?.getValue("name").toString()
                 var gender = document.data?.getValue("gender").toString()
                 newBirthYear = document.data?.getValue("birthYear").toString()
@@ -108,6 +112,10 @@ class EditProfileActivity : AppCompatActivity() {
                 birthDate = newBirthDay.substring(2, 4)
                 newRegion = document.data?.getValue("region").toString()
                 newSmallRegion = document.data?.getValue("smallRegion").toString()
+
+                Glide.with(this)
+                    .load(newAvatar)
+                    .into(binding.avatarImage)
 
                 binding.editName.setText(newName)
                 binding.editGender.text = gender
