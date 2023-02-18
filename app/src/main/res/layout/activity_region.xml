@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.AppCompatButton
+            <ImageView
                 android:layout_marginRight="12dp"
                 android:background="@drawable/ic_arrow_circle_gray"
                 android:layout_width="30dp"

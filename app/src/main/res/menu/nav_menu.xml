@@ -10,6 +10,10 @@
         android:id="@+id/ourTodayMenu"
         android:icon="@drawable/menu_our_diary"
         android:title="모음" />
+<!--    <item-->
+<!--        android:id="@+id/rankingMenu"-->
+<!--        android:icon="@drawable/menu_ranking"-->
+<!--        android:title="순위" />-->
     <item
         android:id="@+id/missionMenu"
         android:icon="@drawable/menu_trophy"

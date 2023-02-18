@@ -90,7 +90,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/diaryBtn"
+        android:layout_above="@+id/diaryBtnLayout"
         android:layout_below="@id/header"
         android:orientation="vertical"
         android:paddingHorizontal="30dp">
@@ -334,28 +334,45 @@
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:visibility="gone"
                 android:id="@+id/photoRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:layout_marginTop="20dp"
                 android:orientation="horizontal"
+                android:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/diaryBtn"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
+    <RelativeLayout
+        android:id="@+id/diaryBtnLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/default_button"
-        android:text="일기 작성"
-        android:textColor="@color/white"
-        android:textSize="23dp"
-        android:textStyle="bold" />
+        android:gravity="center">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/diaryBtn"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/default_button"
+            android:text="일기 작성"
+            android:textColor="@color/white"
+            android:textSize="23dp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/diaryProgressBar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:indeterminateOnly="true"
+            android:indeterminateTint="@color/white"
+            android:keepScreenOn="true"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -59,6 +59,11 @@ class MyDataFragment : Fragment() {
         mcontext = context
     }
 
+    override fun onResume() {
+        super.onResume()
+        adapter.notifyDataSetChanged()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

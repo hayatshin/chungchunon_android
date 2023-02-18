@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -68,6 +69,9 @@ class DiaryTwoActivity : AppCompatActivity() {
                     R.id.missionMenu -> {
                         changeFragment(MissionFragment())
                     }
+//                    R.id.rankingMenu -> {
+//                        changeFragment(RankingFragment())
+//                    }
                     R.id.moreMenu -> {
                         changeFragment(MoreFragment())
                     }
@@ -76,6 +80,9 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
 
             // 초기값 세팅
+
+            Log.d("이동", "${from}")
+
             if (from == "edit") {
                 changeFragment(MyDiaryFragment())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu

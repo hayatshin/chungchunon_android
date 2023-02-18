@@ -61,6 +61,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.mig35:carousellayoutmanager:1.4.6'
 
     // 앱 업데이트 - 인앱

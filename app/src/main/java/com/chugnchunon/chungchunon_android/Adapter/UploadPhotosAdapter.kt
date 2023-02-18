@@ -12,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.DataClass.Mission
+import com.chugnchunon.chungchunon_android.EditDiaryActivity
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.R
 import kotlinx.android.synthetic.main.image_card.view.*
@@ -49,12 +50,14 @@ class UploadPhotosAdapter(val context: Context, private val imageData: List<Any>
 
         holder.itemView.imageLayout.setOnClickListener { view ->
             Log.d("삭제", "클릭")
-            var deleteImageIntent = Intent(context, MyDiaryFragment::class.java)
-            deleteImageIntent.setAction("DELETE_IMAGE")
-            deleteImageIntent.putExtra("deleteImagePosition", position)
-            LocalBroadcastManager.getInstance(context).sendBroadcast(deleteImageIntent);
+            var deleteImageMyFragment = Intent(context, MyDiaryFragment::class.java)
+            deleteImageMyFragment.setAction("DELETE_IMAGE")
+            deleteImageMyFragment.putExtra("deleteImagePosition", position)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(deleteImageMyFragment);
         }
     }
 
-    override fun getItemCount(): Int = imageData!!.size
+    override fun getItemCount(): Int {
+        if(imageData != null) return imageData.size else return 0
+    }
 }

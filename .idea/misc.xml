@@ -59,6 +59,7 @@
         <entry key="app/src/main/res/drawable/ic_partner.xml" value="0.1165" />
         <entry key="app/src/main/res/drawable/ic_people_filled.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_profileedit.xml" value="0.1925" />
+        <entry key="app/src/main/res/drawable/ic_rank_filled.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/ic_rule.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_run.xml" value="0.1565" />
         <entry key="app/src/main/res/drawable/ic_sad.xml" value="0.1215" />
@@ -77,6 +78,7 @@
         <entry key="app/src/main/res/drawable/menu_box.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/menu_diary.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/menu_our_diary.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/menu_ranking.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/menu_trophy.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox.xml" value="0.1415" />
         <entry key="app/src/main/res/drawable/mindbox_bold.xml" value="0.178" />
@@ -135,6 +137,8 @@
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
         <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.24791666666666667" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.1769577026367188" />
+        <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.1515625" />
+        <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
         <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.13247121175130208" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />
@@ -148,6 +152,7 @@
         <entry key="app/src/main/res/layout/partner_activity_diary.xml" value="0.10083589907045716" />
         <entry key="app/src/main/res/layout/partner_activity_region.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/partner_activity_register.xml" value="0.30092592592592593" />
+        <entry key="app/src/main/res/layout/ranking_line.xml" value="0.1375" />
         <entry key="app/src/main/res/menu/nav_menu.xml" value="0.15" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon.xml" value="0.159" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon_round.xml" value="0.159" />

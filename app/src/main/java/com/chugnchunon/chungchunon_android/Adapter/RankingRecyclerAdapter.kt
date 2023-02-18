@@ -1,0 +1,68 @@
+package com.chugnchunon.chungchunon_android.Adapter
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.icu.text.DecimalFormat
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toDrawable
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
+import com.chugnchunon.chungchunon_android.BlockActivity
+import com.chugnchunon.chungchunon_android.CommentActivity
+import com.chugnchunon.chungchunon_android.DataClass.*
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.R
+import com.firebase.ui.auth.AuthUI.getApplicationContext
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.diary_card.view.*
+import org.apache.commons.lang3.mutable.MutableBoolean
+import java.time.LocalDate
+
+
+class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingLine>) :
+    RecyclerView.Adapter<RankingRecyclerAdapter.RankingViewHolder>() {
+
+    inner class RankingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        fun bind(context: Context, items: RankingLine) {
+
+        }
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): RankingRecyclerAdapter.RankingViewHolder {
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.ranking_line, parent, false)
+        return RankingViewHolder(v)    }
+
+    override fun onBindViewHolder(holder: RankingRecyclerAdapter.RankingViewHolder, position: Int) {
+        holder.bind(context, items!![position])
+    }
+
+    override fun getItemCount(): Int = items.size
+
+
+}
