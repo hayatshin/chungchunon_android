@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         // 일반 회원가입
         binding.registerBtn.setOnClickListener {
             val goRegisterUser = Intent(this, AgreementActivity::class.java)
-            goRegisterUser.putExtra("userType", "치매예방자")
+            goRegisterUser.putExtra("userType", "사용자")
             startActivity(goRegisterUser)
         }
 

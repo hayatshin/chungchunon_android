@@ -1,24 +1,28 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.text.color
 import androidx.fragment.app.Fragment
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import com.chugnchunon.chungchunon_android.Adapter.BooksAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DisplayPhotosAdapter
 import com.chugnchunon.chungchunon_android.Adapter.MissionCardAdapter
-import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.DataClass.Book
 import com.chugnchunon.chungchunon_android.DataClass.Mission
 import com.chugnchunon.chungchunon_android.Layout.CenterZoomLayoutManager
+import com.chugnchunon.chungchunon_android.Layout.LinePagerIndicatorDecoration
 import com.chugnchunon.chungchunon_android.databinding.FragmentMissionBinding
-import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mig35.carousellayoutmanager.CarouselLayoutManager
-import com.mig35.carousellayoutmanager.CarouselZoomPostLayoutListener
-import com.mig35.carousellayoutmanager.CenterScrollListener
 import kotlinx.android.synthetic.main.fragment_mission.view.*
 
 
@@ -29,12 +33,18 @@ class MissionFragment: Fragment() {
 
     private val db = Firebase.firestore
     private val missionDB = db.collection("mission")
+    private val booksDB = db.collection("books")
 
     private val userId = Firebase.auth.currentUser?.uid
 
     lateinit var missionSet: Mission
+    lateinit var bookSet: Book
+
     private var missionList: ArrayList<Mission> = ArrayList()
-    private lateinit var adapter: MissionCardAdapter
+    private var bookList: ArrayList<Book> = ArrayList()
+
+    lateinit var missionAdapter: MissionCardAdapter
+    lateinit var booksAdapter: BooksAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,11 +55,40 @@ class MissionFragment: Fragment() {
         val binding = binding.root
 
 
-        adapter = MissionCardAdapter(requireContext(), missionList)
-        binding.missionRecyclerView.adapter = adapter
+        missionAdapter = MissionCardAdapter(requireContext(), missionList)
+        binding.missionRecyclerView.adapter = missionAdapter
+        binding.missionRecyclerView.orientation = ViewPager2.ORIENTATION_HORIZONTAL
 
-        var centerZoomLayoutManager = CenterZoomLayoutManager(requireActivity())
-        binding.missionRecyclerView.layoutManager = centerZoomLayoutManager
+        binding.indicator.setViewPager(binding.missionRecyclerView)
+        binding.indicator.createIndicators(missionList.size, 0)
+        missionAdapter.registerAdapterDataObserver(binding.indicator.getAdapterDataObserver());
+
+        var initialSpanText = SpannableStringBuilder()
+            .color(Color.WHITE) { append("1") }
+            .append(" / ${missionList.size}")
+        binding.cardIndex.text = initialSpanText
+
+        binding.missionRecyclerView.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                var spanText = SpannableStringBuilder()
+                    .color(Color.WHITE) { append("${position+1}") }
+                    .append(" / ${missionList.size}")
+                binding.cardIndex.text = spanText
+            }
+
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+//                var spanText = SpannableStringBuilder()
+//                    .color(Color.WHITE) { append("${position+1}") }
+//                    .append(" / ${missionList.size}")
+//                binding.cardIndex.text = spanText
+            }
+        })
 
         missionDB.get()
             .addOnSuccessListener { documents ->
@@ -78,10 +117,35 @@ class MissionFragment: Fragment() {
                     missionList.sortWith(compareBy({ it.state }))
                     missionList.reverse()
 
-                    adapter.notifyDataSetChanged()
+                    missionAdapter.notifyDataSetChanged()
 
                 }
             }
+
+
+        // 책
+        booksAdapter = BooksAdapter(requireContext(), bookList)
+        binding.bookRecyclerView.adapter = booksAdapter
+        binding.bookRecyclerView.layoutManager = CenterZoomLayoutManager(requireContext())
+
+        booksDB.get().addOnSuccessListener { documents ->
+            for (document in documents) {
+                var title = document.data.getValue("title").toString()
+                var cover = document.data.getValue("cover").toString()
+                var author = document.data.getValue("author").toString()
+                var description = document.data.getValue("description").toString()
+
+                bookSet = Book(
+                    title,
+                    cover,
+                    author,
+                    description
+                )
+
+                bookList.add(bookSet)
+                booksAdapter.notifyDataSetChanged()
+            }
+        }
 
         return binding
     }

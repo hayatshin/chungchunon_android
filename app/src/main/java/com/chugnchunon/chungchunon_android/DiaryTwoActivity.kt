@@ -27,31 +27,47 @@ class DiaryTwoActivity : AppCompatActivity() {
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
     private var from = ""
 
+
     private val binding by lazy {
         ActivityDiaryTwoBinding.inflate(layoutInflater)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        finishAffinity()
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+
         // 걸음수 권한
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION,
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
-            //ask for permission
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                100
-            )
-        }
 
+        userDB.document("$userId").get()
+            .addOnSuccessListener { document ->
+                var userType = document.data?.getValue("userType").toString()
 
-        var startService = Intent(this, MyService::class.java)
-        startForegroundService(startService)
+                if(userType != "파트너") {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACTIVITY_RECOGNITION,
+                        ) == PackageManager.PERMISSION_DENIED
+                    ) {
+                        //ask for permission
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                            100
+                        )
+                    }
+
+                    var startService = Intent(this, MyService::class.java)
+                    startForegroundService(startService)
+                }
+            }
 
         from = intent.getStringExtra("from").toString()
 
@@ -69,9 +85,9 @@ class DiaryTwoActivity : AppCompatActivity() {
                     R.id.missionMenu -> {
                         changeFragment(MissionFragment())
                     }
-//                    R.id.rankingMenu -> {
-//                        changeFragment(RankingFragment())
-//                    }
+                    R.id.rankingMenu -> {
+                        changeFragment(RankingFragment())
+                    }
                     R.id.moreMenu -> {
                         changeFragment(MoreFragment())
                     }

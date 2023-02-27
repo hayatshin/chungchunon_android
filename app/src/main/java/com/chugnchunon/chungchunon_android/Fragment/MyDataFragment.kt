@@ -20,6 +20,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -61,7 +62,24 @@ class MyDataFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        adapter.notifyDataSetChanged()
+//        myDataLoadingState.loadingCompleteData.value = false
+//        binding.dataLoadingProgressBar.visibility = View.GONE
+        if (resumePause == false) {
+            myDiaryItems.clear()
+            getData()
+        } else {
+            resumePause = false
+        }
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (resumePause == false) {
+            myDataLoadingState.loadingCompleteData.value = false
+        } else {
+            resumePause = false
+        }
     }
 
     override fun onCreateView(
@@ -71,6 +89,8 @@ class MyDataFragment : Fragment() {
     ): View? {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
+
+        binding.recyclerDiary.itemAnimator = null
 
         myDataLoadingState =
             ViewModelProvider(requireActivity()).get(MyDataLoadingState::class.java)
@@ -86,8 +106,6 @@ class MyDataFragment : Fragment() {
                 binding.dataLoadingProgressBar.visibility = View.GONE
             }
         })
-
-
         myDataLoadingState.loadingCompleteData.value = false
 
         adapter = DiaryCardAdapter(requireContext(), myDiaryItems)
@@ -132,7 +150,7 @@ class MyDataFragment : Fragment() {
             IntentFilter("CREATE_ACTION")
         );
 
-        getData()
+//        getData()
 
         return binding
     }
@@ -201,7 +219,8 @@ class MyDataFragment : Fragment() {
                                                     .addOnCompleteListener { userTask ->
                                                         var userData = userTask.result
                                                         var username =
-                                                            userData.data?.getValue("name").toString()
+                                                            userData.data?.getValue("name")
+                                                                .toString()
                                                         var userAvatar =
                                                             userData.data?.getValue("avatar") as String
 
@@ -265,7 +284,8 @@ class MyDataFragment : Fragment() {
                                                     .addOnCompleteListener { userTask ->
                                                         var userData = userTask.result
                                                         var username =
-                                                            userData.data?.getValue("name").toString()
+                                                            userData.data?.getValue("name")
+                                                                .toString()
                                                         var userAvatar =
                                                             userData.data?.getValue("avatar") as String
 
@@ -311,9 +331,8 @@ class MyDataFragment : Fragment() {
                     binding.swipeRecyclerDiary.visibility = View.GONE
                     binding.noItemText.visibility = View.VISIBLE
                 }
-                Handler().postDelayed({
-                    myDataLoadingState.loadingCompleteData.value = true
-                }, 200)
+                myDataLoadingState.loadingCompleteData.value = true
+
             }
     }
 }

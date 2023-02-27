@@ -10,14 +10,14 @@
         android:id="@+id/ourTodayMenu"
         android:icon="@drawable/menu_our_diary"
         android:title="모음" />
-<!--    <item-->
-<!--        android:id="@+id/rankingMenu"-->
-<!--        android:icon="@drawable/menu_ranking"-->
-<!--        android:title="순위" />-->
+    <item
+        android:id="@+id/rankingMenu"
+        android:icon="@drawable/menu_ranking"
+        android:title="순위" />
     <item
         android:id="@+id/missionMenu"
-        android:icon="@drawable/menu_trophy"
-        android:title="미션" />
+        android:icon="@drawable/menu_event"
+        android:title="행사" />
     <item
         android:id="@+id/moreMenu"
         android:icon="@drawable/ic_hamburger"

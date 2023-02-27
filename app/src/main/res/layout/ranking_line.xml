@@ -2,44 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
+    android:layout_height="wrap_content"
     android:gravity="center_vertical"
+    android:layout_marginBottom="2dp"
     android:paddingHorizontal="20dp"
     android:paddingVertical="10dp">
 
     <TextView
+        android:id="@+id/rankingIndex"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="15dp"
+        android:layout_marginRight="20dp"
         android:textColor="@color/black"
-        android:textSize="26dp"
+        android:textSize="24dp"
         android:textStyle="bold"
         tools:text="1" />
 
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginRight="20dp"
+        android:background="@drawable/avatar_background"
+        android:clipToOutline="true"
+        android:id="@+id/rankingAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="10dp"
         tools:src="@drawable/ic_user" />
 
     <LinearLayout
-        android:gravity="bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="bottom">
 
         <TextView
-            android:layout_weight="1"
+            android:id="@+id/rankingName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textColor="@color/black"
-            android:textSize="25dp"
+            android:textSize="22dp"
             tools:text="신혜정" />
 
         <TextView
+            android:id="@+id/rankingPoint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/custom_gray"
-            android:textSize="17dp"
-            tools:text="서울특별시" />
+            android:textColor="@color/black"
+            android:textSize="22dp"
+            android:textStyle="bold"
+            tools:text="40점" />
     </LinearLayout>
 </LinearLayout>

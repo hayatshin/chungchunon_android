@@ -47,7 +47,8 @@ class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
                     }"
                     var birthYear = result.kakaoAccount?.birthyear
                     var userAge = currentYear - birthYear!!.toInt() + 1
-                    var gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
+                    var gender =
+                        if (result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
                     val userSet = hashMapOf(
                         "userType" to "파트너",
@@ -83,17 +84,10 @@ class PartnerSessionCallback(val context: MainActivity) : ISessionCallback {
                                                 (userDocument.data?.getValue("userAge") as Long).toInt()
                                             var userType = userDocument.data?.getValue("userType")
 
-                                            if(userType == "마스터" || userType == "치매예방자") {
-                                                var goDiary =
-                                                    Intent(context, DiaryTwoActivity::class.java)
-                                                context.startActivity(goDiary)
-                                            } else {
-                                                var goDiary = Intent(
-                                                    context,
-                                                    PartnerDiaryTwoActivity::class.java
-                                                )
-                                                context.startActivity(goDiary)
-                                            }
+                                            var goDiary =
+                                                Intent(context, DiaryTwoActivity::class.java)
+                                            context.startActivity(goDiary)
+
 
                                         } else {
                                             // user 존재 x

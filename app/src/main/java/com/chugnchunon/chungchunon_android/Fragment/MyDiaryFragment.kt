@@ -17,15 +17,14 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.UiContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
@@ -77,8 +76,7 @@ class MyDiaryFragment : Fragment() {
 //    private lateinit var sensorManager: SensorManager
 //    private lateinit var step_sensor: Sensor
 
-    lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
-    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
 
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
@@ -117,6 +115,34 @@ class MyDiaryFragment : Fragment() {
     ): View? {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+//        userDB.document("$userId").get()
+//            .addOnSuccessListener { document ->
+//                var userType = document.data?.getValue("userType").toString()
+//                if(userType == "파트너") {
+//                    binding.partnerBlock.visibility = View.VISIBLE
+
+//                    var activity = activity
+//                    if(activity != null) {
+//                        var window = requireActivity().window
+//                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                        window.setStatusBarColor(Color.parseColor("#99000000"));
+//                    }
+//                } else binding.partnerBlock.visibility = View.GONE
+//            }
+
+        // DiaryUpdateBroadcastReceiver : 다이어리 업데이트
+//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
+
+//        val diaryChangeIntent = IntentFilter()
+//        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+//        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
+
+        // StepCount Notification Receiver: 변경된 걸음수 UI 반영
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            receiver,
+            IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
+        )
 
         // 이미지 애니메이션
         var womanIcon = binding.womanIcon
@@ -496,18 +522,7 @@ class MyDiaryFragment : Fragment() {
         }
 
 
-//         다이어리 업데이트
-        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
 
-        val diaryChangeIntent = IntentFilter()
-        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
-
-
-        // 걸음수 셋업
-        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
-
-        registerStepCountNotificationBroadCastReceiver()
 
         // 매달 일기 작성
         var currentdate = System.currentTimeMillis()
@@ -689,31 +704,62 @@ class MyDiaryFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         // 이미지 애니메이션
-        var womanIcon = binding.womanIcon
-        var manIcon = binding.manIcon
+        var womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)
+        var manIcon = view?.findViewById<ImageView>(R.id.manIcon)
 
-        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
-        womananimation.setDuration(300)
+        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 0f, 20f, 0f)
+        womananimation.setDuration(500)
         womananimation.repeatCount = 2
         womananimation.interpolator = LinearInterpolator()
         womananimation.start()
 
-        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
-        manAnimation.setDuration(300)
+
+        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", 0f, -20F, 0f)
+        manAnimation.setDuration(500)
         manAnimation.repeatCount = 2
         manAnimation.interpolator = LinearInterpolator()
         manAnimation.start()
+
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             deleteImageFunction,
             IntentFilter("DELETE_IMAGE")
         );
+
+
+        userDB.document("$userId").get()
+            .addOnSuccessListener { document ->
+                var userType = document.data?.getValue("userType").toString()
+                if(userType == "파트너") {
+                    binding.partnerBlock.visibility = View.VISIBLE
+
+                    binding.todayMood.isEnabled = false
+                    binding.todayDiary.isEnabled = false
+                    binding.recordBtn.isEnabled = false
+                    binding.photoButton.isEnabled = false
+                    binding.diaryBtn.isEnabled = false
+
+                    var activity = activity
+                    if(activity != null) {
+                        var window = requireActivity().window
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                        window.setStatusBarColor(Color.parseColor("#99000000"));
+                    }
+                } else binding.partnerBlock.visibility = View.GONE
+            }
     }
 
     override fun onPause() {
         super.onPause()
         LocalBroadcastManager.getInstance(requireActivity())
             .unregisterReceiver(deleteImageFunction);
+
+        var activity = activity
+        if(activity != null) {
+            var window = requireActivity().window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.WHITE);
+        }
     }
 
     override fun onDestroy() {
@@ -721,6 +767,8 @@ class MyDiaryFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
         LocalBroadcastManager.getInstance(requireActivity())
             .unregisterReceiver(deleteImageFunction);
+//        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
+
     }
 
 
@@ -749,13 +797,6 @@ class MyDiaryFragment : Fragment() {
                     print(e.message)
                 })
         }
-    }
-
-    private fun registerStepCountNotificationBroadCastReceiver() {
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            receiver,
-            IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
-        )
     }
 
     private var receiver: BroadcastReceiver = object : BroadcastReceiver() {

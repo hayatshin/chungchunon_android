@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/mission_card_background"
+    android:clipToOutline="true"
+    android:src="@drawable/mission_card_background">
+
+    <ImageView
+        android:scaleType="centerCrop"
+        android:id="@+id/missionImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToOutline="true" />
+
+    <LinearLayout
+        android:translationZ="90dp"
+        android:visibility="gone"
+        android:id="@+id/finishMissionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:clipToOutline="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/ic_sad_tear"
+            app:tint="@color/light_main_color" />
+
+        <TextView
+            android:textStyle="bold"
+            android:textSize="18dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineHeight="25dp"
+            android:text="이벤트가\n종료되었습니다."
+            android:textAlignment="center"
+            android:textColor="@color/light_main_color" />
+
+    </LinearLayout>
+
+</RelativeLayout>

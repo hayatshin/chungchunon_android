@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.MyService
+import com.chugnchunon.chungchunon_android.MyService.Companion.stepCountSharedPref
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -17,12 +18,11 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
     private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
-    private val initialCountKey = "InitialCountKey"
     lateinit var prefs: SharedPreferences
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
-        prefs = context!!.getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
+        prefs = context!!.getSharedPreferences(stepCountSharedPref, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
         if (intentAction == Intent.ACTION_SHUTDOWN) {
@@ -32,7 +32,6 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
                 .addOnSuccessListener { document ->
                     var dummyData = prefs.getInt(userId, 0)
                     var previousStepCount = (document.data?.getValue("todayStepCount") as Long).toInt()
-//                   var previousShowData = previousStepCount - dummyData
 
                     // sharedPref 어제 값 추가
                     editor.putInt(userId, -previousStepCount)

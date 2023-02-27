@@ -53,7 +53,9 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
-
+    companion object {
+        var resumePause : Boolean = false
+    }
 
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -148,8 +150,6 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder.bind(position)
 
-
-
         holder.itemView.likeBox.setOnClickListener { view ->
 
             var DiaryRef = diaryDB.document(items[position].diaryId)
@@ -191,6 +191,8 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
         // 댓글버튼 클릭
         holder.itemView.commentBox.setOnClickListener { view ->
+            resumePause = true
+
             var openComment = Intent(context, CommentActivity::class.java)
             openComment.putExtra("diaryId", items[position].diaryId)
             openComment.putExtra("diaryPosition", position)
@@ -199,6 +201,8 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
 
         // 차단 아이콘 클릭
         holder.itemView.moreIcon.setOnClickListener { view ->
+            resumePause = true
+
             var openBlockActivity = Intent(context, BlockActivity::class.java)
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)

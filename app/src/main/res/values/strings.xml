@@ -11,6 +11,11 @@
 파트너는 일기 쓰기 작성이 제한됩니다."
     </string>
 
+    <string name="point_introduction">
+"걸음수 1000보 10점 + 일기 1일 작성 100점
++ 댓글 1번 20점 + 좋아요 1번 10점"
+    </string>
+
     <string name="agreement_header">
 "회원가입 전
 약관을 동의해주세요"

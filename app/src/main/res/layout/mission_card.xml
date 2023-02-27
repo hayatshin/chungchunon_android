@@ -2,11 +2,11 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="300dp"
+    android:layout_height="450dp"
     android:background="@drawable/mission_card_background"
     android:src="@drawable/mission_card_background"
-    app:cardCornerRadius="20dp"
-    android:layout_width="300dp"
-   android:layout_height="450dp">
+    app:cardCornerRadius="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,14 +14,41 @@
         android:clipToOutline="true"
         android:orientation="vertical">
 
-        <ImageView
+        <LinearLayout
+            android:id="@+id/noMissionCard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight=".6"
+            android:background="@color/main_color"
             android:clipToOutline="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginBottom="25dp"
+                android:src="@drawable/ic_reject"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="아직 등록된 미션이 없습니다."
+                android:textColor="@color/white"
+                android:textSize="18dp" />
+
+        </LinearLayout>
+
+        <ImageView
             android:id="@+id/missionImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight=".6"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop" />
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/missionInfo"
@@ -63,11 +90,11 @@
                     tools:text="정선군 보건소" />
 
                 <TextView
-                    android:gravity="bottom"
                     android:id="@+id/state"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/mission_participation"
+                    android:gravity="bottom"
                     android:padding="5dp"
                     android:textColor="@color/main_color"
                     android:textSize="15dp"

@@ -5,13 +5,14 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/periodTabLayout"
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/menu_box"
         android:paddingHorizontal="10dp">
 
         <com.google.android.material.tabs.TabLayout
+            android:id="@+id/periodTabLayout"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             app:tabBackground="@drawable/tab_background"
@@ -37,7 +38,7 @@
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/rankingViewPager"
-        android:layout_below="@+id/periodTabLayout"
+        android:layout_below="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -5,10 +5,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="20dp"
     tools:context=".Fragment.MyDiaryFragment">
 
     <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/partnerBlock"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:translationZ="90dp"
+        android:background="@drawable/layer_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_marginBottom="60dp"
+            app:tint="@color/white"
+            android:src="@drawable/ic_partner"
+            android:layout_width="150dp"
+            android:layout_height="150dp"/>
+
+        <TextView
+            android:layout_marginBottom="35dp"
+            android:textSize="23dp"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:text="파트너는 일기 작성이 제한됩니다."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:textStyle="bold"
+            android:lineHeight="33dp"
+            android:textSize="20dp"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:text="파트너의 하루에\n좋아요와 댓글로 응원해주세요!"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:paddingTop="20dp"
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,16 +65,16 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:padding="5dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp">
+                android:layout_height="wrap_content">
 
                 <ImageView
                     android:id="@+id/womanIcon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginRight="10dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="5dp"
                     android:src="@drawable/ic_womanimage" />
 
                 <ImageView
@@ -49,6 +87,7 @@
             </LinearLayout>
 
             <TextView
+                android:layout_marginLeft="5dp"
                 android:id="@+id/todayDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

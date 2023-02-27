@@ -39,10 +39,9 @@ class StartActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
 
-        var intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_HOME)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
+        finishAffinity()
+        finish()
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +76,7 @@ class StartActivity : AppCompatActivity() {
 //                        var userType = document.data?.getValue("userType")
 //                        Log.d("userType", "$userType")
 //
-//                        if(userType == "치매예방자" || userType == "마스터") {
+//                        if(userType == "사용자" || userType == "마스터") {
 //                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
 //                            startActivity(goDiaryTwoActivity)
 //                        } else if (userType == "파트너") {
@@ -99,20 +98,20 @@ class StartActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        var womanIcon = findViewById<ImageView>(R.id.womanIcon)
-        var manIcon = findViewById<ImageView>(R.id.manIcon)
-
-        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
-        womananimation.setDuration(300)
-        womananimation.repeatCount = 2
-        womananimation.interpolator = LinearInterpolator()
-        womananimation.start()
-
-        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
-        manAnimation.setDuration(300)
-        manAnimation.repeatCount = 2
-        manAnimation.interpolator = LinearInterpolator()
-        manAnimation.start()
+//        var womanIcon = findViewById<ImageView>(R.id.womanIcon)
+//        var manIcon = findViewById<ImageView>(R.id.manIcon)
+//
+//        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 0f, 20f, 0f)
+//        womananimation.setDuration(100)
+//        womananimation.repeatCount = 2
+//        womananimation.interpolator = LinearInterpolator()
+//        womananimation.start()
+//
+//        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", 0f, -20F, 0f)
+//        manAnimation.setDuration(100)
+//        manAnimation.repeatCount = 2
+//        manAnimation.interpolator = LinearInterpolator()
+//        manAnimation.start()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -132,19 +131,22 @@ class StartActivity : AppCompatActivity() {
                         var userType = document.data?.getValue("userType")
                         Log.d("userType", "$userType")
 
-                        if(userType == "치매예방자" || userType == "마스터") {
-                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
-                            startActivity(goDiaryTwoActivity)
-                        } else if (userType == "파트너") {
-                            val goPartnerDiaryTwoActivity = Intent(this, PartnerDiaryTwoActivity::class.java)
-                            startActivity(goPartnerDiaryTwoActivity)
-                        }
+                        val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+                        startActivity(goDiaryTwoActivity)
+
+//                        if(userType == "사용자" || userType == "마스터") {
+//                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+//                            startActivity(goDiaryTwoActivity)
+//                        } else if (userType == "파트너") {
+//                            val goPartnerDiaryTwoActivity = Intent(this, PartnerDiaryTwoActivity::class.java)
+//                            startActivity(goPartnerDiaryTwoActivity)
+//                        }
                     }
             } else {
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }
 
-        }, 0)
+        }, 1000)
     }
 }

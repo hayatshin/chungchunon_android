@@ -109,11 +109,11 @@ class RegionRegisterActivity : AppCompatActivity() {
                 .set(regionSet, SetOptions.merge())
                 .addOnSuccessListener {
 
-                    if(userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
+                    if(userType == "마스터" || (userAge >= 50 && userType == "사용자")) {
                         var goDiary =
                             Intent(applicationContext, DiaryTwoActivity::class.java)
                         startActivity(goDiary)
-                    } else if (userType == "파트너"  || (userAge < 50 && userType == "치매예방자")){
+                    } else if (userType == "파트너"  || (userAge < 50 && userType == "사용자")){
                         var goDiary = Intent(
                             applicationContext,
                             PartnerDiaryTwoActivity::class.java

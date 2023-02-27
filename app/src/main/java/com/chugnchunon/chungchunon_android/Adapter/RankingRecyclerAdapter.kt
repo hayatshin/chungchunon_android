@@ -46,7 +46,24 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
 
     inner class RankingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(context: Context, items: RankingLine) {
+        var rankingIndex: TextView = itemView.findViewById(R.id.rankingIndex)
+        var rankingName: TextView = itemView.findViewById(R.id.rankingName)
+        var rankingAvatar: ImageView = itemView.findViewById(R.id.rankingAvatar)
+        var rankingPoint: TextView = itemView.findViewById(R.id.rankingPoint)
+
+        fun bind(context: Context, rankingLine: RankingLine) {
+
+            rankingIndex.text = rankingLine.index.toString()
+            rankingName.text = rankingLine.username.toString()
+
+            Glide.with(context)
+                .load(rankingLine.userAvatar)
+                .into(rankingAvatar)
+
+            var decimal = DecimalFormat("#,###")
+            var pointResult = decimal.format(rankingLine.point)
+
+            rankingPoint.text = "${pointResult}점"
 
         }
     }
@@ -56,7 +73,8 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
         viewType: Int
     ): RankingRecyclerAdapter.RankingViewHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.ranking_line, parent, false)
-        return RankingViewHolder(v)    }
+        return RankingViewHolder(v)
+    }
 
     override fun onBindViewHolder(holder: RankingRecyclerAdapter.RankingViewHolder, position: Int) {
         holder.bind(context, items!![position])

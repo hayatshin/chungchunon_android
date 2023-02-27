@@ -20,6 +20,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -59,7 +60,23 @@ class UserRegionDataFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        adapter.notifyDataSetChanged()
+//        userDataLoadingState.loadingCompleteData.value = false
+//        binding.dataLoadingProgressBar.visibility = View.GONE
+        if (resumePause == false) {
+            userRegionDiaryItems.clear()
+            getData()
+        } else {
+            resumePause = false
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (resumePause == false) {
+            userDataLoadingState.loadingCompleteData.value = false
+        } else {
+            resumePause = false
+        }
     }
 
     override fun onCreateView(
@@ -69,6 +86,8 @@ class UserRegionDataFragment : Fragment() {
     ): View? {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
+
+        binding.recyclerDiary.itemAnimator = null
 
         userDataLoadingState =
             ViewModelProvider(requireActivity()).get(UserRegionDataLoadingState::class.java)
@@ -86,8 +105,8 @@ class UserRegionDataFragment : Fragment() {
         })
 
         userDataLoadingState.loadingCompleteData.value = false
-
         binding.dataLoadingProgressBar.visibility = View.VISIBLE
+
         adapter = DiaryCardAdapter(requireContext(), userRegionDiaryItems)
 
         swipeRefreshLayout = binding.swipeRecyclerDiary
@@ -129,7 +148,7 @@ class UserRegionDataFragment : Fragment() {
             IntentFilter("CREATE_ACTION")
         );
 
-        getData()
+//        getData()
 
         return binding
     }
@@ -208,7 +227,8 @@ class UserRegionDataFragment : Fragment() {
                                                             .addOnCompleteListener { userTask ->
                                                                 var userData = userTask.result
                                                                 var username =
-                                                                    userData.data?.getValue("name").toString()
+                                                                    userData.data?.getValue("name")
+                                                                        .toString()
                                                                 var userAvatar =
                                                                     userData.data?.getValue("avatar") as String
 
@@ -273,7 +293,8 @@ class UserRegionDataFragment : Fragment() {
                                                             .addOnCompleteListener { userTask ->
                                                                 var userData = userTask.result
                                                                 var username =
-                                                                    userData.data?.getValue("name").toString()
+                                                                    userData.data?.getValue("name")
+                                                                        .toString()
                                                                 var userAvatar =
                                                                     userData.data?.getValue("avatar") as String
 
@@ -309,7 +330,8 @@ class UserRegionDataFragment : Fragment() {
                                                                         RecyclerView.VERTICAL,
                                                                         false
                                                                     )
-                                                                binding.noItemText.visibility = View.GONE
+                                                                binding.noItemText.visibility =
+                                                                    View.GONE
                                                             }
                                                     }
                                                 }
@@ -325,10 +347,9 @@ class UserRegionDataFragment : Fragment() {
                             binding.swipeRecyclerDiary.visibility = View.GONE
                             binding.noItemText.visibility = View.VISIBLE
                         }
-                        Handler().postDelayed({
-                            userDataLoadingState.loadingCompleteData.value =
-                                true
-                        }, 200)
+
+                        userDataLoadingState.loadingCompleteData.value =
+                            true
                     }
             }
     }

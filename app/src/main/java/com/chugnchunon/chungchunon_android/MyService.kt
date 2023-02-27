@@ -35,6 +35,7 @@ class MyService : Service(), SensorEventListener {
 //    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
+    lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
 
     companion object {
         lateinit var sensorManager: SensorManager
@@ -45,9 +46,11 @@ class MyService : Service(), SensorEventListener {
 
         var todayTotalStepCount: Int? = 0
         const val STEP_THRESHOLD: Double = 6.5
+
+        const val stepCountSharedPref = "stepCountSharedPreference"
+        const val dateChangeSharedPref = "dateChangeSharedPref"
     }
 
-    private val initialCountKey = "InitialCountKey"
     lateinit var prefs: SharedPreferences
 
     private var startingStepCount : Int = 0
@@ -56,7 +59,8 @@ class MyService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
-        Log.d("걸음수","처음 가입")
+        StepCountNotification(this, todayTotalStepCount)
+
 
 
         // 기본
@@ -73,12 +77,12 @@ class MyService : Service(), SensorEventListener {
         }
 
         // shared preference 설정
-        prefs = getSharedPreferences(initialCountKey, Context.MODE_PRIVATE)
+        prefs = getSharedPreferences(stepCountSharedPref, Context.MODE_PRIVATE)
         var dummyData = prefs.getInt(userId, 0)
-        Log.d("걸음수 체크체크 1", "$dummyData")
+        var datePrefs = getSharedPreferences(dateChangeSharedPref, Context.MODE_PRIVATE)
 
 
-        // 매일 걸음수 0
+        // DateChangeBroadcastReceiver : 매일 걸음수 0
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
 
         val dateChangeIntent = IntentFilter()
@@ -93,12 +97,16 @@ class MyService : Service(), SensorEventListener {
 //        applicationContext?.registerReceiver(diaryUpdateBroadcastReceiver, diaryUpdateIntent)
 
 
-        // 핸드폰 꺼질 때
+        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
         deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
 
         val deviceShutdownIntent = IntentFilter()
         deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // StepCountBroadcastReceiver : 디비 저장
+
+        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
 
 
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
@@ -140,21 +148,20 @@ class MyService : Service(), SensorEventListener {
         } else {
 
             // 걸음수 pref 저장 된 상태
-            Log.d("걸음수 체크체크 3", "${prefs.contains(userId)}")
-
-            var todayStepCount = stepCount - startingStepCount
-
-            StepCountNotification(this, todayStepCount)
+            todayTotalStepCount = stepCount - startingStepCount
 
             var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
             intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intentToFirebase.putExtra("todayTotalStepCount", todayStepCount)
+            intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
             sendBroadcast(intentToFirebase)
+
+            StepCountNotification(this, todayTotalStepCount)
+
 
             var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
                 putExtra(
                     "todayTotalStepCount",
-                    todayStepCount
+                    todayTotalStepCount
                 )
             }
             LocalBroadcastManager.getInstance(applicationContext!!).sendBroadcast(intentToMyDiary)
@@ -206,6 +213,7 @@ class MyService : Service(), SensorEventListener {
                 .setContentTitle("$step 걸음")
                 .setDefaults(Notification.DEFAULT_LIGHTS)
                 .setOngoing(true)
+                .setShowWhen(false)
                 .build()
             startForeground(1, notification)
         }

@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityBlockBinding
@@ -47,6 +49,8 @@ class BlockActivity : Activity() {
         setContentView(binding.root)
 
         binding.blockBackground.setOnClickListener {
+            resumePause = true
+
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.blockBox.startAnimation(downAnimation)
             Handler().postDelayed({
@@ -109,6 +113,8 @@ class BlockActivity : Activity() {
 
 
         binding.blockGobackArrow.setOnClickListener {
+            resumePause = true
+
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.blockBox.startAnimation(downAnimation)
             Handler().postDelayed({

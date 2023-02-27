@@ -51,7 +51,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                     var userAge = currentYear - birthYear!!.toInt() + 1
                     var gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
-                    val newUserType = if(userAge < 50) "파트너" else "치매예방자"
+                    val newUserType = if(userAge < 50) "파트너" else "사용자"
 
                     val userSet = hashMapOf(
                         "userType" to newUserType,
@@ -87,17 +87,10 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                                 (userDocument.data?.getValue("userAge") as Long).toInt()
                                             var userType = userDocument.data?.getValue("userType")
 
-                                            if(userType == "마스터" || userType == "치매예방자") {
                                                 var goDiary =
                                                     Intent(context, DiaryTwoActivity::class.java)
                                                 context.startActivity(goDiary)
-                                            } else {
-                                                var goDiary = Intent(
-                                                    context,
-                                                    PartnerDiaryTwoActivity::class.java
-                                                )
-                                                context.startActivity(goDiary)
-                                            }
+
                                         } else {
                                             // user 존재 x
                                             userDB

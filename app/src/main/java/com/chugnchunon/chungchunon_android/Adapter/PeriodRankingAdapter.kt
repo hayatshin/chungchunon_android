@@ -16,12 +16,10 @@ class PeriodRankingAdapter(activity: FragmentActivity) :
     override fun getItemCount(): Int = 2
 
     override fun createFragment(position: Int): Fragment {
-
-        Log.d("내글", "$position")
         when (position) {
             0 -> return PeriodThisWeekRankingFragment()
-            1 -> return PeriodThisWeekRankingFragment()
+            1 -> return PeriodLastWeekRankingFragment()
+            else -> return PeriodThisWeekRankingFragment()
         }
-        return PeriodThisWeekRankingFragment()
     }
 }

@@ -22,6 +22,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
@@ -55,7 +57,6 @@ class CommentActivity : FragmentActivity() {
     private var userAvatar = ""
 
     private var diaryId: String = ""
-    var commentItems: ArrayList<Comment> = ArrayList()
 
     @SuppressLint("SimpleDateFormat")
     private val simpledateformat = SimpleDateFormat("yyyy-MM-dd HH:mm")
@@ -67,6 +68,15 @@ class CommentActivity : FragmentActivity() {
 
     private var diaryPosition: Int? = 0
     lateinit var commentDataLoading: CommentDataLoading
+
+    companion object {
+        var commentItems: ArrayList<Comment> = ArrayList()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        commentItems.clear()
+    }
 
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,8 +104,11 @@ class CommentActivity : FragmentActivity() {
 
 
         binding.commentBackground.setOnClickListener {
+            resumePause = true
+
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
+
             Handler().postDelayed({
                 finish()
             }, 500)
@@ -118,6 +131,8 @@ class CommentActivity : FragmentActivity() {
         binding.commentWriteBtn.isEnabled = false
 
         binding.commentGobackArrow.setOnClickListener {
+            resumePause = true
+
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
             Handler().postDelayed({
@@ -189,8 +204,6 @@ class CommentActivity : FragmentActivity() {
 
                                 binding.commentRecyclerView.visibility = View.VISIBLE
                                 binding.noItemText.visibility = View.GONE
-
-
                             }
                     }
                 } else {
@@ -234,8 +247,14 @@ class CommentActivity : FragmentActivity() {
 
 
         binding.commentWriteBtn.setOnClickListener {
-            if (!editBtn) {
 
+            if(commentItems.size == 0) {
+                Log.d("댓글", "size 0")
+                binding.commentRecyclerView.visibility = View.VISIBLE
+                binding.noItemText.visibility = View.GONE
+            }
+
+            if (!editBtn) {
                 // diary +1
                 var DiaryRef = diaryDB.document(diaryId)
                 DiaryRef.update("numComments", FieldValue.increment(1))
@@ -335,6 +354,11 @@ class CommentActivity : FragmentActivity() {
             if (commentItems.size != 0) {
                 commentItems.removeAt(deleteCommentPosition!!.toInt())
                 adapter.notifyDataSetChanged()
+
+                if(commentItems.size == 0) {
+                    binding.commentRecyclerView.visibility = View.GONE
+                    binding.noItemText.visibility = View.VISIBLE
+                }
             }
 
             diaryDB.document(deleteDiaryId!!).get()

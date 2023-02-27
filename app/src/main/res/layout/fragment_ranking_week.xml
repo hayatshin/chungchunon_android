@@ -1,28 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/graph_back"
     android:orientation="vertical">
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/rankingBarChart"
+    <RelativeLayout
+        android:id="@+id/rankingGraphTotal"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@color/main_color"
-        android:paddingBottom="50dp" />
+        android:layout_height="260dp"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/rankingHeader"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="end|center_vertical"
+            android:paddingHorizontal="20dp"
+            android:translationZ="90dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="10dp"
+                    android:layout_marginRight="7dp"
+                    android:src="@drawable/mindbox_yellow" />
+
+                <TextView
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="목표"
+                    android:textColor="@color/very_light_gray"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="10dp"
+                    android:layout_marginRight="7dp"
+                    android:src="@drawable/mindbox_blue" />
+
+                <TextView
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="나"
+                    android:textColor="@color/very_light_gray"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/rankingBarChart"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:layout_below="@id/rankingHeader"
+            android:visibility="gone" />
+
+        <com.github.silvestrpredko.dotprogressbar.DotProgressBar
+            android:id="@+id/rankingBarChartProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:keepScreenOn="true"
+            app:amount="3"
+            app:animationDirection="right"
+            app:endColor="@color/very_light_gray"
+            app:startColor="@color/light_gray" />
+
+    </RelativeLayout>
 
     <LinearLayout
+        android:visibility="visible"
+        android:id="@+id/rankingList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="250dp"
-        android:background="@drawable/comment_box">
+        android:background="@drawable/comment_box"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:padding="20dp"
-            android:id="@+id/rankingRecyclerView"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/diarycard_infobox"
+                android:gravity="center|bottom"
+                android:text="걸음수"
+                android:textColor="@color/graph_back"
+                android:textSize="22dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center|bottom"
+                android:text="일기"
+                android:textColor="@color/graph_back"
+                android:textSize="22dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="57dp"
+            android:gravity="bottom"
+            android:paddingHorizontal="30dp"
+            android:paddingBottom="11dp">
+
+            <TextView
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:text="* 전체 점수 합산 순위"
+                android:textColor="@color/main_color"
+                android:textSize="23dp" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/pointQuestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/question"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="5dp"
+            android:id="@+id/pointIntroduction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="10dp"
+            android:translationZ="-90dp"
+            android:visibility="gone">
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineHeight="25dp"
+                android:text="@string/point_introduction"
+                android:textColor="@color/custom_gray"
+                android:textSize="15dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="40dp" />
+            android:gravity="center">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rankingRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="20dp"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/rankingRecyclerViewProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminateOnly="true"
+                android:indeterminateTint="@color/main_color"
+                android:keepScreenOn="true"
+                android:visibility="visible" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

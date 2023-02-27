@@ -1,32 +1,60 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.Typeface
+import android.icu.text.DecimalFormat
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.RankingRecyclerAdapter
 import com.chugnchunon.chungchunon_android.DataClass.RankingLine
-import com.chugnchunon.chungchunon_android.Layout.BarChartCustomRenderer
+import com.chugnchunon.chungchunon_android.Fragment.PeriodThisWeekRankingFragment.Companion.thisStepCheck
+import com.chugnchunon.chungchunon_android.Layout.CustomBarChartRender
+import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentRankingWeekBinding
+import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import com.github.mikephil.charting.renderer.BarChartRenderer
 import com.github.mikephil.charting.utils.ViewPortHandler
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.protobuf.Value
+import com.kakao.auth.IApplicationConfig
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.tasks.await
+import me.moallemi.tools.daterange.localdate.rangeTo
+import java.time.LocalDate
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
-class PeriodThisWeekRankingFragment: Fragment() {
+class PeriodThisWeekRankingFragment : Fragment() {
 
     private var _binding: FragmentRankingWeekBinding? = null
     private val binding get() = _binding!!
@@ -39,6 +67,32 @@ class PeriodThisWeekRankingFragment: Fragment() {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
+    private var userPointArray = ArrayList<RankingLine>()
+    private var userStepCountHashMap = hashMapOf<String, Int>()
+
+    private var formatThisWeekStart: String = ""
+    private var formatThisWeekEnd: String = ""
+    lateinit var thisWeekStart: Date
+    lateinit var thisWeekEnd: Date
+
+    private var thisWeekMyStepCount: Int = 0
+    private var thisWeekMyStepCountAvg: Int = 0
+
+    private var thisWeekMyStepPoint: Float = 0f
+    private var thisWeekMyDiaryPoint: Float = 0f
+
+    private val mutex = Mutex()
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+    private var initialIndex: Int = 1
+
+    companion object {
+        var questionClick = false
+        var thisStepCheck = true
+    }
+    lateinit var rankingBarChartView: BarChart
+
+    @SuppressLint("SimpleDateFormat")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,64 +101,443 @@ class PeriodThisWeekRankingFragment: Fragment() {
         _binding = FragmentRankingWeekBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        var myColors = ArrayList<Int>()
-        myColors.add(Color.BLACK);
-        myColors.add(Color.YELLOW);
-        myColors.add(Color.BLUE);
-        myColors.add(Color.DKGRAY);
-        myColors.add(Color.GREEN);
-        myColors.add(Color.GRAY);
+        rankingBarChartView = view.findViewById<BarChart>(R.id.rankingBarChart)
 
-        var myText = arrayListOf<String>("1위", "2위", "3위")
+        binding.pointQuestion.setOnClickListener {
+            if (!questionClick) {
 
-        binding.rankingBarChart.setDrawBarShadow(false)
-        binding.rankingBarChart.description.isEnabled = false
-        binding.rankingBarChart.setDrawGridBackground(false)
 
-        var xaxis = binding.rankingBarChart.xAxis
-        xaxis.setDrawGridLines(false)
-        xaxis.position = XAxis.XAxisPosition.BOTTOM
-        xaxis.setDrawLabels(true)
-        xaxis.setDrawAxisLine(false)
+                binding.pointIntroduction.visibility = View.VISIBLE
+                binding.pointIntroduction.alpha = 0f
 
-        var yAxisLeft = binding.rankingBarChart.axisLeft
-        yAxisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
-        yAxisLeft.setDrawGridLines(false)
-        yAxisLeft.setDrawAxisLine(false)
-        yAxisLeft.isEnabled = false
+                binding.pointIntroduction.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start()
 
-        binding.rankingBarChart.axisRight.isEnabled = false
-        binding.rankingBarChart.renderer = BarChartCustomRenderer(
-            binding.rankingBarChart,
-            binding.rankingBarChart.animator,
-            binding.rankingBarChart.viewPortHandler,
-            myColors
-        )
-        binding.rankingBarChart.setDrawValueAboveBar(true)
+                ObjectAnimator.ofFloat(binding.pointIntroduction, "translationY", -20f, 0f)
+                    .apply {
+                        duration = 300
+                        interpolator = LinearInterpolator()
+                        start()
+                    }
 
-        var legend = binding.rankingBarChart.legend
-        legend.isEnabled = false
 
-        val valueSet1 = ArrayList<BarEntry>()
+                questionClick = true
+            } else {
+                Handler().postDelayed({
+                    binding.pointIntroduction.visibility = View.GONE
+                }, 400)
 
-        for (i in 0..5) {
-            val entry = BarEntry(i.toFloat(), ((i + 1) * 10).toFloat())
-            valueSet1.add(entry)
+                binding.pointIntroduction.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .start()
+
+                ObjectAnimator.ofFloat(binding.pointIntroduction, "translationY", 0f, -40f)
+                    .apply {
+                        duration = 300
+                        interpolator = LinearInterpolator()
+                        start()
+                    }
+
+
+                questionClick = false
+            }
         }
 
-        val dataSets: MutableList<IBarDataSet> = ArrayList()
-        val barDataSet = BarDataSet(valueSet1, " ")
-//        barDataSet.valueFormatter = Val
-        barDataSet.color = Color.CYAN
-        dataSets.add(barDataSet)
+        // 이번주 시작
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val today = Calendar.getInstance()
+        val timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
-        val data = BarData(dataSets)
-        binding.rankingBarChart.setData(data)
+        val startOfWeek = Calendar.getInstance(timeZone).apply {
+            firstDayOfWeek = Calendar.MONDAY
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        }.time
+
+        val endOfWeek = Calendar.getInstance(timeZone).apply {
+            firstDayOfWeek = Calendar.MONDAY
+            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        }.time
+
+        val startOfLastWeek = Calendar.getInstance(timeZone).apply {
+            firstDayOfWeek = Calendar.MONDAY
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        }.time
+
+        val endOfLastWeek = Calendar.getInstance(timeZone).apply {
+            firstDayOfWeek = Calendar.MONDAY
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        }.time
+
+        formatThisWeekStart = dateFormat.format(startOfWeek)
+        formatThisWeekEnd = dateFormat.format(endOfWeek)
+        var formatLastWeekStart = dateFormat.format(startOfLastWeek)
+        var formatLastWeekEnd = dateFormat.format(endOfLastWeek)
+
+        thisWeekStart = dateFormat.parse(formatThisWeekStart)
+        thisWeekEnd = dateFormat.parse(formatThisWeekEnd)
+
+        binding.rankingBarChart.visibility = View.GONE
+        binding.rankingBarChartProgressBar.visibility = View.VISIBLE
+        binding.rankingRecyclerView.visibility = View.GONE
+        binding.rankingRecyclerViewProgressBar.visibility = View.VISIBLE
+
+        // 데이터 불러오기
+        uiScope.launch(Dispatchers.IO) {
+            launch { userIdToArrayFun() }.join()
+            launch { calculatePointFun() }.join()
+            launch { indexArrayFun() }.join()
+            launch { filterItemUpdate() }.join()
+            withContext(Dispatchers.Main) {
+                launch {
+                    binding.rankingRecyclerView.visibility = View.VISIBLE
+                    binding.rankingRecyclerViewProgressBar.visibility = View.GONE
+                }
+            }
+        }
+
+
+        // graph
+        uiScope.launch(Dispatchers.IO) {
+            listOf(
+                launch { graphStepFun() },
+                launch { graphDiaryFun() }
+            ).joinAll()
+            launch { graphStepCalculateFun() }.join()
+            launch { dataToGraph() }.join()
+            withContext(Dispatchers.Main) {
+                launch {
+                    binding.rankingBarChart.visibility = View.VISIBLE
+                    binding.rankingBarChartProgressBar.visibility = View.GONE
+                }
+            }
+        }
+
 
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.rankingBarChart.animateY(1000, Easing.Linear)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
+
+    // 그래프 데이터
+
+    suspend fun dataToGraph() = withContext(Dispatchers.Main) {
+
+        var entryOne = ArrayList<BarEntry>()
+        var entryTwo = ArrayList<BarEntry>()
+
+        entryOne.add(BarEntry(1f, 3f))
+        entryOne.add(BarEntry(2f, 4f))
+
+        entryTwo.add(BarEntry(3f, thisWeekMyStepPoint))
+        entryTwo.add(BarEntry(4f, thisWeekMyDiaryPoint))
+
+        var bds1 = BarDataSet(entryOne, "목표")
+        bds1.setColor(ContextCompat.getColor(requireActivity(), R.color.anxious_color));
+        bds1.valueTextSize = 16f
+        bds1.valueTextColor = Color.WHITE
+        bds1.valueFormatter = ThisMyValueFormatter("goal", thisWeekMyStepCountAvg)
+
+        var bds2 = BarDataSet(entryTwo, "나")
+        bds2.setColor(ContextCompat.getColor(requireActivity(), R.color.teal_200));
+        bds2.valueTextSize = 16f
+        bds2.valueTextColor = Color.WHITE
+        bds2.valueFormatter = ThisMyValueFormatter("me", thisWeekMyStepCountAvg)
+
+        var graphArr = ArrayList<IBarDataSet>()
+        graphArr.add(bds1)
+        graphArr.add(bds2)
+
+        var data = BarData(graphArr)
+
+        data.barWidth = 0.6f
+        binding.rankingBarChart.data = data
+        binding.rankingBarChart.groupBars(0.3f, 0.4f, 0.3f)
+        binding.rankingBarChart.setFitBars(false)
+        binding.rankingBarChart.setDrawValueAboveBar(true)
+        binding.rankingBarChart.setNoDataText("")
+        binding.rankingBarChart.legend.isEnabled = false
+
+        binding.rankingBarChart.xAxis.setDrawGridLines(false)
+        binding.rankingBarChart.axisLeft.setDrawGridLines(false)
+        binding.rankingBarChart.axisRight.setDrawGridLines(false)
+
+        binding.rankingBarChart.xAxis.isEnabled = false
+        binding.rankingBarChart.axisLeft.isEnabled = false
+        binding.rankingBarChart.axisRight.isEnabled = false
+
+        binding.rankingBarChart.axisLeft.axisMinimum = 0f
+        binding.rankingBarChart.axisRight.axisMinimum = 0f
+
+        binding.rankingBarChart.setDrawBarShadow(true)
+        binding.rankingBarChart.setTouchEnabled(false)
+
+        binding.rankingBarChart.description.isEnabled = false
+
+        var barChartRender = CustomBarChartRender(
+            binding.rankingBarChart,
+            binding.rankingBarChart.animator,
+            binding.rankingBarChart.viewPortHandler,
+        )
+        barChartRender.setRadius(20f)
+        barChartRender.initBuffers()
+        binding.rankingBarChart.renderer = barChartRender
+        binding.rankingBarChart.animateY(1000, Easing.Linear)
+        binding.rankingBarChart.invalidate()
+    }
+
+    suspend fun graphStepFun() {
+        val startDate = LocalDate.of(
+            formatThisWeekStart.substring(0, 4).toInt(),
+            formatThisWeekStart.substring(5, 7).toInt(),
+            formatThisWeekStart.substring(8, 10).toInt()
+        )
+        val endDate = LocalDate.of(
+            formatThisWeekEnd.substring(0, 4).toInt(),
+            formatThisWeekEnd.substring(5, 7).toInt(),
+            formatThisWeekEnd.substring(8, 10).toInt()
+        )
 
 
+        for (stepDate in startDate..endDate) {
+            db.collection("user_step_count")
+                .document("$userId")
+                .get()
+                .addOnSuccessListener { userSteps ->
+                    userSteps.data?.forEach { (period, dateStepCount) ->
+                        if (period == stepDate.toString()) {
+                            thisWeekMyStepCount += (dateStepCount as Long).toInt()
+                            Log.d("확인 1", "${thisWeekMyStepCount}")
 
+                        }
+                    }
+                }.await()
+        }
+    }
+
+    suspend fun graphStepCalculateFun() {
+        var daysDiffTime = thisWeekEnd.time - thisWeekStart.time
+        var daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
+        thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate+1).toDouble())).toInt()
+        thisWeekMyStepPoint = (Math.round(thisWeekMyStepCountAvg / 1000.0)).toFloat()
+    }
+
+    suspend fun graphDiaryFun() {
+        var thisWeekMyDiaryDB = diaryDB
+            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
+            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .whereEqualTo("userId", userId)
+            .count()
+
+        thisWeekMyDiaryDB.get(AggregateSource.SERVER).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                thisWeekMyDiaryPoint = (task.result.count).toFloat()
+            }
+        }.await()
+    }
+
+    // 리스트 데이터
+
+    suspend fun calculatePointFun() = coroutineScope {
+        try {
+            listOf(
+                launch { stepCountToArrayFun() },
+                launch { diaryToArrayFun() },
+                launch { commentToArrayFun() },
+                launch { likeToArrayFun() }
+            ).joinAll()
+
+        } catch (e: Throwable) {
+            false
+        }
+    }
+
+    suspend fun userIdToArrayFun() {
+        userDB.get().addOnSuccessListener { documents ->
+            for (document in documents) {
+                var userId = document.data?.getValue("userId").toString()
+                var username = document.data.getValue("name").toString()
+                var userAvatar = document.data.getValue("avatar").toString()
+
+                var userEntry = RankingLine(
+                    0,
+                    userId,
+                    username,
+                    userAvatar,
+                    0,
+                )
+
+                userPointArray.add(userEntry)
+                userStepCountHashMap.put(userId, 0)
+            }
+        }.await()
+    }
+
+
+    suspend fun stepCountToArrayFun() {
+
+        val startDate = LocalDate.of(
+            formatThisWeekStart.substring(0, 4).toInt(),
+            formatThisWeekStart.substring(5, 7).toInt(),
+            formatThisWeekStart.substring(8, 10).toInt()
+        )
+        val endDate = LocalDate.of(
+            formatThisWeekEnd.substring(0, 4).toInt(),
+            formatThisWeekEnd.substring(5, 7).toInt(),
+            formatThisWeekEnd.substring(8, 10).toInt()
+        )
+
+
+        for (stepDate in startDate..endDate) {
+            db.collection("period_step_count")
+                .document("$stepDate")
+                .get()
+                .addOnSuccessListener { dateSteps ->
+                    dateSteps.data?.forEach { (stepUserId, dateStepCount) ->
+                        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
+                            if (keyUserId == stepUserId) {
+                                userStepCountHashMap[keyUserId] =
+                                    valueStepCount + (dateStepCount as Long).toInt()
+                            }
+                        }
+                    }
+                }.await()
+        }
+
+        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
+            userStepCountHashMap[keyUserId] = (Math.floor(valueStepCount / 1000.0) * 10).toInt()
+        }
+
+        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
+
+            userPointArray.forEach {
+                if (it.userId == keyUserId) {
+                    var currentpoint = it.point as Int
+                    it.point = currentpoint + valueStepCount
+                }
+
+            }
+        }
+    }
+
+
+    suspend fun diaryToArrayFun() {
+        db.collection("diary")
+            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
+            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .get()
+            .addOnSuccessListener { diaryDocuments ->
+                for (diaryDocument in diaryDocuments) {
+                    var userId = diaryDocument.data.getValue("userId").toString()
+
+                    userPointArray.forEach {
+                        if (it.userId == userId) {
+                            var currentpoint = it.point as Int
+                            it.point = currentpoint + 100
+                        }
+                    }
+                }
+            }.await()
+    }
+
+    suspend fun commentToArrayFun() {
+        db.collectionGroup("comments")
+            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
+            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .get()
+            .addOnSuccessListener { commentDocuments ->
+                for (commentDocument in commentDocuments) {
+                    var userId = commentDocument.data.getValue("userId").toString()
+                    userPointArray.forEach {
+                        if (it.userId == userId) {
+                            var currentpoint = it.point as Int
+                            it.point = currentpoint + 20
+                        }
+                    }
+                }
+            }.await()
+    }
+
+    suspend fun likeToArrayFun() {
+        db.collectionGroup("likes")
+            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
+            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .get()
+            .addOnSuccessListener { likeDocuments ->
+                for (likeDocument in likeDocuments) {
+                    var userId = likeDocument.data.getValue("id").toString()
+                    userPointArray.forEach {
+                        if (it.userId == userId) {
+                            var currentpoint = it.point as Int
+                            it.point = currentpoint + 10
+                        }
+                    }
+                }
+            }.await()
+    }
+
+    suspend fun indexArrayFun() {
+        userPointArray.sortWith(compareBy { it.point })
+        userPointArray.reverse()
+
+        for (i in 0..userPointArray.size - 1) {
+            userPointArray[i].index = initialIndex
+
+            if (i != userPointArray.size - 1) {
+                if (userPointArray[i].point != userPointArray[i + 1].point) {
+                    initialIndex += 1
+                }
+            } else {
+                // i+1 = userPointArray.size
+                null
+            }
+
+        }
+    }
+
+    suspend fun filterItemUpdate() = withContext(Dispatchers.Main) {
+        rankingItems = ArrayList(userPointArray.filter { it.index!! <= 10 })
+
+        rankingAdapter = RankingRecyclerAdapter(requireActivity(), rankingItems)
+        binding.rankingRecyclerView.adapter = rankingAdapter
+        binding.rankingRecyclerView.layoutManager =
+            LinearLayoutManagerWrapper(
+                requireActivity(),
+                RecyclerView.VERTICAL,
+                false
+            )
+    }
+}
+
+class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) : ValueFormatter() {
+    override fun getFormattedValue(value: Float): String {
+
+        if (position == "goal" && thisStepCheck) {
+            thisStepCheck = !thisStepCheck
+            return "3,000 걸음"
+        } else if (position =="goal" && !thisStepCheck) {
+            thisStepCheck = !thisStepCheck
+            return "4일"
+        } else if (position != "goal" && thisStepCheck) {
+            var decimal = DecimalFormat("#,###")
+            var stepLabel = decimal.format(thisWeekMyStepCount)
+            thisStepCheck = !thisStepCheck
+            return "${stepLabel} 걸음"
+        } else {
+            thisStepCheck = !thisStepCheck
+            return "${value.toInt()} 일"
+        }
+    }
 }

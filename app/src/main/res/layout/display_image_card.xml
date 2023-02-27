@@ -3,21 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dispalyImageLayout"
     android:layout_width="match_parent"
-    android:overScrollMode="never"
-    android:layout_marginRight="20dp"
-    android:clipToOutline="true"
+    android:layout_height="match_parent"
     android:layout_marginStart="5dp"
     android:layout_marginEnd="5dp"
-    android:background="@drawable/mindbox"
-    android:layout_height="match_parent">
+    android:layout_marginRight="20dp"
+    android:background="@drawable/mindbox_gray"
+    android:clipToOutline="true"
+    android:overScrollMode="never">
 
     <ImageView
-        android:layout_weight="1"
         android:id="@+id/displayImageCard"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@drawable/mindbox"
+        android:layout_weight="1"
+        android:background="@drawable/mindbox_gray"
         android:clipToOutline="true"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
 </LinearLayout>

@@ -49,7 +49,7 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
 
             if(commentUserId != userId)  commentEditDeleteView.visibility = View.GONE
 
-            if(commentUserType == "치매예방자") {
+            if(commentUserType == "사용자") {
                 commentPartnerCheckImage.visibility = View.GONE
             } else if (commentUserType == "파트너" || commentUserType == "마스터") {
                 commentPartnerCheckImage.visibility = View.VISIBLE

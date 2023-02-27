@@ -18,6 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -59,7 +60,21 @@ class AllRegionDataFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        adapter.notifyDataSetChanged()
+        if(resumePause == false) {
+            diaryItems.clear()
+            getData()
+        } else {
+            resumePause = false
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if(resumePause == false) {
+            allDataLoadingState.loadingCompleteData.value = false
+        } else {
+            resumePause = false
+        }
     }
 
     override fun onCreateView(
@@ -69,6 +84,11 @@ class AllRegionDataFragment : Fragment() {
     ): View? {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
+
+        binding.recyclerDiary.itemAnimator = null
+
+        binding.swipeRecyclerDiary.visibility = View.VISIBLE
+        binding.dataLoadingProgressBar.visibility = View.GONE
 
         allDataLoadingState =
             ViewModelProvider(requireActivity()).get(AllRegionDataLoadingState::class.java)
@@ -86,9 +106,9 @@ class AllRegionDataFragment : Fragment() {
         })
 
         allDataLoadingState.loadingCompleteData.value = false
+        binding.dataLoadingProgressBar.visibility = View.VISIBLE
 
         adapter = DiaryCardAdapter(requireContext(), diaryItems)
-        binding.dataLoadingProgressBar.visibility = View.VISIBLE
 
         swipeRefreshLayout = binding.swipeRecyclerDiary
 
@@ -127,7 +147,7 @@ class AllRegionDataFragment : Fragment() {
             IntentFilter("CREATE_ACTION")
         );
 
-        getData()
+//        getData()
 
         return binding
     }
@@ -215,10 +235,9 @@ class AllRegionDataFragment : Fragment() {
                                                         diaryImages,
                                                     )
                                                     diaryItems.add(diarySet)
-
                                                     diaryItems.sortWith(compareBy({ it.writeTime }))
                                                     diaryItems.reverse()
-                                                    adapter.notifyDataSetChanged()
+//                                                    adapter.notifyDataSetChanged()
 
                                                     binding.recyclerDiary.adapter = adapter
                                                     binding.recyclerDiary.layoutManager =
@@ -278,7 +297,7 @@ class AllRegionDataFragment : Fragment() {
 
                                                     diaryItems.sortWith(compareBy({ it.writeTime }))
                                                     diaryItems.reverse()
-                                                    adapter.notifyDataSetChanged()
+//                                                    adapter.notifyDataSetChanged()
 
                                                     binding.recyclerDiary.adapter = adapter
                                                     binding.recyclerDiary.layoutManager =
@@ -299,11 +318,15 @@ class AllRegionDataFragment : Fragment() {
                                     }
                                 }
                         }
+                        adapter.notifyDataSetChanged()
+//                        allDataLoadingState.loadingCompleteData.value =
+//                            true
 
                         Handler().postDelayed({
                             allDataLoadingState.loadingCompleteData.value =
                                 true
-                        }, 200)
+                        }, 300)
+
                     }
 
                 }

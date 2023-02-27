@@ -466,7 +466,7 @@ class RegisterActivity : AppCompatActivity() {
                         ResourcesCompat.getDrawable(resources, R.drawable.register_fill_box, null)
 
                     val authParams = RelativeLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                     )
                     authParams.setMargins(0, 0, 20, 0)
@@ -484,7 +484,7 @@ class RegisterActivity : AppCompatActivity() {
                     )
                     var authBtn = Button(applicationContext)
                     authBtn.setBackgroundResource(R.drawable.sub_button)
-                    authBtn.layoutParams = layoutParams
+                    authBtn.layoutParams = params
                     authBtn.setTextSize(dpTextSize(11f))
                     authBtn.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
                     authBtn.setTag("verificationBtn")
@@ -564,8 +564,8 @@ class RegisterActivity : AppCompatActivity() {
                                     "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
                                 val userId = Firebase.auth.currentUser?.uid
-                                val updateUserType = if (userType == "치매예방자" && userAge < 50) "파트너"
-                                else if (userType == "치매예방자" && userAge >= 50) "치매예방자"
+                                val updateUserType = if (userType == "사용자" && userAge < 50) "파트너"
+                                else if (userType == "사용자" && userAge >= 50) "사용자"
                                 else "파트너"
 
                                 val userSet = hashMapOf(
@@ -666,11 +666,11 @@ class RegisterActivity : AppCompatActivity() {
                                         (document.data?.getValue("userAge") as Long).toInt()
                                     var userType = document.data?.getValue("userType")
 
-                                    if (userType == "마스터" || (userAge >= 50 && userType == "치매예방자")) {
+                                    if (userType == "마스터" || (userAge >= 50 && userType == "사용자")) {
                                         var goDiary =
                                             Intent(applicationContext, DiaryTwoActivity::class.java)
                                         startActivity(goDiary)
-                                    } else if (userType == "파트너" || (userAge < 50 && userType == "치매예방자")) {
+                                    } else if (userType == "파트너" || (userAge < 50 && userType == "사용자")) {
                                         var goDiary = Intent(
                                             applicationContext,
                                             PartnerDiaryTwoActivity::class.java
