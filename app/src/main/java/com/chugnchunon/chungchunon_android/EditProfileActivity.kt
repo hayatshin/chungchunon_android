@@ -87,13 +87,19 @@ class EditProfileActivity : AppCompatActivity() {
 
         editFillClass = ViewModelProvider(this).get(EditCheckClass::class.java)
         editFillClass.nameFill.observe(this, Observer { value ->
-            binding.profileEditBtn.isEnabled = true
+            if(value) {
+                binding.profileEditBtn.isEnabled = true
+            }
         })
         editFillClass.birthFill.observe(this, Observer { value ->
-            binding.profileEditBtn.isEnabled = true
+            if(value) {
+                binding.profileEditBtn.isEnabled = true
+            }
         })
         editFillClass.regionFill.observe(this, Observer { value ->
-            binding.profileEditBtn.isEnabled = true
+            if(value) {
+                binding.profileEditBtn.isEnabled = true
+            }
         })
 
 
@@ -118,7 +124,6 @@ class EditProfileActivity : AppCompatActivity() {
                     .into(binding.avatarImage)
 
                 binding.editName.setText(newName)
-                binding.editGender.text = gender
                 binding.editBirth.setText(showBirth)
                 binding.editRegion.setText("${newRegion} ${newSmallRegion}")
 
@@ -131,8 +136,11 @@ class EditProfileActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                editFillClass.nameFill.value = true
-                newName = char.toString()
+
+                if(char.toString() != newName) {
+                    editFillClass.nameFill.value = true
+                    newName = char.toString()
+                }
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -149,11 +157,6 @@ class EditProfileActivity : AppCompatActivity() {
                 newBirthDay = document.data?.getValue("birthDay").toString()
                 birthMonth = newBirthDay.substring(0, 2)
                 birthDate = newBirthDay.substring(2, 4)
-
-                Log.d(
-                    "체크",
-                    "${newBirthYear.toInt()} // ${birthMonth.toInt() - 1} // ${birthDate.toInt()} }"
-                )
 
                 calendar.apply {
                     set(newBirthYear.toInt(), birthMonth.toInt() - 1, birthDate.toInt())

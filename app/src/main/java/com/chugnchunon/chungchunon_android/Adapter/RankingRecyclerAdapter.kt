@@ -50,10 +50,23 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
         var rankingName: TextView = itemView.findViewById(R.id.rankingName)
         var rankingAvatar: ImageView = itemView.findViewById(R.id.rankingAvatar)
         var rankingPoint: TextView = itemView.findViewById(R.id.rankingPoint)
+        var rankingCrown: ImageView = itemView.findViewById(R.id.rankingCrown)
 
         fun bind(context: Context, rankingLine: RankingLine) {
 
+            rankingCrown.bringToFront()
             rankingIndex.text = rankingLine.index.toString()
+
+            if(rankingLine.index!!.toString() == "1") {
+                rankingCrown.visibility = View.VISIBLE
+                rankingCrown.setImageResource(R.drawable.ic_crown_filled)
+            } else if (rankingLine.index!!.toString() == "2") {
+                rankingCrown.visibility = View.VISIBLE
+                rankingCrown.setImageResource(R.drawable.ic_crown_outlined)
+            } else {
+                rankingCrown.visibility = View.GONE
+            }
+
             rankingName.text = rankingLine.username.toString()
 
             Glide.with(context)

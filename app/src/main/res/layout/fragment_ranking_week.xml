@@ -33,12 +33,12 @@
                     android:src="@drawable/mindbox_yellow" />
 
                 <TextView
-                    android:textStyle="bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="목표"
                     android:textColor="@color/very_light_gray"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
@@ -54,12 +54,12 @@
                     android:src="@drawable/mindbox_blue" />
 
                 <TextView
-                    android:textStyle="bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="나"
                     android:textColor="@color/very_light_gray"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
         </LinearLayout>
@@ -85,74 +85,108 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:visibility="visible"
         android:id="@+id/rankingList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="250dp"
         android:background="@drawable/comment_box"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+            <LinearLayout
+                android:padding="10dp"
                 android:background="@drawable/diarycard_infobox"
-                android:gravity="center|bottom"
-                android:text="걸음수"
-                android:textColor="@color/graph_back"
-                android:textSize="22dp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center|bottom"
-                android:text="일기"
-                android:textColor="@color/graph_back"
-                android:textSize="22dp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="7dp"
+                    android:layout_weight="1"
+                    android:text="걸음수"
+                    android:textColor="@color/graph_back"
+                    android:textSize="22dp"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(1일 평균값)"
+                    android:textColor="@color/graph_back"
+                    android:textSize="14dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center|bottom"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="7dp"
+                    android:layout_weight="1"
+                    android:gravity="center|bottom"
+                    android:text="일기"
+                    android:textColor="@color/graph_back"
+                    android:textSize="22dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(1주 합산값)"
+                    android:textColor="@color/graph_back"
+                    android:textSize="14dp" />
+            </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="57dp"
+            android:layout_marginTop="20dp"
             android:gravity="bottom"
             android:paddingHorizontal="30dp"
             android:paddingBottom="11dp">
 
             <TextView
-                android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
-                android:text="* 전체 점수 합산 순위"
+                android:text="* 전체 점수 상위 10위"
                 android:textColor="@color/main_color"
-                android:textSize="23dp" />
+                android:textSize="23dp"
+                android:textStyle="bold" />
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/pointQuestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/question"/>
+                android:background="@drawable/question" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="5dp"
             android:id="@+id/pointIntroduction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:gravity="end"
             android:orientation="horizontal"
             android:paddingHorizontal="30dp"
@@ -161,21 +195,21 @@
             android:visibility="gone">
 
             <TextView
-                android:textAlignment="textEnd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:lineHeight="25dp"
                 android:text="@string/point_introduction"
+                android:textAlignment="textEnd"
                 android:textColor="@color/custom_gray"
                 android:textSize="15dp" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rankingRecyclerView"

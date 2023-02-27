@@ -23,10 +23,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
 import com.google.firebase.Timestamp
@@ -71,6 +71,11 @@ class CommentActivity : FragmentActivity() {
 
     companion object {
         var commentItems: ArrayList<Comment> = ArrayList()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        resumePause = true
     }
 
     override fun onResume() {

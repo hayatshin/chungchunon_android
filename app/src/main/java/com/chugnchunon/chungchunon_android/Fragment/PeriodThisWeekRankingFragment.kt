@@ -72,8 +72,11 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     private var formatThisWeekStart: String = ""
     private var formatThisWeekEnd: String = ""
+    private var formatThisNow: String = ""
+
     lateinit var thisWeekStart: Date
     lateinit var thisWeekEnd: Date
+    lateinit var thisNow: Date
 
     private var thisWeekMyStepCount: Int = 0
     private var thisWeekMyStepCountAvg: Int = 0
@@ -90,6 +93,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var questionClick = false
         var thisStepCheck = true
     }
+
     lateinit var rankingBarChartView: BarChart
 
     @SuppressLint("SimpleDateFormat")
@@ -173,13 +177,15 @@ class PeriodThisWeekRankingFragment : Fragment() {
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         }.time
 
+        val now = Calendar.getInstance(timeZone).time
+
         formatThisWeekStart = dateFormat.format(startOfWeek)
         formatThisWeekEnd = dateFormat.format(endOfWeek)
-        var formatLastWeekStart = dateFormat.format(startOfLastWeek)
-        var formatLastWeekEnd = dateFormat.format(endOfLastWeek)
+        formatThisNow = dateFormat.format(now)
 
         thisWeekStart = dateFormat.parse(formatThisWeekStart)
         thisWeekEnd = dateFormat.parse(formatThisWeekEnd)
+        thisNow = dateFormat.parse(formatThisNow)
 
         binding.rankingBarChart.visibility = View.GONE
         binding.rankingBarChartProgressBar.visibility = View.VISIBLE
@@ -310,28 +316,27 @@ class PeriodThisWeekRankingFragment : Fragment() {
             formatThisWeekEnd.substring(8, 10).toInt()
         )
 
-
         for (stepDate in startDate..endDate) {
-            db.collection("user_step_count")
+            var userSteps = db.collection("user_step_count")
                 .document("$userId")
                 .get()
-                .addOnSuccessListener { userSteps ->
-                    userSteps.data?.forEach { (period, dateStepCount) ->
-                        if (period == stepDate.toString()) {
-                            thisWeekMyStepCount += (dateStepCount as Long).toInt()
-                            Log.d("확인 1", "${thisWeekMyStepCount}")
+                .await()
 
-                        }
-                    }
-                }.await()
+            userSteps.data?.forEach { (period, dateStepCount) ->
+                if (period == stepDate.toString()) {
+                    thisWeekMyStepCount += (dateStepCount as Long).toInt()
+                }
+            }
         }
     }
 
     suspend fun graphStepCalculateFun() {
-        var daysDiffTime = thisWeekEnd.time - thisWeekStart.time
+        var daysDiffTime = thisNow.time - thisWeekStart.time
         var daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
-        thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate+1).toDouble())).toInt()
+        thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate + 1).toDouble())).toInt()
         thisWeekMyStepPoint = (Math.round(thisWeekMyStepCountAvg / 1000.0)).toFloat()
+        Log.d("확인 2", "${thisWeekMyStepCount} / ${daysDiffDate+1} / ${thisWeekMyStepCountAvg} / ${thisWeekMyStepPoint}")
+
     }
 
     suspend fun graphDiaryFun() {
@@ -341,11 +346,10 @@ class PeriodThisWeekRankingFragment : Fragment() {
             .whereEqualTo("userId", userId)
             .count()
 
-        thisWeekMyDiaryDB.get(AggregateSource.SERVER).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                thisWeekMyDiaryPoint = (task.result.count).toFloat()
-            }
-        }.await()
+        var diaryTask = thisWeekMyDiaryDB.get(AggregateSource.SERVER).await()
+        if (diaryTask != null) {
+            thisWeekMyDiaryPoint = (diaryTask.count).toFloat()
+        }
     }
 
     // 리스트 데이터
@@ -365,24 +369,24 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun userIdToArrayFun() {
-        userDB.get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                var userId = document.data?.getValue("userId").toString()
-                var username = document.data.getValue("name").toString()
-                var userAvatar = document.data.getValue("avatar").toString()
+        var userdocuments = userDB.get().await()
 
-                var userEntry = RankingLine(
-                    0,
-                    userId,
-                    username,
-                    userAvatar,
-                    0,
-                )
+        for (document in userdocuments) {
+            var userId = document.data?.getValue("userId").toString()
+            var username = document.data.getValue("name").toString()
+            var userAvatar = document.data.getValue("avatar").toString()
 
-                userPointArray.add(userEntry)
-                userStepCountHashMap.put(userId, 0)
-            }
-        }.await()
+            var userEntry = RankingLine(
+                0,
+                userId,
+                username,
+                userAvatar,
+                0,
+            )
+
+            userPointArray.add(userEntry)
+            userStepCountHashMap.put(userId, 0)
+        }
     }
 
 
@@ -399,21 +403,21 @@ class PeriodThisWeekRankingFragment : Fragment() {
             formatThisWeekEnd.substring(8, 10).toInt()
         )
 
-
         for (stepDate in startDate..endDate) {
-            db.collection("period_step_count")
+            var dataSteps = db.collection("period_step_count")
                 .document("$stepDate")
                 .get()
-                .addOnSuccessListener { dateSteps ->
-                    dateSteps.data?.forEach { (stepUserId, dateStepCount) ->
-                        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
-                            if (keyUserId == stepUserId) {
-                                userStepCountHashMap[keyUserId] =
-                                    valueStepCount + (dateStepCount as Long).toInt()
-                            }
-                        }
+                .await()
+
+
+            dataSteps.data?.forEach { (stepUserId, dateStepCount) ->
+                userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
+                    if (keyUserId == stepUserId) {
+                        userStepCountHashMap[keyUserId] =
+                            valueStepCount + (dateStepCount as Long).toInt()
                     }
-                }.await()
+                }
+            }
         }
 
         userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
@@ -434,58 +438,58 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
 
     suspend fun diaryToArrayFun() {
-        db.collection("diary")
+        var diaryDocuments = db.collection("diary")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
-            .addOnSuccessListener { diaryDocuments ->
-                for (diaryDocument in diaryDocuments) {
-                    var userId = diaryDocument.data.getValue("userId").toString()
+            .await()
 
-                    userPointArray.forEach {
-                        if (it.userId == userId) {
-                            var currentpoint = it.point as Int
-                            it.point = currentpoint + 100
-                        }
-                    }
+        for (diaryDocument in diaryDocuments) {
+            var userId = diaryDocument.data.getValue("userId").toString()
+
+            userPointArray.forEach {
+                if (it.userId == userId) {
+                    var currentpoint = it.point as Int
+                    it.point = currentpoint + 100
                 }
-            }.await()
+            }
+        }
     }
 
     suspend fun commentToArrayFun() {
-        db.collectionGroup("comments")
+        var commentDocuments = db.collectionGroup("comments")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
-            .addOnSuccessListener { commentDocuments ->
-                for (commentDocument in commentDocuments) {
-                    var userId = commentDocument.data.getValue("userId").toString()
-                    userPointArray.forEach {
-                        if (it.userId == userId) {
-                            var currentpoint = it.point as Int
-                            it.point = currentpoint + 20
-                        }
-                    }
+            .await()
+
+        for (commentDocument in commentDocuments) {
+            var userId = commentDocument.data.getValue("userId").toString()
+            userPointArray.forEach {
+                if (it.userId == userId) {
+                    var currentpoint = it.point as Int
+                    it.point = currentpoint + 20
                 }
-            }.await()
+            }
+        }
     }
 
     suspend fun likeToArrayFun() {
-        db.collectionGroup("likes")
+        var likeDocuments = db.collectionGroup("likes")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
-            .addOnSuccessListener { likeDocuments ->
-                for (likeDocument in likeDocuments) {
-                    var userId = likeDocument.data.getValue("id").toString()
-                    userPointArray.forEach {
-                        if (it.userId == userId) {
-                            var currentpoint = it.point as Int
-                            it.point = currentpoint + 10
-                        }
-                    }
+            .await()
+
+        for (likeDocument in likeDocuments) {
+            var userId = likeDocument.data.getValue("id").toString()
+            userPointArray.forEach {
+                if (it.userId == userId) {
+                    var currentpoint = it.point as Int
+                    it.point = currentpoint + 10
                 }
-            }.await()
+            }
+        }
     }
 
     suspend fun indexArrayFun() {
@@ -527,7 +531,7 @@ class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) :
         if (position == "goal" && thisStepCheck) {
             thisStepCheck = !thisStepCheck
             return "3,000 걸음"
-        } else if (position =="goal" && !thisStepCheck) {
+        } else if (position == "goal" && !thisStepCheck) {
             thisStepCheck = !thisStepCheck
             return "4일"
         } else if (position != "goal" && thisStepCheck) {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/layer_screen">
+
+    <ImageButton
+        android:id="@+id/enlargeGoBackBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/ic_arrow_back"
+        android:translationZ="90dp"
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/enlargeLeftArrow"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignLeft="@id/enlargeImageViewPager"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp"
+        android:background="@drawable/ic_angle_circle_left"
+        android:translationZ="90dp" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/enlargeImageViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:maxHeight="600dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/enlargeRightArrow"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignRight="@id/enlargeImageViewPager"
+        android:layout_centerVertical="true"
+        android:layout_gravity="end"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/ic_angle_circle_right"
+        android:translationZ="90dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/enlargeImageViewPager"
+        android:layout_alignBottom="@id/enlargeImageViewPager"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/mindbox_transparent_gray"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:translationZ="180dp">
+
+        <TextView
+            android:id="@+id/enlargeImageIndex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/light_gray"
+            android:textSize="12dp"
+            tools:text="1 / 2" />
+    </LinearLayout>
+
+</RelativeLayout>

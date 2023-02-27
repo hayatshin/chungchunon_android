@@ -98,6 +98,14 @@
         <activity
             android:name=".EditDiaryActivity"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".EnlargeImageActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".LikePersonActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:exported="true">

@@ -20,7 +20,7 @@
         android:gravity="start">
 
         <ImageView
-            android:scaleType="centerInside"
+            android:scaleType="centerCrop"
             android:clipToOutline="true"
             android:id="@+id/userAvatar"
             android:layout_width="50dp"

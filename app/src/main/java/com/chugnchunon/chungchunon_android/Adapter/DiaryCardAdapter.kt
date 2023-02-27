@@ -31,6 +31,8 @@ import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
+import com.chugnchunon.chungchunon_android.LikePersonActivity
 import com.chugnchunon.chungchunon_android.R
 import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.ktx.auth
@@ -53,9 +55,6 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
-    companion object {
-        var resumePause : Boolean = false
-    }
 
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -150,7 +149,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder.bind(position)
 
-        holder.itemView.likeBox.setOnClickListener { view ->
+        holder.itemView.likeIcon.setOnClickListener { view ->
 
             var DiaryRef = diaryDB.document(items[position].diaryId)
 
@@ -207,6 +206,19 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)
             context.startActivity(openBlockActivity)
+        }
+
+        holder.itemView.likeText.setOnClickListener{
+
+            if(likeNumLikes[position] != 0) {
+                resumePause = true
+
+                var openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
+                openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
+                openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
+                context.startActivity(openLikePersonActivity)
+            }
+
         }
     }
 

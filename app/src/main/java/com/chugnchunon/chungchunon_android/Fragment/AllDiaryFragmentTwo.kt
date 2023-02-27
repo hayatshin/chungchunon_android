@@ -67,6 +67,10 @@ class AllDiaryFragmentTwo : Fragment() {
 
     lateinit var mcontext: Context
 
+    companion object {
+        var resumePause : Boolean = false
+    }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

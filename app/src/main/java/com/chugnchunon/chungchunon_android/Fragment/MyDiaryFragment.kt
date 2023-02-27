@@ -219,7 +219,6 @@ class MyDiaryFragment : Fragment() {
         })
 
         diaryEditCheck.photoEdit.observe(requireActivity(), Observer { value ->
-            Log.d("수정확인 edit", "${diaryEditCheck.photoEdit.value}")
             if (diaryEditCheck.photoEdit.value == true) binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true) {
@@ -429,6 +428,13 @@ class MyDiaryFragment : Fragment() {
             var decimal = DecimalFormat("#,###")
             var step = decimal.format(todayTotalStepCount)
             binding.todayStepCount.text = "$step 보"
+
+            if(todayTotalStepCount >= 3000) {
+                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            } else {
+                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+            }
+
         }
 
         currentMonth = LocalDateTime.now().toString().substring(0, 7)

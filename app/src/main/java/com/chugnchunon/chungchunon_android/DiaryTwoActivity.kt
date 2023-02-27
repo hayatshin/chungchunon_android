@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryTwoBinding
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -26,7 +28,6 @@ class DiaryTwoActivity : AppCompatActivity() {
     private val userId = Firebase.auth.currentUser?.uid
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
     private var from = ""
-
 
     private val binding by lazy {
         ActivityDiaryTwoBinding.inflate(layoutInflater)
@@ -42,7 +43,6 @@ class DiaryTwoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
 
         // 걸음수 권한
 

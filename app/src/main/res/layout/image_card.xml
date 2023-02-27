@@ -11,9 +11,9 @@
         android:id="@+id/imageCard"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:background="@drawable/mindbox_bold"
+        android:background="@drawable/mindbox_gray"
         android:clipToOutline="true"
-        android:scaleType="centerInside" />
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:layout_gravity="end"

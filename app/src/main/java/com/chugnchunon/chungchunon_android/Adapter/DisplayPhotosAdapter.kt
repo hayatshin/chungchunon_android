@@ -14,8 +14,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.CommentActivity
+import com.chugnchunon.chungchunon_android.EnlargeImageActivity
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.R
+import kotlinx.android.synthetic.main.display_image_card.view.*
 import kotlinx.android.synthetic.main.image_card.view.*
 import java.net.URI
 
@@ -44,6 +47,14 @@ class DisplayPhotosAdapter(val context: Context, private val imageData: ArrayLis
     override fun onBindViewHolder(holder: DisplayPhotosAdapter.ViewHolder, position: Int) {
         holder.bind(context, imageData[position])
 
+        holder.itemView.displayImageCard.setOnClickListener {
+            resumePause = true
+
+            var goEnlargeImage = Intent(context, EnlargeImageActivity::class.java)
+            goEnlargeImage.putExtra("imageArray", imageData)
+            goEnlargeImage.putExtra("imagePosition", position)
+            context.startActivity(goEnlargeImage)
+        }
     }
 
     override fun getItemCount(): Int = imageData.size

@@ -18,8 +18,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityBlockBinding
 import com.google.firebase.auth.ktx.auth
@@ -43,6 +43,11 @@ class BlockActivity : Activity() {
     private var diaryUserId: String = ""
 
     private var lastUserUpdate: Boolean = false
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        resumePause = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

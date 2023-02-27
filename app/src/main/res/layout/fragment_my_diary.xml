@@ -21,12 +21,12 @@
             android:layout_marginBottom="60dp"
             app:tint="@color/white"
             android:src="@drawable/ic_partner"
-            android:layout_width="150dp"
-            android:layout_height="150dp"/>
+            android:layout_width="80dp"
+            android:layout_height="80dp"/>
 
         <TextView
             android:layout_marginBottom="35dp"
-            android:textSize="23dp"
+            android:textSize="20dp"
             android:textColor="@color/white"
             android:textAlignment="center"
             android:text="파트너는 일기 작성이 제한됩니다."

@@ -20,10 +20,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryTwoBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding

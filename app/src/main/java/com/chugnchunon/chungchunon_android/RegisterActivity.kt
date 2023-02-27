@@ -471,6 +471,7 @@ class RegisterActivity : AppCompatActivity() {
                     )
                     authParams.setMargins(0, 0, 20, 0)
                     authEditTextView.layoutParams = authParams
+                    authEditTextView.setPadding(25, 25, 25, 25)
                     authEditTextView.background = drawableBox
                     authEditTextView.hint = "인증번호 입력하기"
                     authEditTextView.setTextSize(dpTextSize(10f))
