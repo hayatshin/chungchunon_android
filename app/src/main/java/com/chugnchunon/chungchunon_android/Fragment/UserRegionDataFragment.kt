@@ -60,23 +60,7 @@ class UserRegionDataFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-//        userDataLoadingState.loadingCompleteData.value = false
-//        binding.dataLoadingProgressBar.visibility = View.GONE
-        if (resumePause == false) {
-            userRegionDiaryItems.clear()
-            getData()
-        } else {
-            resumePause = false
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (resumePause == false) {
-            userDataLoadingState.loadingCompleteData.value = false
-        } else {
-            resumePause = false
-        }
+        resumePause = false
     }
 
     override fun onCreateView(
@@ -86,6 +70,11 @@ class UserRegionDataFragment : Fragment() {
     ): View? {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
+
+        if (resumePause == false) {
+            userRegionDiaryItems.clear()
+            getData()
+        }
 
         binding.recyclerDiary.itemAnimator = null
 

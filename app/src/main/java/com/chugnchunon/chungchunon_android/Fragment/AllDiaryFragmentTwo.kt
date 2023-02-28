@@ -71,12 +71,10 @@ class AllDiaryFragmentTwo : Fragment() {
         var resumePause : Boolean = false
     }
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mcontext = context
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

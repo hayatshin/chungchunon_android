@@ -6,6 +6,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="app_update">
+"새로운 버전이 업데이트 되었습니다.
+지금 업데이트를 하시겠습니까?"
+    </string>
+
     <string name="partner_introduction">
 "'파트너'란 오늘도청춘 앱을 사용 중인 시니어분들의 가족, 친구, 정부 및 민간 기관의 케어 파트너들을 말합니다.
 파트너는 일기 쓰기 작성이 제한됩니다."

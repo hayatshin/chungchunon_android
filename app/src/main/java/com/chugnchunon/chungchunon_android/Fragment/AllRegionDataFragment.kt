@@ -60,22 +60,9 @@ class AllRegionDataFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if(resumePause == false) {
-            diaryItems.clear()
-            getData()
-        } else {
-            resumePause = false
-        }
+        resumePause = false
     }
 
-    override fun onPause() {
-        super.onPause()
-        if(resumePause == false) {
-            allDataLoadingState.loadingCompleteData.value = false
-        } else {
-            resumePause = false
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,6 +71,11 @@ class AllRegionDataFragment : Fragment() {
     ): View? {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
+
+        if (resumePause == false) {
+            diaryItems.clear()
+            getData()
+        }
 
         binding.recyclerDiary.itemAnimator = null
 
