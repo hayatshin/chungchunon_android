@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -82,6 +81,18 @@ class AllDiaryFragmentTwo : Fragment() {
     ): View? {
         _binding = FragmentAllDiaryTwoBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        var diaryType = arguments?.getString("diaryType")
+
+        Log.d("수정수정", "$diaryType")
+
+        if(diaryType == "all") {
+            binding.regionViewPager.currentItem = 0
+        } else if (diaryType == "region") {
+            binding.regionViewPager.currentItem = 1
+        } else if (diaryType == "my") {
+            binding.regionViewPager.currentItem = 2
+        }
 
         val adapter = RegionDiaryAdapter(requireActivity())
         binding.regionViewPager.offscreenPageLimit = 3

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -33,6 +34,7 @@ import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.Mood
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditDiaryBinding
@@ -74,15 +76,22 @@ class EditDiaryActivity : AppCompatActivity() {
     private var newImageList: ArrayList<String> = ArrayList()
     private var editButtonClick: Boolean = false
 
+//    companion object {
+//        private var secretStatus : Boolean = false
+//    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        var diaryType = intent.getStringExtra("diaryType")
+
         binding.backBtn.setOnClickListener {
-            var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
-            goAllDiary.putExtra("from", "edit")
-            startActivity(goAllDiary)
+//            var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
+//            goAllDiary.putExtra("from", "edit")
+//            startActivity(goAllDiary)
+            finish()
         }
 
         newImageViewModel = ViewModelProvider(this).get(NewImageViewModel::class.java)
@@ -99,6 +108,48 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.diaryBtn.isEnabled = false
 
         // 수정
+
+        diaryEditCheck.secretEdit.observe(this, Observer { value ->
+            if (diaryEditCheck.secretEdit.value!!) {
+                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+                binding.secretButton.text = "보이기"
+                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_unlock,
+                    0,
+                    0,
+                    0
+                )
+                binding.secreteNotificationText.text =
+                    getString(R.string.secret_unhide_notification)
+
+                binding.secretConfirmBox.setOnClickListener {
+                    diaryEditCheck.secretEdit.value = false
+                    binding.secretNotificationLayout.visibility = View.GONE
+                    window.setStatusBarColor(Color.WHITE);
+                    binding.diaryBtn.isEnabled = true
+                }
+            } else {
+                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+
+                binding.secretButton.text = "숨기기"
+                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_lock,
+                    0,
+                    0,
+                    0
+                )
+                binding.secreteNotificationText.text = getString(R.string.secret_hide_notification)
+
+                binding.secretConfirmBox.setOnClickListener {
+                    diaryEditCheck.secretEdit.value = true
+                    binding.secretNotificationLayout.visibility = View.GONE
+                    window.setStatusBarColor(Color.WHITE);
+                    binding.diaryBtn.isEnabled = true
+                }
+            }
+        })
+
         diaryEditCheck.diaryEdit.observe(this, Observer { value ->
             binding.diaryBtn.isEnabled = true
             if (diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -132,6 +183,7 @@ class EditDiaryActivity : AppCompatActivity() {
                     .addOnSuccessListener {
                         var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
                         goAllDiary.putExtra("from", "edit")
+                        goAllDiary.putExtra("diaryType", diaryType)
                         startActivity(goAllDiary)
                     }
             }
@@ -196,6 +248,10 @@ class EditDiaryActivity : AppCompatActivity() {
                     (document.data?.getValue("todayMood") as Map<*, *>)["position"].toString()
                         .toInt()
                 binding.todayMood.setSelection(dbMoodPosition)
+
+                // 숨기기 보여주기
+                var DBsecretStatus = document.data?.getValue("secret") as Boolean
+                diaryEditCheck.secretEdit.value = DBsecretStatus
             }
 
         // 사진 업로드
@@ -340,8 +396,23 @@ class EditDiaryActivity : AppCompatActivity() {
             }
         })
 
+
+        // 숨기기
+        binding.secretButton.setOnClickListener {
+            binding.secretNotificationLayout.visibility = View.VISIBLE
+            window.setStatusBarColor(Color.parseColor("#CC000000"));
+        }
+
+        binding.secretCancelBox.setOnClickListener {
+            binding.secretNotificationLayout.visibility = View.GONE
+            window.setStatusBarColor(Color.WHITE);
+        }
+
+
         // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
+            resumePause = false
+
             binding.diaryBtn.text = ""
             binding.diaryProgressBar.visibility = View.VISIBLE
 
@@ -368,6 +439,8 @@ class EditDiaryActivity : AppCompatActivity() {
                     newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
                 }
 
+                newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+
                 if (newImageViewModel.newImageList.value!!.all { it ->
                         it.toString().startsWith("http://")
                     }) {
@@ -387,11 +460,15 @@ class EditDiaryActivity : AppCompatActivity() {
                     newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
                 }
 
+                newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+
+
                 diaryDB.document("$editDiaryId")
                     .set(newDiarySet, SetOptions.merge())
                     .addOnSuccessListener {
                         var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
                         goAllDiary.putExtra("from", "edit")
+                        goAllDiary.putExtra("diaryType", diaryType)
                         startActivity(goAllDiary)
                     }
             }
@@ -526,6 +603,7 @@ class DiaryEditClass : ViewModel() {
     val diaryEdit by lazy { MutableLiveData<Boolean>(false) }
     val moodEdit by lazy { MutableLiveData<Boolean>(false) }
     val photoEdit by lazy { MutableLiveData<Boolean>(false) }
+    val secretEdit by lazy { MutableLiveData<Boolean>(false) }
 }
 
 

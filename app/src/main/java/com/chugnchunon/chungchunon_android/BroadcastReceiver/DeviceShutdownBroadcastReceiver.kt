@@ -30,12 +30,27 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
                 .document("$userId")
                 .get()
                 .addOnSuccessListener { document ->
-                    var dummyData = prefs.getInt(userId, 0)
-                    var previousStepCount = (document.data?.getValue("todayStepCount") as Long).toInt()
+                    var previousStepCount =
+                        (document.data?.getValue("todayStepCount") as Long).toInt()
 
                     // sharedPref 어제 값 추가
-                    editor.putInt(userId, -previousStepCount)
-                    editor.apply()
+//                    editor.putInt(userId, -previousStepCount)
+//                    editor.apply()
+
+//                    db.collection("user_step_count").document("${userId}")
+//                        .get()
+//                        .addOnSuccessListener { document ->
+//                            if (document.exists()) {
+//                                var snapShot = document.data
+//                                if (snapShot!!.containsKey("dummy")) {
+//                                    var dummyStepCount = (snapShot["dummy"] as Long).toInt()
+//
+//                                }
+//                            }
+//                        }
+
+
+
                 }
 
         }

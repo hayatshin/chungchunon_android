@@ -19,7 +19,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.AllDiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.R
@@ -34,7 +34,7 @@ import java.util.*
 
 class AllDiaryFragment : Fragment() {
 
-    private lateinit var adapter: DiaryCardAdapter
+    private lateinit var adapter: AllDiaryCardAdapter
 
     private val db = Firebase.firestore
     private val userDB = db.collection("users")
@@ -151,7 +151,7 @@ class AllDiaryFragment : Fragment() {
             }
         }
 
-        adapter = DiaryCardAdapter(requireContext(), diaryItems)
+        adapter = AllDiaryCardAdapter(requireContext(), diaryItems)
 
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
@@ -239,6 +239,8 @@ class AllDiaryFragment : Fragment() {
                                                 diaryDiary,
                                                 numLikes,
                                                 numComments,
+                                                null,
+                                                false
                                             )
                                             diaryItems.add(diarySet)
                                         }
@@ -327,6 +329,8 @@ class AllDiaryFragment : Fragment() {
                                                             diaryDiary,
                                                             numLikes,
                                                             numComments,
+                                                            null,
+                                                            false
                                                         )
                                                         diaryItems.add(diarySet)
                                                     }

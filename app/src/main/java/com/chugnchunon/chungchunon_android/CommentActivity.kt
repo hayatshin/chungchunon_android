@@ -22,7 +22,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment

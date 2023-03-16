@@ -50,6 +50,7 @@ class EnlargeImageActivity : Activity() {
 
         enlargeImageAdapter = EnlargeImageAdapter(this, imageArray)
         binding.enlargeImageViewPager.adapter = enlargeImageAdapter
+        binding.enlargeImageViewPager.isUserInputEnabled = false
 
         binding.enlargeImageViewPager.setCurrentItem(imagePosition)
 

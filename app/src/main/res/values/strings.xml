@@ -6,6 +6,18 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="secret_hide_notification">
+"'내 글 보기' 메뉴에서
+나만 게시글을 확인할 수 있게 됩니다.
+
+해당 글을 정말 숨기시겠습니까?"
+    </string>
+
+    <string name="secret_unhide_notification">
+"모두가 게시글을 확인할 수 있게 됩니다.
+해당 글을 정말 보여주시겠습니까?"
+    </string>
+
     <string name="app_update">
 "새로운 버전이 업데이트 되었습니다.
 지금 업데이트를 하시겠습니까?"

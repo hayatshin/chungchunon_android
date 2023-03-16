@@ -6,8 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -20,21 +18,13 @@ import androidx.lifecycle.MutableLiveData
 import com.chugnchunon.chungchunon_android.DataClass.AppUpdate
 import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryTwoBinding
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.get
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import org.json.JSONObject
 import java.time.LocalDateTime
 
 class DiaryTwoActivity : AppCompatActivity() {
@@ -48,6 +38,8 @@ class DiaryTwoActivity : AppCompatActivity() {
     private lateinit var remoteConfig: FirebaseRemoteConfig
     private val _mutableLiveData = MutableLiveData<AppUpdate>()
     val remoteLiveData: LiveData<AppUpdate> = _mutableLiveData
+
+    private var diaryType = ""
 
     private val binding by lazy {
         ActivityDiaryTwoBinding.inflate(layoutInflater)
@@ -94,6 +86,8 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
         }
 
+         diaryType = intent.getStringExtra("diaryType").toString()
+
         binding.updateCancelBox.setOnClickListener {
             binding.updateLayout.visibility = View.GONE
 
@@ -110,7 +104,6 @@ class DiaryTwoActivity : AppCompatActivity() {
         }
 
         // 걸음수 권한
-
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 var userType = document.data?.getValue("userType").toString()
@@ -165,10 +158,10 @@ class DiaryTwoActivity : AppCompatActivity() {
             Log.d("이동", "${from}")
 
             if (from == "edit") {
-                changeFragment(MyDiaryFragment())
+                changeFragment(AllDiaryFragmentTwo())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu
             } else if (from == "delete") {
-                changeFragment(AllDiaryFragment())
+                changeFragment(AllDiaryFragmentTwo())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu
             } else {
                 changeFragment(MyDiaryFragment())
@@ -199,6 +192,10 @@ class DiaryTwoActivity : AppCompatActivity() {
     }
 
     private fun changeFragment(fragment: Fragment) {
+        val data = Bundle()
+        data.putString("diaryType", diaryType)
+        fragment.arguments = data
+
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.enterFrameLayout, fragment)

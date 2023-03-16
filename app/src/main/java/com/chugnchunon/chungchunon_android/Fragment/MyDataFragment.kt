@@ -19,7 +19,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.MyDiaryCardAdapter
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
@@ -48,7 +48,7 @@ class MyDataFragment : Fragment() {
 
     lateinit var diarySet: DiaryCard
     private var myDiaryItems: ArrayList<DiaryCard> = ArrayList()
-    private lateinit var adapter: DiaryCardAdapter
+    private lateinit var adapter: MyDiaryCardAdapter
     lateinit var mcontext: Context
 
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -96,7 +96,7 @@ class MyDataFragment : Fragment() {
         })
         myDataLoadingState.loadingCompleteData.value = false
 
-        adapter = DiaryCardAdapter(requireContext(), myDiaryItems)
+        adapter = MyDiaryCardAdapter(requireContext(), myDiaryItems)
 
 
 
@@ -187,6 +187,8 @@ class MyDataFragment : Fragment() {
                             var diaryMood =
                                 (document.data?.getValue("todayMood") as Map<*, *>)["position"] as Long
                             var diaryDiary = document.data?.getValue("todayDiary").toString()
+                            var secretStatus = document.data?.getValue("secret") as Boolean
+
 
                             if (document.data.contains("images")) {
                                 // 이미지 포함
@@ -228,6 +230,7 @@ class MyDataFragment : Fragment() {
                                                             numLikes,
                                                             numComments,
                                                             diaryImages,
+                                                            secretStatus
                                                         )
                                                         myDiaryItems.add(diarySet)
 
@@ -290,6 +293,8 @@ class MyDataFragment : Fragment() {
                                                             diaryDiary,
                                                             numLikes,
                                                             numComments,
+                                                            null,
+                                                            secretStatus
                                                         )
                                                         myDiaryItems.add(diarySet)
 

@@ -15,4 +15,5 @@ data class DiaryCard(
     var numLikes: Long? = 0,
     var numComments: Long? = 0,
     var images: ArrayList<String>? = null,
+    var secret: Boolean,
     )

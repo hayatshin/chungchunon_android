@@ -20,6 +20,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.*
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -32,7 +33,8 @@ class MyService : Service(), SensorEventListener {
     private val userId = Firebase.auth.currentUser?.uid
 
     private var todayStepCountFromDB = 0
-//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+
+    //    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
@@ -53,14 +55,13 @@ class MyService : Service(), SensorEventListener {
 
     lateinit var prefs: SharedPreferences
 
-    private var startingStepCount : Int = 0
-    private var stepCount : Int = 0
+    private var startingStepCount: Int = 0
+    private var stepCount: Int = 0
 
     override fun onCreate() {
         super.onCreate()
 
         StepCountNotification(this, todayTotalStepCount)
-
 
 
         // 기본
@@ -81,10 +82,8 @@ class MyService : Service(), SensorEventListener {
         var dummyData = prefs.getInt(userId, 0)
         var datePrefs = getSharedPreferences(dateChangeSharedPref, Context.MODE_PRIVATE)
 
-
         // DateChangeBroadcastReceiver : 매일 걸음수 0
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
@@ -121,51 +120,113 @@ class MyService : Service(), SensorEventListener {
         stepCount = sensorEvent!!.values[0].toInt()
         val editor = prefs.edit()
 
-        Log.d("걸음수 체크체크 2", "stepCount: ${stepCount} // startingStepCount: ${startingStepCount}")
+        db.collection("user_step_count").document("$userId")
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    var snapShot = document.data
+                    if (snapShot!!.containsKey("dummy")) {
+                        // 더미값 존재
+                        var dummyStepCount = (snapShot["dummy"] as Long).toInt()
 
-        if (!prefs.contains(userId)) {
-            // 걸음수 pref 저장 안 된 상태
+                        todayTotalStepCount = stepCount - dummyStepCount
 
-            // 1. 걸음수 초기화
-            editor.putInt(userId, stepCount)
-            editor.commit()
+                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+                        intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
+                        sendBroadcast(intentToFirebase)
 
-            StepCountNotification(this, 0)
+                        StepCountNotification(this, todayTotalStepCount)
 
-            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intentToFirebase.putExtra("todayTotalStepCount", 0)
-            sendBroadcast(intentToFirebase)
 
-            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                putExtra(
-                    "todayTotalStepCount",
-                    0
-                )
+                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                todayTotalStepCount
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+
+
+                        Log.d(
+                            "걸음수 체크체크 2",
+                            "stepCount: ${stepCount} // startingStepCount: ${dummyStepCount}"
+                        )
+
+                    } else {
+                        // 더미값 존재 x
+
+                        var newDummySet = hashMapOf(
+                            "dummy" to stepCount
+                        )
+                        db.collection("user_step_count").document("$userId")
+                            .set(newDummySet, SetOptions.merge())
+
+                        StepCountNotification(this, 0)
+
+                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+                        intentToFirebase.putExtra("todayTotalStepCount", 0)
+                        sendBroadcast(intentToFirebase)
+
+                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                0
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+                    }
+                }
             }
-            LocalBroadcastManager.getInstance(applicationContext!!).sendBroadcast(intentToMyDiary)
 
-        } else {
-
-            // 걸음수 pref 저장 된 상태
-            todayTotalStepCount = stepCount - startingStepCount
-
-            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-            intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
-            sendBroadcast(intentToFirebase)
-
-            StepCountNotification(this, todayTotalStepCount)
-
-
-            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                putExtra(
-                    "todayTotalStepCount",
-                    todayTotalStepCount
-                )
-            }
-            LocalBroadcastManager.getInstance(applicationContext!!).sendBroadcast(intentToMyDiary)
-        }
+//        if (!prefs.contains(userId)) {
+//            // 걸음수 pref 저장 안 된 상태
+//
+//            // 1. 걸음수 초기화
+//            editor.putInt(userId, stepCount)
+//            editor.commit()
+//
+//            StepCountNotification(this, 0)
+//
+//            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+//            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+//            intentToFirebase.putExtra("todayTotalStepCount", 0)
+//            sendBroadcast(intentToFirebase)
+//
+//            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+//                putExtra(
+//                    "todayTotalStepCount",
+//                    0
+//                )
+//            }
+//            LocalBroadcastManager.getInstance(applicationContext!!)
+//                .sendBroadcast(intentToMyDiary)
+//
+//        } else {
+//
+//            // 걸음수 pref 저장 된 상태
+//            todayTotalStepCount = stepCount - startingStepCount
+//
+//            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+//            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+//            intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
+//            sendBroadcast(intentToFirebase)
+//
+//            StepCountNotification(this, todayTotalStepCount)
+//
+//
+//            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+//                putExtra(
+//                    "todayTotalStepCount",
+//                    todayTotalStepCount
+//                )
+//            }
+//            LocalBroadcastManager.getInstance(applicationContext!!)
+//                .sendBroadcast(intentToMyDiary)
+//        }
     }
 
 
@@ -186,7 +247,6 @@ class MyService : Service(), SensorEventListener {
     override fun onBind(p0: Intent?): IBinder? {
         return Binder()
     }
-
 
 
     var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {

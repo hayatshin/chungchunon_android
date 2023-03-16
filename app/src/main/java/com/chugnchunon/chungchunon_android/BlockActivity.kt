@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.chugnchunon.chungchunon_android.Adapter.DiaryCardAdapter
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
@@ -53,6 +52,8 @@ class BlockActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        var diaryType = intent.getStringExtra("diaryType")
+
         binding.blockBackground.setOnClickListener {
             resumePause = true
 
@@ -86,26 +87,32 @@ class BlockActivity : Activity() {
         binding.editLayout.setOnClickListener {
             var goEditActivity = Intent(this, EditDiaryActivity::class.java)
             goEditActivity.putExtra("editDiaryId", diaryId)
+            goEditActivity.putExtra("diaryType", diaryType)
             startActivity(goEditActivity)
         }
 
         binding.deleteLayout.setOnClickListener {
+            resumePause = false
 
             // 좋아요 삭제
-            diaryDB.document("$diaryId").collection("likes").get().addOnSuccessListener { documents ->
-                for (document in documents) {
-                    var diaryUserId = document.data.getValue("id")
-                    diaryDB.document("$diaryId").collection("likes").document("$diaryUserId").delete()
+            diaryDB.document("$diaryId").collection("likes").get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        var diaryUserId = document.data.getValue("id")
+                        diaryDB.document("$diaryId").collection("likes").document("$diaryUserId")
+                            .delete()
+                    }
                 }
-            }
 
             // 댓글 삭제
-            diaryDB.document("$diaryId").collection("comments").get().addOnSuccessListener { documents ->
-                for (document in documents) {
-                    var commentId = document.data.getValue("commentId")
-                    diaryDB.document("$diaryId").collection("comments").document("$commentId").delete()
+            diaryDB.document("$diaryId").collection("comments").get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        var commentId = document.data.getValue("commentId")
+                        diaryDB.document("$diaryId").collection("comments").document("$commentId")
+                            .delete()
+                    }
                 }
-            }
 
             // 글 삭제
             diaryDB.document("$diaryId").delete()
@@ -155,6 +162,8 @@ class BlockActivity : Activity() {
 
         // 일기 차단하기
         binding.blockDiaryLayout.setOnClickListener {
+            resumePause = false
+
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
             resultView.text = "일기를 차단했습니다."
@@ -173,6 +182,8 @@ class BlockActivity : Activity() {
 
         // 유저 차단하기
         binding.blockUserLayout.setOnClickListener {
+            resumePause = false
+
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
             resultView.text = "유저를 차단했습니다."

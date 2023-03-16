@@ -421,7 +421,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
         }
 
         userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
-            userStepCountHashMap[keyUserId] = (Math.floor(valueStepCount / 1000.0) * 10).toInt()
+            userStepCountHashMap[keyUserId] = ((Math.floor(valueStepCount / 1000.0)) * 10).toInt()
         }
 
         userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->

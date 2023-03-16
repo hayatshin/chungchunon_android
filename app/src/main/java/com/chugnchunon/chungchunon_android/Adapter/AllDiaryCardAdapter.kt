@@ -45,8 +45,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean
 import java.time.LocalDate
 
 
-class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
-    RecyclerView.Adapter<DiaryCardAdapter.CardViewHolder>() {
+class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
+    RecyclerView.Adapter<AllDiaryCardAdapter.CardViewHolder>() {
 
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
@@ -70,6 +70,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
         var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
+        var secretStatusView: ImageView = itemView.findViewById(R.id.secretStatusView)
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
@@ -83,6 +84,12 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
                     .into(userAvatarView)
             } else {
                 // nothing
+            }
+
+            if(items[position].secret) {
+                secretStatusView.visibility = View.VISIBLE
+            } else {
+                secretStatusView.visibility = View.GONE
             }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
@@ -205,6 +212,7 @@ class DiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
             var openBlockActivity = Intent(context, BlockActivity::class.java)
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)
+            openBlockActivity.putExtra("diaryType", "all")
             context.startActivity(openBlockActivity)
         }
 
