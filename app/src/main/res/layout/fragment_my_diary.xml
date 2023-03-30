@@ -8,71 +8,71 @@
     tools:context=".Fragment.MyDiaryFragment">
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/partnerBlock"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:translationZ="90dp"
-        android:background="@drawable/layer_screen"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
 
         <ImageView
-            android:layout_marginBottom="60dp"
-            app:tint="@color/white"
-            android:src="@drawable/ic_partner"
             android:layout_width="80dp"
-            android:layout_height="80dp"/>
+            android:layout_height="80dp"
+            android:layout_marginBottom="60dp"
+            android:src="@drawable/ic_partner"
+            app:tint="@color/white" />
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="35dp"
-            android:textSize="20dp"
-            android:textColor="@color/white"
-            android:textAlignment="center"
             android:text="파트너는 일기 작성이 제한됩니다."
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="20dp" />
 
         <TextView
-            android:textStyle="bold"
-            android:lineHeight="33dp"
-            android:textSize="20dp"
-            android:textColor="@color/white"
-            android:textAlignment="center"
-            android:text="파트너의 하루에\n좋아요와 댓글로 응원해주세요!"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:lineHeight="33dp"
+            android:text="파트너의 하루에\n좋아요와 댓글로 응원해주세요!"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/secretNotificationLayout"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:translationZ="90dp"
-        android:background="@drawable/layer_screen"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
 
         <LinearLayout
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/mindbox_update"
             android:layout_width="300dp"
-            android:layout_height="250dp">
+            android:layout_height="250dp"
+            android:background="@drawable/mindbox_update"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/secreteNotificationText"
-                android:lineHeight="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/rule_header"
                 android:gravity="center"
-                android:textSize="16dp"
-                android:textColor="@color/black"
-                android:layout_weight="1"
+                android:lineHeight="20dp"
                 android:text="@string/secret_hide_notification"
-               android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:textColor="@color/black"
+                android:textSize="16dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -121,15 +121,15 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:paddingTop="20dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rule_header"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingHorizontal="30dp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
         android:paddingBottom="20dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -138,12 +138,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="bottom"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
-                android:padding="5dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:padding="5dp">
 
                 <ImageView
                     android:id="@+id/womanIcon"
@@ -163,12 +165,12 @@
             </LinearLayout>
 
             <TextView
-                android:layout_marginLeft="5dp"
                 android:id="@+id/todayDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
                 android:textColor="@color/main_color"
-                android:textSize="27dp"
+                android:textSize="25dp"
                 android:textStyle="bold"
                 tools:text="1월 1일" />
 
@@ -180,7 +182,9 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp">
+            android:paddingHorizontal="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
 
             <TextView
                 android:id="@+id/thisMonth"
@@ -200,7 +204,7 @@
                 tools:text="15일 / 31일" />
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -210,310 +214,325 @@
         android:orientation="vertical"
         android:paddingHorizontal="30dp">
 
-        <LinearLayout
+        <ScrollView
+            android:scrollbars="none"
+            android:fillViewport="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:gravity="start">
+            android:layout_height="match_parent">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/stepCheckBox"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginRight="15dp"
-                    android:src="@drawable/ic_checkbox_no" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="걸음수"
-                    android:textColor="@color/black"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
-
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="bottom"
-                    android:minWidth="140dp"
-                    android:paddingHorizontal="5dp">
+                    android:layout_marginTop="30dp"
+                    android:gravity="start">
 
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_gravity="start"
-                        android:src="@drawable/ic_run" />
-
-                    <TextView
-                        android:id="@+id/todayStepCount"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="end"
-                        android:textColor="@color/black"
-                        android:textSize="22dp"
-                        android:textStyle="bold"
-                        tools:text="0보" />
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/stepCheckBox"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="15dp"
+                            android:src="@drawable/ic_checkbox_no" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="걸음수"
+                            android:textColor="@color/black"
+                            android:textSize="20dp"
+                            android:textStyle="bold" />
+
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="bottom"
+                            android:minWidth="140dp"
+                            android:paddingHorizontal="5dp">
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="start"
+                                android:src="@drawable/ic_run" />
+
+                            <TextView
+                                android:id="@+id/todayStepCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="end"
+                                android:textColor="@color/black"
+                                android:textSize="22dp"
+                                android:textStyle="bold"
+                                tools:text="0보" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:id="@+id/moodCheckBox"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginRight="15dp"
-                android:src="@drawable/ic_checkbox_no" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="내 마음"
-                android:textColor="@color/black"
-                android:textSize="20dp"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/todayMood"
-                android:layout_width="wrap_content"
-                android:layout_height="45dp"
-                android:background="@drawable/transparent_fill_box"
-                android:gravity="end"
-                android:minWidth="140dp"
-                android:textColor="@color/black" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/diaryBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:orientation="horizontal">
-
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_weight="1"
-                    android:gravity="start">
+                    android:layout_marginTop="20dp"
+                    android:gravity="center_vertical">
 
                     <ImageView
-                        android:id="@+id/diaryCheckBox"
+                        android:id="@+id/moodCheckBox"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:layout_marginRight="15dp"
                         android:src="@drawable/ic_checkbox_no" />
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="감정"
+                        android:textColor="@color/black"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/diaryHeader"
-                            android:layout_width="match_parent"
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/todayMood"
+                        android:layout_width="wrap_content"
+                        android:layout_height="45dp"
+                        android:background="@drawable/transparent_fill_box"
+                        android:gravity="end"
+                        android:minWidth="140dp"
+                        android:textColor="@color/black" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/diaryBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="start"
-                            android:text="내 이야기"
-                            android:textColor="@color/black"
-                            android:textSize="20dp"
-                            android:textStyle="bold"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            android:layout_marginBottom="10dp"
+                            android:layout_weight="1"
+                            android:gravity="start">
 
+                            <ImageView
+                                android:id="@+id/diaryCheckBox"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_marginRight="15dp"
+                                android:src="@drawable/ic_checkbox_no" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/diaryHeader"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="start"
+                                    android:text="일기"
+                                    android:textColor="@color/black"
+                                    android:textSize="20dp"
+                                    android:textStyle="bold"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:orientation="vertical">
+
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/recordBtn"
+                                    style="@style/Widget.AppCompat.Button.Borderless"
+                                    android:layout_width="140dp"
+                                    android:layout_height="40dp"
+                                    android:layout_gravity="end"
+                                    android:background="@drawable/register_fill_box"
+                                    android:drawableStart="@drawable/ic_mic"
+                                    android:drawablePadding="10dp"
+                                    android:paddingHorizontal="20dp"
+                                    android:text="말로 쓰기"
+                                    android:textSize="18dp" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
+                    <EditText
+                        android:id="@+id/todayDiary"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:orientation="vertical">
+                        android:layout_weight="1"
+                        android:background="@drawable/mindbox_bold"
+                        android:fitsSystemWindows="true"
+                        android:gravity="top"
+                        android:hint="오늘 하루는 어떠셨나요?"
+                        android:paddingHorizontal="20dp"
+                        android:paddingTop="20dp"
+                        android:paddingBottom="50dp"
+                        android:textSize="20dp" />
 
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/photoLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/photoCheckBox"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="15dp"
+                            android:src="@drawable/ic_checkbox_no" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="start"
+                                android:text="사진"
+                                android:textColor="@color/black"
+                                android:textSize="20dp"
+                                android:textStyle="bold"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+
+                        </LinearLayout>
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/recordBtn"
+                            android:id="@+id/photoButton"
                             style="@style/Widget.AppCompat.Button.Borderless"
                             android:layout_width="140dp"
                             android:layout_height="40dp"
                             android:layout_gravity="end"
                             android:background="@drawable/register_fill_box"
-                            android:drawableStart="@drawable/ic_mic"
-                            android:drawablePadding="10dp"
+                            android:drawableStart="@drawable/ic_gallery"
+                            android:drawablePadding="20dp"
                             android:paddingHorizontal="20dp"
-                            android:text="말로 쓰기"
+                            android:text="올리기"
                             android:textSize="18dp" />
 
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/photoRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:layout_marginTop="20dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/secretLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/secretCheckBox"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="15dp"
+                            android:src="@drawable/ic_checkbox_no" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="start"
+                                android:text="숨기기"
+                                android:textColor="@color/black"
+                                android:textSize="20dp"
+                                android:textStyle="bold"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/secretButton"
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:layout_width="140dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/register_fill_box"
+                            android:drawableStart="@drawable/ic_lock"
+                            android:drawablePadding="10dp"
+                            android:paddingHorizontal="20dp"
+                            android:text="숨기기"
+                            android:textSize="18dp" />
                     </LinearLayout>
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/todayDiary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/mindbox_bold"
-                android:fitsSystemWindows="true"
-                android:gravity="top"
-                android:hint="오늘 하루는 어떠셨나요?"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="50dp"
-                android:textSize="20dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/photoLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="start"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/photoCheckBox"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginRight="15dp"
-                    android:src="@drawable/ic_checkbox_no" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:text="사진"
-                        android:textColor="@color/black"
-                        android:textSize="20dp"
-                        android:textStyle="bold"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/photoButton"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="140dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="end"
-                    android:background="@drawable/register_fill_box"
-                    android:drawableStart="@drawable/ic_gallery"
-                    android:drawablePadding="20dp"
-                    android:paddingHorizontal="20dp"
-                    android:text="올리기"
-                    android:textSize="18dp" />
-
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/photoRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/secretLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="start"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/secretCheckBox"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginRight="15dp"
-                    android:src="@drawable/ic_checkbox_no" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="start"
-                        android:text="글 숨기기"
-                        android:textColor="@color/black"
-                        android:textSize="20dp"
-                        android:textStyle="bold"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-
-                </LinearLayout>
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/secretButton"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="140dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="end"
-                    android:background="@drawable/register_fill_box"
-                    android:drawableStart="@drawable/ic_lock"
-                    android:drawablePadding="10dp"
-                    android:paddingHorizontal="20dp"
-                    android:text="숨기기"
-                    android:textSize="18dp" />
-            </LinearLayout>
-
-        </LinearLayout>
+        </ScrollView>
 
 
     </LinearLayout>
@@ -526,11 +545,11 @@
         android:gravity="center">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:enabled="false"
             android:id="@+id/diaryBtn"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@drawable/default_button"
+            android:enabled="false"
             android:text="일기 작성"
             android:textColor="@color/white"
             android:textSize="23dp"

@@ -49,11 +49,12 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
 
             if(commentUserId != userId)  commentEditDeleteView.visibility = View.GONE
 
-            if(commentUserType == "사용자") {
-                commentPartnerCheckImage.visibility = View.GONE
-            } else if (commentUserType == "파트너" || commentUserType == "마스터") {
+            if (commentUserType == "파트너" ) {
                 commentPartnerCheckImage.visibility = View.VISIBLE
+            } else {
+                commentPartnerCheckImage.visibility = View.GONE
             }
+
             commentNameView.text = items[position].commentUserName
             commentTimeStampView.text = items[position].commentTimestamp
             commentDescriptionView.text = items[position].commentDescription

@@ -108,22 +108,24 @@
             android:windowSoftInputMode="adjustResize" />
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
-            android:exported="true">
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_TICK" />
-<!--                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />-->
             </intent-filter>
         </receiver>
         <receiver
             android:name=".BroadcastReceiver.DeviceShutdownBroadcastReceiver"
-            android:exported="true">
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".BroadcastReceiver.StepCountBroadcastReceiver"
-            android:exported="true">
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
             </intent-filter>

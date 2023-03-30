@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:text="우블 이용약관"
+            android:text="오늘도청춘 이용약관"
             android:textSize="18dp"
             android:textStyle="bold" />
 

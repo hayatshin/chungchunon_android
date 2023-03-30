@@ -49,6 +49,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
 import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.NewImageViewModel
@@ -114,28 +115,6 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-//        userDB.document("$userId").get()
-//            .addOnSuccessListener { document ->
-//                var userType = document.data?.getValue("userType").toString()
-//                if(userType == "파트너") {
-//                    binding.partnerBlock.visibility = View.VISIBLE
-
-//                    var activity = activity
-//                    if(activity != null) {
-//                        var window = requireActivity().window
-//                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//                        window.setStatusBarColor(Color.parseColor("#99000000"));
-//                    }
-//                } else binding.partnerBlock.visibility = View.GONE
-//            }
-
-        // DiaryUpdateBroadcastReceiver : 다이어리 업데이트
-//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-
-//        val diaryChangeIntent = IntentFilter()
-//        diaryChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-//        activity?.registerReceiver(diaryUpdateBroadcastReceiver, diaryChangeIntent)
-
         // StepCount Notification Receiver: 변경된 걸음수 UI 반영
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             receiver,
@@ -172,7 +151,6 @@ class MyDiaryFragment : Fragment() {
 
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
         binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-
 //        if(!editDiary) {
 //            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
 //            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
@@ -293,6 +271,8 @@ class MyDiaryFragment : Fragment() {
                         var region = document.data?.getValue("region")
                         var smallRegion = document.data?.getValue("smallRegion")
                         var regionGroup = "${region} ${smallRegion}"
+                        var secretStatus = diaryFillCheck.secretFill.value
+
                         val diarySet = hashMapOf(
                             "regionGroup" to regionGroup,
                             "diaryId" to diaryId,
@@ -305,6 +285,7 @@ class MyDiaryFragment : Fragment() {
                             "numLikes" to 0,
                             "numComments" to 0,
                             "blockedBy" to ArrayList<String>(),
+                            "secret" to secretStatus,
                         )
 
                         diaryDB
@@ -331,7 +312,7 @@ class MyDiaryFragment : Fragment() {
         val sdf = java.text.SimpleDateFormat("EEE")
         val dayOfTheWeek = sdf.format(Date())
 
-        binding.todayDate.text = "${monthUI}월 ${dateUI}일 (${dayOfTheWeek})"
+        binding.todayDate.text = "${monthUI}월 ${dateUI}일 (${DateFormat().doDayOfWeek()})"
 
 
         diaryDB
@@ -807,7 +788,7 @@ class MyDiaryFragment : Fragment() {
                     if(activity != null) {
                         var window = requireActivity().window
                         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                        window.setStatusBarColor(Color.parseColor("#99000000"));
+                        window.setStatusBarColor(Color.parseColor("#CC000000"));
                     }
                 } else binding.partnerBlock.visibility = View.GONE
             }

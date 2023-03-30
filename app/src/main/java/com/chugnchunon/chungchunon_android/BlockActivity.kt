@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityBlockBinding
@@ -173,7 +173,7 @@ class BlockActivity : Activity() {
 
             diaryDB.document("$diaryId").update("blockedBy", (FieldValue.arrayUnion("$userId")))
                 .addOnSuccessListener {
-                    var blockDiaryIntent = Intent(this, AllDiaryFragment::class.java)
+                    var blockDiaryIntent = Intent(this, AllDiaryFragmentTwo::class.java)
                     blockDiaryIntent.setAction("BLOCK_DIARY_INTENT")
                     LocalBroadcastManager.getInstance(this).sendBroadcast(blockDiaryIntent)
                     finish()
@@ -198,7 +198,7 @@ class BlockActivity : Activity() {
                             .update("blockedBy", (FieldValue.arrayUnion("$userId")))
                             .addOnSuccessListener {
                                 if (index == documents.size() - 1) {
-                                    var blockUserDiary = Intent(this, AllDiaryFragment::class.java)
+                                    var blockUserDiary = Intent(this, AllDiaryFragmentTwo::class.java)
                                     blockUserDiary.setAction("BLOCK_USER_INTENT")
                                     LocalBroadcastManager.getInstance(this)
                                         .sendBroadcast(blockUserDiary)

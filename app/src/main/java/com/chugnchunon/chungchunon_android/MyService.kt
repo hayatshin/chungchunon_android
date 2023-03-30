@@ -58,10 +58,11 @@ class MyService : Service(), SensorEventListener {
     private var startingStepCount: Int = 0
     private var stepCount: Int = 0
 
+
     override fun onCreate() {
         super.onCreate()
 
-        StepCountNotification(this, todayTotalStepCount)
+//        StepCountNotification(this, todayTotalStepCount)
 
 
         // 기본
@@ -241,11 +242,14 @@ class MyService : Service(), SensorEventListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-        return super.onStartCommand(intent, flags, startId)
+        StepCountNotification(this, todayTotalStepCount)
+
+//        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onBind(p0: Intent?): IBinder? {
-        return Binder()
+        return null
     }
 
 
@@ -256,7 +260,7 @@ class MyService : Service(), SensorEventListener {
     }
 
     private fun StepCountNotification(context: Context, stepCount: Int?) {
-        if (Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val CHANNEL_ID = "my_app"
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -278,6 +282,8 @@ class MyService : Service(), SensorEventListener {
             startForeground(1, notification)
         }
     }
+
+
 }
 
 

@@ -69,22 +69,23 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                 // 더미 데이터 있는 경우
 
                                 if (snapShot!!.containsKey(REFRESH_DAILY)) { // 기존 날
-                                    var testSetTwo = hashMapOf(
-                                        "더미데이터 있고 기존 날" to "작동"
-                                    )
 
-                                    db.collection("test").document(REFRESH_DAILY)
-                                        .set(testSetTwo, SetOptions.merge())
+//                                    var testSetTwo = hashMapOf(
+//                                        "더미데이터 있고 기존 날" to "작동"
+//                                    )
+//
+//                                    db.collection("test").document(REFRESH_DAILY)
+//                                        .set(testSetTwo, SetOptions.merge())
 
                                 } else {
                                     // 새로운 날
 
-                                    var testSetFour = hashMapOf(
-                                        "더미데이터 있고 새로운 날" to "작동",
-                                    )
-
-                                    db.collection("test").document(REFRESH_DAILY)
-                                        .set(testSetFour, SetOptions.merge())
+//                                    var testSetFour = hashMapOf(
+//                                        "더미데이터 있고 새로운 날" to "작동",
+//                                    )
+//
+//                                    db.collection("test").document(REFRESH_DAILY)
+//                                        .set(testSetFour, SetOptions.merge())
 
 
                                     var todayStepCountSet = hashMapOf<String, Int?>(
@@ -121,23 +122,23 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                         db.collection("user_step_count").document("$userId")
                                             .set(newStepSet, SetOptions.merge())
 
-                                        var testSetThree = hashMapOf(
-                                            "더미데이터 있고 새로운 날, 어제 값 존재" to "작동",
-                                            "yesterday" to yesterday,
-                                            "dummyStep" to dummyStep
-                                        )
-
-                                        db.collection("test").document(REFRESH_DAILY)
-                                            .set(testSetThree, SetOptions.merge())
+//                                        var testSetThree = hashMapOf(
+//                                            "더미데이터 있고 새로운 날, 어제 값 존재" to "작동",
+//                                            "yesterday" to yesterday,
+//                                            "dummyStep" to dummyStep
+//                                        )
+//
+//                                        db.collection("test").document(REFRESH_DAILY)
+//                                            .set(testSetThree, SetOptions.merge())
 
                                     } else {
 
-                                        var testSetFive = hashMapOf(
-                                            "더미데이터 있고 새로운 날, 어제 값 존재 x" to "작동",
-                                        )
-
-                                        db.collection("test").document(REFRESH_DAILY)
-                                            .set(testSetFive, SetOptions.merge())
+//                                        var testSetFive = hashMapOf(
+//                                            "더미데이터 있고 새로운 날, 어제 값 존재 x" to "작동",
+//                                        )
+//
+//                                        db.collection("test").document(REFRESH_DAILY)
+//                                            .set(testSetFive, SetOptions.merge())
 
 
                                     }
@@ -155,12 +156,12 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                             } else {
                                 // 더미 데이터 없는 경우
 
-                                var testSetSeven = hashMapOf(
-                                    "더미데이터 없음, 어제 값 존재 x" to "작동",
-                                )
-
-                                db.collection("test").document(REFRESH_DAILY)
-                                    .set(testSetSeven, SetOptions.merge())
+//                                var testSetSeven = hashMapOf(
+//                                    "더미데이터 없음, 어제 값 존재 x" to "작동",
+//                                )
+//
+//                                db.collection("test").document(REFRESH_DAILY)
+//                                    .set(testSetSeven, SetOptions.merge())
 
                             }
                         }

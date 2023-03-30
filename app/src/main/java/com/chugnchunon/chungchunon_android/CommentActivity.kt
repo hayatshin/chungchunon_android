@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
-import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragment
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
@@ -270,7 +270,7 @@ class CommentActivity : FragmentActivity() {
                                 var createNumComments =
                                     document.data?.getValue("numComments").toString().toInt()
 
-                                var createIntent = Intent(this, AllDiaryFragment::class.java)
+                                var createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
                                 createIntent.setAction("CREATE_ACTION")
                                 createIntent.putExtra("createDiaryPosition", diaryPosition)
                                 createIntent.putExtra("createNumComments", createNumComments)
@@ -370,7 +370,7 @@ class CommentActivity : FragmentActivity() {
                     var newNumComments = document.data?.getValue("numComments").toString().toInt()
 
                     // 전체 일기 화면
-                    var intent = Intent(context, AllDiaryFragment::class.java)
+                    var intent = Intent(context, AllDiaryFragmentTwo::class.java)
                     intent.setAction("DELETE_ACTION")
                     intent.putExtra("deleteDiaryPosition", deleteDiaryPosition)
                     intent.putExtra("deleteNumComments", newNumComments)

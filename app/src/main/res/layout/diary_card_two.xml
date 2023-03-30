@@ -8,11 +8,38 @@
     android:background="@drawable/diarybox_bold"
     android:clipToOutline="true"
     android:orientation="vertical"
-    android:paddingTop="30dp"
+    android:paddingTop="20dp"
     android:paddingBottom="20dp"
     android:paddingHorizontal="20dp">
 
     <LinearLayout
+        android:layout_marginBottom="5dp"
+        android:layout_gravity="right"
+        android:id="@+id/moreLayout"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/moreIcon"
+            android:layout_width="25dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:src="@drawable/ic_more_empty" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/secretStatusView"
+            android:src="@drawable/ic_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="@color/light_gray" />
+    </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/userInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,23 +47,26 @@
         android:gravity="start">
 
         <ImageView
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
             android:scaleType="centerCrop"
             android:clipToOutline="true"
             android:id="@+id/userAvatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginRight="15dp"
             android:background="@drawable/avatar_background"
             android:src="@drawable/ic_user" />
 
         <LinearLayout
+            android:layout_marginLeft="10dp"
+            app:layout_constraintRight_toLeftOf="@id/userActInfo"
+            app:layout_constraintLeft_toRightOf="@id/userAvatar"
             android:gravity="center_vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:background="@drawable/diarycard_infobox"
-            android:orientation="vertical"
-            android:paddingRight="15dp">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/userName"
@@ -44,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/black"
-                android:textSize="22dp"
+                android:textSize="21dp"
                 android:textStyle="bold"
                 tools:text="신혜정" />
 
@@ -53,20 +83,19 @@
                 android:id="@+id/userWriteTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 tools:text="2023-02-10" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/userActInfo"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"
             android:orientation="vertical"
             android:paddingLeft="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.1">
 
             <LinearLayout
@@ -118,29 +147,8 @@
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="-10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/moreIcon"
-            android:layout_width="25dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:src="@drawable/ic_more_empty" />
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/secretStatusView"
-                android:src="@drawable/ic_lock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:tint="@color/light_gray" />
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

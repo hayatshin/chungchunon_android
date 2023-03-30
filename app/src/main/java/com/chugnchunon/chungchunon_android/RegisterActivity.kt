@@ -88,7 +88,7 @@ class RegisterActivity : AppCompatActivity() {
     lateinit var avatarUri: Uri
 
     private val REQUEST_PHOTO_PERMISSION = 300
-    lateinit var metrics : DisplayMetrics
+    lateinit var metrics: DisplayMetrics
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -106,6 +106,10 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+
+        binding.goBackBtn.setOnClickListener {
+            finish()
+        }
 
         var userType = intent.getStringExtra("userType")
 
@@ -478,7 +482,6 @@ class RegisterActivity : AppCompatActivity() {
                     authEditTextView.gravity = Gravity.CENTER
 
                     // 인증 확인
-
                     val params = RelativeLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -514,9 +517,7 @@ class RegisterActivity : AppCompatActivity() {
                         override fun afterTextChanged(p0: Editable?) {
                             // null
                         }
-
                     })
-
 
                     authBtn.setOnClickListener {
                         binding.authProgressBar.visibility = View.GONE
@@ -550,9 +551,11 @@ class RegisterActivity : AppCompatActivity() {
 
         // 회원가입 버튼 클릭
         binding.registerBtn.setOnClickListener {
+            binding.registerBtn.visibility = View.GONE
+            binding.registerProgressBar.visibility = View.VISIBLE
 
-            if(avatarUri != null) {
-                val fileName = UUID.randomUUID().toString()+".jpg"
+            if (avatarUri != null) {
+                val fileName = UUID.randomUUID().toString() + ".jpg"
                 val database = FirebaseDatabase.getInstance()
                 val refStorage = FirebaseStorage.getInstance().reference.child("avatars/$fileName")
 
@@ -588,7 +591,8 @@ class RegisterActivity : AppCompatActivity() {
                                     .document("$userId")
                                     .set(userSet, SetOptions.merge())
                                     .addOnSuccessListener {
-                                        var intent = Intent(this, RegionRegisterActivity::class.java)
+                                        var intent =
+                                            Intent(this, RegionRegisterActivity::class.java)
                                         intent.putExtra("userType", updateUserType)
                                         intent.putExtra("userAge", userAge)
                                         startActivity(intent)
@@ -667,17 +671,10 @@ class RegisterActivity : AppCompatActivity() {
                                         (document.data?.getValue("userAge") as Long).toInt()
                                     var userType = document.data?.getValue("userType")
 
-                                    if (userType == "마스터" || (userAge >= 50 && userType == "사용자")) {
-                                        var goDiary =
-                                            Intent(applicationContext, DiaryTwoActivity::class.java)
-                                        startActivity(goDiary)
-                                    } else if (userType == "파트너" || (userAge < 50 && userType == "사용자")) {
-                                        var goDiary = Intent(
-                                            applicationContext,
-                                            PartnerDiaryTwoActivity::class.java
-                                        )
-                                        startActivity(goDiary)
-                                    }
+                                    var goDiary =
+                                        Intent(applicationContext, DiaryTwoActivity::class.java)
+                                    startActivity(goDiary)
+
 
                                 } else {
                                     // 인증 성공
@@ -725,8 +722,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
 
-
-    private fun dpTextSize(dp: Float) : Float {
+    private fun dpTextSize(dp: Float): Float {
         metrics = applicationContext.resources.displayMetrics
         var fpixels = metrics.density * dp
         var pixels = fpixels * 0.5f

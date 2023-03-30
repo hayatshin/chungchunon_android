@@ -8,6 +8,7 @@ import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -73,6 +74,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
     private var initialIndex: Int = 1
+    lateinit var metrics: DisplayMetrics
 
     companion object {
         var questionClick = false
@@ -203,6 +205,13 @@ class PeriodLastWeekRankingFragment : Fragment() {
         return view
     }
 
+    private fun dpTextSize(dp: Float): Float {
+        metrics = context?.resources!!.displayMetrics
+        var fpixels = metrics.density * dp
+        var pixels = fpixels * 0.5f
+        return pixels
+    }
+
     override fun onResume() {
         super.onResume()
         binding.rankingBarChart.animateY(1000, Easing.Linear)
@@ -229,13 +238,13 @@ class PeriodLastWeekRankingFragment : Fragment() {
 
         var bds1 = BarDataSet(entryOne, "목표")
         bds1.setColor(ContextCompat.getColor(requireActivity(), R.color.anxious_color));
-        bds1.valueTextSize = 16f
+        bds1.valueTextSize = dpTextSize(13f)
         bds1.valueTextColor = Color.WHITE
         bds1.valueFormatter = LastMyValueFormatter("goal", lastWeekMyStepCountAvg)
 
         var bds2 = BarDataSet(entryTwo, "나")
         bds2.setColor(ContextCompat.getColor(requireActivity(), R.color.teal_200));
-        bds2.valueTextSize = 16f
+        bds2.valueTextSize = dpTextSize(13f)
         bds2.valueTextColor = Color.WHITE
         bds2.valueFormatter = LastMyValueFormatter("me", lastWeekMyStepCountAvg)
 

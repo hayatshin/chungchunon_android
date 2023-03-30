@@ -125,6 +125,7 @@
         <entry key="app/src/main/res/drawable/tab_background_unselected.xml" value="0.1585" />
         <entry key="app/src/main/res/drawable/tab_icon_color.xml" value="0.1565" />
         <entry key="app/src/main/res/drawable/transparent_fill_box.xml" value="0.144" />
+        <entry key="app/src/main/res/font/custom_font_family.xml" value="0.1537037037037037" />
         <entry key="app/src/main/res/font/custom_font_family_nanum.xml" value="0.225" />
         <entry key="app/src/main/res/layout/activity_agreement.xml" value="0.1793502844743195" />
         <entry key="app/src/main/res/layout/activity_application_rule.xml" value="0.12802582033351265" />
@@ -147,7 +148,7 @@
         <entry key="app/src/main/res/layout/activity_personalinfo_rule.xml" value="0.1796875" />
         <entry key="app/src/main/res/layout/activity_region.xml" value="0.23852386474609377" />
         <entry key="app/src/main/res/layout/activity_region_register.xml" value="0.16304347826086957" />
-        <entry key="app/src/main/res/layout/activity_register.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_register.xml" value="0.2011444091796875" />
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.20737581114838088" />
         <entry key="app/src/main/res/layout/big_image_card.xml" value="0.13058494285300926" />
@@ -162,7 +163,7 @@
         <entry key="app/src/main/res/layout/fragment_all_diary_two.xml" value="0.2033514492753623" />
         <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.10219879150390623" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
-        <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.24791666666666667" />
+        <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.22592875162760417" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.1769577026367188" />
         <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.1515625" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
