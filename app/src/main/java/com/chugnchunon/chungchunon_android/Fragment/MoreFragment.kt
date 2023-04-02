@@ -95,11 +95,15 @@ class MoreFragment: Fragment() {
 
     var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            var newAvatar = intent?.getStringExtra("newAvatar")
             var newName = intent?.getStringExtra("newName")
             var newUserAge = intent?.getIntExtra("newUserAge", 0)
             var newRegionSmallRegion = intent?.getStringExtra("newRegionSmallRegion")
 
-            Log.d("지역수정2", "${newRegionSmallRegion}")
+            Glide.with(context!!)
+                .load(newAvatar)
+                .into(binding.profileAvatar)
+
             binding.profileName.text = newName
             binding.profileAge.text = "${newUserAge}세"
             binding.profileRegion.text = newRegionSmallRegion

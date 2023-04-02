@@ -1,22 +1,33 @@
 package com.chugnchunon.chungchunon_android
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -24,14 +35,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
+import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.Fragment.MoreFragment
+import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileTwoBinding
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import java.util.*
 
 class EditProfileActivity : AppCompatActivity() {
@@ -60,6 +76,9 @@ class EditProfileActivity : AppCompatActivity() {
     private var intentRegion = ""
     private var intentSmallRegion = ""
 
+    lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    lateinit var selectedAvatarURI: Uri
+
     override fun onBackPressed() {
         super.onBackPressed()
         overridePendingTransition(0, R.anim.slide_down_enter)
@@ -75,6 +94,23 @@ class EditProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        binding.editProfileScrollView.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
+                when(ev?.action) {
+                    MotionEvent.ACTION_MOVE -> {
+                        return false
+                    }
+                    KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP -> {
+                        val imm: InputMethodManager =
+                            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+                        return false
+                    }
+                }
+                return false
+            }
+        })
+
         binding.backBtn.setOnClickListener {
             finish()
         }
@@ -86,25 +122,30 @@ class EditProfileActivity : AppCompatActivity() {
 
 
         editFillClass = ViewModelProvider(this).get(EditCheckClass::class.java)
-        editFillClass.nameFill.observe(this, Observer { value ->
+
+        editFillClass.avatarFill.observe(this, Observer {value ->
             if(value) {
+                binding.profileEditBtn.isEnabled = true
+            }
+        })
+
+        editFillClass.nameFill.observe(this, Observer { value ->
+            if (value) {
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.birthFill.observe(this, Observer { value ->
-            if(value) {
+            if (value) {
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.regionFill.observe(this, Observer { value ->
-            if(value) {
+            if (value) {
                 binding.profileEditBtn.isEnabled = true
             }
         })
 
-
         // 초기 셋업
-
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 newAvatar = document.data?.getValue("avatar").toString()
@@ -126,8 +167,40 @@ class EditProfileActivity : AppCompatActivity() {
                 binding.editName.setText(newName)
                 binding.editBirth.setText(showBirth)
                 binding.editRegion.setText("${newRegion} ${newSmallRegion}")
-
             }
+
+
+        // 이미지 수정
+        fun selectGallery() {
+            val readPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+
+            // 권한 확인
+            if (readPermission == PackageManager.PERMISSION_DENIED) {
+                // 권한 요청
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ),
+                    100
+                )
+            } else {
+
+                var intent = Intent(Intent.ACTION_PICK)
+                intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                intent.type = "image/*"
+
+                startActivityForResult(intent, 2000)
+            }
+        }
+
+
+        binding.editAvatar.setOnClickListener {
+            selectGallery()
+        }
 
         // 이름 수정
         binding.editName.addTextChangedListener(object : TextWatcher {
@@ -137,7 +210,7 @@ class EditProfileActivity : AppCompatActivity() {
 
             override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-                if(char.toString() != newName) {
+                if (char.toString() != newName) {
                     editFillClass.nameFill.value = true
                     newName = char.toString()
                 }
@@ -150,7 +223,6 @@ class EditProfileActivity : AppCompatActivity() {
         })
 
         // 생년월일 수정
-
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 newBirthYear = document.data?.getValue("birthYear").toString()
@@ -202,73 +274,152 @@ class EditProfileActivity : AppCompatActivity() {
                 }
             }
 
-
         // 지역 수정
         binding.editRegion.setOnClickListener {
             var goEditRegion = Intent(this, EditRegionRegisterActivity::class.java)
             startActivityForResult(goEditRegion, 1)
         }
 
-        Log.d("확인", "${intentRegion} // ${intentSmallRegion} // ${newRegion} // ${newSmallRegion}")
-
-
         // 수정 버튼 클릭
-
         binding.profileEditBtn.setOnClickListener {
-            var newPersonalInfoSet = hashMapOf(
-                "name" to newName,
-                "birthYear" to newBirthYear,
-                "birthDay" to newBirthDay,
-                "region" to newRegion,
-                "smallRegion" to newSmallRegion,
-            )
+            binding.profileEditBtn.text = ""
+            binding.profileProgressBtn.visibility = View.VISIBLE
 
-            userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
-                .addOnSuccessListener {
-                    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                    var newUserAge = currentYear - newBirthYear.toInt() + 1
+            if(editFillClass.avatarFill.value == false) {
+                // 이미지 없는 경우
+
+                var newPersonalInfoSet = hashMapOf(
+                    "name" to newName,
+                    "birthYear" to newBirthYear,
+                    "birthDay" to newBirthDay,
+                    "region" to newRegion,
+                    "smallRegion" to newSmallRegion,
+                )
+
+                userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                        var newUserAge = currentYear - newBirthYear.toInt() + 1
 
 
-                    Log.d("지역수정1", "${newRegion} ${newSmallRegion}")
+                        Log.d("지역수정1", "${newRegion} ${newSmallRegion}")
 
-                    var intent = Intent(this, MoreFragment::class.java)
-                    intent.setAction("EDIT_PROFILE")
-                    intent.putExtra("newName", newName)
-                    intent.putExtra("newUserAge", newUserAge)
-                    intent.putExtra("newRegionSmallRegion", "${newRegion} ${newSmallRegion}")
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        var intent = Intent(this, MoreFragment::class.java)
+                        intent.setAction("EDIT_PROFILE")
+                        intent.putExtra("newName", newName)
+                        intent.putExtra("newUserAge", newUserAge)
+                        intent.putExtra("newRegionSmallRegion", "${newRegion} ${newSmallRegion}")
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
-                    finish()
-                }
+                        finish()
+                    }
+            } else {
+                // 이미지 수정
+
+                val fileName = UUID.randomUUID().toString() + ".jpg"
+                val refStorage = FirebaseStorage.getInstance().reference.child("avatars/${fileName}")
+
+                refStorage.putFile(selectedAvatarURI)
+                    .addOnSuccessListener (
+                        OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                            taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                                val avatarUrl = it.toString()
+
+                                var newPersonalInfoSet = hashMapOf(
+                                    "avatar" to avatarUrl,
+                                    "name" to newName,
+                                    "birthYear" to newBirthYear,
+                                    "birthDay" to newBirthDay,
+                                    "region" to newRegion,
+                                    "smallRegion" to newSmallRegion,
+                                )
+
+                                userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                                        var newUserAge = currentYear - newBirthYear.toInt() + 1
+
+
+                                        var intent = Intent(this, MoreFragment::class.java)
+                                        intent.setAction("EDIT_PROFILE")
+                                        intent.putExtra("newAvatar", avatarUrl)
+                                        intent.putExtra("newName", newName)
+                                        intent.putExtra("newUserAge", newUserAge)
+                                        intent.putExtra("newRegionSmallRegion", "${newRegion} ${newSmallRegion}")
+                                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+                                        finish()
+                                    }
+
+                            }
+                    })
+            }
+
+
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            var intent = Intent(Intent.ACTION_PICK)
+            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            intent.type = "image/*"
+
+            startActivityForResult(intent, 2000)
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val imm: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+        Log.d("터치터치터치", "${event}")
+        hideKeyBoard()
         return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                var region = data!!.getStringExtra("region")
-                var smallRegion = data!!.getStringExtra("smallRegion")
-                binding.editRegion.text = "$region $smallRegion"
-                newRegion = region.toString()
-                newSmallRegion = smallRegion.toString()
-                editFillClass.regionFill.value = true
+        when (requestCode) {
+            1 -> {
+                // 지역
+                if (resultCode == RESULT_OK) {
+                    var region = data!!.getStringExtra("region")
+                    var smallRegion = data!!.getStringExtra("smallRegion")
+                    binding.editRegion.text = "$region $smallRegion"
+                    newRegion = region.toString()
+                    newSmallRegion = smallRegion.toString()
+                    editFillClass.regionFill.value = true
+                }
+            }
+            2000 -> {
+                // 사진 가져오기
+                selectedAvatarURI = data?.data!!
+
+                Glide.with(this)
+                    .load(selectedAvatarURI)
+                    .into(binding.avatarImage)
+
+                editFillClass.avatarFill.value = true
+
             }
         }
     }
 
-
+    private fun hideKeyBoard() {
+        val imm: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+    }
 }
 
 class EditCheckClass : ViewModel() {
+    val avatarFill by lazy { MutableLiveData<Boolean>(false) }
     val nameFill by lazy { MutableLiveData<Boolean>(false) }
     val birthFill by lazy { MutableLiveData<Boolean>(false) }
     val regionFill by lazy { MutableLiveData<Boolean>(false) }

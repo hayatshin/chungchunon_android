@@ -244,6 +244,11 @@ class MyService : Service(), SensorEventListener {
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
         StepCountNotification(this, todayTotalStepCount)
 
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
+
 //        return super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }

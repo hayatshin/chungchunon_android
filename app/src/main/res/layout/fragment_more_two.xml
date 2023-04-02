@@ -48,37 +48,43 @@
                 android:textStyle="bold"
                 tools:text="신혜정" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:gravity="start">
 
                 <TextView
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/profileRegion"
                     android:id="@+id/profileAge"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="3"
                     android:background="@drawable/diarycard_infobox"
                     android:gravity="center"
                     android:padding="15dp"
                     android:textColor="@color/black"
-                    android:textSize="19dp"
+                    android:textSize="18dp"
                     tools:text="51세" />
 
 
                 <TextView
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/profileAge"
                     android:id="@+id/profileRegion"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
                     android:padding="15dp"
                     android:textColor="@color/black"
-                    android:textSize="19dp"
-                    tools:text="서울특별시 광진구" />
+                    android:textSize="15dp"
+                    tools:text="제주특별자치도 서귀포시 서귀포" />
 
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
     </LinearLayout>
@@ -110,10 +116,10 @@
                     android:src="@drawable/ic_profileedit" />
 
                 <TextView
-                    android:textAlignment="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="개인정보\n수정"
+                    android:textAlignment="center"
                     android:textColor="@color/custom_gray"
                     android:textSize="17dp" />
 
@@ -160,10 +166,10 @@
                     android:src="@drawable/ic_rule" />
 
                 <TextView
-                    android:textAlignment="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="개인정보\n처리방침"
+                    android:textAlignment="center"
                     android:textColor="@color/custom_gray"
                     android:textSize="17dp" />
 
