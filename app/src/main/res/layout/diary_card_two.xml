@@ -8,19 +8,19 @@
     android:background="@drawable/diarybox_bold"
     android:clipToOutline="true"
     android:orientation="vertical"
+    android:paddingHorizontal="20dp"
     android:paddingTop="20dp"
-    android:paddingBottom="20dp"
-    android:paddingHorizontal="20dp">
+    android:paddingBottom="20dp">
 
     <LinearLayout
-        android:layout_marginBottom="5dp"
-        android:layout_gravity="right"
         android:id="@+id/moreLayout"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:orientation="vertical"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/moreIcon"
@@ -30,11 +30,11 @@
             android:src="@drawable/ic_more_empty" />
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/secretStatusView"
-            android:src="@drawable/ic_lock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_lock"
+            android:visibility="gone"
             app:tint="@color/light_gray" />
     </LinearLayout>
 
@@ -47,26 +47,26 @@
         android:gravity="start">
 
         <ImageView
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:scaleType="centerCrop"
-            android:clipToOutline="true"
             android:id="@+id/userAvatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/avatar_background"
-            android:src="@drawable/ic_user" />
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_user"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
-            android:layout_marginLeft="10dp"
-            app:layout_constraintRight_toLeftOf="@id/userActInfo"
-            app:layout_constraintLeft_toRightOf="@id/userAvatar"
-            android:gravity="center_vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
             android:background="@drawable/diarycard_infobox"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toRightOf="@id/userAvatar"
+            app:layout_constraintRight_toLeftOf="@id/userActInfo">
 
             <TextView
                 android:id="@+id/userName"
@@ -79,23 +79,23 @@
                 tools:text="신혜정" />
 
             <TextView
-                android:textColor="@color/light_gray"
                 android:id="@+id/userWriteTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/light_gray"
                 android:textSize="14dp"
                 tools:text="2023-02-10" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/userActInfo"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:orientation="vertical"
             android:paddingLeft="10dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.1">
 
             <LinearLayout
@@ -156,13 +156,13 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:padding="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:backgroundTint="@color/main_color"
             android:gravity="start"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <TextView
                 android:id="@+id/userDiary"
@@ -176,14 +176,14 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:clipToPadding="false"
-        android:paddingEnd="20dp"
         android:id="@+id/imageDisplayRecyclerView"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingEnd="20dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -217,10 +217,10 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_alignParentRight="true"
             android:id="@+id/commentBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:gravity="end|center_vertical">
 
             <ImageView

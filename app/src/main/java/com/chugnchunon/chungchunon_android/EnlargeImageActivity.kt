@@ -38,7 +38,6 @@ class EnlargeImageActivity : Activity() {
 
         binding.enlargeGoBackBtn.setOnClickListener {
             resumePause = true
-            Log.d("resumePause", "EnlargeImageActivity: ${resumePause}")
             Handler().postDelayed({
                 finish()
             }, 100)

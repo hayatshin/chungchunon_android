@@ -62,8 +62,7 @@ class MyService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
-//        StepCountNotification(this, todayTotalStepCount)
-
+        StepCountNotification(this, todayTotalStepCount)
 
         // 기본
         sensorManager =
@@ -89,14 +88,6 @@ class MyService : Service(), SensorEventListener {
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
-        // 다이어리 업데이트
-//        diaryUpdateBroadcastReceiver = DiaryUpdateBroadcastReceiver()
-//
-//        val diaryUpdateIntent = IntentFilter()
-//        diaryUpdateIntent.addAction(Intent.ACTION_TIME_TICK)
-//        applicationContext?.registerReceiver(diaryUpdateBroadcastReceiver, diaryUpdateIntent)
-
-
         // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
         deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
 
@@ -115,6 +106,94 @@ class MyService : Service(), SensorEventListener {
         );
     }
 
+    override fun onStart(intent: Intent?, startId: Int) {
+        super.onStart(intent, startId)
+
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        StepCountNotification(this, todayTotalStepCount)
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        // 오늘 걸음수 초기화
+        userDB.document("$userId").get().addOnSuccessListener { document ->
+            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
+            todayTotalStepCount = todayStepCountFromDB.toInt()
+            StepCountNotification(this, todayTotalStepCount)
+        }
+
+        // DateChangeBroadcastReceiver : 매일 걸음수 0
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // StepCountBroadcastReceiver : 디비 저장
+        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        StepCountNotification(this, todayTotalStepCount)
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        // 오늘 걸음수 초기화
+        userDB.document("$userId").get().addOnSuccessListener { document ->
+            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
+            todayTotalStepCount = todayStepCountFromDB.toInt()
+            StepCountNotification(this, todayTotalStepCount)
+        }
+
+        // DateChangeBroadcastReceiver : 매일 걸음수 0
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // StepCountBroadcastReceiver : 디비 저장
+        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        );
+        return START_STICKY
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
+
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
         startingStepCount = prefs.getInt(userId, 0)
@@ -126,7 +205,13 @@ class MyService : Service(), SensorEventListener {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     var snapShot = document.data
-                    if (snapShot!!.containsKey("dummy")) {
+
+                    var dateFormat = SimpleDateFormat("yyyy-MM-dd")
+                    var cal = Calendar.getInstance()
+                    cal.add(Calendar.DATE, -1)
+                    var yesterday = dateFormat.format(cal.getTime())
+
+                    if (snapShot!!.containsKey("dummy") && snapShot!!.containsKey(yesterday)) {
                         // 더미값 존재
                         var dummyStepCount = (snapShot["dummy"] as Long).toInt()
 
@@ -182,79 +267,10 @@ class MyService : Service(), SensorEventListener {
                     }
                 }
             }
-
-//        if (!prefs.contains(userId)) {
-//            // 걸음수 pref 저장 안 된 상태
-//
-//            // 1. 걸음수 초기화
-//            editor.putInt(userId, stepCount)
-//            editor.commit()
-//
-//            StepCountNotification(this, 0)
-//
-//            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-//            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-//            intentToFirebase.putExtra("todayTotalStepCount", 0)
-//            sendBroadcast(intentToFirebase)
-//
-//            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-//                putExtra(
-//                    "todayTotalStepCount",
-//                    0
-//                )
-//            }
-//            LocalBroadcastManager.getInstance(applicationContext!!)
-//                .sendBroadcast(intentToMyDiary)
-//
-//        } else {
-//
-//            // 걸음수 pref 저장 된 상태
-//            todayTotalStepCount = stepCount - startingStepCount
-//
-//            var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-//            intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-//            intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
-//            sendBroadcast(intentToFirebase)
-//
-//            StepCountNotification(this, todayTotalStepCount)
-//
-//
-//            var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-//                putExtra(
-//                    "todayTotalStepCount",
-//                    todayTotalStepCount
-//                )
-//            }
-//            LocalBroadcastManager.getInstance(applicationContext!!)
-//                .sendBroadcast(intentToMyDiary)
-//        }
     }
-
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         Log.d("서비스", "accuracychanged")
-    }
-
-    override fun onStart(intent: Intent?, startId: Int) {
-        super.onStart(intent, startId)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-        StepCountNotification(this, todayTotalStepCount)
-
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        );
-
-//        return super.onStartCommand(intent, flags, startId)
-        return START_STICKY
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
     }
 
 

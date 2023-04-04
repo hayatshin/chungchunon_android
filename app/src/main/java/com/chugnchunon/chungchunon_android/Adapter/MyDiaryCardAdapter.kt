@@ -25,14 +25,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.chugnchunon.chungchunon_android.BlockActivity
-import com.chugnchunon.chungchunon_android.CommentActivity
+import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
-import com.chugnchunon.chungchunon_android.LikePersonActivity
-import com.chugnchunon.chungchunon_android.R
 import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -40,6 +37,11 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.diary_card.view.*
+import kotlinx.android.synthetic.main.diary_card.view.commentBox
+import kotlinx.android.synthetic.main.diary_card.view.likeIcon
+import kotlinx.android.synthetic.main.diary_card.view.likeText
+import kotlinx.android.synthetic.main.diary_card.view.moreIcon
+import kotlinx.android.synthetic.main.diary_card_two.view.*
 import org.apache.commons.lang3.mutable.MutableBoolean
 import java.time.LocalDate
 
@@ -154,6 +156,12 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder.bind(position)
+
+        holder.itemView.userAvatar.setOnClickListener { view ->
+            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
+            context.startActivity(goEnlargeAvatar)
+        }
 
         holder.itemView.likeIcon.setOnClickListener { view ->
 

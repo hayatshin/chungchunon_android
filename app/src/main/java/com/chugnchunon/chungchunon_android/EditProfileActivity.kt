@@ -79,14 +79,9 @@ class EditProfileActivity : AppCompatActivity() {
     lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     lateinit var selectedAvatarURI: Uri
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        overridePendingTransition(0, R.anim.slide_down_enter)
-    }
-
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, R.anim.slide_down_enter)
+        overridePendingTransition (0, R.anim.slide_down_enter)
     }
 
     @SuppressLint("SetTextI18n")
@@ -96,7 +91,7 @@ class EditProfileActivity : AppCompatActivity() {
 
         binding.editProfileScrollView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
-                when(ev?.action) {
+                when (ev?.action) {
                     MotionEvent.ACTION_MOVE -> {
                         return false
                     }
@@ -123,8 +118,8 @@ class EditProfileActivity : AppCompatActivity() {
 
         editFillClass = ViewModelProvider(this).get(EditCheckClass::class.java)
 
-        editFillClass.avatarFill.observe(this, Observer {value ->
-            if(value) {
+        editFillClass.avatarFill.observe(this, Observer { value ->
+            if (value) {
                 binding.profileEditBtn.isEnabled = true
             }
         })
@@ -285,7 +280,7 @@ class EditProfileActivity : AppCompatActivity() {
             binding.profileEditBtn.text = ""
             binding.profileProgressBtn.visibility = View.VISIBLE
 
-            if(editFillClass.avatarFill.value == false) {
+            if (editFillClass.avatarFill.value == false) {
                 // 이미지 없는 경우
 
                 var newPersonalInfoSet = hashMapOf(
@@ -317,10 +312,11 @@ class EditProfileActivity : AppCompatActivity() {
                 // 이미지 수정
 
                 val fileName = UUID.randomUUID().toString() + ".jpg"
-                val refStorage = FirebaseStorage.getInstance().reference.child("avatars/${fileName}")
+                val refStorage =
+                    FirebaseStorage.getInstance().reference.child("avatars/${fileName}")
 
                 refStorage.putFile(selectedAvatarURI)
-                    .addOnSuccessListener (
+                    .addOnSuccessListener(
                         OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
                             taskSnapshot.storage.downloadUrl.addOnSuccessListener {
                                 val avatarUrl = it.toString()
@@ -334,7 +330,8 @@ class EditProfileActivity : AppCompatActivity() {
                                     "smallRegion" to newSmallRegion,
                                 )
 
-                                userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
+                                userDB.document("$userId")
+                                    .set(newPersonalInfoSet, SetOptions.merge())
                                     .addOnSuccessListener {
                                         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
                                         var newUserAge = currentYear - newBirthYear.toInt() + 1
@@ -345,14 +342,18 @@ class EditProfileActivity : AppCompatActivity() {
                                         intent.putExtra("newAvatar", avatarUrl)
                                         intent.putExtra("newName", newName)
                                         intent.putExtra("newUserAge", newUserAge)
-                                        intent.putExtra("newRegionSmallRegion", "${newRegion} ${newSmallRegion}")
-                                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                                        intent.putExtra(
+                                            "newRegionSmallRegion",
+                                            "${newRegion} ${newSmallRegion}"
+                                        )
+                                        LocalBroadcastManager.getInstance(this)
+                                            .sendBroadcast(intent);
 
                                         finish()
                                     }
 
                             }
-                    })
+                        })
             }
 
 
@@ -377,7 +378,6 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Log.d("터치터치터치", "${event}")
         hideKeyBoard()
         return true
     }
@@ -399,13 +399,16 @@ class EditProfileActivity : AppCompatActivity() {
             }
             2000 -> {
                 // 사진 가져오기
-                selectedAvatarURI = data?.data!!
+                if(data?.data != null) {
+                    selectedAvatarURI = data?.data!!
 
-                Glide.with(this)
-                    .load(selectedAvatarURI)
-                    .into(binding.avatarImage)
+                    Glide.with(this)
+                        .load(selectedAvatarURI)
+                        .into(binding.avatarImage)
 
-                editFillClass.avatarFill.value = true
+                    editFillClass.avatarFill.value = true
+                }
+
 
             }
         }

@@ -144,15 +144,20 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                     }
 
 
-                                    // 날짜 저장
-                                    var newDateHashmap = hashMapOf(
+                                    // 날짜 저장 - user_step_count
+                                    var newDateForUser = hashMapOf(
                                         REFRESH_DAILY to 0
                                     )
                                     db.collection("user_step_count").document("$userId")
-                                        .set(newDateHashmap, SetOptions.merge())
+                                        .set(newDateForUser, SetOptions.merge())
+
+                                    // 날짜 저장 - period_step_count
+                                    var newDateForPeriod = hashMapOf(
+                                        userId to 0
+                                    )
+                                    db.collection("period_step_count").document(REFRESH_DAILY)
+                                        .set(newDateForPeriod, SetOptions.merge())
                                 }
-
-
                             } else {
                                 // 더미 데이터 없는 경우
 
@@ -166,69 +171,6 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                             }
                         }
                     }
-
-//                if (!todayChecking) {
-//                    // 새로운 날
-//
-//                    // todayStepCount = 0
-//                    var todayStepCountSet = hashMapOf<String, Int?>(
-//                        "todayStepCount" to 0
-//                    )
-//
-//                    userDB
-//                        .document("$userId")
-//                        .set(todayStepCountSet, SetOptions.merge())
-//                        .addOnSuccessListener {
-//
-//                            // noti & UI 걸음수 0로 초기화
-//                            var goDiary = Intent(context, MyDiaryFragment::class.java)
-//                            goDiary.setAction("NEW_DATE_STEP_ZERO")
-//                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(goDiary);
-//
-//                            var goService = Intent(context, MyService::class.java)
-//                            goService.setAction("NEW_DATE_STEP_ZERO")
-//                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(goService);
-//                        }
-//
-//
-//                    // dateChangedPref DB 첫번재 값인지 체크
-//                    var allDatePref: Map<String, *> = datePrefs.all
-//
-//                    if (allDatePref.size != 0) {
-//
-//                        // sharedPref 어제 값 추가
-//                        db.collection("user_step_count").document("${userId}")
-//                            .get()
-//                            .addOnSuccessListener { document ->
-//                                if (document.exists()) {
-//                                    var snapShot = document.data
-//                                    if (snapShot!!.containsKey(yesterday)) {
-//                                        var stepPrefs = context!!.getSharedPreferences(
-//                                            stepCountSharedPref,
-//                                            Context.MODE_PRIVATE
-//                                        )
-//                                        var stepEdit = stepPrefs.edit()
-//
-//                                        // yesterday 값 있는 경우
-//                                        var yesterdayStep = (snapShot[yesterday] as Long).toInt()
-//                                        var dummyStep = stepPrefs.getInt(userId, 0)
-//                                        stepEdit.putInt(userId, dummyStep + yesterdayStep)
-//                                        stepEdit.apply()
-//
-//                                    } else {
-//                                        // yesterday 값 없는 경우
-//                                    }
-//                                }
-//                            }
-//                    }
-//
-//                    // 새로운 날 값 sharedPref에 저장
-//                    datePrefsEdit.putBoolean(REFRESH_DAILY, true)
-//                    datePrefsEdit.apply()
-//
-//                } else {
-//                    // 새롭지 않은 날
-//                }
             }
         }
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -50,6 +51,9 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         finishAffinity()
         finish()
+
+//        finish()
+//        System.exit(0)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,8 +126,15 @@ class DiaryTwoActivity : AppCompatActivity() {
                         )
                     }
 
-                    var startService = Intent(this, MyService::class.java)
-                    startForegroundService(startService)
+//                    var startService = Intent(this, MyService::class.java)
+//
+//                    //오레오 이상부터 동작하는 코드
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        startForegroundService(startService);
+//                    } else {
+//                        startService(startService);
+//                    }
+
                 }
             }
 
@@ -210,7 +221,14 @@ class DiaryTwoActivity : AppCompatActivity() {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             var startService = Intent(this, MyService::class.java)
-            startForegroundService(startService)
+
+            //오레오 이상부터 동작하는 코드
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(startService);
+            } else {
+                startService(startService);
+            }
+
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }

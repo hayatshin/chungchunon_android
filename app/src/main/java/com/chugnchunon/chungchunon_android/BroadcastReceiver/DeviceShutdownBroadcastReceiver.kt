@@ -26,32 +26,14 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
         val editor = prefs.edit()
 
         if (intentAction == Intent.ACTION_SHUTDOWN) {
-            userDB
-                .document("$userId")
-                .get()
-                .addOnSuccessListener { document ->
-                    var previousStepCount =
-                        (document.data?.getValue("todayStepCount") as Long).toInt()
 
-                    // sharedPref 어제 값 추가
-//                    editor.putInt(userId, -previousStepCount)
-//                    editor.apply()
-
-//                    db.collection("user_step_count").document("${userId}")
-//                        .get()
-//                        .addOnSuccessListener { document ->
-//                            if (document.exists()) {
-//                                var snapShot = document.data
-//                                if (snapShot!!.containsKey("dummy")) {
-//                                    var dummyStepCount = (snapShot["dummy"] as Long).toInt()
-//
-//                                }
-//                            }
-//                        }
-
-
-
-                }
+            // dummy data - 0
+            var dummyDataReset = hashMapOf(
+                "dummy" to 0
+            )
+            db.collection("user_step_count")
+                .document("${userId}")
+                .set(dummyDataReset, SetOptions.merge())
 
         }
     }

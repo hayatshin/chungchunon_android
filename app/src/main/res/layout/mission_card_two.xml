@@ -9,7 +9,7 @@
     android:src="@drawable/mission_card_background">
 
     <ImageView
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:id="@+id/missionImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
