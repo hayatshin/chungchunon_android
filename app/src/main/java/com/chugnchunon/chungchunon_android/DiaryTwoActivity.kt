@@ -75,11 +75,11 @@ class DiaryTwoActivity : AppCompatActivity() {
 
                 val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
                 // 인앱 업데이트 - 즉시업데이트 - resultJson.app_version.toInt()
-                if(currentAppVersion < resultJson.app_version.toInt() && resultJson.force_update as Boolean) {
+                if (currentAppVersion < resultJson.app_version.toInt() && resultJson.force_update as Boolean) {
                     // 즉시 업데이트할 것.
-                var window = this.window
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(Color.parseColor("#CC000000"));
+                    var window = this.window
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    window.setStatusBarColor(Color.parseColor("#CC000000"));
 
                     binding.updateLayout.visibility = View.VISIBLE
                 } else {
@@ -90,7 +90,7 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
         }
 
-         diaryType = intent.getStringExtra("diaryType").toString()
+        diaryType = intent.getStringExtra("diaryType").toString()
 
         binding.updateCancelBox.setOnClickListener {
             binding.updateLayout.visibility = View.GONE
@@ -124,16 +124,16 @@ class DiaryTwoActivity : AppCompatActivity() {
                             arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
                             100
                         )
-                    }
+                    } else {
+                        var startService = Intent(this, MyService::class.java)
 
-//                    var startService = Intent(this, MyService::class.java)
-//
-//                    //오레오 이상부터 동작하는 코드
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                        startForegroundService(startService);
-//                    } else {
-//                        startService(startService);
-//                    }
+                        //오레오 이상부터 동작하는 코드
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(startService);
+                        } else {
+                            startService(startService);
+                        }
+                    }
 
                 }
             }

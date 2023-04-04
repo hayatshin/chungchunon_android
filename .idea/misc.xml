@@ -98,6 +98,7 @@
         <entry key="app/src/main/res/drawable/mindbox_blue.xml" value="0.1015" />
         <entry key="app/src/main/res/drawable/mindbox_bold.xml" value="0.178" />
         <entry key="app/src/main/res/drawable/mindbox_gray.xml" value="0.176" />
+        <entry key="app/src/main/res/drawable/mindbox_gray_graph.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/mindbox_light_main.xml" value="0.1015" />
         <entry key="app/src/main/res/drawable/mindbox_main.xml" value="0.154" />
         <entry key="app/src/main/res/drawable/mindbox_transparent_gray.xml" value="0.164" />
@@ -113,6 +114,7 @@
         <entry key="app/src/main/res/drawable/partner_register_main.xml" value="0.167" />
         <entry key="app/src/main/res/drawable/profile_back.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/question.xml" value="0.1015" />
+        <entry key="app/src/main/res/drawable/ranking_list_box.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/recycler_default_item.xml" value="0.1555" />
         <entry key="app/src/main/res/drawable/region_box.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/register_fill_box.xml" value="0.1495" />

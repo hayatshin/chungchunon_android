@@ -106,6 +106,89 @@ class MyService : Service(), SensorEventListener {
         );
     }
 
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onSensorChanged(sensorEvent: SensorEvent?) {
+
+        startingStepCount = prefs.getInt(userId, 0)
+        stepCount = sensorEvent!!.values[0].toInt()
+        val editor = prefs.edit()
+
+        db.collection("user_step_count").document("$userId")
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    var snapShot = document.data
+
+                    var dateFormat = SimpleDateFormat("yyyy-MM-dd")
+                    var cal = Calendar.getInstance()
+                    cal.add(Calendar.DATE, -1)
+                    var yesterday = dateFormat.format(cal.getTime())
+
+                    if (snapShot!!.containsKey("dummy") && snapShot!!.containsKey(yesterday)) {
+                        // 더미값 존재
+                        var dummyStepCount = (snapShot["dummy"] as Long).toInt()
+
+                        todayTotalStepCount = stepCount - dummyStepCount
+
+                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+                        intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
+                        sendBroadcast(intentToFirebase)
+
+                        StepCountNotification(this, todayTotalStepCount)
+
+
+                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                todayTotalStepCount
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+
+
+                        Log.d(
+                            "걸음수 체크체크 2",
+                            "stepCount: ${stepCount} // startingStepCount: ${dummyStepCount}"
+                        )
+
+                    } else {
+                        // 더미값 존재 x
+
+                        var newDummySet = hashMapOf(
+                            "dummy" to stepCount
+                        )
+                        db.collection("user_step_count").document("$userId")
+                            .set(newDummySet, SetOptions.merge())
+
+                        StepCountNotification(this, 0)
+
+                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
+                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
+                        intentToFirebase.putExtra("todayTotalStepCount", 0)
+                        sendBroadcast(intentToFirebase)
+
+                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                0
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+                    }
+                }
+            }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        Log.d("서비스", "accuracychanged")
+    }
+
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
 
@@ -188,89 +271,6 @@ class MyService : Service(), SensorEventListener {
             IntentFilter("NEW_DATE_STEP_ZERO")
         );
         return START_STICKY
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
-
-    override fun onSensorChanged(sensorEvent: SensorEvent?) {
-
-        startingStepCount = prefs.getInt(userId, 0)
-        stepCount = sensorEvent!!.values[0].toInt()
-        val editor = prefs.edit()
-
-        db.collection("user_step_count").document("$userId")
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    var snapShot = document.data
-
-                    var dateFormat = SimpleDateFormat("yyyy-MM-dd")
-                    var cal = Calendar.getInstance()
-                    cal.add(Calendar.DATE, -1)
-                    var yesterday = dateFormat.format(cal.getTime())
-
-                    if (snapShot!!.containsKey("dummy") && snapShot!!.containsKey(yesterday)) {
-                        // 더미값 존재
-                        var dummyStepCount = (snapShot["dummy"] as Long).toInt()
-
-                        todayTotalStepCount = stepCount - dummyStepCount
-
-                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-                        intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
-                        sendBroadcast(intentToFirebase)
-
-                        StepCountNotification(this, todayTotalStepCount)
-
-
-                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                            putExtra(
-                                "todayTotalStepCount",
-                                todayTotalStepCount
-                            )
-                        }
-                        LocalBroadcastManager.getInstance(applicationContext!!)
-                            .sendBroadcast(intentToMyDiary)
-
-
-                        Log.d(
-                            "걸음수 체크체크 2",
-                            "stepCount: ${stepCount} // startingStepCount: ${dummyStepCount}"
-                        )
-
-                    } else {
-                        // 더미값 존재 x
-
-                        var newDummySet = hashMapOf(
-                            "dummy" to stepCount
-                        )
-                        db.collection("user_step_count").document("$userId")
-                            .set(newDummySet, SetOptions.merge())
-
-                        StepCountNotification(this, 0)
-
-                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-                        intentToFirebase.putExtra("todayTotalStepCount", 0)
-                        sendBroadcast(intentToFirebase)
-
-                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                            putExtra(
-                                "todayTotalStepCount",
-                                0
-                            )
-                        }
-                        LocalBroadcastManager.getInstance(applicationContext!!)
-                            .sendBroadcast(intentToMyDiary)
-                    }
-                }
-            }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        Log.d("서비스", "accuracychanged")
     }
 
 

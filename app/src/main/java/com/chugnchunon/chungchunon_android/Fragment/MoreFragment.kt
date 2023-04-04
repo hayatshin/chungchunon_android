@@ -65,7 +65,7 @@ class MoreFragment: Fragment() {
                 var dbSmallRegion = document.data?.getValue("smallRegion")
                 var userRegion = "${dbRegion} ${dbSmallRegion}"
 
-                Glide.with(this)
+                Glide.with(requireActivity())
                     .load(userAvatar)
                     .into(binding.profileAvatar)
 

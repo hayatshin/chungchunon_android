@@ -259,15 +259,15 @@ class PeriodThisWeekRankingFragment : Fragment() {
         entryTwo.add(BarEntry(4f, thisWeekMyDiaryPoint))
 
         var bds1 = BarDataSet(entryOne, "목표")
-        bds1.setColor(ContextCompat.getColor(requireActivity(), R.color.anxious_color));
+        bds1.setColor(ContextCompat.getColor(requireActivity(), R.color.light_gray));
         bds1.valueTextSize = dpTextSize(13f)
-        bds1.valueTextColor = Color.WHITE
+        bds1.valueTextColor = ContextCompat.getColor(requireActivity(), R.color.custom_gray)
         bds1.valueFormatter = ThisMyValueFormatter("goal", thisWeekMyStepCountAvg)
 
         var bds2 = BarDataSet(entryTwo, "나")
-        bds2.setColor(ContextCompat.getColor(requireActivity(), R.color.teal_200));
+        bds2.setColor(ContextCompat.getColor(requireActivity(), R.color.main_color));
         bds2.valueTextSize = dpTextSize(13f)
-        bds2.valueTextColor = Color.WHITE
+        bds2.valueTextColor = Color.BLACK
         bds2.valueFormatter = ThisMyValueFormatter("me", thisWeekMyStepCountAvg)
 
         var graphArr = ArrayList<IBarDataSet>()
@@ -343,8 +343,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
         thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate + 1).toDouble())).toInt()
         thisWeekMyStepPoint = (Math.round(thisWeekMyStepCountAvg / 1000.0)).toFloat()
-        Log.d("확인 2", "${thisWeekMyStepCount} / ${daysDiffDate+1} / ${thisWeekMyStepCountAvg} / ${thisWeekMyStepPoint}")
-
     }
 
     suspend fun graphDiaryFun() {
@@ -538,18 +536,18 @@ class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) :
 
         if (position == "goal" && thisStepCheck) {
             thisStepCheck = !thisStepCheck
-            return "3,000 걸음"
+            return "3,000 보"
         } else if (position == "goal" && !thisStepCheck) {
             thisStepCheck = !thisStepCheck
-            return "4일"
+            return "4회"
         } else if (position != "goal" && thisStepCheck) {
             var decimal = DecimalFormat("#,###")
             var stepLabel = decimal.format(thisWeekMyStepCount)
             thisStepCheck = !thisStepCheck
-            return "${stepLabel} 걸음"
+            return "${stepLabel} 보"
         } else {
             thisStepCheck = !thisStepCheck
-            return "${value.toInt()} 일"
+            return "${value.toInt()} 회"
         }
     }
 }

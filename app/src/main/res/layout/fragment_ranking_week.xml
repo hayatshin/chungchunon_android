@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/graph_back"
+    android:background="@color/very_light_gray"
     android:orientation="vertical">
 
     <ScrollView
@@ -41,13 +41,13 @@
                             android:layout_width="30dp"
                             android:layout_height="10dp"
                             android:layout_marginRight="7dp"
-                            android:src="@drawable/mindbox_yellow" />
+                            android:src="@drawable/mindbox_gray_graph" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="목표"
-                            android:textColor="@color/very_light_gray"
+                            android:textColor="@color/black"
                             android:textSize="16dp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -62,13 +62,13 @@
                             android:layout_width="30dp"
                             android:layout_height="10dp"
                             android:layout_marginRight="7dp"
-                            android:src="@drawable/mindbox_blue" />
+                            android:src="@drawable/mindbox_main" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="나"
-                            android:textColor="@color/very_light_gray"
+                            android:textColor="@color/black"
                             android:textSize="16dp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -99,7 +99,7 @@
                 android:id="@+id/rankingList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/comment_box"
+                android:background="@drawable/ranking_list_box"
                 android:orientation="vertical"
                 android:visibility="visible">
 
@@ -113,7 +113,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/diarycard_infobox"
                         android:gravity="center|bottom"
                         android:orientation="vertical"
                         android:padding="10dp">
@@ -124,7 +123,7 @@
                             android:layout_marginBottom="7dp"
                             android:layout_weight="1"
                             android:text="걸음수"
-                            android:textColor="@color/graph_back"
+                            android:textColor="@color/black"
                             android:textSize="22dp"
                             android:textStyle="bold" />
 
@@ -133,7 +132,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="(1일 평균값)"
-                            android:textColor="@color/graph_back"
+                            android:textColor="@color/custom_gray"
                             android:textSize="14dp" />
                     </LinearLayout>
 
@@ -151,8 +150,8 @@
                             android:layout_marginBottom="7dp"
                             android:layout_weight="1"
                             android:gravity="center|bottom"
-                            android:text="일기"
-                            android:textColor="@color/graph_back"
+                            android:text="일기 작성"
+                            android:textColor="@color/black"
                             android:textSize="22dp"
                             android:textStyle="bold" />
 
@@ -160,7 +159,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="(1주 합산값)"
-                            android:textColor="@color/graph_back"
+                            android:textColor="@color/custom_gray"
                             android:textSize="14dp" />
                     </LinearLayout>
 

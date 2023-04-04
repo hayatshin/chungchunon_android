@@ -14,6 +14,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.FragmentActivity
@@ -73,9 +74,23 @@ class CommentActivity : FragmentActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         resumePause = true
+
+        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        binding.commentLayout.startAnimation(downAnimation)
+
+        downAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?) {
+                finish()
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
     }
+
+
 
     override fun onResume() {
         super.onResume()

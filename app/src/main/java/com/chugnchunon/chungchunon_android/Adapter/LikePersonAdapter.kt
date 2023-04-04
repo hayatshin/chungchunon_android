@@ -1,6 +1,7 @@
 package com.chugnchunon.chungchunon_android.Adapter
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +14,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.DataClass.LikePerson
 import com.chugnchunon.chungchunon_android.DataClass.Mission
+import com.chugnchunon.chungchunon_android.EnlargeAvatarActivity
 import com.chugnchunon.chungchunon_android.EnlargeImageActivity
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.EnlargeImageCardBinding
 import kotlinx.android.synthetic.main.activity_image_enlarge.view.*
 import kotlinx.android.synthetic.main.enlarge_image_card.view.*
+import kotlinx.android.synthetic.main.like_person_line.view.*
 
 class LikePersonAdapter(
     val context: Context,
@@ -51,6 +54,12 @@ class LikePersonAdapter(
 
     override fun onBindViewHolder(holder: LikePersonAdapter.ViewHolder, position: Int) {
         holder.bind(context, position)
+
+        holder.itemView.likePersonAvatar.setOnClickListener { view ->
+            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            goEnlargeAvatar.putExtra("userAvatar", likePersonList[position].userAvatar)
+            context.startActivity(goEnlargeAvatar)
+        }
     }
 
     override fun getItemCount(): Int = likePersonList.size

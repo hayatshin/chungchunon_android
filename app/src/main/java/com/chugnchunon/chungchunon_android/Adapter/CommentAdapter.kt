@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.Comment
+import com.chugnchunon.chungchunon_android.EnlargeAvatarActivity
 import com.chugnchunon.chungchunon_android.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -73,6 +74,12 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         holder.bind(position)
+
+        holder.itemView.commentAvatar.setOnClickListener { view ->
+            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            goEnlargeAvatar.putExtra("userAvatar", items[position].commentUserAvatar)
+            context.startActivity(goEnlargeAvatar)
+        }
 
         // 수정
         holder.itemView.editBtn.setOnClickListener { view ->

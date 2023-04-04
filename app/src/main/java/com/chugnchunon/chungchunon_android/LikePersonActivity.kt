@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,8 +34,20 @@ class LikePersonActivity: Activity() {
     private var likePersonList = ArrayList<LikePerson>()
 
     override fun onBackPressed() {
-        super.onBackPressed()
         resumePause = true
+
+        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        binding.likePersonLayout.startAnimation(downAnimation)
+
+        downAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?) {
+                finish()
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
 
     }
 
