@@ -13,15 +13,15 @@ class RegionDiaryAdapter(activity: FragmentActivity) :
     var fragmentList: MutableList<Fragment> = arrayListOf()
     var titleList: MutableList<String> = arrayListOf()
 
-    override fun getItemCount(): Int = 3
+    override fun getItemCount(): Int = 4
 
     override fun createFragment(position: Int): Fragment {
 
-        Log.d("내글", "$position")
         when (position) {
             0 -> return AllRegionDataFragment()
             1 -> return UserRegionDataFragment()
-            2 -> return MyDataFragment()
+            2 -> return FriendDataFragment()
+            3 -> return MyDataFragment()
         }
         return AllRegionDataFragment()
     }

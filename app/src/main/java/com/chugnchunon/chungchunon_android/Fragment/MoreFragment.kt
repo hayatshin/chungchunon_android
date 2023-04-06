@@ -18,10 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
-import com.chugnchunon.chungchunon_android.ApplicationRuleActivity
-import com.chugnchunon.chungchunon_android.EditProfileActivity
-import com.chugnchunon.chungchunon_android.PersonalInfoRuleActivity
-import com.chugnchunon.chungchunon_android.R
+import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentMoreBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentMoreTwoBinding
@@ -87,6 +84,16 @@ class MoreFragment: Fragment() {
         binding.personalInfo.setOnClickListener {
             var personal_info_intent = Intent(activity, PersonalInfoRuleActivity::class.java)
             startActivity(personal_info_intent)
+        }
+
+        binding.blockUserBtn.setOnClickListener {
+            var block_user_list_intent = Intent(activity, BlockUserListActivity::class.java)
+            startActivity(block_user_list_intent)
+        }
+
+        binding.exitAppBtn.setOnClickListener {
+            var exit_intent = Intent(activity, ExitActivity::class.java)
+            startActivity(exit_intent)
         }
 
         return view

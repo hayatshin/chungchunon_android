@@ -239,4 +239,3 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
 
     override fun getItemCount(): Int = items.size
 }
-

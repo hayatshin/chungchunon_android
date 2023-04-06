@@ -44,7 +44,7 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
                         var snapShot = document.data
 
                         if (snapShot!!.containsKey(currentDate.toString())) {
-                            // 오늘 날짜 있는 경우
+                            // 오늘 날짜 있는 경우 - 기존 날
 
                             var userStepCountSet = hashMapOf(
                                 "$currentDate" to todayTotalStepCount
@@ -108,43 +108,43 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
 
 
                                 var userStepCountSet = hashMapOf(
-                                    "$currentDate" to todayTotalStepCount
+                                    currentDate to 0
                                 )
 
                                 var periodStepCountSet = hashMapOf(
-                                    "$userId" to todayTotalStepCount
+                                    userId to 0
                                 )
-
-                                // user_step_count
-                                db.collection("user_step_count")
-                                    .document("$userId")
-                                    .set(userStepCountSet, SetOptions.merge())
 
                                 // period_step_count
                                 db.collection("period_step_count")
                                     .document("$currentDate")
                                     .set(periodStepCountSet, SetOptions.merge())
+
+                                // user_step_count
+                                db.collection("user_step_count")
+                                    .document("$userId")
+                                    .set(userStepCountSet, SetOptions.merge())
 
                             } else {
+                                // 어제 값 존재 x
 
                                 var userStepCountSet = hashMapOf(
-                                    "$currentDate" to todayTotalStepCount
+                                    currentDate to 0
                                 )
 
                                 var periodStepCountSet = hashMapOf(
-                                    "$userId" to todayTotalStepCount
+                                    userId to 0
                                 )
-
-                                // user_step_count
-                                db.collection("user_step_count")
-                                    .document("$userId")
-                                    .set(userStepCountSet, SetOptions.merge())
 
                                 // period_step_count
                                 db.collection("period_step_count")
                                     .document("$currentDate")
                                     .set(periodStepCountSet, SetOptions.merge())
 
+                                // user_step_count
+                                db.collection("user_step_count")
+                                    .document("$userId")
+                                    .set(userStepCountSet, SetOptions.merge())
                             }
                         }
                     }

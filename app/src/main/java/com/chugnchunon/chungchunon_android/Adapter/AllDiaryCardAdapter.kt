@@ -29,6 +29,7 @@ import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.ktx.auth
@@ -199,6 +200,13 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                 likeToggleCheck[position] = true
 
             }
+
+            var intent = Intent(context, AllDiaryFragmentTwo::class.java)
+            intent.setAction("LIKE_TOGGLE_ACTION")
+            intent.putExtra("newDiaryId", items[position].diaryId)
+            intent.putExtra("newLikeToggle", likeToggleCheck[position]!!)
+            intent.putExtra("newNumLikes", likeNumLikes[position]!!.toInt())
+            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
 
         }
 

@@ -11,8 +11,8 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/blockGobackArrow"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
         android:background="@drawable/ic_arrow_circle_white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -101,7 +101,7 @@
             <TextView
                 android:textColor="@color/black"
                 android:textSize="20dp"
-                android:text="유저 차단하기"
+                android:text="사람 차단하기"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 

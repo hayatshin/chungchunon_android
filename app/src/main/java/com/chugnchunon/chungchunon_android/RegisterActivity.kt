@@ -53,6 +53,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 class RegisterActivity : AppCompatActivity() {
@@ -585,6 +586,7 @@ class RegisterActivity : AppCompatActivity() {
                                     "birthDay" to birthDay,
                                     "userAge" to userAge,
                                     "todayStepCount" to 0,
+                                    "blockUserList" to ArrayList<String>(),
                                 )
 
                                 userDB

@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/profileAvatar"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="25dp"
             android:background="@drawable/avatar_background"
             android:clipToOutline="true"
@@ -55,10 +55,6 @@
                 android:gravity="start">
 
                 <TextView
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toLeftOf="@id/profileRegion"
                     android:id="@+id/profileAge"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -67,14 +63,14 @@
                     android:padding="15dp"
                     android:textColor="@color/black"
                     android:textSize="18dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/profileRegion"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="51세" />
 
 
                 <TextView
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toRightOf="@id/profileAge"
                     android:id="@+id/profileRegion"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -82,6 +78,10 @@
                     android:padding="15dp"
                     android:textColor="@color/black"
                     android:textSize="15dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/profileAge"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="제주특별자치도 서귀포시 서귀포" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -93,7 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="start"
@@ -101,10 +101,14 @@
             android:padding="30dp">
 
             <LinearLayout
+                android:id="@+id/editProfileLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/friendListLayout"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/profileEditBtn"
@@ -126,11 +130,74 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/blockUserLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toRightOf="@+id/editProfileLayout"
+                app:layout_constraintRight_toLeftOf="@+id/exitAppLayout"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/blockUserBtn"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/rule_background"
+                    android:padding="23dp"
+                    android:src="@drawable/ic_ad_block" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="차단목록\n관리"
+                    android:textAlignment="center"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="17dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/exitAppLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                app:layout_constraintLeft_toRightOf="@+id/blockUserLayout"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/exitAppBtn"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/rule_background"
+                    android:padding="23dp"
+                    android:src="@drawable/ic_exit" />
+
+                <TextView
+                    android:textAlignment="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="탈퇴"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="17dp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_marginTop="30dp"
+                android:id="@+id/appRuleLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/personalInfoLayout"
+                app:layout_constraintTop_toBottomOf="@+id/editProfileLayout">
 
                 <ImageView
                     android:id="@+id/application"
@@ -151,10 +218,15 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_marginTop="30dp"
+                android:id="@+id/personalInfoLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                app:layout_constraintLeft_toRightOf="@+id/appRuleLayout"
+                app:layout_constraintRight_toLeftOf="@id/exitAppLayout"
+                app:layout_constraintTop_toBottomOf="@+id/blockUserLayout">
 
                 <ImageView
                     android:id="@+id/personalInfo"
@@ -174,7 +246,10 @@
                     android:textSize="17dp" />
 
             </LinearLayout>
-        </LinearLayout>
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 

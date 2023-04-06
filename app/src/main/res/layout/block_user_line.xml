@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="2dp"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="25dp"
+    android:paddingVertical="10dp">
+
+    <ImageView
+        android:id="@+id/likePersonAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:background="@drawable/avatar_background"
+        android:clipToOutline="true"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/ic_user" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/rankingAvatar"
+        android:gravity="bottom">
+
+        <TextView
+            android:id="@+id/likePersonName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="22dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/likePersonRegion"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="신혜정" />
+
+        <TextView
+            android:id="@+id/likePersonRegion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textColor="@color/custom_gray"
+            android:textSize="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/likePersonName"
+            app:layout_constraintRight_toLeftOf="@id/cancelBlock"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="제주특별자치도 서귀포시 서귀포" />
+
+        <TextView
+            android:id="@+id/cancelBlock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textColor="@color/main_color"
+            android:textSize="13dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/likePersonRegion"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="차단 해제" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

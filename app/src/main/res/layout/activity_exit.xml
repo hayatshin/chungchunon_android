@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/exitBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/layer_screen"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/authLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/layer_screen"
-        android:clickable="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:translationZ="90dp"
-        android:visibility="gone">
+    <ImageView
+        android:id="@+id/exitGobackArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/ic_arrow_circle_white" />
+
 
         <LinearLayout
+            android:layout_centerInParent="true"
             android:layout_width="320dp"
             android:layout_height="220dp"
             android:background="@drawable/mindbox_update"
@@ -46,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:lineHeight="28dp"
-                    android:text="@string/read_contact_auth"
+                    android:text="@string/exit_notification"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="17dp" />
@@ -59,7 +59,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:id="@+id/authCancelBox"
+                    android:id="@+id/exitCancelBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -77,7 +77,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/authConfirmBox"
+                    android:id="@+id/exitConfirmBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -86,7 +86,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="권한 허용"
+                        android:text="확인"
                         android:textColor="@color/main_color"
                         android:textSize="15dp"
                         android:textStyle="bold" />
@@ -96,57 +96,5 @@
             </LinearLayout>
 
         </LinearLayout>
-
-    </LinearLayout>
-
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRecyclerDiary"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerDiary"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <TextView
-        android:id="@+id/noItemText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:lineSpacingExtra="10dp"
-        android:text="@string/all_diary_no_item"
-        android:textAlignment="center"
-        android:textColor="@color/light_gray"
-        android:textSize="17dp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/noContactReadAuthText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:lineSpacingExtra="10dp"
-        android:text="@string/no_read_contact_auth_text"
-        android:textAlignment="center"
-        android:textColor="@color/light_gray"
-        android:textSize="17dp"
-        android:visibility="gone" />
-
-    <com.github.silvestrpredko.dotprogressbar.DotProgressBar
-        android:id="@+id/dataLoadingProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_centerInParent="true"
-        android:keepScreenOn="true"
-        app:amount="3"
-        app:animationDirection="right"
-        app:endColor="@color/light_main_color"
-        app:startColor="@color/main_color" />
 
 </RelativeLayout>

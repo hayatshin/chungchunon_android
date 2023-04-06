@@ -21,6 +21,7 @@
         <entry key="app/src/main/res/drawable/gender_spinner_item.xml" value="0.116" />
         <entry key="app/src/main/res/drawable/general_background.xml" value="0.167" />
         <entry key="app/src/main/res/drawable/ic____04.xml" value="0.1655" />
+        <entry key="app/src/main/res/drawable/ic_ad_block.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_angle_circle_left.xml" value="0.1465" />
         <entry key="app/src/main/res/drawable/ic_angle_circle_right.xml" value="0.1465" />
         <entry key="app/src/main/res/drawable/ic_angry.xml" value="0.1655" />
@@ -32,6 +33,7 @@
         <entry key="app/src/main/res/drawable/ic_arrow_circle_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_arrow_circle_white.xml" value="0.121" />
         <entry key="app/src/main/res/drawable/ic_block_check.xml" value="0.147" />
+        <entry key="app/src/main/res/drawable/ic_block_user.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_cancel.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/ic_chart_up_filled.xml" value="0.18" />
         <entry key="app/src/main/res/drawable/ic_check_agreement.xml" value="0.169" />
@@ -47,8 +49,10 @@
         <entry key="app/src/main/res/drawable/ic_emotion_2.xml" value="0.1145" />
         <entry key="app/src/main/res/drawable/ic_emptychat.xml" value="0.1565" />
         <entry key="app/src/main/res/drawable/ic_emptyheart.xml" value="0.1165" />
+        <entry key="app/src/main/res/drawable/ic_exit.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_filledchat.xml" value="0.1165" />
         <entry key="app/src/main/res/drawable/ic_filledheart.xml" value="0.128" />
+        <entry key="app/src/main/res/drawable/ic_friend.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_gallery.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_gift_filled.xml" value="0.164" />
         <entry key="app/src/main/res/drawable/ic_gloomy.xml" value="0.1765" />
@@ -133,7 +137,9 @@
         <entry key="app/src/main/res/layout/activity_application_rule.xml" value="0.12802582033351265" />
         <entry key="app/src/main/res/layout/activity_avatar_enlarge.xml" value="0.1375" />
         <entry key="app/src/main/res/layout/activity_big_region.xml" value="0.22780797101449277" />
-        <entry key="app/src/main/res/layout/activity_block.xml" value="0.2345392862955729" />
+        <entry key="app/src/main/res/layout/activity_block.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_block_user.xml" value="0.14010416666666667" />
+        <entry key="app/src/main/res/layout/activity_block_user_list.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.15057220458984374" />
         <entry key="app/src/main/res/layout/activity_community_register.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
@@ -141,9 +147,10 @@
         <entry key="app/src/main/res/layout/activity_edit_diary.xml" value="0.38723602294921877" />
         <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.19738820393880213" />
         <entry key="app/src/main/res/layout/activity_edit_profile_two.xml" value="0.134375" />
+        <entry key="app/src/main/res/layout/activity_exit.xml" value="0.22777777777777777" />
         <entry key="app/src/main/res/layout/activity_extend_image.xml" value="0.12135416666666667" />
         <entry key="app/src/main/res/layout/activity_image_enlarge.xml" value="0.12002512613932292" />
-        <entry key="app/src/main/res/layout/activity_like_person.xml" value="0.32115681966145837" />
+        <entry key="app/src/main/res/layout/activity_like_person.xml" value="0.18043416341145835" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1549697875976564" />
         <entry key="app/src/main/res/layout/activity_main2.xml" value="0.15670289855072464" />
         <entry key="app/src/main/res/layout/activity_mission.xml" value="0.1375" />
@@ -155,6 +162,7 @@
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.20737581114838088" />
         <entry key="app/src/main/res/layout/big_image_card.xml" value="0.13058494285300926" />
+        <entry key="app/src/main/res/layout/block_user_line.xml" value="0.2638888888888889" />
         <entry key="app/src/main/res/layout/book_card.xml" value="0.17135416666666667" />
         <entry key="app/src/main/res/layout/comment_list.xml" value="0.25183461507161453" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="0.153125" />

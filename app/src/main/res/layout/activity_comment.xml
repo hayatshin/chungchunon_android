@@ -17,12 +17,12 @@
         android:background="@drawable/ic_arrow_circle_white" />
 
     <RelativeLayout
-        android:clickable="true"
-        android:focusable="true"
         android:id="@+id/commentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/comment_box"
+        android:clickable="true"
+        android:focusable="true"
         android:orientation="vertical"
         android:paddingHorizontal="10dp"
         android:paddingTop="40dp"
@@ -38,6 +38,7 @@
                 android:id="@+id/commentRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintVertical_weight="6"
                 app:stackFromEnd="true" />
 

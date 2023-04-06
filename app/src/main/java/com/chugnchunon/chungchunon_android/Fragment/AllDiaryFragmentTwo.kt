@@ -68,6 +68,7 @@ class AllDiaryFragmentTwo : Fragment() {
 
     companion object {
         var resumePause : Boolean = false
+        var tabChange: Boolean = false
     }
 
     override fun onAttach(context: Context) {
@@ -90,12 +91,14 @@ class AllDiaryFragmentTwo : Fragment() {
             binding.regionViewPager.currentItem = 0
         } else if (diaryType == "region") {
             binding.regionViewPager.currentItem = 1
-        } else if (diaryType == "my") {
+        } else if (diaryType == "friend") {
             binding.regionViewPager.currentItem = 2
+        } else if (diaryType == "my") {
+            binding.regionViewPager.currentItem = 3
         }
 
         val adapter = RegionDiaryAdapter(requireActivity())
-        binding.regionViewPager.offscreenPageLimit = 3
+        binding.regionViewPager.offscreenPageLimit = 4
         binding.regionViewPager.adapter = adapter
         binding.regionViewPager.isUserInputEnabled = false
 

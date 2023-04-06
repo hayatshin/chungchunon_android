@@ -539,7 +539,7 @@ class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) :
             return "3,000 보"
         } else if (position == "goal" && !thisStepCheck) {
             thisStepCheck = !thisStepCheck
-            return "4회"
+            return "4 회"
         } else if (position != "goal" && thisStepCheck) {
             var decimal = DecimalFormat("#,###")
             var stepLabel = decimal.format(thisWeekMyStepCount)

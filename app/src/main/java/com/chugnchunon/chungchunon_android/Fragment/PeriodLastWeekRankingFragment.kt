@@ -520,7 +520,7 @@ class LastMyValueFormatter(var position: String, var lastWeekStepCount: Int) : V
             return "3,000 보"
         } else if (position == "goal" && !lastStepCheck) {
             lastStepCheck = !lastStepCheck
-            return "4회"
+            return "4 회"
         } else if (position != "goal" && lastStepCheck) {
             var decimal = DecimalFormat("#,###")
             var stepLabel = decimal.format(lastWeekStepCount)

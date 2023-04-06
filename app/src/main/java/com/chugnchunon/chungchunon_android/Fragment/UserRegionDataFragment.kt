@@ -25,6 +25,7 @@ import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.Region
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.tabChange
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
@@ -72,10 +73,7 @@ class UserRegionDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
-        if (resumePause == false) {
-            userRegionDiaryItems.clear()
-            getData()
-        }
+        getData()
 
         binding.recyclerDiary.itemAnimator = null
 
@@ -107,14 +105,7 @@ class UserRegionDataFragment : Fragment() {
             ft.detach(this).attach(this).commitAllowingStateLoss()
         }
 
-        var blockReloadFragment: BroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                userRegionDiaryItems.clear()
-                if (userRegionDiaryItems.isEmpty()) {
-                    getData()
-                }
-            }
-        }
+
 
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -127,39 +118,75 @@ class UserRegionDataFragment : Fragment() {
             IntentFilter("BLOCK_USER_INTENT")
         );
 
-
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            deleteNumChangeReceiver,
-            IntentFilter("DELETE_ACTION")
+            newNumChangeReceiver,
+            IntentFilter("COMMENT_ACTION")
         );
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
-            createNumChangeReceiver,
-            IntentFilter("CREATE_ACTION")
+            newLikeToggleReceiver,
+            IntentFilter("LIKE_TOGGLE_ACTION")
         );
+
 
 //        getData()
 
         return binding
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
 
-    var deleteNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(
+            blockReloadFragment
+        );
+
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(
+            newNumChangeReceiver
+        );
+
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(
+            newLikeToggleReceiver
+        );
+    }
+
+    private var newLikeToggleReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            var deleteNumComments = intent?.getIntExtra("deleteNumComments", 0)
-            var deleteDiaryPosition = intent?.getIntExtra("deleteDiaryPosition", 0)
+            var toggleDiaryId = intent?.getStringExtra("newDiaryId")
+            var newLikeToggle = intent?.getBooleanExtra("newLikeToggle", false)
+            var newNumLikes = intent?.getIntExtra("newNumLikes", 0)
 
-            userRegionDiaryItems[deleteDiaryPosition!!].numComments = deleteNumComments?.toLong()
+            for (diaryItem in userRegionDiaryItems) {
+                if (diaryItem.diaryId == toggleDiaryId) {
+                    diaryItem.numLikes = newNumLikes?.toLong()
+                }
+            }
             adapter.notifyDataSetChanged()
         }
     }
 
-    var createNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private var blockReloadFragment: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            var createNumComments = intent?.getIntExtra("createNumComments", 0)
-            var createDiaryPosition = intent?.getIntExtra("createDiaryPosition", 0)
+            userRegionDiaryItems.clear()
+            if (userRegionDiaryItems.isEmpty()) {
+                getData()
+            }
+        }
+    }
 
-            userRegionDiaryItems[createDiaryPosition!!].numComments = createNumComments?.toLong()
+
+    var newNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            var createDiaryId = intent?.getStringExtra("newDiaryId")
+            var createNumComments = intent?.getIntExtra("newNumComments", 0)
+
+            for(diaryItem in userRegionDiaryItems) {
+                if(diaryItem.diaryId == createDiaryId) {
+                    diaryItem.numComments = createNumComments?.toLong()
+                }
+            }
+
             adapter.notifyDataSetChanged()
         }
     }

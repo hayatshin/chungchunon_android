@@ -47,8 +47,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean
 import java.time.LocalDate
 
 
-class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
-    RecyclerView.Adapter<RegionDiaryCardAdapter.CardViewHolder>() {
+class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
+    RecyclerView.Adapter<FriendDiaryCardAdapter.CardViewHolder>() {
 
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
@@ -56,7 +56,6 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
-
 
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -165,6 +164,7 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
         }
 
         holder.itemView.likeIcon.setOnClickListener { view ->
+            resumePause = true
 
             var DiaryRef = diaryDB.document(items[position].diaryId)
 
@@ -176,7 +176,6 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             if (likeToggleCheck[position]!!) {
 
                 DiaryRef.update("numLikes", FieldValue.increment(-1))
-
 
                 likeNumLikes[position] = likeNumLikes[position]!!.toInt() - 1
                 holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
@@ -220,7 +219,7 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             var openBlockActivity = Intent(context, BlockActivity::class.java)
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)
-            openBlockActivity.putExtra("diaryType", "region")
+            openBlockActivity.putExtra("diaryType", "friend")
             context.startActivity(openBlockActivity)
         }
 
@@ -240,3 +239,4 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
     override fun getItemCount(): Int = items.size
 }
+

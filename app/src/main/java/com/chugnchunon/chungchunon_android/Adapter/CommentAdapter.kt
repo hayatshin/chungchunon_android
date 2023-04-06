@@ -48,9 +48,9 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
             var commentUserType = items[position].commentUserType
             var commentUserId = items[position].commentUserId
 
-            if(commentUserId != userId)  commentEditDeleteView.visibility = View.GONE
+            if (commentUserId != userId) commentEditDeleteView.visibility = View.GONE
 
-            if (commentUserType == "파트너" ) {
+            if (commentUserType == "파트너") {
                 commentPartnerCheckImage.visibility = View.VISIBLE
             } else {
                 commentPartnerCheckImage.visibility = View.GONE
@@ -103,21 +103,25 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
                 .document(items[position].commentId)
                 .delete()
                 .addOnSuccessListener {
+
                     // diary DB 내 numComments -1
                     DiaryRef.update("numComments", FieldValue.increment(-1))
-                        .addOnSuccessListener {
-                            var deleteIntent = Intent(context, CommentActivity::class.java)
-                            deleteIntent.setAction("DELETE_INTENT")
-                            deleteIntent.putExtra("deleteDiaryId", items[position].diaryId)
-                            deleteIntent.putExtra(
-                                "deleteDiaryPosition",
-                                items[position].diaryPosition
-                            ) // All Diary
-                            deleteIntent.putExtra(
-                                "deleteCommentPosition",
-                                position
-                            ) // CommentActivity
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(deleteIntent);
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+
+                                var deleteIntent =
+                                    Intent(context, CommentActivity::class.java)
+                                deleteIntent.setAction("DELETE_INTENT")
+                                deleteIntent.putExtra("deleteDiaryId", items[position].diaryId)
+                                deleteIntent.putExtra(
+                                    "deleteDiaryPosition",
+                                    items[position].diaryPosition
+                                )
+                                deleteIntent.putExtra("deleteCommentPosition", position)
+                                LocalBroadcastManager.getInstance(context)
+                                    .sendBroadcast(deleteIntent);
+
+                            }
                         }
                 }
 

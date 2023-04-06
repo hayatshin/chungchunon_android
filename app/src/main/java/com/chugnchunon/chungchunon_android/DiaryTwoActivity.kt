@@ -1,12 +1,15 @@
 package com.chugnchunon.chungchunon_android
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -26,6 +29,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.gson.GsonBuilder
+import kotlinx.android.synthetic.main.fragment_region_data.view.*
 import java.time.LocalDateTime
 
 class DiaryTwoActivity : AppCompatActivity() {
@@ -107,7 +111,7 @@ class DiaryTwoActivity : AppCompatActivity() {
             startActivity(goUpdateIntent)
         }
 
-        // 걸음수 권한
+        // 걸음수 권한 체크
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 var userType = document.data?.getValue("userType").toString()
@@ -138,10 +142,31 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
 
-        from = intent.getStringExtra("from").toString()
+        // 휴대폰 연동 권한 체크
+        var readContactPermissionCheck =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+        if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED) {
+            // 권한 없음
+            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), 200)
+        }
 
+        // 배터리 사용 제한없음 설정
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = this.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent().apply {
+                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                    data = Uri.parse("package:$packageName")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                this.startActivity(intent)
+            }
+        }
 
         // 메뉴 이동
+
+        from = intent.getStringExtra("from").toString()
+
         binding.bottomNav.run {
             setOnItemSelectedListener {
                 when (it.itemId) {
@@ -218,7 +243,7 @@ class DiaryTwoActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode==100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             var startService = Intent(this, MyService::class.java)
 

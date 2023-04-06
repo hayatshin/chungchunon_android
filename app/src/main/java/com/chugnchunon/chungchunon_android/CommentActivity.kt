@@ -28,6 +28,7 @@ import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
+import com.chugnchunon.chungchunon_android.Fragment.LinearLayoutManagerWrapper
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -97,6 +98,11 @@ class CommentActivity : FragmentActivity() {
         commentItems.clear()
     }
 
+    override fun finish() {
+        super.finish()
+        resumePause = false
+    }
+
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,12 +116,9 @@ class CommentActivity : FragmentActivity() {
         commentDataLoading.loadingCompleteData.observe(this, Observer { value ->
 
             if (!commentDataLoading.loadingCompleteData.value!!) {
-                Log.d("댓글", "로딩 false")
                 binding.commentRecyclerView.visibility = View.GONE
                 binding.dataLoadingProgressBar.visibility = View.VISIBLE
             } else {
-                Log.d("댓글", "로딩 true")
-
                 binding.commentRecyclerView.visibility = View.VISIBLE
                 binding.dataLoadingProgressBar.visibility = View.GONE
             }
@@ -150,8 +153,6 @@ class CommentActivity : FragmentActivity() {
         binding.commentWriteBtn.isEnabled = false
 
         binding.commentGobackArrow.setOnClickListener {
-            resumePause = true
-
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
             Handler().postDelayed({
@@ -217,24 +218,22 @@ class CommentActivity : FragmentActivity() {
                                     false
                                 )
 
-                                adapter.notifyDataSetChanged()
 
                                 commentDataLoading.loadingCompleteData.value = true
-
-                                binding.commentRecyclerView.visibility = View.VISIBLE
                                 binding.noItemText.visibility = View.GONE
+
+                                adapter.notifyDataSetChanged()
+
                             }
                     }
                 } else {
                     // 0인 경우
                     commentDataLoading.loadingCompleteData.value = true
-
-                    binding.commentRecyclerView.visibility = View.GONE
                     binding.noItemText.visibility = View.VISIBLE
                 }
 
 
-//                commentDataLoading.loadingCompleteData.value = true
+                commentDataLoading.loadingCompleteData.value = true
 
             }
 
@@ -266,12 +265,7 @@ class CommentActivity : FragmentActivity() {
 
 
         binding.commentWriteBtn.setOnClickListener {
-
-            if(commentItems.size == 0) {
-                Log.d("댓글", "size 0")
-                binding.commentRecyclerView.visibility = View.VISIBLE
-                binding.noItemText.visibility = View.GONE
-            }
+            binding.noItemText.visibility = View.GONE
 
             if (!editBtn) {
                 // diary +1
@@ -286,9 +280,9 @@ class CommentActivity : FragmentActivity() {
                                     document.data?.getValue("numComments").toString().toInt()
 
                                 var createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
-                                createIntent.setAction("CREATE_ACTION")
-                                createIntent.putExtra("createDiaryPosition", diaryPosition)
-                                createIntent.putExtra("createNumComments", createNumComments)
+                                createIntent.setAction("COMMENT_ACTION")
+                                createIntent.putExtra("newDiaryId", diaryId)
+                                createIntent.putExtra("newNumComments", createNumComments)
                                 LocalBroadcastManager.getInstance(this!!)
                                     .sendBroadcast(createIntent)
                             }
@@ -322,11 +316,17 @@ class CommentActivity : FragmentActivity() {
                         description.toString()
                     )
                 )
-                Log.d("commentItems", "생성: ${commentItems}")
 
                 adapter.notifyDataSetChanged()
-                binding.commentRecyclerView.scrollToPosition(commentItems.size - 1);
 
+                binding.commentRecyclerView.layoutManager =
+                    LinearLayoutManagerWrapper(
+                        this,
+                        RecyclerView.VERTICAL,
+                        false
+                    )
+
+                binding.commentRecyclerView.scrollToPosition(commentItems.size - 1);
                 binding.commentWriteText.text = null
 
 
@@ -351,6 +351,18 @@ class CommentActivity : FragmentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            editDescriptionReceiver
+        );
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            deleteCommentReceiver
+        );
+    }
+
 
     var editDescriptionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -366,6 +378,7 @@ class CommentActivity : FragmentActivity() {
 
     var deleteCommentReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+
             var deleteDiaryId = intent?.getStringExtra("deleteDiaryId")
             var deleteDiaryPosition = intent?.getIntExtra("deleteDiaryPosition", 0)
             var deleteCommentPosition = intent?.getIntExtra("deleteCommentPosition", 0)
@@ -375,7 +388,6 @@ class CommentActivity : FragmentActivity() {
                 adapter.notifyDataSetChanged()
 
                 if(commentItems.size == 0) {
-                    binding.commentRecyclerView.visibility = View.GONE
                     binding.noItemText.visibility = View.VISIBLE
                 }
             }
@@ -386,9 +398,9 @@ class CommentActivity : FragmentActivity() {
 
                     // 전체 일기 화면
                     var intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                    intent.setAction("DELETE_ACTION")
-                    intent.putExtra("deleteDiaryPosition", deleteDiaryPosition)
-                    intent.putExtra("deleteNumComments", newNumComments)
+                    intent.setAction("COMMENT_ACTION")
+                    intent.putExtra("newDiaryId", diaryId)
+                    intent.putExtra("newNumComments", newNumComments)
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
                 }
         }

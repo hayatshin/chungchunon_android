@@ -66,7 +66,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         "birthDay" to result.kakaoAccount?.birthday,
                         "todayStepCount" to 0,
                         "userAge" to userAge,
-                    )
+                        "blockUserList" to ArrayList<String>(),
+                        )
 
                     context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->
                         val firebaseToken = task.result

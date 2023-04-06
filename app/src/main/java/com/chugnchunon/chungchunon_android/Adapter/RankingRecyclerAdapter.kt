@@ -28,6 +28,7 @@ import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.BlockActivity
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.*
+import com.chugnchunon.chungchunon_android.EnlargeAvatarActivity
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.R
 import com.firebase.ui.auth.AuthUI.getApplicationContext
@@ -37,6 +38,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.diary_card.view.*
+import kotlinx.android.synthetic.main.ranking_line.view.*
 import org.apache.commons.lang3.mutable.MutableBoolean
 import java.time.LocalDate
 
@@ -91,6 +93,12 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
 
     override fun onBindViewHolder(holder: RankingRecyclerAdapter.RankingViewHolder, position: Int) {
         holder.bind(context, items!![position])
+
+        holder.itemView.rankingAvatar.setOnClickListener { view ->
+            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
+            context.startActivity(goEnlargeAvatar)
+        }
     }
 
     override fun getItemCount(): Int = items.size

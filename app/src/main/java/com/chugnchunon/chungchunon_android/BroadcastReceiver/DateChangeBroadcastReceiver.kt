@@ -116,11 +116,13 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                         var dummyStep = (snapShot["dummy"] as Long).toInt()
 
                                         var newStepSet = hashMapOf(
+                                            REFRESH_DAILY to 0,
                                             "dummy" to (yesterdayStep + dummyStep)
                                         )
 
                                         db.collection("user_step_count").document("$userId")
                                             .set(newStepSet, SetOptions.merge())
+
 
 //                                        var testSetThree = hashMapOf(
 //                                            "더미데이터 있고 새로운 날, 어제 값 존재" to "작동",
@@ -139,17 +141,7 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 //
 //                                        db.collection("test").document(REFRESH_DAILY)
 //                                            .set(testSetFive, SetOptions.merge())
-
-
                                     }
-
-
-                                    // 날짜 저장 - user_step_count
-                                    var newDateForUser = hashMapOf(
-                                        REFRESH_DAILY to 0
-                                    )
-                                    db.collection("user_step_count").document("$userId")
-                                        .set(newDateForUser, SetOptions.merge())
 
                                     // 날짜 저장 - period_step_count
                                     var newDateForPeriod = hashMapOf(
@@ -157,6 +149,13 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                     )
                                     db.collection("period_step_count").document(REFRESH_DAILY)
                                         .set(newDateForPeriod, SetOptions.merge())
+
+                                    // 날짜 저장 - user_step_count
+                                    var newDateForUser = hashMapOf(
+                                        REFRESH_DAILY to 0
+                                    )
+                                    db.collection("user_step_count").document("$userId")
+                                        .set(newDateForUser, SetOptions.merge())
                                 }
                             } else {
                                 // 더미 데이터 없는 경우

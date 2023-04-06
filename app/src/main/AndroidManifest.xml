@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".GlobalApplication"
@@ -110,6 +112,14 @@
             android:name=".LikePersonActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".BlockUserListActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ExitActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
+
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:enabled="true"

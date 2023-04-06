@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -42,6 +43,7 @@ class BlockActivity : Activity() {
     private var diaryUserId: String = ""
 
     private var lastUserUpdate: Boolean = false
+    lateinit var metrics: DisplayMetrics
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -167,6 +169,7 @@ class BlockActivity : Activity() {
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
             resultView.text = "일기를 차단했습니다."
+            resultView.setTextSize(dpTextSize(10f))
             binding.blockBox.addView(resultView)
 
 
@@ -186,29 +189,45 @@ class BlockActivity : Activity() {
 
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
-            resultView.text = "유저를 차단했습니다."
+            resultView.text = "이 사람을 차단했습니다."
+            resultView.setTextSize(dpTextSize(10f))
             binding.blockBox.addView(resultView)
 
 
-            diaryDB.whereEqualTo("userId", diaryUserId).get()
-                .addOnSuccessListener { documents ->
-                    documents.forEachIndexed { index, queryDocumentSnapshot ->
-                        var documentId = queryDocumentSnapshot.data.getValue("diaryId")
-                        diaryDB.document("$documentId")
-                            .update("blockedBy", (FieldValue.arrayUnion("$userId")))
-                            .addOnSuccessListener {
-                                if (index == documents.size() - 1) {
-                                    var blockUserDiary = Intent(this, AllDiaryFragmentTwo::class.java)
-                                    blockUserDiary.setAction("BLOCK_USER_INTENT")
-                                    LocalBroadcastManager.getInstance(this)
-                                        .sendBroadcast(blockUserDiary)
-                                    finish()
-                                }
+            // userDB에 차단 목록
+            userDB.document("${userId}")
+                .update("blockUserList", (FieldValue.arrayUnion("$diaryUserId")))
+                .addOnSuccessListener {
+                    // 다이어리에 차단
+                    diaryDB.whereEqualTo("userId", diaryUserId).get()
+                        .addOnSuccessListener { documents ->
+                            documents.forEachIndexed { index, queryDocumentSnapshot ->
+                                var documentId = queryDocumentSnapshot.data.getValue("diaryId")
+                                diaryDB.document("$documentId")
+                                    .update("blockedBy", (FieldValue.arrayUnion("$userId")))
+                                    .addOnSuccessListener {
+                                        if (index == documents.size() - 1) {
+                                            var blockUserDiary =
+                                                Intent(this, AllDiaryFragmentTwo::class.java)
+                                            blockUserDiary.setAction("BLOCK_USER_INTENT")
+                                            LocalBroadcastManager.getInstance(this)
+                                                .sendBroadcast(blockUserDiary)
+                                            finish()
+                                        }
+                                    }
                             }
-                    }
-
+                        }
                 }
+
+
         }
 
+    }
+
+    private fun dpTextSize(dp: Float): Float {
+        metrics = applicationContext.resources.displayMetrics
+        var fpixels = metrics.density * dp
+        var pixels = fpixels * 0.5f
+        return pixels
     }
 }
