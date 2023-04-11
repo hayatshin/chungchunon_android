@@ -350,13 +350,13 @@ class AllRegionDataFragment : Fragment() {
                         }
 
                         adapter.notifyDataSetChanged()
-//                        allDataLoadingState.loadingCompleteData.value =
-//                            true
+                        allDataLoadingState.loadingCompleteData.value =
+                            true
 
-                        Handler().postDelayed({
-                            allDataLoadingState.loadingCompleteData.value =
-                                true
-                        }, 300)
+//                        Handler().postDelayed({
+//                            allDataLoadingState.loadingCompleteData.value =
+//                                true
+//                        }, 300)
 
                     }
 

@@ -48,7 +48,11 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
             var commentUserType = items[position].commentUserType
             var commentUserId = items[position].commentUserId
 
-            if (commentUserId != userId) commentEditDeleteView.visibility = View.GONE
+            if (commentUserId != userId) {
+                commentEditDeleteView.visibility = View.GONE
+            } else {
+                commentEditDeleteView.visibility = View.VISIBLE
+            }
 
             if (commentUserType == "파트너") {
                 commentPartnerCheckImage.visibility = View.VISIBLE

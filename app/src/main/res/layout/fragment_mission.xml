@@ -33,14 +33,13 @@
         android:layout_height="0dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header">
 
         <ScrollView
-            android:scrollbars="none"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -48,15 +47,18 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
-                    android:layout_marginTop="30dp"
+                    android:paddingHorizontal="20dp"
                     android:layout_width="match_parent"
-                    android:layout_height="430dp">
+                    android:layout_height="430dp"
+                    android:layout_marginTop="30dp">
 
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/missionRecyclerView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:background="@drawable/mission_card_background"
+                        android:clipToOutline="true"
                         android:orientation="horizontal"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
@@ -88,28 +90,30 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_gravity="bottom"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginBottom="40dp"
                     android:gravity="center"
                     app:ci_drawable="@drawable/indicator_active"
                     app:ci_drawable_unselected="@drawable/indicator_inactive" />
 
                 <TextView
+                    android:layout_marginStart="20dp"
+                    android:id="@+id/attractionTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="시니어 책 추천"
+                    android:layout_marginBottom="7dp"
+                    android:text="청춘시 명소"
                     android:textColor="@color/black"
-                    android:textSize="24dp"
+                    android:textSize="21dp"
                     android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:layout_marginBottom="30dp"
-                    android:paddingEnd="20dp"
-                    android:paddingVertical="20dp"
-                    android:id="@+id/bookRecyclerView"
+                    android:id="@+id/attractionRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:orientation="horizontal"
+                    android:paddingVertical="20dp"
+                    android:paddingStart="15dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
             </LinearLayout>

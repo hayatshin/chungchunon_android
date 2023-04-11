@@ -38,6 +38,13 @@ class MoreFragment: Fragment() {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
+    lateinit var mcontext: Context
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mcontext = context
+    }
+
     @SuppressLint("Range")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,7 +69,7 @@ class MoreFragment: Fragment() {
                 var dbSmallRegion = document.data?.getValue("smallRegion")
                 var userRegion = "${dbRegion} ${dbSmallRegion}"
 
-                Glide.with(requireActivity())
+                Glide.with(mcontext)
                     .load(userAvatar)
                     .into(binding.profileAvatar)
 

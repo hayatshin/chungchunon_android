@@ -131,9 +131,11 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
                 questionClick = true
             } else {
-                Handler().postDelayed({
-                    binding.pointIntroduction.visibility = View.GONE
-                }, 400)
+//                Handler().postDelayed({
+//                    binding.pointIntroduction.visibility = View.GONE
+//                }, 400)
+                binding.pointIntroduction.visibility = View.GONE
+
 
                 binding.pointIntroduction.animate()
                     .alpha(0f)
@@ -207,7 +209,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 }
             }
         }
-
 
         // graph
         uiScope.launch(Dispatchers.IO) {
@@ -359,7 +360,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     // 리스트 데이터
-
     suspend fun calculatePointFun() = coroutineScope {
         try {
             listOf(
@@ -378,20 +378,24 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
-            var userId = document.data?.getValue("userId").toString()
-            var username = document.data.getValue("name").toString()
-            var userAvatar = document.data.getValue("avatar").toString()
+            var userType = document.data.getValue("userType").toString()
 
-            var userEntry = RankingLine(
-                0,
-                userId,
-                username,
-                userAvatar,
-                0,
-            )
+            if(userType == "사용자") {
+                var userId = document.data?.getValue("userId").toString()
+                var username = document.data.getValue("name").toString()
+                var userAvatar = document.data.getValue("avatar").toString()
 
-            userPointArray.add(userEntry)
-            userStepCountHashMap.put(userId, 0)
+                var userEntry = RankingLine(
+                    0,
+                    userId,
+                    username,
+                    userAvatar,
+                    0,
+                )
+
+                userPointArray.add(userEntry)
+                userStepCountHashMap.put(userId, 0)
+            }
         }
     }
 
@@ -518,9 +522,9 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun filterItemUpdate() = withContext(Dispatchers.Main) {
-        rankingItems = ArrayList(userPointArray.filter { it.index!! <= 10 })
+//        rankingItems = ArrayList(userPointArray.filter { it.index!! <= 10 })
 
-        rankingAdapter = RankingRecyclerAdapter(requireActivity(), rankingItems)
+        rankingAdapter = RankingRecyclerAdapter(requireActivity(), userPointArray)
         binding.rankingRecyclerView.adapter = rankingAdapter
         binding.rankingRecyclerView.layoutManager =
             LinearLayoutManagerWrapper(

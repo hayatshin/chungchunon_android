@@ -4,14 +4,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
-import com.chugnchunon.chungchunon_android.MyService
-import com.chugnchunon.chungchunon_android.MyService.Companion.ACTION_STEP_COUNTER_NOTIFICATION
-import com.google.android.material.internal.ContextUtils.getActivity
+import com.chugnchunon.chungchunon_android.Service.MyService
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.ACTION_STEP_COUNTER_NOTIFICATION
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore

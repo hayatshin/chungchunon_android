@@ -22,6 +22,8 @@ import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
@@ -30,6 +32,7 @@ import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companio
 import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
 import com.chugnchunon.chungchunon_android.Fragment.LinearLayoutManagerWrapper
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -37,8 +40,17 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
+import io.ktor.client.plugins.BodyProgress.Plugin.key
 import kotlinx.android.synthetic.main.diary_card.*
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import java.io.IOException
 
 class CommentActivity : FragmentActivity() {
 
@@ -92,7 +104,6 @@ class CommentActivity : FragmentActivity() {
     }
 
 
-
     override fun onResume() {
         super.onResume()
         commentItems.clear()
@@ -107,6 +118,7 @@ class CommentActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
 
         var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.commentLayout.startAnimation(upAnimation)
@@ -212,12 +224,13 @@ class CommentActivity : FragmentActivity() {
                                     )
                                 )
 
+                                commentItems.sortWith(compareBy({ it.commentTimestamp }))
+
                                 binding.commentRecyclerView.layoutManager = LinearLayoutManager(
                                     this,
                                     RecyclerView.VERTICAL,
                                     false
                                 )
-
 
                                 commentDataLoading.loadingCompleteData.value = true
                                 binding.noItemText.visibility = View.GONE
@@ -264,6 +277,7 @@ class CommentActivity : FragmentActivity() {
         })
 
 
+        // 댓글 작성
         binding.commentWriteBtn.setOnClickListener {
             binding.noItemText.visibility = View.GONE
 
@@ -297,7 +311,8 @@ class CommentActivity : FragmentActivity() {
                     "commentId" to commentId,
                     "userId" to commentUserId,
                     "timestamp" to FieldValue.serverTimestamp(),
-                    "description" to description.toString()
+                    "description" to description.toString(),
+                    "diaryId" to diaryId,
                 )
                 DiaryRef.collection("comments").document(commentId)
                     .set(commentSet, SetOptions.merge())
@@ -316,7 +331,6 @@ class CommentActivity : FragmentActivity() {
                         description.toString()
                     )
                 )
-
                 adapter.notifyDataSetChanged()
 
                 binding.commentRecyclerView.layoutManager =
@@ -387,7 +401,7 @@ class CommentActivity : FragmentActivity() {
                 commentItems.removeAt(deleteCommentPosition!!.toInt())
                 adapter.notifyDataSetChanged()
 
-                if(commentItems.size == 0) {
+                if (commentItems.size == 0) {
                     binding.noItemText.visibility = View.VISIBLE
                 }
             }

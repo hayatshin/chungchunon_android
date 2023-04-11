@@ -1,6 +1,6 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
-import com.chugnchunon.chungchunon_android.MyService
+import com.chugnchunon.chungchunon_android.Service.MyService
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
@@ -25,15 +25,12 @@ import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.UiContext
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.R
@@ -50,12 +47,9 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.DiaryUpdateBroadcastReceiver
-import com.chugnchunon.chungchunon_android.BroadcastReceiver.StepCountBroadcastReceiver
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
-import com.chugnchunon.chungchunon_android.DiaryTwoActivity
-import com.chugnchunon.chungchunon_android.NewImageViewModel
+import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.FirebaseDatabase
@@ -102,19 +96,19 @@ class MyDiaryFragment : Fragment() {
     private var oldImageList: ArrayList<String> = ArrayList()
 
     lateinit var mcontext: Context
-
+    private lateinit var callback: OnBackPressedCallback
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mcontext = context
     }
 
-
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
@@ -172,79 +166,45 @@ class MyDiaryFragment : Fragment() {
 
 
         // 이미지 삭제 로컬 브로드캐스트
-
-
-//        var startService = Intent(activity, MyService::class.java)
-//        activity?.let { ContextCompat.startForegroundService(it, startService) }
-
-
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
         binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-//        if(!editDiary) {
-//            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-//            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-//        } else {
-//            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-//            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-//        }
-
 
         binding.diaryBtn.isEnabled = false
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            secretOrNotFunction,
+            IntentFilter("SECRET_OR_NOT")
+        );
 
         diaryFillCheck.secretFill.observe(requireActivity(), Observer
         { value ->
             if (diaryFillCheck.secretFill.value!!) {
-                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
-                binding.secretButton.text = "보이기"
+                binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_unlock,
                     0,
                     0,
                     0
                 )
-                binding.secreteNotificationText.text =
-                    "${activity?.getString(R.string.secret_unhide_notification)}"
 
-                binding.secretConfirmBox.setOnClickListener {
-                    diaryFillCheck.secretFill.value = false
-                    binding.secretNotificationLayout.visibility = View.GONE
-                    activity?.window?.setStatusBarColor(Color.WHITE);
-
-                    if (editDiary) {
-                        diaryEditCheck.secretEdit.value = true
-                    }
-                }
             } else {
-                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-
-                binding.secretButton.text = "숨기기"
+                binding.secretButton.text = "나만 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_lock,
                     0,
                     0,
                     0
                 )
-                binding.secreteNotificationText.text =
-                    "${activity?.getString(R.string.secret_hide_notification)}"
 
-                binding.secretConfirmBox.setOnClickListener {
-                    diaryFillCheck.secretFill.value = true
-                    binding.secretNotificationLayout.visibility = View.GONE
-                    activity?.window?.setStatusBarColor(Color.WHITE);
-
-                    if (editDiary) {
-                        diaryEditCheck.secretEdit.value = true
-                    }
-                }
             }
         })
 
+
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer
         { value ->
-            if (diaryFillCheck.diaryFill.value!! && !editDiary) {
+            if (diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-            } else if (!diaryFillCheck.diaryFill.value!! && !editDiary) {
+            } else if (!diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
@@ -254,7 +214,6 @@ class MyDiaryFragment : Fragment() {
         // 수정
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer
         { value ->
-
             if (diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
@@ -264,7 +223,6 @@ class MyDiaryFragment : Fragment() {
 
         diaryEditCheck.moodEdit.observe(requireActivity(), Observer
         { value ->
-
             if (diaryEditCheck.moodEdit.value == true) binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
@@ -274,7 +232,6 @@ class MyDiaryFragment : Fragment() {
 
         diaryEditCheck.photoEdit.observe(requireActivity(), Observer
         { value ->
-            if (diaryEditCheck.photoEdit.value == true) binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
@@ -283,19 +240,18 @@ class MyDiaryFragment : Fragment() {
 
         diaryEditCheck.secretEdit.observe(requireActivity(), Observer
         { value ->
+
+            if (diaryEditCheck.secretEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 binding.diaryBtn.isEnabled = true
             }
         })
 
 
-
         newImageViewModel.newImageList.observe(requireActivity(), Observer
         { value ->
-            binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
             if (newImageViewModel.newImageList.value!!.size == 0) {
-                binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_no)
                 binding.photoRecyclerView.visibility = View.GONE
             }
         })
@@ -500,7 +456,7 @@ class MyDiaryFragment : Fragment() {
 
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
-            Log.d("걸음수 결과", "$todayStepCountFromDB")
+
             todayTotalStepCount = todayStepCountFromDB
             var decimal = DecimalFormat("#,###")
             var step = decimal.format(todayTotalStepCount)
@@ -623,14 +579,10 @@ class MyDiaryFragment : Fragment() {
 
         // 글 숨기기
         binding.secretButton.setOnClickListener {
-            binding.secretNotificationLayout.visibility = View.VISIBLE
-            activity?.window?.setStatusBarColor(Color.parseColor("#CC000000"));
+           var goLockDiary = Intent(requireActivity(), LockDiaryActivity::class.java)
+            startActivity(goLockDiary)
         }
 
-        binding.secretCancelBox.setOnClickListener {
-            binding.secretNotificationLayout.visibility = View.GONE
-            activity?.window?.setStatusBarColor(Color.WHITE);
-        }
 
 
         // 다이어리 작성 버튼
@@ -740,9 +692,6 @@ class MyDiaryFragment : Fragment() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        Log.d("올리기사진 1", "${requestCode}")
-        Log.d("올리기사진 2", "${grantResults[0] == PackageManager.PERMISSION_GRANTED}")
-
 
         if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -762,11 +711,7 @@ class MyDiaryFragment : Fragment() {
 
         when (requestCode) {
             2000 -> {
-                Log.d("올리기사진", "액션")
-
                 if (data?.clipData != null) {
-                    binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
                     val count = data!!.clipData!!.itemCount
 
                     for (i in 0 until count) {
@@ -784,20 +729,6 @@ class MyDiaryFragment : Fragment() {
                     photoAdapter.notifyDataSetChanged()
 
                     binding.photoRecyclerView.visibility = View.VISIBLE
-                    binding.photoRecyclerView.alpha = 0f
-                    binding.photoRecyclerView.y = -50f
-
-                    binding.photoRecyclerView.animate()
-                        .translationY(0f)
-                        .setDuration(500)
-                        .setInterpolator(LinearInterpolator())
-                        .start()
-
-                    binding.photoRecyclerView.animate()
-                        .alpha(1f)
-                        .setDuration(600)
-                        .setInterpolator(LinearInterpolator())
-                        .start()
                 }
             }
         }
@@ -919,6 +850,21 @@ class MyDiaryFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private var secretOrNotFunction: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            var secretOrNot = intent?.getBooleanExtra("secretOrNot", false)
+            Log.d("시크릿", secretOrNot.toString())
+
+            if(!editDiary) {
+                diaryFillCheck.secretFill.value = secretOrNot
+            } else {
+                diaryEditCheck.secretEdit.value = secretOrNot
+            }
+        }
+
     }
 
 

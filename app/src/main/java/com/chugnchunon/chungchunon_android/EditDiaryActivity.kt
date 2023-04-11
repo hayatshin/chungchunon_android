@@ -88,15 +88,10 @@ class EditDiaryActivity : AppCompatActivity() {
         var diaryType = intent.getStringExtra("diaryType")
 
         binding.backBtn.setOnClickListener {
-//            var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
-//            goAllDiary.putExtra("from", "edit")
-//            startActivity(goAllDiary)
             finish()
         }
 
         newImageViewModel = ViewModelProvider(this).get(NewImageViewModel::class.java)
-//        photoAdapter = UploadPhotosAdapter(this, newImageViewModel.newImageList.value)
-//        binding.photoRecyclerView.adapter = photoAdapter
 
         var editDiaryId = intent.getStringExtra("editDiaryId")
 
@@ -110,10 +105,11 @@ class EditDiaryActivity : AppCompatActivity() {
         // 수정
 
         diaryEditCheck.secretEdit.observe(this, Observer { value ->
-            if (diaryEditCheck.secretEdit.value!!) {
-                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            if (diaryEditCheck.secretEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
-                binding.secretButton.text = "보이기"
+            if (diaryEditCheck.secretEdit.value!!) {
+
+                binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_unlock,
                     0,
@@ -130,9 +126,8 @@ class EditDiaryActivity : AppCompatActivity() {
                     binding.diaryBtn.isEnabled = true
                 }
             } else {
-                binding.secretCheckBox.setImageResource(R.drawable.ic_checkbox_no)
 
-                binding.secretButton.text = "숨기기"
+                binding.secretButton.text = "나만 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_lock,
                     0,
@@ -162,14 +157,12 @@ class EditDiaryActivity : AppCompatActivity() {
 
         diaryEditCheck.photoEdit.observe(this, Observer { value ->
             binding.diaryBtn.isEnabled = true
-            if (diaryEditCheck.photoEdit.value == true) binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
         })
 
 
         newImageViewModel.newImageList.observe(this, Observer { value ->
 
             if (newImageViewModel.newImageList.value!!.size == 0) {
-                binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_no)
                 binding.photoRecyclerView.visibility = View.GONE
             }
         })
@@ -270,8 +263,6 @@ class EditDiaryActivity : AppCompatActivity() {
                 if (it.resultCode == RESULT_OK) {
                     if (it.data?.clipData != null) {
 
-                        binding.photoCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
                         val count = it.data!!.clipData!!.itemCount
                         for (i in 0 until count) {
                             val imageUri = it.data?.clipData!!.getItemAt(i).uri.toString()
@@ -285,27 +276,8 @@ class EditDiaryActivity : AppCompatActivity() {
                         binding.photoRecyclerView.adapter = photoAdapter
                         photoAdapter.notifyDataSetChanged()
 
-//                        photoAdapter =
-//                            UploadPhotosAdapter(this, newImageViewModel.newImageList.value!!)
-//                        binding.photoRecyclerView.adapter = photoAdapter
-
-//                        photoAdapter.notifyDataSetChanged()
-
                         binding.photoRecyclerView.visibility = View.VISIBLE
-//                        binding.photoRecyclerView.alpha = 0f
-//                        binding.photoRecyclerView.y = -50f
-//
-//                        binding.photoRecyclerView.animate()
-//                            .translationY(0f)
-//                            .setDuration(500)
-//                            .setInterpolator(LinearInterpolator())
-//                            .start()
-//
-//                        binding.photoRecyclerView.animate()
-//                            .alpha(1f)
-//                            .setDuration(600)
-//                            .setInterpolator(LinearInterpolator())
-//                            .start()
+
                     }
                 }
             }

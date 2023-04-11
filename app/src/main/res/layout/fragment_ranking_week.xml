@@ -178,7 +178,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:layout_weight="1"
-                        android:text="* 전체 점수 상위 10위"
+                        android:text="* 전체 점수 순위"
                         android:textColor="@color/main_color"
                         android:textSize="23dp"
                         android:textStyle="bold" />

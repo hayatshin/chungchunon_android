@@ -40,6 +40,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_diary.view.*
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
+import okhttp3.internal.toImmutableList
 import kotlin.collections.ArrayList
 import kotlin.text.StringBuilder
 
@@ -237,9 +238,10 @@ class FriendDataFragment : Fragment() {
         }
     }
 
-    private fun getRefinedAllContactNumbers(): ArrayList<String> {
+    private fun getRefinedAllContactNumbers(): List<String> {
         val numbersList = getAllContactNumbers(requireActivity())
         var newNumberList = ArrayList<String>()
+
         for (number in numbersList) {
             val numberBuilder = StringBuilder(number)
             if (number.contains("-")) {
@@ -264,7 +266,7 @@ class FriendDataFragment : Fragment() {
                 }
             }
         }
-        return newNumberList
+        return newNumberList.distinct().toImmutableList()
     }
 
     @SuppressLint("Range")
@@ -303,7 +305,7 @@ class FriendDataFragment : Fragment() {
                             var userPhone = userData.data?.getValue("phone")
                             myContactList.forEach { contact ->
 
-                                if (contact == userPhone) {
+                                if (userPhone == contact) {
                                     var blockedList =
                                         document.data?.getValue("blockedBy") as java.util.ArrayList<String>
                                     if (!blockedList.contains(userId)) {

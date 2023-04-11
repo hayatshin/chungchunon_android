@@ -8,17 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.chugnchunon.chungchunon_android.Adapter.BooksAdapter
-import com.chugnchunon.chungchunon_android.Adapter.DisplayPhotosAdapter
+import com.chugnchunon.chungchunon_android.Adapter.AttractionAdapter
 import com.chugnchunon.chungchunon_android.Adapter.MissionCardAdapter
+import com.chugnchunon.chungchunon_android.DataClass.Attraction
 import com.chugnchunon.chungchunon_android.DataClass.Book
 import com.chugnchunon.chungchunon_android.DataClass.Mission
 import com.chugnchunon.chungchunon_android.Layout.CenterZoomLayoutManager
-import com.chugnchunon.chungchunon_android.Layout.LinePagerIndicatorDecoration
 import com.chugnchunon.chungchunon_android.databinding.FragmentMissionBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -32,19 +29,22 @@ class MissionFragment: Fragment() {
     private val binding get() = _binding!!
 
     private val db = Firebase.firestore
+    private val userDB = db.collection("users")
     private val missionDB = db.collection("mission")
     private val booksDB = db.collection("books")
+    private val attractionDB = db.collection("attraction")
 
     private val userId = Firebase.auth.currentUser?.uid
 
     lateinit var missionSet: Mission
     lateinit var bookSet: Book
+    lateinit var attractionSet: Attraction
 
     private var missionList: ArrayList<Mission> = ArrayList()
-    private var bookList: ArrayList<Book> = ArrayList()
+    private var attractionList: ArrayList<Attraction> = ArrayList()
 
     lateinit var missionAdapter: MissionCardAdapter
-    lateinit var booksAdapter: BooksAdapter
+    lateinit var attractionAdapter: AttractionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,10 +54,13 @@ class MissionFragment: Fragment() {
         _binding = FragmentMissionBinding.inflate(inflater, container, false)
         val binding = binding.root
 
-
         missionAdapter = MissionCardAdapter(requireContext(), missionList)
         binding.missionRecyclerView.adapter = missionAdapter
         binding.missionRecyclerView.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+
+        attractionAdapter = AttractionAdapter(requireContext(), attractionList)
+        binding.attractionRecyclerView.adapter = attractionAdapter
+        binding.attractionRecyclerView.layoutManager = CenterZoomLayoutManager(requireContext())
 
         binding.indicator.setViewPager(binding.missionRecyclerView)
         binding.indicator.createIndicators(missionList.size, 0)
@@ -123,29 +126,63 @@ class MissionFragment: Fragment() {
             }
 
 
-        // 책
-        booksAdapter = BooksAdapter(requireContext(), bookList)
-        binding.bookRecyclerView.adapter = booksAdapter
-        binding.bookRecyclerView.layoutManager = CenterZoomLayoutManager(requireContext())
+        // 명소
+        userDB
+            .document("$userId")
+            .get()
+            .addOnSuccessListener { userData ->
+                var bigRegion = userData.data?.getValue("region")
+                var smallRegion = userData.data?.getValue("smallRegion")
+                var userRegion = "${bigRegion} ${smallRegion}"
 
-        booksDB.get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                var title = document.data.getValue("title").toString()
-                var cover = document.data.getValue("cover").toString()
-                var author = document.data.getValue("author").toString()
-                var description = document.data.getValue("description").toString()
+                attractionDB
+                    .get()
+                    .addOnSuccessListener { attractions ->
+                        for(attraction in attractions) {
+                            var attractionRegion = attraction.data.getValue("region")
+                            if(attractionRegion == "전체" || attractionRegion == userRegion) {
+                                var attractionName = attraction.data.getValue("name").toString()
+                                var attractionDescription = attraction.data.getValue("description").toString()
+                                var attractionLocation = attraction.data.getValue("location").toString()
+                                var attractionMainImage = attraction.data.getValue("mainImage").toString()
+                                var attractionSubImage = attraction.data.getValue("subImage") as ArrayList<String>
 
-                bookSet = Book(
-                    title,
-                    cover,
-                    author,
-                    description
-                )
+                                binding.attractionTitle.text = "${userRegion} 명소"
 
-                bookList.add(bookSet)
-                booksAdapter.notifyDataSetChanged()
+                                attractionSet = Attraction(
+                                    attractionName,
+                                    attractionDescription,
+                                    attractionLocation,
+                                    attractionMainImage,
+                                    attractionSubImage
+                                )
+
+                                attractionList.add(attractionSet)
+                                attractionAdapter.notifyDataSetChanged()
+
+                            }
+                        }
+                    }
             }
-        }
+
+//        booksDB.get().addOnSuccessListener { documents ->
+//            for (document in documents) {
+//                var title = document.data.getValue("title").toString()
+//                var cover = document.data.getValue("cover").toString()
+//                var author = document.data.getValue("author").toString()
+//                var description = document.data.getValue("description").toString()
+//
+//                bookSet = Book(
+//                    title,
+//                    cover,
+//                    author,
+//                    description
+//                )
+//
+//                bookList.add(bookSet)
+//                booksAdapter.notifyDataSetChanged()
+//            }
+//        }
 
         return binding
     }

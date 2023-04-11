@@ -35,12 +35,25 @@ class StartActivity : AppCompatActivity() {
     private val userDB = Firebase.firestore.collection("users")
     lateinit var appUpdateManager: AppUpdateManager
     private val MY_REQUEST_CODE: Int = 200
+    private var lastBackPressTime: Long = 0
 
     override fun onBackPressed() {
         super.onBackPressed()
 
-        finishAffinity()
-        finish()
+        val currentTime = System.currentTimeMillis()
+        val interval = 2000 // Define the time interval between two back presses
+
+        if (currentTime - lastBackPressTime < interval) {
+            // If the current back press is within the time interval,
+            // close the app
+            super.onBackPressed()
+            finishAffinity()
+            finish()
+        } else {
+            // If the current back press is not within the time interval,
+            // update the timestamp of the last back press and show a toast
+            lastBackPressTime = currentTime
+        }
 
     }
 

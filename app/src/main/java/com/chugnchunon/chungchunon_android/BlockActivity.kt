@@ -9,6 +9,7 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -46,8 +47,20 @@ class BlockActivity : Activity() {
     lateinit var metrics: DisplayMetrics
 
     override fun onBackPressed() {
-        super.onBackPressed()
         resumePause = true
+
+        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        binding.blockBox.startAnimation(downAnimation)
+
+        downAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?) {
+                finish()
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +74,7 @@ class BlockActivity : Activity() {
 
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.blockBox.startAnimation(downAnimation)
-            Handler().postDelayed({
+           Handler().postDelayed({
                 finish()
             }, 500)
         }

@@ -12,7 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.PartnerTabPageAdapter
-import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
+import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.ktx.auth

@@ -172,7 +172,18 @@
                 android:textColor="@color/black"
                 android:textSize="24dp"
                 tools:text="@string/partner_introduction" />
+
+            <TextView
+                android:id="@+id/moreDiary"
+                android:textColor="@color/light_gray"
+                android:textStyle="bold"
+                android:layout_marginTop="15dp"
+                android:textSize="22dp"
+                android:text="더보기"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

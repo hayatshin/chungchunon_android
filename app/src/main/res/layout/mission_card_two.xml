@@ -3,17 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/mission_card_background"
-    android:clipToOutline="true"
-    android:src="@drawable/mission_card_background">
+    android:layout_height="match_parent">
 
     <ImageView
         android:scaleType="fitXY"
         android:id="@+id/missionImage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToOutline="true" />
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:translationZ="90dp"
@@ -31,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:src="@drawable/ic_sad_tear"
-            app:tint="@color/light_main_color" />
+            app:tint="@color/light_gray" />
 
         <TextView
             android:textStyle="bold"
@@ -41,7 +37,7 @@
             android:lineHeight="25dp"
             android:text="이벤트가\n종료되었습니다."
             android:textAlignment="center"
-            android:textColor="@color/light_main_color" />
+            android:textColor="@color/light_gray" />
 
     </LinearLayout>
 

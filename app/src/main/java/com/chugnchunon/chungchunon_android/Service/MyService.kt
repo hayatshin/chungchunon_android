@@ -1,9 +1,7 @@
-package com.chugnchunon.chungchunon_android
+package com.chugnchunon.chungchunon_android.Service
 
-import android.Manifest
 import android.app.*
 import android.content.*
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -11,14 +9,13 @@ import android.hardware.SensorManager
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.os.*
-import android.preference.PreferenceManager
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.*
+import com.chugnchunon.chungchunon_android.MainActivity
+import com.chugnchunon.chungchunon_android.R
+import com.chugnchunon.chungchunon_android.Service.MyFirebaseMessagingService.Companion.CHANNEL_ID
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -32,9 +29,8 @@ class MyService : Service(), SensorEventListener {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-    private var todayStepCountFromDB = 0
 
-    //    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
+    // lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
     lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
@@ -47,7 +43,6 @@ class MyService : Service(), SensorEventListener {
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
 
         var todayTotalStepCount: Int? = 0
-        const val STEP_THRESHOLD: Double = 6.5
 
         const val stepCountSharedPref = "stepCountSharedPreference"
         const val dateChangeSharedPref = "dateChangeSharedPref"
@@ -57,7 +52,6 @@ class MyService : Service(), SensorEventListener {
 
     private var startingStepCount: Int = 0
     private var stepCount: Int = 0
-
 
     override fun onCreate() {
         super.onCreate()
@@ -74,6 +68,7 @@ class MyService : Service(), SensorEventListener {
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
             todayTotalStepCount = todayStepCountFromDB.toInt()
+
             StepCountNotification(this, todayTotalStepCount)
         }
 
@@ -140,7 +135,6 @@ class MyService : Service(), SensorEventListener {
 
                         StepCountNotification(this, todayTotalStepCount)
 
-
                         var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
                             putExtra(
                                 "todayTotalStepCount",
@@ -192,9 +186,9 @@ class MyService : Service(), SensorEventListener {
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
 
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
-
         StepCountNotification(this, todayTotalStepCount)
+
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
         // 기본
         sensorManager =
@@ -233,9 +227,11 @@ class MyService : Service(), SensorEventListener {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        Log.d("노티", "onStartCommand")
 
         StepCountNotification(this, todayTotalStepCount)
+
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
         // 기본
         sensorManager =
@@ -281,6 +277,7 @@ class MyService : Service(), SensorEventListener {
     }
 
     private fun StepCountNotification(context: Context, stepCount: Int?) {
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val CHANNEL_ID = "my_app"
             val channel = NotificationChannel(
@@ -303,8 +300,6 @@ class MyService : Service(), SensorEventListener {
             startForeground(1, notification)
         }
     }
-
-
 }
 
 

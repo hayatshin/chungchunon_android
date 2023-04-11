@@ -57,8 +57,6 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
 
-
-
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
@@ -73,6 +71,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
         var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
         var secretStatusView: ImageView = itemView.findViewById(R.id.secretStatusView)
+        var moreDiaryView: TextView = itemView.findViewById(R.id.moreDiary)
 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
@@ -98,7 +97,20 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             userNameView.text = items[position].name
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
-            userDiaryView.text = items[position].diary
+
+            if(items[position].diary.toString().length > 150) {
+                userDiaryView.text = "${items[position].diary.toString().substring(0, 150)}..."
+                moreDiaryView.visibility = View.VISIBLE
+            } else {
+                userDiaryView.text = items[position].diary
+                moreDiaryView.visibility = View.GONE
+            }
+
+            moreDiaryView.setOnClickListener {
+                moreDiaryView.visibility = View.GONE
+                userDiaryView.text = items[position].diary
+            }
+
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
 
