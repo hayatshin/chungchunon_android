@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.AllDiaryCardAdapter
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
+import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
@@ -32,6 +33,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_diary.view.*
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import kotlin.collections.ArrayList
 
 class AllRegionDataFragment : Fragment() {
@@ -53,6 +56,11 @@ class AllRegionDataFragment : Fragment() {
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var allDataLoadingState: AllRegionDataLoadingState
 
+    private var notificationDiaryId: String = ""
+    private var notificationCommentId: String = ""
+
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -73,7 +81,11 @@ class AllRegionDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
-        getData()
+        // comment notification push
+        notificationDiaryId =
+            activity?.intent?.getStringExtra("notificationDiaryId").toString()
+        notificationCommentId =
+            activity?.intent?.getStringExtra("notificationCommentId").toString()
 
         binding.recyclerDiary.itemAnimator = null
 
@@ -84,17 +96,17 @@ class AllRegionDataFragment : Fragment() {
         allDataLoadingState =
             ViewModelProvider(requireActivity()).get(AllRegionDataLoadingState::class.java)
 
-        allDataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
-            Log.d("지역보기 66", "${allDataLoadingState.loadingCompleteData.value}")
-
-            if (!allDataLoadingState.loadingCompleteData.value!!) {
-                binding.swipeRecyclerDiary.visibility = View.GONE
-                binding.dataLoadingProgressBar.visibility = View.VISIBLE
-            } else {
-                binding.swipeRecyclerDiary.visibility = View.VISIBLE
-                binding.dataLoadingProgressBar.visibility = View.GONE
-            }
-        })
+        allDataLoadingState.loadingCompleteData.observe(
+            requireActivity(),
+            Observer { value ->
+                if (!allDataLoadingState.loadingCompleteData.value!!) {
+                    binding.swipeRecyclerDiary.visibility = View.GONE
+                    binding.dataLoadingProgressBar.visibility = View.VISIBLE
+                } else {
+                    binding.swipeRecyclerDiary.visibility = View.VISIBLE
+                    binding.dataLoadingProgressBar.visibility = View.GONE
+                }
+            })
 
         allDataLoadingState.loadingCompleteData.value = false
         binding.dataLoadingProgressBar.visibility = View.VISIBLE
@@ -129,6 +141,16 @@ class AllRegionDataFragment : Fragment() {
             newLikeToggleReceiver,
             IntentFilter("LIKE_TOGGLE_ACTION")
         );
+
+        getData()
+
+        if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
+            var openComment = Intent(requireActivity(), CommentActivity::class.java)
+            openComment.putExtra("notificationDiaryId", notificationDiaryId)
+            openComment.putExtra("notificationCommentId", notificationCommentId)
+            startActivity(openComment)
+        }
+
 
         return binding
     }
@@ -190,20 +212,21 @@ class AllRegionDataFragment : Fragment() {
         }
     }
 
-    private fun getData() {
+    fun getData() {
         diaryDB
-            .whereNotEqualTo("blockedBy", "$userId")
             .get()
-            ?.addOnSuccessListener { documents ->
+            .addOnSuccessListener { documents ->
                 for (document in documents) {
                     var blockedList =
                         document.data.getValue("blockedBy") as ArrayList<String>
-                    if (!blockedList.contains(userId)) {
-                        // 내가 차단하지 않은 글
 
+                    if (!blockedList.contains(userId)) {
+
+                        // 내가 차단하지 않은 글
                         var secretStatus = document.data.getValue("secret") as Boolean
 
                         if (secretStatus == false) {
+
                             var diaryUserId = document.data?.getValue("userId").toString()
                             var diaryId = document.data?.getValue("diaryId").toString()
                             var numLikes = document.data?.getValue("numLikes") as Long
@@ -247,7 +270,9 @@ class AllRegionDataFragment : Fragment() {
                                                             username,
                                                             userAvatar,
                                                             diaryId,
-                                                            DateFormat().convertMillis(timefromdb),
+                                                            DateFormat().convertMillis(
+                                                                timefromdb
+                                                            ),
                                                             username,
                                                             stepValue,
                                                             diaryMood,
@@ -258,9 +283,10 @@ class AllRegionDataFragment : Fragment() {
                                                             false,
                                                         )
                                                         diaryItems.add(diarySet)
+
                                                         diaryItems.sortWith(compareBy({ it.writeTime }))
                                                         diaryItems.reverse()
-//                                                    adapter.notifyDataSetChanged()
+                                                        adapter.notifyDataSetChanged()
 
                                                         binding.recyclerDiary.adapter = adapter
                                                         binding.recyclerDiary.layoutManager =
@@ -277,11 +303,24 @@ class AllRegionDataFragment : Fragment() {
                                                                 View.GONE
                                                         }
 
+                                                        allDataLoadingState.loadingCompleteData.value =
+                                                            true
+
+                                                        if (notificationDiaryId != null) {
+                                                            if(diaryItems.size != 0) {
+                                                                diaryItems.forEachIndexed { index, diaryItem ->
+                                                                    if (diaryItem.diaryId == notificationDiaryId) {
+                                                                        binding.recyclerDiary.scrollToPosition(index)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                     }
+
+
                                             }
                                         }
                                     }
-
                             } else {
                                 // 이미지 미포함
                                 db.collection("user_step_count")
@@ -324,7 +363,7 @@ class AllRegionDataFragment : Fragment() {
 
                                                         diaryItems.sortWith(compareBy({ it.writeTime }))
                                                         diaryItems.reverse()
-//                                                    adapter.notifyDataSetChanged()
+                                                        adapter.notifyDataSetChanged()
 
                                                         binding.recyclerDiary.adapter = adapter
                                                         binding.recyclerDiary.layoutManager =
@@ -341,29 +380,32 @@ class AllRegionDataFragment : Fragment() {
                                                                 View.GONE
                                                         }
 
+                                                        allDataLoadingState.loadingCompleteData.value =
+                                                            true
 
+                                                        if (notificationDiaryId != null) {
+                                                            if(diaryItems.size != 0) {
+                                                                diaryItems.forEachIndexed { index, diaryItem ->
+                                                                    if (diaryItem.diaryId == notificationDiaryId) {
+                                                                        binding.recyclerDiary.scrollToPosition(index)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                             }
                                         }
                                     }
                             }
                         }
-
-                        adapter.notifyDataSetChanged()
-                        allDataLoadingState.loadingCompleteData.value =
-                            true
-
-//                        Handler().postDelayed({
-//                            allDataLoadingState.loadingCompleteData.value =
-//                                true
-//                        }, 300)
-
                     }
 
                 }
             }
     }
+
 }
+
 
 
 class AllRegionDataLoadingState : ViewModel() {

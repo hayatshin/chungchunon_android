@@ -99,7 +99,7 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                         var dummyStep = (snapShot["dummy"] as Long).toInt()
 
                                         var newStepSet = hashMapOf(
-                                            REFRESH_DAILY to 0,
+                                            "$REFRESH_DAILY" to 0,
                                             "dummy" to (yesterdayStep + dummyStep)
                                         )
 
@@ -128,14 +128,14 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 
                                     // 날짜 저장 - period_step_count
                                     var newDateForPeriod = hashMapOf(
-                                        userId to 0
+                                        "$userId" to 0
                                     )
                                     db.collection("period_step_count").document(REFRESH_DAILY)
                                         .set(newDateForPeriod, SetOptions.merge())
 
                                     // 날짜 저장 - user_step_count
                                     var newDateForUser = hashMapOf(
-                                        REFRESH_DAILY to 0
+                                        "$REFRESH_DAILY" to 0
                                     )
                                     db.collection("user_step_count").document("$userId")
                                         .set(newDateForUser, SetOptions.merge())

@@ -82,8 +82,6 @@ class MyDataFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(MyDataLoadingState::class.java)
 
         myDataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
-            Log.d("지역보기 66", "${myDataLoadingState.loadingCompleteData.value}")
-
             if (!myDataLoadingState.loadingCompleteData.value!!) {
                 binding.swipeRecyclerDiary.visibility = View.GONE
                 binding.dataLoadingProgressBar.visibility = View.VISIBLE
@@ -274,6 +272,8 @@ class MyDataFragment : Fragment() {
                                                             binding.noItemText.visibility =
                                                                 View.GONE
                                                         }
+                                                        myDataLoadingState.loadingCompleteData.value = true
+
                                                     }
                                             }
                                         }
@@ -328,7 +328,15 @@ class MyDataFragment : Fragment() {
                                                                 RecyclerView.VERTICAL,
                                                                 false
                                                             )
-                                                        binding.noItemText.visibility = View.GONE
+                                                        if (myDiaryItems.size == 0) {
+                                                            binding.noItemText.visibility =
+                                                                View.VISIBLE
+                                                        } else {
+                                                            binding.noItemText.visibility =
+                                                                View.GONE
+                                                        }
+                                                        myDataLoadingState.loadingCompleteData.value = true
+
                                                     }
                                             }
 
@@ -342,8 +350,9 @@ class MyDataFragment : Fragment() {
                     adapter.notifyDataSetChanged()
                     binding.swipeRecyclerDiary.visibility = View.GONE
                     binding.noItemText.visibility = View.VISIBLE
+                    myDataLoadingState.loadingCompleteData.value = true
+
                 }
-                myDataLoadingState.loadingCompleteData.value = true
 
             }
     }

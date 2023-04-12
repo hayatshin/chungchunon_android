@@ -29,6 +29,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
@@ -517,7 +518,7 @@ class MyDiaryFragment : Fragment() {
             if (task.isSuccessful) {
                 val calendarThisMonthCount = "${task.result.count}일"
                 var spanText = SpannableStringBuilder()
-                    .color(Color.RED) { append("${calendarThisMonthCount}") }
+                    .bold { color(ContextCompat.getColor(mcontext, R.color.main_color)) { append("${calendarThisMonthCount}") } }
                     .append(" / ${currentMonthDate}일")
 
                 binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일"

@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.DataClass.AppUpdate
 import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.Service.MyService
@@ -308,6 +310,7 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         // 메뉴 이동
         from = intent.getStringExtra("from").toString()
+        var notificationDiaryId = intent?.getStringExtra("notificationDiaryId")
 
         binding.bottomNav.run {
             setOnItemSelectedListener {
@@ -339,8 +342,14 @@ class DiaryTwoActivity : AppCompatActivity() {
                 changeFragment(AllDiaryFragmentTwo())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu
             } else {
-                changeFragment(MyDiaryFragment())
-                binding.bottomNav.selectedItemId = R.id.myTodayMenu
+                if (notificationDiaryId != null) {
+                    changeFragment(AllDiaryFragmentTwo())
+                    binding.bottomNav.selectedItemId = R.id.ourTodayMenu
+                } else {
+                    changeFragment(MyDiaryFragment())
+                    binding.bottomNav.selectedItemId = R.id.myTodayMenu
+
+                }
             }
         }
     }

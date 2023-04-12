@@ -11,6 +11,7 @@ const db = admin.firestore();
 
 exports.commentPushNotification = functions.firestore.document("/diary/{diaryId}/comments/{diaryCommentId}").onCreate((snapShot, context) => {
 
+    const commentId = snapShot.data().commentId
     const commentUserId = snapShot.data().userId
     const commentDiaryId = snapShot.data().diaryId
     const commentDescription = snapShot.data().description
@@ -26,12 +27,19 @@ exports.commentPushNotification = functions.firestore.document("/diary/{diaryId}
             db.collection("users").doc(`${diaryUserId}`).get().then((diaryUserData) => {
 
                 const diaryUserIdFormat = diaryUserId.replace(":", "")
+                const titleReformat = (diaryDescription.length > 10) ? `${diaryDescription.slice(0, 10)}...` : diaryDescription
+                const commentDescriptionReformat = (commentDescription.length > 15) ? `${commentDescription.slice(0, 15)}...` : commentDescription
 
                  const payload = {
                                notification: {
-                                   title: `일기: ${diaryDescription.slice(0, 10)}...`,
-                                   body: `${commentUserName}님이 댓글을 달았습니다: ${commentDescription}`,
+                                   title: `일기: ${titleReformat}`,
+                                   body: `${commentUserName}님이 댓글을 달았습니다: ${commentDescriptionReformat}`,
+                                   clickAction: "DiaryTwoActivity"
                                },
+                               data: {
+                                    notificationDiaryId: commentDiaryId,
+                                    notificationCommentId: commentId
+                               }
                            }
                   admin.messaging().sendToTopic("/topics/" + diaryUserIdFormat, payload)
 

@@ -78,8 +78,6 @@ class AllDiaryFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(DataLoadingState::class.java)
 
         dataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
-            Log.d("지역보기 66", "${dataLoadingState.loadingCompleteData.value}")
-
             if (!dataLoadingState.loadingCompleteData.value!!) {
                 binding.swipeRecyclerDiary.visibility = View.GONE
                 binding.dataLoadingProgressBar.visibility = View.VISIBLE

@@ -25,6 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chugnchunon_android">
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_new_alarm_icon" />
+
         <activity
             android:name=".StartActivity"
             android:exported="true"
@@ -77,7 +81,13 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".DiaryTwoActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="DiaryTwoActivity"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".RegionRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
@@ -94,7 +104,6 @@
         <activity
             android:name=".Partner.PartnerDiaryTwoActivity"
             android:windowSoftInputMode="adjustPan" />
-
         <activity
             android:name=".EditProfileActivity"
             android:windowSoftInputMode="adjustPan" />

@@ -397,6 +397,8 @@ class FriendDataFragment : Fragment() {
                                                                             binding.noItemText.visibility =
                                                                                 View.GONE
                                                                         }
+                                                                        friendDataLoadingState.loadingCompleteData.value = true
+
                                                                     }
                                                             }
                                                         }
@@ -468,12 +470,13 @@ class FriendDataFragment : Fragment() {
                                                                             binding.noItemText.visibility =
                                                                                 View.GONE
                                                                         }
+                                                                        friendDataLoadingState.loadingCompleteData.value = true
+
                                                                     }
                                                             }
                                                         }
                                                     }
                                             }
-                                            friendDataLoadingState.loadingCompleteData.value = true
                                         }
 
                                     }

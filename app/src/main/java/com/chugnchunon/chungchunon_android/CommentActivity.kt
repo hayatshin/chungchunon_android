@@ -86,6 +86,9 @@ class CommentActivity : FragmentActivity() {
         var commentItems: ArrayList<Comment> = ArrayList()
     }
 
+    private var notificationDiaryId: String = ""
+    private var notificationCommentId: String = ""
+
     override fun onBackPressed() {
         resumePause = true
 
@@ -114,11 +117,29 @@ class CommentActivity : FragmentActivity() {
         resumePause = false
     }
 
+
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+
+        binding.commentRecyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                p0: View?,
+                p1: Int,
+                p2: Int,
+                p3: Int,
+                p4: Int,
+                p5: Int,
+                p6: Int,
+                p7: Int,
+                p8: Int
+            ) {
+                binding.commentRecyclerView.scrollToPosition(commentItems.size - 1)
+            }
+
+        })
 
         var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.commentLayout.startAnimation(upAnimation)
@@ -148,7 +169,7 @@ class CommentActivity : FragmentActivity() {
             }, 500)
         }
 
-        binding.commentLayout.setOnTouchListener { v, event ->
+        binding.commentRecyclerView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 binding.commentWriteText.clearFocus()
 
@@ -172,7 +193,16 @@ class CommentActivity : FragmentActivity() {
             }, 500)
         }
 
-        diaryId = intent.getStringExtra("diaryId").toString()
+        if (intent?.hasExtra("notificationDiaryId") == true) {
+            diaryId = intent.getStringExtra("notificationDiaryId").toString()
+        } else if (intent?.hasExtra("diaryId") == true) {
+            diaryId = intent.getStringExtra("diaryId").toString()
+        }
+
+
+        Log.d("diaryId", diaryId)
+        Log.d("notificationDiaryId", notificationDiaryId)
+
         diaryPosition = intent.getIntExtra("diaryPosition", 0)
 
         adapter = CommentAdapter(this, commentItems)
@@ -185,69 +215,6 @@ class CommentActivity : FragmentActivity() {
                 username = document.data?.getValue("name").toString()
                 userType = document.data?.getValue("userType").toString()
                 userAvatar = document.data?.getValue("avatar").toString()
-            }
-
-        diaryDB.document(diaryId).collection("comments")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
-            .get()
-            .addOnSuccessListener { documents ->
-
-                if (documents.size() != 0) {
-                    for (document in documents) {
-                        var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
-                        var commentId = document.data?.getValue("commentId").toString()
-                        var commentUserId = document.data?.getValue("userId").toString()
-                        var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
-                        var commentDescription =
-                            document.data?.getValue("description").toString()
-
-                        userDB.document("$commentUserId")
-                            .get()
-                            .addOnSuccessListener { userDocument ->
-                                var commentUserName = userDocument.data?.getValue("name").toString()
-                                var commentUserAvatar =
-                                    userDocument.data?.getValue("avatar").toString()
-                                var commentUserType =
-                                    userDocument.data?.getValue("userType").toString()
-
-                                commentItems.add(
-                                    Comment(
-                                        diaryId,
-                                        diaryPosition!!,
-                                        commentId,
-                                        commentUserId,
-                                        commentUserAvatar,
-                                        commentUserName,
-                                        commentUserType,
-                                        commentTimestamp,
-                                        commentDescription
-                                    )
-                                )
-
-                                commentItems.sortWith(compareBy({ it.commentTimestamp }))
-
-                                binding.commentRecyclerView.layoutManager = LinearLayoutManager(
-                                    this,
-                                    RecyclerView.VERTICAL,
-                                    false
-                                )
-
-                                commentDataLoading.loadingCompleteData.value = true
-                                binding.noItemText.visibility = View.GONE
-
-                                adapter.notifyDataSetChanged()
-
-                            }
-                    }
-                } else {
-                    // 0인 경우
-                    commentDataLoading.loadingCompleteData.value = true
-                    binding.noItemText.visibility = View.VISIBLE
-                }
-
-
-                commentDataLoading.loadingCompleteData.value = true
-
             }
 
 
@@ -363,6 +330,8 @@ class CommentActivity : FragmentActivity() {
                     }
             }
         }
+        getData()
+        scrollToPosition()
     }
 
     override fun onDestroy() {
@@ -377,6 +346,87 @@ class CommentActivity : FragmentActivity() {
         );
     }
 
+    private fun scrollToPosition() {
+        if (notificationCommentId != null) {
+            if(commentItems.size != 0) {
+                commentItems.forEachIndexed { index, commentItem ->
+                    if (commentItem.commentId == notificationCommentId) {
+                        Log.d("코멘트푸시: CommentActivity - commentItems", "${commentItems}")
+                        Log.d(
+                            "코멘트푸시: CommentActivity - notificationCommentId",
+                            "${notificationCommentId}"
+                        )
+
+                        binding.commentRecyclerView.scrollToPosition(index)
+                    }
+                }
+            }
+
+        }
+    }
+
+    private fun getData(): ArrayList<Comment> {
+        diaryDB.document(diaryId).collection("comments")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+
+                if (documents.size() != 0) {
+                    for (document in documents) {
+                        var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
+                        var commentId = document.data?.getValue("commentId").toString()
+                        var commentUserId = document.data?.getValue("userId").toString()
+                        var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
+                        var commentDescription =
+                            document.data?.getValue("description").toString()
+
+                        userDB.document("$commentUserId")
+                            .get()
+                            .addOnSuccessListener { userDocument ->
+                                var commentUserName = userDocument.data?.getValue("name").toString()
+                                var commentUserAvatar =
+                                    userDocument.data?.getValue("avatar").toString()
+                                var commentUserType =
+                                    userDocument.data?.getValue("userType").toString()
+
+                                commentItems.add(
+                                    Comment(
+                                        diaryId,
+                                        diaryPosition!!,
+                                        commentId,
+                                        commentUserId,
+                                        commentUserAvatar,
+                                        commentUserName,
+                                        commentUserType,
+                                        commentTimestamp,
+                                        commentDescription
+                                    )
+                                )
+
+                                commentItems.sortWith(compareBy({ it.commentTimestamp }))
+
+                                binding.commentRecyclerView.layoutManager = LinearLayoutManager(
+                                    this,
+                                    RecyclerView.VERTICAL,
+                                    false
+                                )
+
+                                commentDataLoading.loadingCompleteData.value = true
+                                binding.noItemText.visibility = View.GONE
+
+                                adapter.notifyDataSetChanged()
+
+                            }
+                    }
+                } else {
+                    // 0인 경우
+                    commentDataLoading.loadingCompleteData.value = true
+                    binding.noItemText.visibility = View.VISIBLE
+                }
+            }
+        return commentItems
+
+    }
 
     var editDescriptionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {

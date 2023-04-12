@@ -104,11 +104,11 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
 
 
                                 var userStepCountSet = hashMapOf(
-                                    currentDate to 0
+                                    "${currentDate}" to 0
                                 )
 
                                 var periodStepCountSet = hashMapOf(
-                                    userId to 0
+                                    "${userId}" to 0
                                 )
 
                                 // period_step_count
@@ -125,11 +125,11 @@ open class StepCountBroadcastReceiver : BroadcastReceiver() {
                                 // 어제 값 존재 x
 
                                 var userStepCountSet = hashMapOf(
-                                    currentDate to 0
+                                    "$currentDate" to 0
                                 )
 
                                 var periodStepCountSet = hashMapOf(
-                                    userId to 0
+                                    "$userId" to 0
                                 )
 
                                 // period_step_count

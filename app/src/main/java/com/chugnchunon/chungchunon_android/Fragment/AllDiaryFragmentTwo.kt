@@ -85,8 +85,6 @@ class AllDiaryFragmentTwo : Fragment() {
 
         var diaryType = arguments?.getString("diaryType")
 
-        Log.d("수정수정", "$diaryType")
-
         if(diaryType == "all") {
             binding.regionViewPager.currentItem = 0
         } else if (diaryType == "region") {

@@ -59,6 +59,10 @@ class LockDiaryActivity : FragmentActivity() {
 
         window?.setStatusBarColor(Color.parseColor("#CC000000"));
 
+        binding.goBackArrow.setOnClickListener {
+            finish()
+        }
+
         binding.secretCancelBox.setOnClickListener {
             finish()
         }

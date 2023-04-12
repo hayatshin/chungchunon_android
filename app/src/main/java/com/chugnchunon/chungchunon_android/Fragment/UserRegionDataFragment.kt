@@ -81,8 +81,6 @@ class UserRegionDataFragment : Fragment() {
             ViewModelProvider(requireActivity()).get(UserRegionDataLoadingState::class.java)
 
         userDataLoadingState.loadingCompleteData.observe(requireActivity(), Observer { value ->
-            Log.d("지역보기 66", "${userDataLoadingState.loadingCompleteData.value}")
-
             if (!userDataLoadingState.loadingCompleteData.value!!) {
                 binding.swipeRecyclerDiary.visibility = View.GONE
                 binding.dataLoadingProgressBar.visibility = View.VISIBLE
@@ -298,6 +296,9 @@ class UserRegionDataFragment : Fragment() {
                                                                         binding.noItemText.visibility =
                                                                             View.GONE
                                                                     }
+
+                                                                    userDataLoadingState.loadingCompleteData.value =
+                                                                        true
                                                                 }
                                                         }
                                                     }
@@ -360,8 +361,17 @@ class UserRegionDataFragment : Fragment() {
                                                                             RecyclerView.VERTICAL,
                                                                             false
                                                                         )
-                                                                    binding.noItemText.visibility =
-                                                                        View.GONE
+
+                                                                    if (userRegionDiaryItems.size == 0) {
+                                                                        binding.noItemText.visibility =
+                                                                            View.VISIBLE
+                                                                    } else {
+                                                                        binding.noItemText.visibility =
+                                                                            View.GONE
+                                                                    }
+
+                                                                    userDataLoadingState.loadingCompleteData.value =
+                                                                        true
                                                                 }
                                                         }
                                                     }
@@ -378,10 +388,12 @@ class UserRegionDataFragment : Fragment() {
                             adapter.notifyDataSetChanged()
                             binding.swipeRecyclerDiary.visibility = View.GONE
                             binding.noItemText.visibility = View.VISIBLE
+
+                            userDataLoadingState.loadingCompleteData.value =
+                                true
                         }
 
-                        userDataLoadingState.loadingCompleteData.value =
-                            true
+
                     }
             }
     }

@@ -3,12 +3,19 @@ package com.chugnchunon.chungchunon_android.Service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
+import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataFragment
+import com.chugnchunon.chungchunon_android.Fragment.SmallRegionRegisterFragment
 import com.chugnchunon.chungchunon_android.R
+import com.chugnchunon.chungchunon_android.StartActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
@@ -31,6 +38,10 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     }
 
+    data class MessageData (
+        var notificationDiaryId: String
+    )
+
     override fun onNewToken(newToken: String) {
         super.onNewToken(newToken)
 
@@ -43,8 +54,18 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        // 수신한 메세지를 처리
 
+        // 스크롤 to AllRegionDataFragment
+        val notificationDiaryId = message.data.get("notificationDiaryId")
+        val notificationCommentId = message.data.get("notificationCommentId")
+
+        val notificationIntent = Intent(applicationContext, DiaryTwoActivity::class.java)
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        notificationIntent.putExtra("notificationDiaryId", notificationDiaryId)
+        notificationIntent.putExtra("notificationCommentId", notificationCommentId)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        // 수신한 메세지를 처리
         val notificationManager = NotificationManagerCompat.from(applicationContext)
         var builder : NotificationCompat.Builder
 
@@ -66,12 +87,13 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             .setSmallIcon(R.drawable.ic_new_alarm_icon)
             .setDefaults(Notification.DEFAULT_LIGHTS)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
 
         val random = Random
         val m = random.nextInt(9999-1000) + 1000
 
         val notification = builder.build()
         notificationManager.notify(m, notification)
-    }
 
+    }
 }

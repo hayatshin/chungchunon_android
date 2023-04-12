@@ -117,7 +117,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:textStyle="bold"
-                android:textColor="@color/main_color"
+                android:textColor="@color/custom_gray"
                 android:textSize="17dp"
                 tools:text="12월 작성일" />
 
