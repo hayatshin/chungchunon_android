@@ -73,6 +73,13 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                        .document(today)
                                        .set(periodStepCountSet, SetOptions.merge())
 
+                                   // todayStepCount
+                                   val todayStepCountSet = hashMapOf(
+                                       "todayStepCount" to 0
+                                   )
+                                   userDB.document("$userId")
+                                       .set(todayStepCountSet, SetOptions.merge())
+
                                } else {
                                    // 어제 값 없음 -> dummy 0 세팅
 
@@ -99,6 +106,14 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                    db.collection("period_step_count")
                                        .document(today)
                                        .set(periodStepCountSet, SetOptions.merge())
+
+                                   // todayStepCount
+                                   val todayStepCountSet = hashMapOf(
+                                       "todayStepCount" to 0
+                                   )
+                                   userDB.document("$userId")
+                                       .set(todayStepCountSet, SetOptions.merge())
+
                                }
 
                                 // noti & UI 걸음수 0로 초기화
