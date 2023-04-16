@@ -8,7 +8,6 @@ import android.widget.ProgressBar
 import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.R
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
@@ -23,10 +22,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.NonCancellable.cancel
-import java.time.LocalDateTime
 import java.util.*
-import kotlin.concurrent.timer
 
 
 class SessionCallback(val context: MainActivity) : ISessionCallback {
@@ -77,7 +73,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         if (task.isSuccessful) {
                             var userId = "kakao:${result.id}"
                             userDB
-                                .document("$userId")
+                                .document(userId)
                                 .get()
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {

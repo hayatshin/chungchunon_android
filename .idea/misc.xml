@@ -66,6 +66,7 @@
         <entry key="app/src/main/res/drawable/ic_image_forward.xml" value="0.199" />
         <entry key="app/src/main/res/drawable/ic_joy.xml" value="0.1175" />
         <entry key="app/src/main/res/drawable/ic_kakao_logo.xml" value="0.168" />
+        <entry key="app/src/main/res/drawable/ic_l.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_lock.xml" value="0.126" />
@@ -78,6 +79,7 @@
         <entry key="app/src/main/res/drawable/ic_rank_filled.xml" value="0.162" />
         <entry key="app/src/main/res/drawable/ic_rule.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_run.xml" value="0.1565" />
+        <entry key="app/src/main/res/drawable/ic_run_20.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_sad.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_secret.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_shalom.xml" value="0.1655" />
@@ -178,6 +180,7 @@
         <entry key="app/src/main/res/layout/block_user_line.xml" value="0.2638888888888889" />
         <entry key="app/src/main/res/layout/book_card.xml" value="0.17135416666666667" />
         <entry key="app/src/main/res/layout/comment_list.xml" value="0.25183461507161453" />
+        <entry key="app/src/main/res/layout/comment_list_re.xml" value="0.27608915906788245" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="0.153125" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
         <entry key="app/src/main/res/layout/diary_card_two.xml" value="0.2040461222330729" />
@@ -192,7 +195,7 @@
         <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.1515625" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
         <entry key="app/src/main/res/layout/fragment_ranking_week.xml" value="0.16156616210937505" />
-        <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.13247121175130208" />
+        <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.24689229329427084" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />
         <entry key="app/src/main/res/layout/gender_item_spinner.xml" value="0.14945652173913043" />

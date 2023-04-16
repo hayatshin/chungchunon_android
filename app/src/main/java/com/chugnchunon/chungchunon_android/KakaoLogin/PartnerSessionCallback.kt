@@ -7,7 +7,6 @@ import android.widget.ProgressBar
 import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.R
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session

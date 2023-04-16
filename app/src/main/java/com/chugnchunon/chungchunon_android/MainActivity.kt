@@ -2,12 +2,9 @@ package com.chugnchunon.chungchunon_android
 
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Color.WHITE
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.provider.CalendarContract
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
@@ -17,23 +14,15 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.chugnchunon.chungchunon_android.KakaoLogin.PartnerSessionCallback
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
-import com.kakao.sdk.user.UserApiClient
-import kotlinx.android.synthetic.main.activity_diary.*
 import org.json.JSONObject
-import java.util.*
 import kotlin.collections.HashMap
-import kotlin.concurrent.timer
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,39 +30,33 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-    private val auth = FirebaseAuth.getInstance()
-    private val userDB = Firebase.firestore.collection("users")
     private lateinit var callback: SessionCallback
     private lateinit var partnerCallback: PartnerSessionCallback
-
-    var timer : Timer? = null
-    var deltaTime = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        enterIconAnimation()
+        // 오늘도청춘 아이콘 애니메이션
+        onlccIconUpAnimation()
 
+        // 상태바 화이트
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.statusBarColor = Color.WHITE
         }
 
-        callback = SessionCallback(this) // Initialize Session
+        // 카카오로그인 세션 콜백
+        callback = SessionCallback(this)
         partnerCallback = PartnerSessionCallback(this)
-
 
         // 카톡 로그인 버튼 클릭
         binding.kakaoLoginBtn.setOnClickListener {
-//            TimerFun()
-
             binding.kakaoLoginTextView.visibility = View.GONE
             binding.kakaoActivityIndicator.visibility = View.VISIBLE
 
             val keyHash = Utility.getKeyHash(this) // keyHash 발급
-            Log.d("키", "${keyHash}")
 
             Session.getCurrentSession().addCallback(callback)
             Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
@@ -102,7 +85,6 @@ class MainActivity : AppCompatActivity() {
 
             // 파트너 - 카톡 로그인 버튼 클릭
             binding.partnerKakaoLoginBtn.setOnClickListener {
-//                TimerFun()
 
                 binding.partnerKakaoTextView.visibility = View.GONE
                 binding.partnerKakaoAcitivityIndicator.visibility = View.VISIBLE
@@ -160,11 +142,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d("카톡로그인", "LoginActivity - onActivityResult() called")
 
         if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
             if(resultCode == -1) {
-                // null
+                // 세션 요청이 안 됐을 경우
             }
             return
         }
@@ -178,13 +159,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        enterIconAnimation()
+        onlccIconUpAnimation()
     }
 
-    private fun enterIconAnimation() {
-        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-//        binding.iconImage.startAnimation(upAnimation)
-
+    private fun onlccIconUpAnimation() {
         binding.iconImage.y = 100f
         binding.iconImage.animate()
             .translationY(0f)
@@ -200,7 +178,6 @@ class MainActivity : AppCompatActivity() {
     private fun firebaseLogout() {
         FirebaseAuth.getInstance().signOut();
     }
-
 
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
         val source = TaskCompletionSource<String>()
@@ -219,7 +196,6 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             Response.ErrorListener { error ->
-                Log.e("토큰토큰", error.toString())
                 source.setException(error)
             }) {
             override fun getParams(): Map<String, String>? {
@@ -231,15 +207,6 @@ class MainActivity : AppCompatActivity() {
         queue.add(request)
         return source.task
     }
-
-//    fun TimerFun() {
-//        // 0.1초에 1%씩 증가, 시작 버튼 누른 후 3초 뒤 시작
-//        timer = timer(period = 50, initialDelay = 500) {
-//            if(deltaTime > 100) cancel()
-//            binding.kakaoProgressBar.setProgress(++deltaTime)
-//        }
-//    }
-
 }
 
 

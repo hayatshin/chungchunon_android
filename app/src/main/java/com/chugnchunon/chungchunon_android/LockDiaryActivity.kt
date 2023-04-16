@@ -57,7 +57,7 @@ class LockDiaryActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        window?.setStatusBarColor(Color.parseColor("#CC000000"));
+        window.setStatusBarColor(Color.parseColor("#B3000000"));
 
         binding.goBackArrow.setOnClickListener {
             finish()

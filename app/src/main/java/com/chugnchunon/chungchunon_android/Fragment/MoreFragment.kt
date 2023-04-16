@@ -7,26 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.*
-import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
-import com.chugnchunon.chungchunon_android.databinding.FragmentMoreBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentMoreTwoBinding
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.time.LocalDate
 import java.util.*
 
 class MoreFragment: Fragment() {
@@ -45,7 +36,7 @@ class MoreFragment: Fragment() {
         mcontext = context
     }
 
-    @SuppressLint("Range")
+    @SuppressLint("Range", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,19 +46,15 @@ class MoreFragment: Fragment() {
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            editProfileWithNewInfo,
-            IntentFilter("EDIT_PROFILE")
-        )
-
+        // 초기 셋업
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
-                var userName = document.data?.getValue("name").toString()
-                var userAvatar = document.data?.getValue("avatar").toString()
-                var userAge = document.data?.getValue("userAge").toString().toInt()
-                var dbRegion = document.data?.getValue("region")
-                var dbSmallRegion = document.data?.getValue("smallRegion")
-                var userRegion = "${dbRegion} ${dbSmallRegion}"
+                val userName = document.data?.getValue("name").toString()
+                val userAvatar = document.data?.getValue("avatar").toString()
+                val userAge = document.data?.getValue("userAge").toString().toInt()
+                val dbRegion = document.data?.getValue("region")
+                val dbSmallRegion = document.data?.getValue("smallRegion")
+                val userRegion = "${dbRegion} ${dbSmallRegion}"
 
                 Glide.with(mcontext)
                     .load(userAvatar)
@@ -77,6 +64,12 @@ class MoreFragment: Fragment() {
                 binding.profileAge.text = "${userAge}세"
                 binding.profileRegion.text = userRegion
             }
+
+        // 개인정보 수정 반영
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            editProfileWithNewInfo,
+            IntentFilter("EDIT_PROFILE")
+        )
 
         binding.profileEditBtn.setOnClickListener {
             var goProfileEdit = Intent(requireActivity(), EditProfileActivity::class.java)

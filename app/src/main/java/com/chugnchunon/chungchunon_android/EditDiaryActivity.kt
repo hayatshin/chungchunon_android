@@ -372,7 +372,7 @@ class EditDiaryActivity : AppCompatActivity() {
         // 숨기기
         binding.secretButton.setOnClickListener {
             binding.secretNotificationLayout.visibility = View.VISIBLE
-            window.setStatusBarColor(Color.parseColor("#CC000000"));
+            window.setStatusBarColor(Color.parseColor("#B3000000"))
         }
 
         binding.secretCancelBox.setOnClickListener {

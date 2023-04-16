@@ -181,7 +181,7 @@
                     android:textAlignment="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="로그아웃"
+                    android:text="탈퇴"
                     android:textColor="@color/custom_gray"
                     android:textSize="17dp" />
 

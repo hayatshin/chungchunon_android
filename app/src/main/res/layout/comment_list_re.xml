@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/reCommentLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_below="@id/commentLayout"
+    android:orientation="horizontal"
+    android:padding="15dp">
+
+    <ImageView
+        android:layout_marginLeft="20dp"
+        android:src="@drawable/ic_l"
+        android:layout_marginRight="15dp"
+        android:layout_gravity="start"
+        android:layout_width="20dp"
+        android:layout_height="30dp"/>
 
     <LinearLayout
-        android:id="@+id/commentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="10dp">
+        android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/commentAvatar"
+            android:id="@+id/reCommentAvatar"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_marginRight="15dp"
@@ -34,7 +43,7 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/partnerCheckImg"
+                    android:id="@+id/rePartnerCheckImg"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_marginRight="5dp"
@@ -42,47 +51,47 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/commentName"
+                    android:id="@+id/reCommentName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:textColor="@color/black"
-                    android:textSize="14dp"
+                    android:textSize="13dp"
                     android:textStyle="bold"
                     tools:text="신혜정" />
 
                 <TextView
-                    android:id="@+id/commentTimestamp"
+                    android:id="@+id/reCommentTimestamp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textColor="@color/custom_gray"
-                    android:textSize="14dp"
+                    android:textSize="13dp"
                     tools:text="2023-01-07 14:57" />
 
                 <LinearLayout
-                    android:id="@+id/editDeleteLayout"
+                    android:id="@+id/reEditDeleteLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="end">
 
                     <TextView
-                        android:id="@+id/editBtn"
+                        android:id="@+id/reEditBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="20dp"
                         android:text="수정"
                         android:textColor="@color/main_color"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/deleteBtn"
+                        android:id="@+id/reDeleteBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="삭제"
                         android:textColor="@color/black"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -90,32 +99,15 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/commentDescription"
+                android:id="@+id/reCommentDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:lineHeight="22dp"
                 android:textColor="@color/black"
                 android:textSize="16dp"
-                tools:text="@string/partner_introduction" />
+                tools:text="안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕" />
 
-            <TextView
-                android:id="@+id/reCommentBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginTop="5dp"
-                android:text="답글 달기"
-                android:textColor="@color/light_gray"
-                android:textSize="16dp"
-                android:textStyle="bold" />
 
         </LinearLayout>
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_below="@+id/commentLayout"
-        android:id="@+id/reCommentRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</RelativeLayout>
+</LinearLayout>

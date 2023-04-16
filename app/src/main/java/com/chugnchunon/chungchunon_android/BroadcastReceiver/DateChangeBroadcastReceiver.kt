@@ -9,7 +9,6 @@ import android.icu.text.SimpleDateFormat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.Service.MyService
-import com.chugnchunon.chungchunon_android.Service.MyService.Companion.dateChangeSharedPref
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -22,133 +21,97 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
 
-    lateinit var datePrefs: SharedPreferences
-
     @SuppressLint("SimpleDateFormat")
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
-        datePrefs = context!!.getSharedPreferences(dateChangeSharedPref, Context.MODE_PRIVATE)
-        val datePrefsEdit = datePrefs.edit()
 
-        var dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        var cal = Calendar.getInstance()
-        cal.add(Calendar.DATE, -1)
-        var yesterday = dateFormat.format(cal.getTime())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val yesterdayCal = Calendar.getInstance()
+        yesterdayCal.add(Calendar.DATE, -1)
+        val yesterday = dateFormat.format(yesterdayCal.time)
+        val todayCal = Calendar.getInstance()
+        val today = dateFormat.format(todayCal.time)
 
         when (intentAction) {
             Intent.ACTION_TIME_TICK -> {
-
-                var REFRESH_DAILY =
-                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                var todayChecking = datePrefs.getBoolean(REFRESH_DAILY, false)
 
                 db.collection("user_step_count").document("$userId")
                     .get()
                     .addOnSuccessListener { document ->
                         if (document.exists()) {
-                            var snapShot = document.data
-
-                            if (snapShot!!.containsKey("dummy")) {
-                                // 더미 데이터 있는 경우
-
-                                if (snapShot!!.containsKey(REFRESH_DAILY)) { // 기존 날
-
-//                                    var testSetTwo = hashMapOf(
-//                                        "더미데이터 있고 기존 날" to "작동"
-//                                    )
-//
-//                                    db.collection("test").document(REFRESH_DAILY)
-//                                        .set(testSetTwo, SetOptions.merge())
-
-                                } else {
-                                    // 새로운 날
-
-//                                    var testSetFour = hashMapOf(
-//                                        "더미데이터 있고 새로운 날" to "작동",
-//                                    )
-//
-//                                    db.collection("test").document(REFRESH_DAILY)
-//                                        .set(testSetFour, SetOptions.merge())
-
-
-                                    var todayStepCountSet = hashMapOf<String, Int?>(
-                                        "todayStepCount" to 0
-                                    )
-
-                                    userDB
-                                        .document("$userId")
-                                        .set(todayStepCountSet, SetOptions.merge())
-                                        .addOnSuccessListener {
-
-                                            // noti & UI 걸음수 0로 초기화
-                                            var goDiary =
-                                                Intent(context, MyDiaryFragment::class.java)
-                                            goDiary.setAction("NEW_DATE_STEP_ZERO")
-                                            LocalBroadcastManager.getInstance(context!!)
-                                                .sendBroadcast(goDiary);
-
-                                            var goService = Intent(context, MyService::class.java)
-                                            goService.setAction("NEW_DATE_STEP_ZERO")
-                                            LocalBroadcastManager.getInstance(context!!)
-                                                .sendBroadcast(goService);
-                                        }
-
-                                    if (snapShot!!.containsKey(yesterday)) {
-                                        // 어제 값 존재
-                                        var yesterdayStep = (snapShot[yesterday] as Long).toInt()
-                                        var dummyStep = (snapShot["dummy"] as Long).toInt()
-
-                                        var newStepSet = hashMapOf(
-                                            "$REFRESH_DAILY" to 0,
-                                            "dummy" to (yesterdayStep + dummyStep)
-                                        )
-
-                                        db.collection("user_step_count").document("$userId")
-                                            .set(newStepSet, SetOptions.merge())
-
-
-//                                        var testSetThree = hashMapOf(
-//                                            "더미데이터 있고 새로운 날, 어제 값 존재" to "작동",
-//                                            "yesterday" to yesterday,
-//                                            "dummyStep" to dummyStep
-//                                        )
-//
-//                                        db.collection("test").document(REFRESH_DAILY)
-//                                            .set(testSetThree, SetOptions.merge())
-
-                                    } else {
-
-//                                        var testSetFive = hashMapOf(
-//                                            "더미데이터 있고 새로운 날, 어제 값 존재 x" to "작동",
-//                                        )
-//
-//                                        db.collection("test").document(REFRESH_DAILY)
-//                                            .set(testSetFive, SetOptions.merge())
-                                    }
-
-                                    // 날짜 저장 - period_step_count
-                                    var newDateForPeriod = hashMapOf(
-                                        "$userId" to 0
-                                    )
-                                    db.collection("period_step_count").document(REFRESH_DAILY)
-                                        .set(newDateForPeriod, SetOptions.merge())
-
-                                    // 날짜 저장 - user_step_count
-                                    var newDateForUser = hashMapOf(
-                                        "$REFRESH_DAILY" to 0
-                                    )
-                                    db.collection("user_step_count").document("$userId")
-                                        .set(newDateForUser, SetOptions.merge())
-                                }
+                            if(document.contains(today)) {
+                                // 기존 날
                             } else {
-                                // 더미 데이터 없는 경우
+                                // 새로운 날
+                               if(document.contains(yesterday)){
+                                   // 어제 값 있음 -> dummy 값 추가
+                                   val dummyStepCount = (document.data?.getValue("dummy") as Long).toInt()
+                                   val yesterdayStepCount = (document.data?.getValue(yesterday) as Long).toInt()
+                                   val newDummy = dummyStepCount + yesterdayStepCount
 
-//                                var testSetSeven = hashMapOf(
-//                                    "더미데이터 없음, 어제 값 존재 x" to "작동",
-//                                )
-//
-//                                db.collection("test").document(REFRESH_DAILY)
-//                                    .set(testSetSeven, SetOptions.merge())
+                                   val newDummySet = hashMapOf(
+                                       "dummy" to newDummy
+                                   )
+                                   db.collection("user_step_count").document("$userId")
+                                       .set(newDummySet, SetOptions.merge())
+
+                                   val userStepCountSet = hashMapOf(
+                                       today to 0
+                                   )
+
+                                   val periodStepCountSet = hashMapOf(
+                                       "$userId" to 0
+                                   )
+
+                                   // user_step_count
+                                   db.collection("user_step_count")
+                                       .document("$userId")
+                                       .set(userStepCountSet, SetOptions.merge())
+
+                                   // period_step_count
+                                   db.collection("period_step_count")
+                                       .document(today)
+                                       .set(periodStepCountSet, SetOptions.merge())
+
+                               } else {
+                                   // 어제 값 없음 -> dummy 0 세팅
+
+                                   val newDummySet = hashMapOf(
+                                       "dummy" to 0
+                                   )
+                                   db.collection("user_step_count").document("$userId")
+                                       .set(newDummySet, SetOptions.merge())
+
+                                   val userStepCountSet = hashMapOf(
+                                       today to 0
+                                   )
+
+                                   val periodStepCountSet = hashMapOf(
+                                       "$userId" to 0
+                                   )
+
+                                   // user_step_count
+                                   db.collection("user_step_count")
+                                       .document("$userId")
+                                       .set(userStepCountSet, SetOptions.merge())
+
+                                   // period_step_count
+                                   db.collection("period_step_count")
+                                       .document(today)
+                                       .set(periodStepCountSet, SetOptions.merge())
+                               }
+
+                                // noti & UI 걸음수 0로 초기화
+                                var goDiary =
+                                    Intent(context, MyDiaryFragment::class.java)
+                                goDiary.setAction("NEW_DATE_STEP_ZERO")
+                                LocalBroadcastManager.getInstance(context!!)
+                                    .sendBroadcast(goDiary);
+
+                                var goService = Intent(context, MyService::class.java)
+                                goService.setAction("NEW_DATE_STEP_ZERO")
+                                LocalBroadcastManager.getInstance(context!!)
+                                    .sendBroadcast(goService);
 
                             }
                         }

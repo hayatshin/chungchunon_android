@@ -1,5 +1,6 @@
 package com.chugnchunon.chungchunon_android.Service
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.*
 import android.hardware.Sensor
@@ -29,34 +30,31 @@ class MyService : Service(), SensorEventListener {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-
-    // lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
-    lateinit var stepCountBroadcastReceiver: StepCountBroadcastReceiver
 
     companion object {
-        lateinit var sensorManager: SensorManager
-        lateinit var step_sensor: Sensor
-
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
-
+        const val NOTIFICATION_ID = 1
+        lateinit var sensorManager: SensorManager
+        lateinit var step_sensor: Sensor
         var todayTotalStepCount: Int? = 0
-
-        const val stepCountSharedPref = "stepCountSharedPreference"
-        const val dateChangeSharedPref = "dateChangeSharedPref"
     }
 
-    lateinit var prefs: SharedPreferences
-
-    private var startingStepCount: Int = 0
     private var stepCount: Int = 0
 
     override fun onCreate() {
         super.onCreate()
 
-        StepCountNotification(this, todayTotalStepCount)
+        // 노티피케이션
+        val mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val statusNotifications = mNotificationManager.activeNotifications
+        for(statusNotification in statusNotifications) {
+            if(statusNotification.id != NOTIFICATION_ID) {
+                StepCountNotification(this, todayTotalStepCount)
+            }
+        }
 
         // 기본
         sensorManager =
@@ -72,101 +70,205 @@ class MyService : Service(), SensorEventListener {
             StepCountNotification(this, todayTotalStepCount)
         }
 
-        // shared preference 설정
-        prefs = getSharedPreferences(stepCountSharedPref, Context.MODE_PRIVATE)
-        var dummyData = prefs.getInt(userId, 0)
-        var datePrefs = getSharedPreferences(dateChangeSharedPref, Context.MODE_PRIVATE)
-
-        // DateChangeBroadcastReceiver : 매일 걸음수 0
+        // 1. 1분마다 체크 (날짜 바뀔 때)
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
-        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
-        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        // 2. 날짜 바뀔 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        )
 
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
         val deviceShutdownIntent = IntentFilter()
         deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // StepCountBroadcastReceiver : 디비 저장
+        // 4. 앱 끌 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            closeAppReceiver,
+            IntentFilter("CLOSE_APP")
+        )
+    }
 
-        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
+    override fun onDestroy() {
+        super.onDestroy()
 
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(closeAppReceiver)
 
+        // 1. 1분마다 체크 (날짜 바뀔 때)
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // 2. 날짜 바뀔 때
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
             stepInitializeReceiver,
             IntentFilter("NEW_DATE_STEP_ZERO")
-        );
+        )
+
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // 4. 앱 끌 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            closeAppReceiver,
+            IntentFilter("CLOSE_APP")
+        )
     }
 
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
-
+    @SuppressLint("SimpleDateFormat")
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
-        startingStepCount = prefs.getInt(userId, 0)
         stepCount = sensorEvent!!.values[0].toInt()
-        val editor = prefs.edit()
 
-        db.collection("user_step_count").document("$userId")
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    var snapShot = document.data
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val yesterdayCal = Calendar.getInstance()
+        yesterdayCal.add(Calendar.DATE, -1)
+        val yesterday = dateFormat.format(yesterdayCal.time)
+        val todayCal = Calendar.getInstance()
+        val today = dateFormat.format(todayCal.time)
 
-                    var dateFormat = SimpleDateFormat("yyyy-MM-dd")
-                    var cal = Calendar.getInstance()
-                    cal.add(Calendar.DATE, -1)
-                    var yesterday = dateFormat.format(cal.getTime())
+        if(stepCount == 0) {
+            // 리부팅 된 경우
 
-                    if (snapShot!!.containsKey("dummy") && snapShot!!.containsKey(yesterday)) {
-                        // 더미값 존재
-                        var dummyStepCount = (snapShot["dummy"] as Long).toInt()
-
-                        todayTotalStepCount = stepCount - dummyStepCount
-
-                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-                        intentToFirebase.putExtra("todayTotalStepCount", todayTotalStepCount)
-                        sendBroadcast(intentToFirebase)
-
-                        StepCountNotification(this, todayTotalStepCount)
-
-                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                            putExtra(
-                                "todayTotalStepCount",
-                                todayTotalStepCount
+            db.collection("user_step_count").document("$userId")
+                .get()
+                .addOnSuccessListener { userSteps ->
+                    if(userSteps.contains(today)) {
+                        // 리부팅: 오늘 걸음수 있는 경우
+                        val todayIngStep = (userSteps.data?.getValue(today) as Long).toInt()
+                        if(todayIngStep != 0) {
+                            // 리부팅: 누적 걸음수 0이 아닌 경우 -> *일반적 리부팅
+                            val newTodayIngStepSet = hashMapOf(
+                                "dummy" to -todayIngStep
                             )
+                            db.collection("user_step_count").document("$userId")
+                                .set(newTodayIngStepSet, SetOptions.merge())
+
+                            StepCountNotification(this, todayIngStep)
+
+                            val userStepCountSet = hashMapOf(
+                                today to todayIngStep
+                            )
+
+                            val periodStepCountSet = hashMapOf(
+                                "$userId" to todayIngStep
+                            )
+
+                            // user_step_count
+                            db.collection("user_step_count")
+                                .document("$userId")
+                                .set(userStepCountSet, SetOptions.merge())
+
+                            // period_step_count
+                            db.collection("period_step_count")
+                                .document(today)
+                                .set(periodStepCountSet, SetOptions.merge())
+
+                            val todayStepCountSet = hashMapOf(
+                                "todayStepCount" to todayIngStep
+                            )
+                            userDB.document("$userId")
+                                .set(todayStepCountSet, SetOptions.merge())
+
+                            val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                                putExtra(
+                                    "todayTotalStepCount",
+                                    todayIngStep
+                                )
+                            }
+                            LocalBroadcastManager.getInstance(applicationContext!!)
+                                .sendBroadcast(intentToMyDiary)
+                        } else {
+                            // 리부팅: 누적 걸음수 0인 경우
+                            val newTodayIngStepSet = hashMapOf(
+                                "dummy" to 0
+                            )
+                            db.collection("user_step_count").document("$userId")
+                                .set(newTodayIngStepSet, SetOptions.merge())
+
+                            StepCountNotification(this, 0)
+
+                            val userStepCountSet = hashMapOf(
+                                today to 0
+                            )
+
+                            val periodStepCountSet = hashMapOf(
+                                "$userId" to 0
+                            )
+
+                            // user_step_count
+                            db.collection("user_step_count")
+                                .document("$userId")
+                                .set(userStepCountSet, SetOptions.merge())
+
+                            // period_step_count
+                            db.collection("period_step_count")
+                                .document(today)
+                                .set(periodStepCountSet, SetOptions.merge())
+
+                            val todayStepCountSet = hashMapOf(
+                                "todayStepCount" to 0
+                            )
+                            userDB.document("$userId")
+                                .set(todayStepCountSet, SetOptions.merge())
+
+                            val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                                putExtra(
+                                    "todayTotalStepCount",
+                                    0
+                                )
+                            }
+                            LocalBroadcastManager.getInstance(applicationContext!!)
+                                .sendBroadcast(intentToMyDiary)
                         }
-                        LocalBroadcastManager.getInstance(applicationContext!!)
-                            .sendBroadcast(intentToMyDiary)
-
-
-                        Log.d(
-                            "걸음수 체크체크 2",
-                            "stepCount: ${stepCount} // startingStepCount: ${dummyStepCount}"
-                        )
-
                     } else {
-                        // 더미값 존재 x
-
-                        var newDummySet = hashMapOf(
-                            "dummy" to stepCount
+                        // 리부팅: 오늘 걸음수 없는 경우 -> 새로운 날 (DateChange보다 먼저 작동)
+                        val newTodayIngStepSet = hashMapOf(
+                            "dummy" to 0
                         )
                         db.collection("user_step_count").document("$userId")
-                            .set(newDummySet, SetOptions.merge())
+                            .set(newTodayIngStepSet, SetOptions.merge())
 
                         StepCountNotification(this, 0)
 
-                        var intentToFirebase = Intent(this, StepCountBroadcastReceiver::class.java)
-                        intentToFirebase.setAction(ACTION_STEP_COUNTER_NOTIFICATION)
-                        intentToFirebase.putExtra("todayTotalStepCount", 0)
-                        sendBroadcast(intentToFirebase)
+                        val userStepCountSet = hashMapOf(
+                            today to 0
+                        )
 
-                        var intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                        val periodStepCountSet = hashMapOf(
+                            "$userId" to 0
+                        )
+
+                        // user_step_count
+                        db.collection("user_step_count")
+                            .document("$userId")
+                            .set(userStepCountSet, SetOptions.merge())
+
+                        // period_step_count
+                        db.collection("period_step_count")
+                            .document(today)
+                            .set(periodStepCountSet, SetOptions.merge())
+
+                        val todayStepCountSet = hashMapOf(
+                            "todayStepCount" to 0
+                        )
+                        userDB.document("$userId")
+                            .set(todayStepCountSet, SetOptions.merge())
+
+                        val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
                             putExtra(
                                 "todayTotalStepCount",
                                 0
@@ -176,17 +278,157 @@ class MyService : Service(), SensorEventListener {
                             .sendBroadcast(intentToMyDiary)
                     }
                 }
-            }
-    }
+        } else {
+            // 리부팅 x
+            db.collection("user_step_count").document("$userId").get()
+                .addOnSuccessListener { userStepCount ->
+                if(userStepCount.contains("dummy")) {
+                    // 리부팅 x: 더미 값이 있는 경우 -> 처음 시작 x
+                    val dummyStepCount = (userStepCount.data?.getValue("dummy") as Long).toInt()
 
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        Log.d("서비스", "accuracychanged")
+                    if(userStepCount.contains(today)) {
+                        // 리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중
+                        todayTotalStepCount = stepCount - dummyStepCount
+
+                        StepCountNotification(this, todayTotalStepCount)
+
+                        val userStepCountSet = hashMapOf(
+                            today to todayTotalStepCount
+                        )
+                        val periodStepCountSet = hashMapOf(
+                            "$userId" to todayTotalStepCount
+                        )
+
+                        // user_step_count
+                        db.collection("user_step_count")
+                            .document("$userId")
+                            .set(userStepCountSet, SetOptions.merge())
+                        // period_step_count
+                        db.collection("period_step_count")
+                            .document(today)
+                            .set(periodStepCountSet, SetOptions.merge())
+
+
+                        val todayStepCountSet = hashMapOf(
+                            "todayStepCount" to todayTotalStepCount
+                        )
+                        userDB.document("$userId")
+                            .set(todayStepCountSet, SetOptions.merge())
+
+                        val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                todayTotalStepCount
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+                    } else {
+                        // 리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날
+                        Log.d("걸음수", "리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날")
+
+                        val yesterdayStepCount = (userStepCount.data?.getValue(yesterday) as Long).toInt()
+                        val newDummy = dummyStepCount + yesterdayStepCount
+
+                        val newDummySet = hashMapOf(
+                            "dummy" to newDummy
+                        )
+                        db.collection("user_step_count").document("$userId")
+                            .set(newDummySet, SetOptions.merge())
+
+                        StepCountNotification(this, 0)
+
+                        val userStepCountSet = hashMapOf(
+                            today to 0
+                        )
+
+                        val periodStepCountSet = hashMapOf(
+                            "$userId" to 0
+                        )
+
+                        // user_step_count
+                        db.collection("user_step_count")
+                            .document("$userId")
+                            .set(userStepCountSet, SetOptions.merge())
+
+                        // period_step_count
+                        db.collection("period_step_count")
+                            .document(today)
+                            .set(periodStepCountSet, SetOptions.merge())
+
+                        val todayStepCountSet = hashMapOf(
+                            "todayStepCount" to 0
+                        )
+                        userDB.document("$userId")
+                            .set(todayStepCountSet, SetOptions.merge())
+
+                        val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                            putExtra(
+                                "todayTotalStepCount",
+                                0
+                            )
+                        }
+                        LocalBroadcastManager.getInstance(applicationContext!!)
+                            .sendBroadcast(intentToMyDiary)
+                    }
+                } else {
+                    // 리부팅 x: 더미 값이 없는 경우 -> 처음 시작
+                    val newDummySet = hashMapOf(
+                        "dummy" to stepCount
+                    )
+                    db.collection("user_step_count").document("$userId")
+                        .set(newDummySet, SetOptions.merge())
+
+                    StepCountNotification(this, 0)
+
+                    val userStepCountSet = hashMapOf(
+                        today to 0
+                    )
+
+                    val periodStepCountSet = hashMapOf(
+                        "$userId" to 0
+                    )
+
+                    // user_step_count
+                    db.collection("user_step_count")
+                        .document("$userId")
+                        .set(userStepCountSet, SetOptions.merge())
+
+                    // period_step_count
+                    db.collection("period_step_count")
+                        .document(today)
+                        .set(periodStepCountSet, SetOptions.merge())
+
+                    val todayStepCountSet = hashMapOf(
+                        "todayStepCount" to 0
+                    )
+                    userDB.document("$userId")
+                        .set(todayStepCountSet, SetOptions.merge())
+
+                    val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                        putExtra(
+                            "todayTotalStepCount",
+                            0
+                        )
+                    }
+                    LocalBroadcastManager.getInstance(applicationContext!!)
+                        .sendBroadcast(intentToMyDiary)
+                }
+            }
+        }
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
 
-        StepCountNotification(this, todayTotalStepCount)
+        // 노티피케이션
+        val mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val statusNotifications = mNotificationManager.activeNotifications
+        for(statusNotification in statusNotifications) {
+            if(statusNotification.id != NOTIFICATION_ID) {
+                StepCountNotification(this, todayTotalStepCount)
+            }
+        }
 
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
@@ -203,33 +445,41 @@ class MyService : Service(), SensorEventListener {
             StepCountNotification(this, todayTotalStepCount)
         }
 
-        // DateChangeBroadcastReceiver : 매일 걸음수 0
+        // 1. 1분마다 체크 (날짜 바뀔 때)
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
-        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
-        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        // 2. 날짜 바뀔 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        )
 
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
         val deviceShutdownIntent = IntentFilter()
         deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // StepCountBroadcastReceiver : 디비 저장
-        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
-
+        // 4. 앱 끌 때
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        );
+            closeAppReceiver,
+            IntentFilter("CLOSE_APP")
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        Log.d("노티", "onStartCommand")
-
-        StepCountNotification(this, todayTotalStepCount)
+        // 노티피케이션
+        val mNotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val statusNotifications = mNotificationManager.activeNotifications
+        for(statusNotification in statusNotifications) {
+            if(statusNotification.id != NOTIFICATION_ID) {
+                StepCountNotification(this, todayTotalStepCount)
+            }
+        }
 
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
@@ -246,33 +496,92 @@ class MyService : Service(), SensorEventListener {
             StepCountNotification(this, todayTotalStepCount)
         }
 
-        // DateChangeBroadcastReceiver : 매일 걸음수 0
+        // 1. 1분마다 체크 (날짜 바뀔 때)
         dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
         val dateChangeIntent = IntentFilter()
         dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
         applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
 
-        // DeviceShutDownBroadcastReceiver : 핸드폰 꺼질 때
-        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        // 2. 날짜 바뀔 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        )
 
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
         val deviceShutdownIntent = IntentFilter()
         deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // StepCountBroadcastReceiver : 디비 저장
-        stepCountBroadcastReceiver = StepCountBroadcastReceiver()
-
+        // 4. 앱 끌 때
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        );
+            closeAppReceiver,
+            IntentFilter("CLOSE_APP")
+        )
+
         return START_STICKY
     }
 
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
 
     var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             StepCountNotification(context!!, 0)
+
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(closeAppReceiver)
+
+            // 1. 1분마다 체크 (날짜 바뀔 때)
+            dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+            val dateChangeIntent = IntentFilter()
+            dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+            applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+            // 3. 핸드폰 꺼질 때
+            deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+            val deviceShutdownIntent = IntentFilter()
+            deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+            applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+            // 4. 앱 끌 때
+            LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+                closeAppReceiver,
+                IntentFilter("CLOSE_APP")
+            );
+        }
+    }
+
+    var closeAppReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
+
+            // 1. 1분마다 체크 (날짜 바뀔 때)
+            dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+            val dateChangeIntent = IntentFilter()
+            dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+            applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+            // 2. 날짜 바뀔 때
+            LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+                stepInitializeReceiver,
+                IntentFilter("NEW_DATE_STEP_ZERO")
+            )
+
+            // 3. 핸드폰 꺼질 때
+            deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+            val deviceShutdownIntent = IntentFilter()
+            deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+            applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
         }
     }
 
@@ -287,8 +596,8 @@ class MyService : Service(), SensorEventListener {
             (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
                 channel
             )
-            var decimal = DecimalFormat("#,###")
-            var step = decimal.format(stepCount)
+            val decimal = DecimalFormat("#,###")
+            val step = decimal.format(stepCount)
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_new_alarm_icon)
@@ -297,7 +606,7 @@ class MyService : Service(), SensorEventListener {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .build()
-            startForeground(1, notification)
+            startForeground(NOTIFICATION_ID, notification)
         }
     }
 }

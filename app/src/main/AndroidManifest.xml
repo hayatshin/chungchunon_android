@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".GlobalApplication"
@@ -102,9 +103,6 @@
             android:name=".PersonalInfoRuleActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".Partner.PartnerDiaryTwoActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
             android:name=".EditProfileActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
@@ -153,7 +151,7 @@
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_TICK" />
             </intent-filter>
@@ -161,18 +159,9 @@
         <receiver
             android:name=".BroadcastReceiver.DeviceShutdownBroadcastReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
-                <action android:name="android.intent.action.REBOOT" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".BroadcastReceiver.StepCountBroadcastReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>

@@ -11,8 +11,11 @@ import android.graphics.Color
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.MediaStore
+import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
@@ -29,6 +32,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
@@ -50,6 +54,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -72,11 +77,6 @@ class MyDiaryFragment : Fragment() {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-//    private lateinit var sensorManager: SensorManager
-//    private lateinit var step_sensor: Sensor
-
-//    lateinit var diaryUpdateBroadcastReceiver: DiaryUpdateBroadcastReceiver
-
     private var currentMonth: String = ""
     private val model: BaseViewModel by viewModels()
 
@@ -87,17 +87,21 @@ class MyDiaryFragment : Fragment() {
     lateinit var diaryEditCheck: DiaryEditClass
     lateinit var newImageViewModel: NewImageViewModel
 
-    companion object {
-        private var editDiary: Boolean = false
-        const val REQ_GALLERY = 200
-    }
-
     lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     lateinit var photoAdapter: UploadPhotosAdapter
     private var oldImageList: ArrayList<String> = ArrayList()
 
     lateinit var mcontext: Context
     private lateinit var callback: OnBackPressedCallback
+
+    companion object {
+        private var editDiary: Boolean = false
+        const val REQ_GALLERY = 200
+        const val REQ_MULTI_PHOTO = 2000
+        const val REQ_STEP = 300
+        const val REQ_IGNORING_BATTERY_OPT = 400
+    }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -113,6 +117,26 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        // 걸음수 권한 체크 후 버튼 노출
+        val stepPermissionCheck =
+            ContextCompat.checkSelfPermission(mcontext, Manifest.permission.ACTIVITY_RECOGNITION)
+        if(stepPermissionCheck == PackageManager.PERMISSION_GRANTED) {
+            binding.stepCountLayout.visibility = View.VISIBLE
+            binding.stepAuthLayout.visibility = View.GONE
+        } else {
+            binding.stepCountLayout.visibility = View.GONE
+            binding.stepAuthLayout.visibility = View.VISIBLE
+        }
+
+        // 걸음수 권한 요청
+        binding.stepAuthLayout.setOnClickListener {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                REQ_STEP
+            )
+        }
+
+        // 스크롤뷰 키보드 터치다운
         binding.myDiaryScrollView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
                 when(ev?.action) {
@@ -132,21 +156,21 @@ class MyDiaryFragment : Fragment() {
 
         // StepCount Notification Receiver: 변경된 걸음수 UI 반영
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            receiver,
+            stepCountUpdateReceiver,
             IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
         )
 
         // 이미지 애니메이션
-        var womanIcon = binding.womanIcon
-        var manIcon = binding.manIcon
+        val womanIcon = binding.womanIcon
+        val manIcon = binding.manIcon
 
-        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
+        val womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
         womananimation.setDuration(300)
         womananimation.repeatCount = 2
         womananimation.interpolator = LinearInterpolator()
         womananimation.start()
 
-        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
+        val manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
         manAnimation.setDuration(300)
         manAnimation.repeatCount = 2
         manAnimation.interpolator = LinearInterpolator()
@@ -166,16 +190,13 @@ class MyDiaryFragment : Fragment() {
         )
 
 
-        // 이미지 삭제 로컬 브로드캐스트
+        // 이미지 초기 세팅
+
+        binding.diaryBtn.isEnabled = false
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
         binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
 
-        binding.diaryBtn.isEnabled = false
-
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            secretOrNotFunction,
-            IntentFilter("SECRET_OR_NOT")
-        );
+        // 필드별 작성 시 변화
 
         diaryFillCheck.secretFill.observe(requireActivity(), Observer
         { value ->
@@ -200,7 +221,6 @@ class MyDiaryFragment : Fragment() {
             }
         })
 
-
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer
         { value ->
             if (diaryFillCheck.diaryFill.value!!) {
@@ -212,7 +232,12 @@ class MyDiaryFragment : Fragment() {
             binding.diaryBtn.isEnabled = diaryFillCheck.diaryFill.value!! && !editDiary
         })
 
-        // 수정
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            secretOrNotFunction,
+            IntentFilter("SECRET_OR_NOT")
+        );
+
+        // 수정 시 필드별 변화
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer
         { value ->
             if (diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -249,7 +274,7 @@ class MyDiaryFragment : Fragment() {
             }
         })
 
-
+        // 이미지
         newImageViewModel.newImageList.observe(requireActivity(), Observer
         { value ->
             if (newImageViewModel.newImageList.value!!.size == 0) {
@@ -257,27 +282,25 @@ class MyDiaryFragment : Fragment() {
             }
         })
 
-
-
         newImageViewModel.uploadFirebaseComplete.observe(requireActivity(), Observer
         { value ->
 
             if (newImageViewModel.uploadFirebaseComplete.value == true) {
 
-                var currentMilliseconds = System.currentTimeMillis()
+                val currentMilliseconds = System.currentTimeMillis()
                 val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
                 val writeTime = LocalDateTime.now()
-                var diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
+                val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
 
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
-                        var username = document.data?.getValue("name")
-                        var stepCount = document.data?.getValue("todayStepCount")
-                        var region = document.data?.getValue("region")
-                        var smallRegion = document.data?.getValue("smallRegion")
-                        var regionGroup = "${region} ${smallRegion}"
-                        var secretStatus = diaryFillCheck.secretFill.value
+                        val username = document.data?.getValue("name")
+                        val stepCount = document.data?.getValue("todayStepCount")
+                        val region = document.data?.getValue("region")
+                        val smallRegion = document.data?.getValue("smallRegion")
+                        val regionGroup = "${region} ${smallRegion}"
+                        val secretStatus = diaryFillCheck.secretFill.value
 
                         val diarySet = hashMapOf(
                             "regionGroup" to regionGroup,
@@ -316,7 +339,7 @@ class MyDiaryFragment : Fragment() {
         val monthUI = StringUtils.stripStart(month, "0");
         val dateUI = StringUtils.stripStart(date, "0");
 
-        // 요일
+        // 상단 요일 세팅
         val sdf = java.text.SimpleDateFormat("EEE")
         val dayOfTheWeek = sdf.format(Date())
 
@@ -367,20 +390,19 @@ class MyDiaryFragment : Fragment() {
                         binding.diaryBtn.text = "일기 수정"
 
                         // 숨기기 보여주기
-                        var secretStatus = document.data?.getValue("secret") as Boolean
+                        val secretStatus = document.data?.getValue("secret") as Boolean
                         diaryFillCheck.secretFill.value = secretStatus
 
                         // 일기 보여주기
-                        var oldDiary = document.data?.getValue("todayDiary").toString()
+                        val oldDiary = document.data?.getValue("todayDiary").toString()
                         binding.todayDiary.setText(oldDiary)
 
                         // 마음 보여주기
                         var spinnerAdapter = binding.todayMood.adapter
-                        var dbMoodPosition =
+                        val dbMoodPosition =
                             (document.data?.getValue("todayMood") as Map<*, *>)["position"].toString()
                                 .toInt()
                         binding.todayMood.setSelection(dbMoodPosition)
-//                            binding.todayMood.setSelection(selectedPosition)
 
                         binding.todayMood.setOnItemSelectedListener(object :
                             AdapterView.OnItemSelectedListener {
@@ -390,7 +412,7 @@ class MyDiaryFragment : Fragment() {
                                 p2: Int,
                                 p3: Long
                             ) {
-                                var nowMood = (binding.todayMood.selectedItem as Mood).position
+                                val nowMood = (binding.todayMood.selectedItem as Mood).position
                                 if (nowMood != dbMoodPosition) {
                                     diaryEditCheck.moodEdit.value = true
                                 }
@@ -401,8 +423,6 @@ class MyDiaryFragment : Fragment() {
                             }
 
                         })
-
-
 
                         binding.todayDiary.addTextChangedListener(object : TextWatcher {
                             override fun beforeTextChanged(
@@ -432,22 +452,19 @@ class MyDiaryFragment : Fragment() {
 
 
                     } else {
-                        // 일기 작성 놉
+                        // 일기 작성 x
                     }
                 }
             } else {
-                // 일기 작성 놉
+                // 일기 작성 x
             }
         }
 
-
         // 하루 걸음수 초기화
-
-        var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        val stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 binding.todayStepCount.text = "0 보"
             }
-
         }
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -455,12 +472,13 @@ class MyDiaryFragment : Fragment() {
             IntentFilter("NEW_DATE_STEP_ZERO")
         );
 
+        // 걸음수 업데이트
         userDB.document("$userId").get().addOnSuccessListener { document ->
-            var todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
+            val todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
 
             todayTotalStepCount = todayStepCountFromDB
-            var decimal = DecimalFormat("#,###")
-            var step = decimal.format(todayTotalStepCount)
+            val decimal = DecimalFormat("#,###")
+            val step = decimal.format(todayTotalStepCount)
             binding.todayStepCount.text = "$step 보"
 
             if (todayTotalStepCount >= 3000) {
@@ -471,8 +489,6 @@ class MyDiaryFragment : Fragment() {
 
         }
 
-        currentMonth = LocalDateTime.now().toString().substring(0, 7)
-
         // 사진 업로드
         fun selectGallery() {
             val readPermission = ContextCompat.checkSelfPermission(
@@ -480,19 +496,17 @@ class MyDiaryFragment : Fragment() {
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
 
-            // 권한 확인
             if (readPermission == PackageManager.PERMISSION_DENIED) {
                 // 권한 요청
-                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQ_GALLERY)
 
             } else {
-
-                var intent = Intent(Intent.ACTION_PICK)
+                val intent = Intent(Intent.ACTION_PICK)
                 intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 intent.type = "image/*"
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
-                startActivityForResult(intent, 2000)
+                startActivityForResult(intent, REQ_MULTI_PHOTO)
             }
         }
 
@@ -501,15 +515,17 @@ class MyDiaryFragment : Fragment() {
             selectGallery()
         }
 
-        // 매달 일기 작성
-        var currentdate = System.currentTimeMillis()
-        var currentYearMonth = yearMonthDateFormat.format(currentdate)
-        var currentMonth = SimpleDateFormat("MM").format(currentdate)
-        var removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
-        var currentMonthDate = MonthDate(currentMonth.toInt()).getDate
+        // 매달 일기 작성 카운트
+        currentMonth = LocalDateTime.now().toString().substring(0, 7)
+
+        val currentdate = System.currentTimeMillis()
+        val currentYearMonth = yearMonthDateFormat.format(currentdate)
+        val currentMonth = SimpleDateFormat("MM").format(currentdate)
+        val removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
+        val currentMonthDate = MonthDate(currentMonth.toInt()).getDate
 
 
-        var thisMonthCount = diaryDB
+        val thisMonthCount = diaryDB
             .whereEqualTo("monthDate", currentYearMonth)
             .whereEqualTo("userId", userId)
             .count()
@@ -517,7 +533,7 @@ class MyDiaryFragment : Fragment() {
         thisMonthCount.get(AggregateSource.SERVER).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val calendarThisMonthCount = "${task.result.count}일"
-                var spanText = SpannableStringBuilder()
+                val spanText = SpannableStringBuilder()
                     .bold { color(ContextCompat.getColor(mcontext, R.color.main_color)) { append("${calendarThisMonthCount}") } }
                     .append(" / ${currentMonthDate}일")
 
@@ -543,7 +559,6 @@ class MyDiaryFragment : Fragment() {
             )
         }
 
-
         binding.todayMood.setOnTouchListener(
             object : View.OnTouchListener {
                 override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
@@ -552,8 +567,13 @@ class MyDiaryFragment : Fragment() {
                 }
             })
 
-        // 음성녹음
+        // 글 숨기기
+        binding.secretButton.setOnClickListener {
+            val goLockDiary = Intent(requireActivity(), LockDiaryActivity::class.java)
+            startActivity(goLockDiary)
+        }
 
+        // 말로 쓰기
         model.initial(textToSpeechEngine, startForResult)
 
         binding.recordBtn.setOnClickListener {
@@ -578,23 +598,16 @@ class MyDiaryFragment : Fragment() {
                 }
             })
 
-        // 글 숨기기
-        binding.secretButton.setOnClickListener {
-           var goLockDiary = Intent(requireActivity(), LockDiaryActivity::class.java)
-            startActivity(goLockDiary)
-        }
-
-
 
         // 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
             binding.diaryBtn.text = ""
             binding.diaryProgressBar.visibility = View.VISIBLE
 
-            var currentMilliseconds = System.currentTimeMillis()
+            val currentMilliseconds = System.currentTimeMillis()
             val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
             val writeTime = LocalDateTime.now()
-            var diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
+            val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
             if (diaryFillCheck.photoFill.value == true || diaryEditCheck.photoEdit.value == true) {
 
@@ -672,6 +685,7 @@ class MyDiaryFragment : Fragment() {
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        // 말로 쓰기 결과
         if (result.resultCode == RESULT_OK) {
             val spokenText: String? =
                 result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
@@ -693,25 +707,78 @@ class MyDiaryFragment : Fragment() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        // 사진 보기 권한 요청
+        if (requestCode == REQ_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            var intent = Intent(Intent.ACTION_PICK)
+            val intent = Intent(Intent.ACTION_PICK)
             intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             intent.type = "image/*"
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
-            startActivityForResult(intent, 2000)
+            startActivityForResult(intent, REQ_MULTI_PHOTO)
         }
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // 걸음 수 권한 요청
+        if(requestCode == REQ_STEP && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            // 배터리 사용량 제한 없음 요청
+            val packageName = mcontext.packageName
+            val intent = Intent()
+            val pm = mcontext.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+            if(!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                intent.data = Uri.parse("packageName:$packageName")
+                startActivityForResult(intent, REQ_IGNORING_BATTERY_OPT)
+            } else {
+                val batteryAuthSet = hashMapOf(
+                    "auth_ignoring_battery" to true,
+                )
+                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+            }
+
+            // DB 저장
+            val authSet = hashMapOf(
+                "auth_step" to true,
+            )
+            userDB.document("$userId").set(authSet, SetOptions.merge())
+
+            // 걸음수 호출
+            var startService = Intent(activity, MyService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(mcontext, startService);
+            } else {
+                mcontext.startService(startService);
+            }
+
+            binding.stepAuthLayout.visibility = View.GONE
+            binding.stepCountLayout.visibility = View.VISIBLE
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            2000 -> {
+            REQ_IGNORING_BATTERY_OPT -> {
+                val pm = mcontext.getSystemService(Context.POWER_SERVICE) as PowerManager
+                if(pm.isIgnoringBatteryOptimizations(mcontext.packageName)) {
+                    // 권한 부여 o
+                    val batteryAuthSet = hashMapOf(
+                        "auth_ignoring_battery" to true,
+                    )
+                    userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+                } else {
+                    // 권한 부여 x
+                    val batteryAuthSet = hashMapOf(
+                        "auth_ignoring_battery" to false,
+                    )
+                    userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+                }
+            }
+            REQ_MULTI_PHOTO -> {
                 if (data?.clipData != null) {
                     val count = data!!.clipData!!.itemCount
 
@@ -739,32 +806,31 @@ class MyDiaryFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         // 이미지 애니메이션
-        var womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)
-        var manIcon = view?.findViewById<ImageView>(R.id.manIcon)
+        val womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)
+        val manIcon = view?.findViewById<ImageView>(R.id.manIcon)
 
-        var womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 0f, 20f, 0f)
+        val womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 0f, 20f, 0f)
         womananimation.setDuration(500)
         womananimation.repeatCount = 2
         womananimation.interpolator = LinearInterpolator()
         womananimation.start()
 
 
-        var manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", 0f, -20F, 0f)
+        val manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", 0f, -20F, 0f)
         manAnimation.setDuration(500)
         manAnimation.repeatCount = 2
         manAnimation.interpolator = LinearInterpolator()
         manAnimation.start()
 
-
+        // 사진 삭제
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             deleteImageFunction,
             IntentFilter("DELETE_IMAGE")
         );
 
-
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
-                var userType = document.data?.getValue("userType").toString()
+                val userType = document.data?.getValue("userType").toString()
                 if (userType == "파트너") {
                     binding.partnerBlock.visibility = View.VISIBLE
 
@@ -774,11 +840,11 @@ class MyDiaryFragment : Fragment() {
                     binding.photoButton.isEnabled = false
                     binding.diaryBtn.isEnabled = false
 
-                    var activity = activity
+                    val activity = activity
                     if (activity != null) {
-                        var window = requireActivity().window
-                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                        window.setStatusBarColor(Color.parseColor("#CC000000"));
+                        val window = requireActivity().window
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                        window.setStatusBarColor(Color.parseColor("#B3000000"))
                     }
                 } else binding.partnerBlock.visibility = View.GONE
             }
@@ -786,12 +852,10 @@ class MyDiaryFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(requireActivity())
-            .unregisterReceiver(deleteImageFunction);
 
-        var activity = activity
+        val activity = activity
         if (activity != null) {
-            var window = requireActivity().window
+            val window = requireActivity().window
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.WHITE);
         }
@@ -799,52 +863,47 @@ class MyDiaryFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(secretOrNotFunction)
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(stepCountUpdateReceiver)
         LocalBroadcastManager.getInstance(requireActivity())
             .unregisterReceiver(deleteImageFunction);
-//        activity?.unregisterReceiver(diaryUpdateBroadcastReceiver)
-
     }
 
 
     private fun uploadImageToFirebase(fileUri: Uri, position: Int) {
-        if (fileUri != null) {
-            val fileName = UUID.randomUUID().toString() + ".jpg"
-            val database = FirebaseDatabase.getInstance()
-            val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+        val fileName = UUID.randomUUID().toString() + ".jpg"
+        val database = FirebaseDatabase.getInstance()
+        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
 
-            refStorage.putFile(fileUri)
-                .addOnSuccessListener(
-                    OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
-                        taskSnapshot.storage.downloadUrl.addOnSuccessListener {
-                            val imageUrl = it.toString()
-                            newImageViewModel.changeImage(imageUrl, position)
+        refStorage.putFile(fileUri)
+            .addOnSuccessListener(
+                OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                    taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                        val imageUrl = it.toString()
+                        newImageViewModel.changeImage(imageUrl, position)
 
-                            if (newImageViewModel.newImageList.value!!.all { it ->
-                                    it.toString().startsWith("https://")
-                                }) {
-                                newImageViewModel.uploadFirebaseComplete.value = true
-                            }
+                        if (newImageViewModel.newImageList.value!!.all { it ->
+                                it.toString().startsWith("https://")
+                            }) {
+                            newImageViewModel.uploadFirebaseComplete.value = true
                         }
                     }
-                )
-                ?.addOnFailureListener(OnFailureListener { e ->
-                    print(e.message)
-                })
-        }
+                }
+            )
+            ?.addOnFailureListener(OnFailureListener { e ->
+                print(e.message)
+            })
     }
 
-    private var receiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private var stepCountUpdateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("SetTextI18n")
         override fun onReceive(context: Context?, intent: Intent?) {
 
             intent?.let {
                 val todayTotalStepCount = it.getIntExtra("todayTotalStepCount", 0)
-                var decimal = DecimalFormat("#,###")
-                var step = decimal.format(todayTotalStepCount)
+                val decimal = DecimalFormat("#,###")
+                val step = decimal.format(todayTotalStepCount)
                 binding.todayStepCount.text = "$step 보"
-
-                Log.d("걸음수", "$todayTotalStepCount")
 
                 if (todayTotalStepCount >= 3000) {
                     binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -856,8 +915,7 @@ class MyDiaryFragment : Fragment() {
     private var secretOrNotFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
-            var secretOrNot = intent?.getBooleanExtra("secretOrNot", false)
-            Log.d("시크릿", secretOrNot.toString())
+            val secretOrNot = intent?.getBooleanExtra("secretOrNot", false)
 
             if(!editDiary) {
                 diaryFillCheck.secretFill.value = secretOrNot
@@ -868,8 +926,6 @@ class MyDiaryFragment : Fragment() {
 
     }
 
-
-    // 갤러리
     private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             var deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
@@ -882,7 +938,6 @@ class MyDiaryFragment : Fragment() {
 
         }
     }
-
 
     class NewImageViewModel : ViewModel() {
         var uploadFirebaseComplete = MutableLiveData<Boolean>().apply {
@@ -915,7 +970,6 @@ class MyDiaryFragment : Fragment() {
         }
     }
 }
-
 
 class DiaryFillClass : ViewModel() {
     val diaryFill by lazy { MutableLiveData<Boolean>(false) }

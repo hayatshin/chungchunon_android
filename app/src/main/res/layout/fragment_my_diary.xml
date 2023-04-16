@@ -180,8 +180,23 @@
                             android:textSize="20dp"
                             android:textStyle="bold" />
 
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/stepAuthLayout"
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:layout_width="140dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="end"
+                            android:background="@drawable/register_fill_box"
+                            android:drawableStart="@drawable/ic_run_20"
+                            android:drawablePadding="10dp"
+                            android:paddingHorizontal="20dp"
+                            android:text="권한 허용"
+                            android:textSize="18dp" />
+
 
                         <LinearLayout
+                            android:id="@+id/stepCountLayout"
+                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="bottom"

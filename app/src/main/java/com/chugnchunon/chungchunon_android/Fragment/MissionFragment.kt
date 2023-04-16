@@ -13,7 +13,6 @@ import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.chugnchunon.chungchunon_android.Adapter.AttractionAdapter
 import com.chugnchunon.chungchunon_android.Adapter.MissionCardAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Attraction
-import com.chugnchunon.chungchunon_android.DataClass.Book
 import com.chugnchunon.chungchunon_android.DataClass.Mission
 import com.chugnchunon.chungchunon_android.Layout.CenterZoomLayoutManager
 import com.chugnchunon.chungchunon_android.databinding.FragmentMissionBinding
@@ -37,7 +36,6 @@ class MissionFragment: Fragment() {
     private val userId = Firebase.auth.currentUser?.uid
 
     lateinit var missionSet: Mission
-    lateinit var bookSet: Book
     lateinit var attractionSet: Attraction
 
     private var missionList: ArrayList<Mission> = ArrayList()
@@ -164,26 +162,6 @@ class MissionFragment: Fragment() {
                         }
                     }
             }
-
-//        booksDB.get().addOnSuccessListener { documents ->
-//            for (document in documents) {
-//                var title = document.data.getValue("title").toString()
-//                var cover = document.data.getValue("cover").toString()
-//                var author = document.data.getValue("author").toString()
-//                var description = document.data.getValue("description").toString()
-//
-//                bookSet = Book(
-//                    title,
-//                    cover,
-//                    author,
-//                    description
-//                )
-//
-//                bookList.add(bookSet)
-//                booksAdapter.notifyDataSetChanged()
-//            }
-//        }
-
         return binding
     }
 }

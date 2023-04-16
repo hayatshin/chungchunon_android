@@ -9,5 +9,5 @@ data class Comment(
     val commentUserName: String,
     val commentUserType: String,
     val commentTimestamp: String,
-    var commentDescription: String
+    var commentDescription: String,
 )

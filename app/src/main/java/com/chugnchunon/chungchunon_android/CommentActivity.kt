@@ -1,7 +1,6 @@
 package com.chugnchunon.chungchunon_android
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -22,17 +21,15 @@ import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.Request
-import com.android.volley.Response
 import com.chugnchunon.chungchunon_android.Adapter.CommentAdapter
+import com.chugnchunon.chungchunon_android.Adapter.CommentReAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Comment
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
+import com.chugnchunon.chungchunon_android.DataClass.ReComment
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
-import com.chugnchunon.chungchunon_android.Fragment.AllRegionDataLoadingState
 import com.chugnchunon.chungchunon_android.Fragment.LinearLayoutManagerWrapper
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -40,17 +37,8 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import io.ktor.client.plugins.BodyProgress.Plugin.key
-import kotlinx.android.synthetic.main.diary_card.*
-import kotlinx.android.synthetic.main.fragment_region_data.view.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import java.io.IOException
+import kotlinx.android.synthetic.main.activity_comment.view.*
+import kotlinx.android.synthetic.main.comment_list.view.*
 
 class CommentActivity : FragmentActivity() {
 
@@ -60,6 +48,7 @@ class CommentActivity : FragmentActivity() {
 
     private lateinit var adapter: CommentAdapter
 
+    private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
@@ -74,13 +63,30 @@ class CommentActivity : FragmentActivity() {
     @SuppressLint("SimpleDateFormat")
     private val simpledateformat = SimpleDateFormat("yyyy-MM-dd HH:mm")
 
-    private var editBtn: Boolean = false
+    enum class BtnStatusEnum {
+        WRITE_COMMENT,
+        EDIT_COMMENT,
+        RE_WRITE_COMMENT,
+        RE_EDIT_COMMENT
+    }
+
+    private var BtnStatus: BtnStatusEnum = BtnStatusEnum.WRITE_COMMENT
+
     private var editCommentId: String? = ""
     private var editCommentPosition: Int? = 0
     private var originalDescription: String? = ""
 
+    private var rewriteCommentId: String = ""
+
+    private var reEditCommentId: String? = ""
+    private var reEditCommentCommentId: String? = ""
+    private var reOriginalDescription: String? = ""
+
     private var diaryPosition: Int? = 0
     lateinit var commentDataLoading: CommentDataLoading
+
+    private val anonymousUserAvatar =
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
 
     companion object {
         var commentItems: ArrayList<Comment> = ArrayList()
@@ -92,7 +98,7 @@ class CommentActivity : FragmentActivity() {
     override fun onBackPressed() {
         resumePause = true
 
-        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
         binding.commentLayout.startAnimation(downAnimation)
 
         downAnimation.setAnimationListener(object : Animation.AnimationListener {
@@ -123,7 +129,7 @@ class CommentActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
+        // 가장 아래 글로 스크롤
         binding.commentRecyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
             override fun onLayoutChange(
                 p0: View?,
@@ -138,14 +144,14 @@ class CommentActivity : FragmentActivity() {
             ) {
                 binding.commentRecyclerView.scrollToPosition(commentItems.size - 1)
             }
-
         })
 
-        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        // 코멘트창 애니메이션
+        val upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.commentLayout.startAnimation(upAnimation)
 
+        // 데이터 로딩
         commentDataLoading = ViewModelProvider(this).get(CommentDataLoading::class.java)
-
         commentDataLoading.loadingCompleteData.observe(this, Observer { value ->
 
             if (!commentDataLoading.loadingCompleteData.value!!) {
@@ -157,7 +163,7 @@ class CommentActivity : FragmentActivity() {
             }
         })
 
-
+        // 배경 뒤로가기
         binding.commentBackground.setOnClickListener {
             resumePause = true
 
@@ -169,22 +175,7 @@ class CommentActivity : FragmentActivity() {
             }, 500)
         }
 
-        binding.commentRecyclerView.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                binding.commentWriteText.clearFocus()
-
-                val imm: InputMethodManager =
-                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
-
-                true
-            }
-            false
-        }
-
-
-        binding.commentWriteBtn.isEnabled = false
-
+        // 화살표 뒤로가기
         binding.commentGobackArrow.setOnClickListener {
             var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
@@ -193,41 +184,23 @@ class CommentActivity : FragmentActivity() {
             }, 500)
         }
 
-        if (intent?.hasExtra("notificationDiaryId") == true) {
-            diaryId = intent.getStringExtra("notificationDiaryId").toString()
-        } else if (intent?.hasExtra("diaryId") == true) {
-            diaryId = intent.getStringExtra("diaryId").toString()
+        // 리사이클러뷰 터치 키보드 다운
+        binding.commentRecyclerView.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                binding.commentWriteText.clearFocus()
+
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+
+                true
+            }
+            false
         }
 
+        // 작성버튼 초기 셋업
+        binding.commentWriteBtn.isEnabled = false
 
-        Log.d("diaryId", diaryId)
-        Log.d("notificationDiaryId", notificationDiaryId)
-
-        diaryPosition = intent.getIntExtra("diaryPosition", 0)
-
-        adapter = CommentAdapter(this, commentItems)
-        binding.commentRecyclerView.adapter = adapter
-
-        userDB.document("$userId")
-            .get()
-            .addOnSuccessListener { document ->
-                commentUserId = document.data?.getValue("userId").toString()
-                username = document.data?.getValue("name").toString()
-                userType = document.data?.getValue("userType").toString()
-                userAvatar = document.data?.getValue("avatar").toString()
-            }
-
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            editDescriptionReceiver,
-            IntentFilter("EDIT_INTENT")
-        );
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            deleteCommentReceiver,
-            IntentFilter("DELETE_INTENT")
-        );
-
+        // 작성시 버튼 초기 셋업
         binding.commentWriteText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 // null
@@ -243,24 +216,77 @@ class CommentActivity : FragmentActivity() {
 
         })
 
+        // 코멘트 푸시 노티피케이션
+        if (intent?.hasExtra("notificationDiaryId") == true) {
+            diaryId = intent.getStringExtra("notificationDiaryId").toString()
+        } else if (intent?.hasExtra("diaryId") == true) {
+            diaryId = intent.getStringExtra("diaryId").toString()
+        }
+
+        // 다이어리 포지션
+        diaryPosition = intent.getIntExtra("diaryPosition", 0)
+
+        // 어댑터
+        adapter = CommentAdapter(this, commentItems)
+        binding.commentRecyclerView.adapter = adapter
+
+        // 초기 유저 정보 셋업
+        userDB.document("$userId")
+            .get()
+            .addOnSuccessListener { document ->
+                commentUserId = document.data?.getValue("userId").toString()
+                username = document.data?.getValue("name").toString()
+                userType = document.data?.getValue("userType").toString()
+                userAvatar = document.data?.getValue("avatar").toString()
+            }
+
+        // 로컬 브로드캐스트
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            editDescriptionReceiver,
+            IntentFilter("EDIT_INTENT")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            deleteCommentReceiver,
+            IntentFilter("DELETE_INTENT")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            reCommentWriteReceiver,
+            IntentFilter("RE_COMMENT_WRITE_INTENT")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            reCommentEditReceiver,
+            IntentFilter("RE_COMMENT_EDIT_INTENT")
+        )
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            reCommentDeleteReceiver,
+            IntentFilter("RE_COMMENT_DELETE_INTENT")
+        )
 
         // 댓글 작성
         binding.commentWriteBtn.setOnClickListener {
             binding.noItemText.visibility = View.GONE
+            val DiaryRef = diaryDB.document(diaryId)
 
-            if (!editBtn) {
+            val imm: InputMethodManager =
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+
+            if (BtnStatus == BtnStatusEnum.WRITE_COMMENT) {
                 // diary +1
-                var DiaryRef = diaryDB.document(diaryId)
                 DiaryRef.update("numComments", FieldValue.increment(1))
                     .addOnSuccessListener {
                         // 전체 다이어리 화면
                         DiaryRef
                             .get()
                             .addOnSuccessListener { document ->
-                                var createNumComments =
+                                val createNumComments =
                                     document.data?.getValue("numComments").toString().toInt()
 
-                                var createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
+                                val createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
                                 createIntent.setAction("COMMENT_ACTION")
                                 createIntent.putExtra("newDiaryId", diaryId)
                                 createIntent.putExtra("newNumComments", createNumComments)
@@ -271,10 +297,10 @@ class CommentActivity : FragmentActivity() {
 
 
                 // diary DB 내 comments 추가
-                var timestamp = System.currentTimeMillis()
-                var commentId = "${userId}_${timestamp}"
-                var description = binding.commentWriteText.text
-                var commentSet = hashMapOf(
+                val timestamp = System.currentTimeMillis()
+                val commentId = "${userId}_${timestamp}"
+                val description = binding.commentWriteText.text
+                val commentSet = hashMapOf(
                     "commentId" to commentId,
                     "userId" to commentUserId,
                     "timestamp" to FieldValue.serverTimestamp(),
@@ -308,55 +334,94 @@ class CommentActivity : FragmentActivity() {
                     )
 
                 binding.commentRecyclerView.scrollToPosition(commentItems.size - 1);
-                binding.commentWriteText.text = null
+                binding.commentWriteText.text.clear()
 
-
-            } else {
+            } else if (BtnStatus == BtnStatusEnum.EDIT_COMMENT) {
                 // 댓글 수정 버튼
-                var newDescription = binding.commentWriteText.text
+                val newDescription = binding.commentWriteText.text
 
-                var newDescriptionSet = hashMapOf(
+                val newDescriptionSet = hashMapOf(
                     "description" to newDescription.toString()
                 )
+
                 diaryDB.document(diaryId).collection("comments").document("$editCommentId")
                     .set(newDescriptionSet, SetOptions.merge())
                     .addOnSuccessListener {
-                        binding.commentWriteText.text = null
+                        binding.commentWriteText.text.clear()
                         commentItems[editCommentPosition!!].commentDescription =
                             newDescription.toString()
                         adapter.notifyDataSetChanged()
-                        editBtn = false
+                        BtnStatus = BtnStatusEnum.WRITE_COMMENT
                         binding.commentWriteBtn.text = "댓글 작성"
+                    }
+            } else if (BtnStatus == BtnStatusEnum.RE_WRITE_COMMENT) {
+                // diary DB 내 comments 추가
+                val reTimestamp = System.currentTimeMillis()
+                val reCommentId = "${userId}_${reTimestamp}"
+                val reDescription = binding.commentWriteText.text.toString()
+                val reCommentSet = hashMapOf(
+                    "commentId" to rewriteCommentId,
+                    "reCommentId" to reCommentId,
+                    "userId" to commentUserId,
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "description" to reDescription,
+                )
+
+                DiaryRef.collection("comments").document(rewriteCommentId)
+                    .collection("reComments")
+                    .document(reCommentId)
+                    .set(reCommentSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        binding.commentWriteText.text.clear()
+                        BtnStatus = BtnStatusEnum.WRITE_COMMENT
+                        binding.commentWriteBtn.text = "댓글 작성"
+                        adapter.notifyDataSetChanged()
+                    }
+
+            } else if (BtnStatus == BtnStatusEnum.RE_EDIT_COMMENT) {
+                // 답글 수정
+                val newDescription = binding.commentWriteText.text
+                val newDescriptionSet = hashMapOf(
+                    "description" to newDescription.toString()
+                )
+
+                diaryDB.document(diaryId).collection("comments").document("$reEditCommentId")
+                    .collection("reComments").document("$reEditCommentCommentId")
+                    .set(newDescriptionSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        binding.commentWriteText.text.clear()
+                        BtnStatus = BtnStatusEnum.WRITE_COMMENT
+                        binding.commentWriteBtn.text = "댓글 작성"
+                        adapter.notifyDataSetChanged()
                     }
             }
         }
+
         getData()
         scrollToPosition()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             editDescriptionReceiver
-        );
-
+        )
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             deleteCommentReceiver
-        );
+        )
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            reCommentWriteReceiver
+        )
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            reCommentEditReceiver
+        )
     }
 
     private fun scrollToPosition() {
-        if (notificationCommentId != null) {
-            if(commentItems.size != 0) {
+        if (intent.hasExtra("notificationCommentId")) {
+            if (commentItems.size != 0) {
                 commentItems.forEachIndexed { index, commentItem ->
                     if (commentItem.commentId == notificationCommentId) {
-                        Log.d("코멘트푸시: CommentActivity - commentItems", "${commentItems}")
-                        Log.d(
-                            "코멘트푸시: CommentActivity - notificationCommentId",
-                            "${notificationCommentId}"
-                        )
-
                         binding.commentRecyclerView.scrollToPosition(index)
                     }
                 }
@@ -365,6 +430,7 @@ class CommentActivity : FragmentActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun getData(): ArrayList<Comment> {
         diaryDB.document(diaryId).collection("comments")
             .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -373,50 +439,88 @@ class CommentActivity : FragmentActivity() {
 
                 if (documents.size() != 0) {
                     for (document in documents) {
-                        var timeMillis = (document.data?.getValue("timestamp") as Timestamp)
-                        var commentId = document.data?.getValue("commentId").toString()
-                        var commentUserId = document.data?.getValue("userId").toString()
-                        var commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
-                        var commentDescription =
+                        val timeMillis = (document.data?.getValue("timestamp") as Timestamp)
+                        val commentId = document.data?.getValue("commentId").toString()
+                        val commentUserId = document.data?.getValue("userId").toString()
+                        val commentTimestamp = DateFormat().convertTimeStampToDateTime(timeMillis)
+                        val commentDescription =
                             document.data?.getValue("description").toString()
 
-                        userDB.document("$commentUserId")
+                        userDB.document(commentUserId)
                             .get()
                             .addOnSuccessListener { userDocument ->
-                                var commentUserName = userDocument.data?.getValue("name").toString()
-                                var commentUserAvatar =
-                                    userDocument.data?.getValue("avatar").toString()
-                                var commentUserType =
-                                    userDocument.data?.getValue("userType").toString()
+                                if (userDocument != null) {
+                                    // 유저가 있는 경우
+                                    val commentUserName =
+                                        userDocument.data?.getValue("name").toString()
+                                    val commentUserAvatar =
+                                        userDocument.data?.getValue("avatar").toString()
+                                    val commentUserType =
+                                        userDocument.data?.getValue("userType").toString()
 
-                                commentItems.add(
-                                    Comment(
-                                        diaryId,
-                                        diaryPosition!!,
-                                        commentId,
-                                        commentUserId,
-                                        commentUserAvatar,
-                                        commentUserName,
-                                        commentUserType,
-                                        commentTimestamp,
-                                        commentDescription
+                                    commentItems.add(
+                                        Comment(
+                                            diaryId,
+                                            diaryPosition!!,
+                                            commentId,
+                                            commentUserId,
+                                            commentUserAvatar,
+                                            commentUserName,
+                                            commentUserType,
+                                            commentTimestamp,
+                                            commentDescription
+                                        )
                                     )
-                                )
 
-                                commentItems.sortWith(compareBy({ it.commentTimestamp }))
+                                    commentItems.sortWith(compareBy({ it.commentTimestamp }))
 
-                                binding.commentRecyclerView.layoutManager = LinearLayoutManager(
-                                    this,
-                                    RecyclerView.VERTICAL,
-                                    false
-                                )
+                                    binding.commentRecyclerView.layoutManager = LinearLayoutManager(
+                                        this,
+                                        RecyclerView.VERTICAL,
+                                        false
+                                    )
 
-                                commentDataLoading.loadingCompleteData.value = true
-                                binding.noItemText.visibility = View.GONE
+                                    commentDataLoading.loadingCompleteData.value = true
+                                    binding.noItemText.visibility = View.GONE
 
-                                adapter.notifyDataSetChanged()
+                                    adapter.notifyDataSetChanged()
+                                } else {
+                                    // 유저가 없는 경우
+                                    val commentUserName = "탈퇴자"
+                                    val commentUserAvatar = anonymousUserAvatar
+                                    val commentUserType = "마스터"
 
+                                    commentItems.add(
+                                        Comment(
+                                            diaryId,
+                                            diaryPosition!!,
+                                            commentId,
+                                            commentUserId,
+                                            commentUserAvatar,
+                                            commentUserName,
+                                            commentUserType,
+                                            commentTimestamp,
+                                            commentDescription
+                                        )
+                                    )
+
+                                    commentItems.sortWith(compareBy({ it.commentTimestamp }))
+
+                                    binding.commentRecyclerView.layoutManager = LinearLayoutManager(
+                                        this,
+                                        RecyclerView.VERTICAL,
+                                        false
+                                    )
+
+                                    commentDataLoading.loadingCompleteData.value = true
+                                    binding.noItemText.visibility = View.GONE
+
+                                    adapter.notifyDataSetChanged()
+                                }
                             }
+
+                        // 답글
+//
                     }
                 } else {
                     // 0인 경우
@@ -430,22 +534,28 @@ class CommentActivity : FragmentActivity() {
 
     var editDescriptionReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            editBtn = true
+            BtnStatus = BtnStatusEnum.EDIT_COMMENT
             editCommentId = intent?.getStringExtra("editCommentId").toString()
             originalDescription = intent?.getStringExtra("originalDescription").toString()
             editCommentPosition = intent?.getIntExtra("editCommentPosition", 0)
 
             binding.commentWriteText.setText(originalDescription)
+            binding.commentWriteText.setSelection(binding.commentWriteText.length())
+
             binding.commentWriteBtn.text = "댓글 수정"
+
+            val inputMethodManager =
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         }
     }
 
     var deleteCommentReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        @SuppressLint("NotifyDataSetChanged")
         override fun onReceive(context: Context?, intent: Intent?) {
-
-            var deleteDiaryId = intent?.getStringExtra("deleteDiaryId")
+            val deleteDiaryId = intent?.getStringExtra("deleteDiaryId")
             var deleteDiaryPosition = intent?.getIntExtra("deleteDiaryPosition", 0)
-            var deleteCommentPosition = intent?.getIntExtra("deleteCommentPosition", 0)
+            val deleteCommentPosition = intent?.getIntExtra("deleteCommentPosition", 0)
 
             if (commentItems.size != 0) {
                 commentItems.removeAt(deleteCommentPosition!!.toInt())
@@ -458,10 +568,10 @@ class CommentActivity : FragmentActivity() {
 
             diaryDB.document(deleteDiaryId!!).get()
                 .addOnSuccessListener { document ->
-                    var newNumComments = document.data?.getValue("numComments").toString().toInt()
+                    val newNumComments = document.data?.getValue("numComments").toString().toInt()
 
                     // 전체 일기 화면
-                    var intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
                     intent.setAction("COMMENT_ACTION")
                     intent.putExtra("newDiaryId", diaryId)
                     intent.putExtra("newNumComments", newNumComments)
@@ -470,6 +580,46 @@ class CommentActivity : FragmentActivity() {
         }
     }
 
+    var reCommentWriteReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            BtnStatus = BtnStatusEnum.RE_WRITE_COMMENT
+            binding.commentWriteText.requestFocus()
+            rewriteCommentId = intent?.getStringExtra("rewriteCommentId").toString()
+            binding.commentWriteBtn.text = "답글 작성"
+
+            val inputMethodManager =
+                context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+        }
+    }
+
+    var reCommentEditReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            BtnStatus = BtnStatusEnum.RE_EDIT_COMMENT
+            binding.commentWriteText.requestFocus()
+
+            reEditCommentId = intent?.getStringExtra("commentId").toString()
+            reEditCommentCommentId = intent?.getStringExtra("reCommentId").toString()
+            reOriginalDescription = intent?.getStringExtra("reOriginalDescription").toString()
+
+            binding.commentWriteText.setText(reOriginalDescription)
+            binding.commentWriteText.setSelection(binding.commentWriteText.length())
+            binding.commentWriteBtn.text = "답글 수정"
+
+            val inputMethodManager =
+                context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+        }
+    }
+
+    var reCommentDeleteReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            adapter.notifyDataSetChanged()
+            binding.commentWriteText.text.clear()
+            BtnStatus = BtnStatusEnum.WRITE_COMMENT
+            binding.commentWriteBtn.text = "댓글 작성"
+        }
+    }
 }
 
 

@@ -3,48 +3,30 @@ package com.chugnchunon.chungchunon_android.Adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.icu.text.DecimalFormat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toDrawable
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.DataClass.EmoticonInteger
-import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
-import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.diary_card.view.*
 import kotlinx.android.synthetic.main.diary_card.view.commentBox
 import kotlinx.android.synthetic.main.diary_card.view.likeIcon
 import kotlinx.android.synthetic.main.diary_card.view.likeText
 import kotlinx.android.synthetic.main.diary_card.view.moreIcon
 import kotlinx.android.synthetic.main.diary_card_two.view.*
-import org.apache.commons.lang3.mutable.MutableBoolean
-import java.time.LocalDate
 
 
 class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
@@ -95,7 +77,7 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
-            userNameView.text = items[position].name
+            userNameView.text = items[position].username
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
 
@@ -135,11 +117,6 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                 imageDisplayRecyclerView.adapter = DisplayPhotosAdapter(context, items[position].images!!)
             }
 
-//            if(items[position].userId == userId) {
-//                var backgroundDrawable = ContextCompat.getDrawable(context, R.drawable.my_diary_background)
-//                diaryCardView.setBackgroundDrawable(backgroundDrawable)
-//            }
-
             // 좋아요 토글 작업
             likeNumLikes.put(position, items[position].numLikes!!.toInt())
 
@@ -159,7 +136,7 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                         }
                     }
                 }
-        } // bind
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {

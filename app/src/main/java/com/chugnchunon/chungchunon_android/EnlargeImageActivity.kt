@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.EnlargeImageAdapter
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
-import com.chugnchunon.chungchunon_android.Fragment.LinearLayoutManagerWrapper
 import com.chugnchunon.chungchunon_android.databinding.ActivityImageEnlargeBinding
 import kotlinx.android.synthetic.main.activity_image_enlarge.view.*
 import kotlinx.android.synthetic.main.fragment_mission.view.*

@@ -1,42 +1,21 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
-import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
-import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryTwoBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_diary.*
-import kotlinx.android.synthetic.main.activity_diary.viewPager
-import kotlinx.android.synthetic.main.fragment_all_diary.*
-import kotlinx.android.synthetic.main.fragment_all_diary_two.*
-import kotlinx.android.synthetic.main.fragment_my_diary.*
-import java.util.*
 
 class AllDiaryFragmentTwo : Fragment() {
 
@@ -55,14 +34,6 @@ class AllDiaryFragmentTwo : Fragment() {
 
     private var _binding: FragmentAllDiaryTwoBinding? = null
     private val binding get() = _binding!!
-
-    private var diaryItems: ArrayList<DiaryCard> = ArrayList()
-    private var sortItems: ArrayList<DiaryCard> = ArrayList()
-
-
-    lateinit var dataGroupSelection: DataGroupSelection
-    var order = 0
-    lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     lateinit var mcontext: Context
 
@@ -123,3 +94,24 @@ class AllDiaryFragmentTwo : Fragment() {
 
 }
 
+class LinearLayoutManagerWrapper : LinearLayoutManager {
+    constructor(context: Context) : super(context) {}
+    constructor(context: Context, orientation: Int, reverseLayout: Boolean) : super(
+        context,
+        orientation,
+        reverseLayout
+    ) {
+    }
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(
+        context,
+        attrs,
+        defStyleAttr,
+        defStyleRes
+    ) {
+    }
+
+    override fun supportsPredictiveItemAnimations(): Boolean {
+        return false
+    }
+}

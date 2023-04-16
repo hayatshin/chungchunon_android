@@ -11,21 +11,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chugnchunon.chungchunon_android.Adapter.RegionAdapter
-import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
-import com.chugnchunon.chungchunon_android.R
-import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding.inflate
-import com.chugnchunon.chungchunon_android.databinding.ActivityRegionBinding
-import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryBinding
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionListBinding
-import com.chugnchunon.chungchunon_android.databinding.FragmentRegionRegisterBinding
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 

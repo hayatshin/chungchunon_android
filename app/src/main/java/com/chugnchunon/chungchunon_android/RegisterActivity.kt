@@ -34,7 +34,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.chugnchunon.chungchunon_android.Partner.PartnerDiaryTwoActivity
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
