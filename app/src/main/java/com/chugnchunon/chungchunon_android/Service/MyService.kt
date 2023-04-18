@@ -18,10 +18,13 @@ import com.chugnchunon.chungchunon_android.MainActivity
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.Service.MyFirebaseMessagingService.Companion.CHANNEL_ID
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class MyService : Service(), SensorEventListener {
 
@@ -55,6 +58,12 @@ class MyService : Service(), SensorEventListener {
                 StepCountNotification(this, todayTotalStepCount)
             }
         }
+
+        // 주기적으로 실행
+        val executor = Executors.newSingleThreadScheduledExecutor()
+        val delay = 5 * 60 * 60
+        val period = 5 * 60 * 60
+        executor.scheduleAtFixedRate(::registerStepBackgroundAgain, delay.toLong(), period.toLong(), TimeUnit.SECONDS)
 
         // 기본
         sensorManager =
@@ -97,35 +106,7 @@ class MyService : Service(), SensorEventListener {
 
     override fun onDestroy() {
         super.onDestroy()
-
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(closeAppReceiver)
-
-        // 1. 1분마다 체크 (날짜 바뀔 때)
-        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-        val dateChangeIntent = IntentFilter()
-        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
-
-        // 2. 날짜 바뀔 때
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        )
-
-        // 3. 핸드폰 꺼질 때
-        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
-        val deviceShutdownIntent = IntentFilter()
-        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
-        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
-
-        // 4. 앱 끌 때
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            closeAppReceiver,
-            IntentFilter("CLOSE_APP")
-        )
+        registerStepBackgroundAgain()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -528,6 +509,43 @@ class MyService : Service(), SensorEventListener {
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
+    }
+
+    private fun registerStepBackgroundAgain() {
+
+        val registerSet = hashMapOf(
+            "timestamp" to FieldValue.serverTimestamp(),
+        )
+        db.collection("registerTest").document("$userId").set(registerSet)
+
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(closeAppReceiver)
+
+        // 1. 1분마다 체크 (날짜 바뀔 때)
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // 2. 날짜 바뀔 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        )
+
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // 4. 앱 끌 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            closeAppReceiver,
+            IntentFilter("CLOSE_APP")
+        )
     }
 
     var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {

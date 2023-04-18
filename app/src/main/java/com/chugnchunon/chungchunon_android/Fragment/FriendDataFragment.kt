@@ -109,6 +109,7 @@ class FriendDataFragment : Fragment() {
         if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED) {
             // 권한 없음
             binding.authLayout.visibility = View.VISIBLE
+            binding.dataLoadingProgressBar.visibility = View.GONE
         } else {
             // 권한 있음
             binding.authLayout.visibility = View.GONE
@@ -118,15 +119,6 @@ class FriendDataFragment : Fragment() {
                 friendDiaryItems.clear()
                 getData()
             }
-        }
-
-        binding.authCancelBox.setOnClickListener {
-            binding.authLayout.visibility = View.GONE
-            binding.noContactReadAuthText.visibility = View.VISIBLE
-        }
-
-        binding.authConfirmBox.setOnClickListener {
-            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), CONTACT_REQ)
         }
 
         // 일반

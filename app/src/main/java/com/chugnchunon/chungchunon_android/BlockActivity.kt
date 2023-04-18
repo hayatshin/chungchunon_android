@@ -49,7 +49,7 @@ class BlockActivity : Activity() {
     override fun onBackPressed() {
         resumePause = true
 
-        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
         binding.blockBox.startAnimation(downAnimation)
 
         downAnimation.setAnimationListener(object : Animation.AnimationListener {
@@ -67,19 +67,19 @@ class BlockActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        var diaryType = intent.getStringExtra("diaryType")
+        val diaryType = intent.getStringExtra("diaryType")
 
         binding.blockBackground.setOnClickListener {
             resumePause = true
 
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.blockBox.startAnimation(downAnimation)
            Handler().postDelayed({
                 finish()
             }, 500)
         }
 
-        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        val upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.blockBox.startAnimation(upAnimation)
 
         diaryId = intent.getStringExtra("diaryId").toString()
@@ -100,7 +100,7 @@ class BlockActivity : Activity() {
         }
 
         binding.editLayout.setOnClickListener {
-            var goEditActivity = Intent(this, EditDiaryActivity::class.java)
+            val goEditActivity = Intent(this, EditDiaryActivity::class.java)
             goEditActivity.putExtra("editDiaryId", diaryId)
             goEditActivity.putExtra("diaryType", diaryType)
             startActivity(goEditActivity)
@@ -110,30 +110,49 @@ class BlockActivity : Activity() {
             resumePause = false
 
             // 좋아요 삭제
-            diaryDB.document("$diaryId").collection("likes").get()
+            diaryDB.document(diaryId).collection("likes").get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
-                        var diaryUserId = document.data.getValue("id")
-                        diaryDB.document("$diaryId").collection("likes").document("$diaryUserId")
+                        val diaryUserId = document.data.getValue("id")
+                        diaryDB.document(diaryId).collection("likes").document("$diaryUserId")
                             .delete()
                     }
                 }
 
-            // 댓글 삭제
-            diaryDB.document("$diaryId").collection("comments").get()
+            // 답글 삭제
+            diaryDB.document(diaryId).collection("comments").get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
-                        var commentId = document.data.getValue("commentId")
-                        diaryDB.document("$diaryId").collection("comments").document("$commentId")
+                        val commentId = document.data.getValue("commentId")
+                        diaryDB.document(diaryId).collection("comments").document("$commentId")
+                            .collection("reComments").get()
+                            .addOnSuccessListener { reCommentsDocs ->
+                                for(reCommentDoc in reCommentsDocs) {
+                                    val reCommentDocId = reCommentDoc.data.getValue("reCommentId")
+                                    diaryDB.document(diaryId)
+                                        .collection("comments").document("$commentId")
+                                        .collection("reComments").document("$reCommentDocId")
+                                        .delete()
+                                }
+                            }
+                    }
+                }
+
+            // 댓글 삭제
+            diaryDB.document(diaryId).collection("comments").get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        val commentId = document.data.getValue("commentId")
+                        diaryDB.document(diaryId).collection("comments").document("$commentId")
                             .delete()
                     }
                 }
 
             // 글 삭제
-            diaryDB.document("$diaryId").delete()
+            diaryDB.document(diaryId).delete()
 
 
-            var goMyFragment = Intent(this, DiaryTwoActivity::class.java)
+            val goMyFragment = Intent(this, DiaryTwoActivity::class.java)
             goMyFragment.putExtra("from", "delete")
             startActivity(goMyFragment)
         }
@@ -142,7 +161,7 @@ class BlockActivity : Activity() {
         binding.blockGobackArrow.setOnClickListener {
             resumePause = true
 
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.blockBox.startAnimation(downAnimation)
             Handler().postDelayed({
                 finish()
@@ -155,11 +174,11 @@ class BlockActivity : Activity() {
         )
         layoutParams.setMargins(0, 40, 0, 40)
 
-        var blockCheckIcon = ImageView(applicationContext)
+        val blockCheckIcon = ImageView(applicationContext)
         blockCheckIcon.layoutParams = layoutParams
         blockCheckIcon.setImageResource(R.drawable.ic_block_check)
 
-        var resultView = TextView(applicationContext)
+        val resultView = TextView(applicationContext)
 
         resultView.layoutParams = layoutParams
         resultView.setTypeface(null, Typeface.BOLD)
@@ -239,8 +258,8 @@ class BlockActivity : Activity() {
 
     private fun dpTextSize(dp: Float): Float {
         metrics = applicationContext.resources.displayMetrics
-        var fpixels = metrics.density * dp
-        var pixels = fpixels * 0.5f
+        val fpixels = metrics.density * dp
+        val pixels = fpixels * 0.5f
         return pixels
     }
 }

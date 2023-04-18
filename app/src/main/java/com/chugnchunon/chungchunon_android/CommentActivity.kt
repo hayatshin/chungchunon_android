@@ -167,7 +167,7 @@ class CommentActivity : FragmentActivity() {
         binding.commentBackground.setOnClickListener {
             resumePause = true
 
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
 
             Handler().postDelayed({
@@ -177,7 +177,7 @@ class CommentActivity : FragmentActivity() {
 
         // 화살표 뒤로가기
         binding.commentGobackArrow.setOnClickListener {
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.commentLayout.startAnimation(downAnimation)
             Handler().postDelayed({
                 finish()

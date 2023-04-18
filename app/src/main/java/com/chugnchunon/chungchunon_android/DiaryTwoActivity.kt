@@ -179,7 +179,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
 
-
         // 권한 체크
         val readContactPermissionCheck =
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
@@ -246,26 +245,20 @@ class DiaryTwoActivity : AppCompatActivity() {
         }
 
         // 배터리 제한 없음 설정 안 한 경우
-        val intent = Intent()
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                if(!pm.isIgnoringBatteryOptimizations(packageName)) {
-                    intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    intent.data = Uri.parse("package:${packageName}")
-                    startActivityForResult(intent, IGNORING_BATTERY_OPT_REQ_CODE)
-                } else {
-                    val batteryAuthSet = hashMapOf(
-                        "auth_ignoring_battery" to true,
-                    )
-                    userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-                }
-            } catch(e:Exception) {
-                //
-            }
-        }
+//        val packageName = packageName
+//        val intent = Intent()
+//        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+//
+//        if(!pm.isIgnoringBatteryOptimizations(packageName)) {
+//            intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+//            intent.data = Uri.parse("packageName:$packageName")
+//            startActivityForResult(intent, IGNORING_BATTERY_OPT_REQ_CODE)
+//        } else {
+//            val batteryAuthSet = hashMapOf(
+//                "auth_ignoring_battery" to true,
+//            )
+//            userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+//        }
 
         // 메뉴 이동
         from = intent.getStringExtra("from").toString()
@@ -293,11 +286,16 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
 
             // 초기값 세팅
-            if(intent.hasExtra("from")){
-                if (from == "edit") {
-                    changeFragment(AllDiaryFragmentTwo())
-                    binding.bottomNav.selectedItemId = R.id.ourTodayMenu
-                } else if (from == "delete") {
+            if (from == "edit") {
+                changeFragment(AllDiaryFragmentTwo())
+                binding.bottomNav.selectedItemId = R.id.ourTodayMenu
+            } else if (from == "delete") {
+                changeFragment(AllDiaryFragmentTwo())
+                binding.bottomNav.selectedItemId = R.id.ourTodayMenu
+            } else {
+                // 댓글 푸시 알림
+                if (intent.hasExtra("notificationDiaryId")) {
+                    // 들어오는 경우
                     changeFragment(AllDiaryFragmentTwo())
                     binding.bottomNav.selectedItemId = R.id.ourTodayMenu
                 } else {
@@ -305,12 +303,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                     binding.bottomNav.selectedItemId = R.id.myTodayMenu
 
                 }
-            } else if(intent.hasExtra("notificationDiaryId")) {
-                changeFragment(AllDiaryFragmentTwo())
-                binding.bottomNav.selectedItemId = R.id.ourTodayMenu
-            } else {
-                changeFragment(MyDiaryFragment())
-                binding.bottomNav.selectedItemId = R.id.myTodayMenu
             }
         }
     }

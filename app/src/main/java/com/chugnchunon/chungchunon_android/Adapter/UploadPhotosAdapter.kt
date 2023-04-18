@@ -49,7 +49,6 @@ class UploadPhotosAdapter(val context: Context, private val imageData: List<Any>
         holder.bind(context, imageData!![position])
 
         holder.itemView.imageLayout.setOnClickListener { view ->
-            Log.d("삭제", "클릭")
             var deleteImageMyFragment = Intent(context, MyDiaryFragment::class.java)
             deleteImageMyFragment.setAction("DELETE_IMAGE")
             deleteImageMyFragment.putExtra("deleteImagePosition", position)

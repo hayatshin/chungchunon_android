@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -112,14 +113,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
         binding.pointQuestion.setOnClickListener {
             if (!questionClick) {
 
-
                 binding.pointIntroduction.visibility = View.VISIBLE
-                binding.pointIntroduction.alpha = 0f
-
-                binding.pointIntroduction.animate()
-                    .alpha(1f)
-                    .setDuration(300)
-                    .start()
 
                 ObjectAnimator.ofFloat(binding.pointIntroduction, "translationY", -20f, 0f)
                     .apply {
@@ -128,19 +122,16 @@ class PeriodThisWeekRankingFragment : Fragment() {
                         start()
                     }
 
+                ObjectAnimator.ofFloat(binding.rankingRecyclerView, "translationY", -20f, 0f)
+                    .apply {
+                        duration = 300
+                        interpolator = AccelerateInterpolator()
+                        start()
+                    }
 
                 questionClick = true
             } else {
-//                Handler().postDelayed({
-//                    binding.pointIntroduction.visibility = View.GONE
-//                }, 400)
                 binding.pointIntroduction.visibility = View.GONE
-
-
-                binding.pointIntroduction.animate()
-                    .alpha(0f)
-                    .setDuration(300)
-                    .start()
 
                 ObjectAnimator.ofFloat(binding.pointIntroduction, "translationY", 0f, -40f)
                     .apply {
@@ -149,6 +140,12 @@ class PeriodThisWeekRankingFragment : Fragment() {
                         start()
                     }
 
+                ObjectAnimator.ofFloat(binding.rankingRecyclerView, "translationY", 0f, -40f)
+                    .apply {
+                        duration = 300
+                        interpolator = AccelerateInterpolator()
+                        start()
+                    }
 
                 questionClick = false
             }

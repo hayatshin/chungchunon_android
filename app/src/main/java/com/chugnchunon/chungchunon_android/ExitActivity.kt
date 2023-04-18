@@ -36,7 +36,6 @@ class ExitActivity : Activity() {
         }
 
         binding.exitConfirmBox.setOnClickListener {
-
             val exitSet = hashMapOf(
                 "userId" to userId,
                 "timestamp" to FieldValue.serverTimestamp()
@@ -51,8 +50,6 @@ class ExitActivity : Activity() {
                             startActivity(goMain)
                         }
                 }
-
-
         }
     }
 

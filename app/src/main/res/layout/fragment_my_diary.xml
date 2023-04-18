@@ -181,6 +181,7 @@
                             android:textStyle="bold" />
 
                         <androidx.appcompat.widget.AppCompatButton
+                            android:visibility="gone"
                             android:id="@+id/stepAuthLayout"
                             style="@style/Widget.AppCompat.Button.Borderless"
                             android:layout_width="140dp"
@@ -190,13 +191,13 @@
                             android:drawableStart="@drawable/ic_run_20"
                             android:drawablePadding="10dp"
                             android:paddingHorizontal="20dp"
-                            android:text="권한 허용"
+                            android:text="권한 없음"
                             android:textSize="18dp" />
 
 
                         <LinearLayout
                             android:id="@+id/stepCountLayout"
-                            android:visibility="gone"
+                            android:visibility="visible"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="bottom"

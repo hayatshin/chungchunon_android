@@ -63,7 +63,7 @@ class EditDiaryActivity : AppCompatActivity() {
     }
 
     lateinit var diaryEditCheck: DiaryEditClass
-    lateinit var newImageViewModel: NewImageViewModel
+    lateinit var newImageViewModel: EditNewImageViewModel
 
     lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     lateinit var photoAdapter: UploadPhotosAdapter
@@ -91,7 +91,7 @@ class EditDiaryActivity : AppCompatActivity() {
             finish()
         }
 
-        newImageViewModel = ViewModelProvider(this).get(NewImageViewModel::class.java)
+        newImageViewModel = ViewModelProvider(this).get(EditNewImageViewModel::class.java)
 
         var editDiaryId = intent.getStringExtra("editDiaryId")
 
@@ -168,7 +168,6 @@ class EditDiaryActivity : AppCompatActivity() {
         })
 
         newImageViewModel.uploadFirebaseComplete.observe(this, Observer { value ->
-            Log.d("삭제 클릭", "$newDiarySet")
 
             if (newImageViewModel.uploadFirebaseComplete.value == true) {
                 diaryDB.document("$editDiaryId")
@@ -421,8 +420,6 @@ class EditDiaryActivity : AppCompatActivity() {
 
             } else {
                 // 이미지 업로드 안 하는 경우
-                Log.d("수정수정", "photoEdit xx")
-
                 if (diaryEditCheck.diaryEdit.value == true) {
                     var newDiary = binding.todayDiary.text
                     newDiarySet.put("todayDiary", newDiary.toString())
@@ -579,7 +576,7 @@ class DiaryEditClass : ViewModel() {
 }
 
 
-class NewImageViewModel : ViewModel() {
+class EditNewImageViewModel : ViewModel() {
     var uploadFirebaseComplete = MutableLiveData<Boolean>().apply {
         postValue(false)
     }
