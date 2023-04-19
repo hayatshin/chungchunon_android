@@ -143,12 +143,12 @@ class MyDataFragment : Fragment() {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
 
-            for (diaryItem in myDiaryItems) {
+            myDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {
                     diaryItem.numLikes = newNumLikes?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-            adapter.notifyDataSetChanged()
         }
     }
 
@@ -168,13 +168,12 @@ class MyDataFragment : Fragment() {
             val createDiaryId = intent?.getStringExtra("newDiaryId")
             val createNumComments = intent?.getIntExtra("newNumComments", 0)
 
-            for(diaryItem in myDiaryItems) {
-                if(diaryItem.diaryId == createDiaryId) {
+            myDiaryItems.forEachIndexed { index, diaryItem ->
+                if (diaryItem.diaryId == createDiaryId) {
                     diaryItem.numComments = createNumComments?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-
-            adapter.notifyDataSetChanged()
         }
     }
 

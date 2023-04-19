@@ -243,12 +243,12 @@ class CommentActivity : FragmentActivity() {
         // 로컬 브로드캐스트
         LocalBroadcastManager.getInstance(this).registerReceiver(
             editDescriptionReceiver,
-            IntentFilter("EDIT_INTENT")
+            IntentFilter("EDIT_COMMENT_INTENT")
         )
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             deleteCommentReceiver,
-            IntentFilter("DELETE_INTENT")
+            IntentFilter("DELETE_COMMENT_INTENT")
         )
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
@@ -295,7 +295,6 @@ class CommentActivity : FragmentActivity() {
                             }
                     }
 
-
                 // diary DB 내 comments 추가
                 val timestamp = System.currentTimeMillis()
                 val commentId = "${userId}_${timestamp}"
@@ -324,7 +323,7 @@ class CommentActivity : FragmentActivity() {
                         description.toString()
                     )
                 )
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemInserted(commentItems.size - 1)
 
                 binding.commentRecyclerView.layoutManager =
                     LinearLayoutManagerWrapper(
@@ -338,24 +337,24 @@ class CommentActivity : FragmentActivity() {
 
             } else if (BtnStatus == BtnStatusEnum.EDIT_COMMENT) {
                 // 댓글 수정 버튼
-                val newDescription = binding.commentWriteText.text
+                val newDescription = binding.commentWriteText.text.toString()
 
                 val newDescriptionSet = hashMapOf(
-                    "description" to newDescription.toString()
+                    "description" to newDescription
                 )
 
                 diaryDB.document(diaryId).collection("comments").document("$editCommentId")
                     .set(newDescriptionSet, SetOptions.merge())
                     .addOnSuccessListener {
-                        binding.commentWriteText.text.clear()
-                        commentItems[editCommentPosition!!].commentDescription =
-                            newDescription.toString()
-                        adapter.notifyDataSetChanged()
+                        commentItems[editCommentPosition!!].commentDescription = newDescription
+                        adapter.notifyItemChanged(editCommentPosition!!)
                         BtnStatus = BtnStatusEnum.WRITE_COMMENT
                         binding.commentWriteBtn.text = "댓글 작성"
+                        binding.commentWriteText.text.clear()
                     }
             } else if (BtnStatus == BtnStatusEnum.RE_WRITE_COMMENT) {
-                // diary DB 내 comments 추가
+                // 답글 작성
+
                 val reTimestamp = System.currentTimeMillis()
                 val reCommentId = "${userId}_${reTimestamp}"
                 val reDescription = binding.commentWriteText.text.toString()
@@ -375,7 +374,12 @@ class CommentActivity : FragmentActivity() {
                         binding.commentWriteText.text.clear()
                         BtnStatus = BtnStatusEnum.WRITE_COMMENT
                         binding.commentWriteBtn.text = "댓글 작성"
-                        adapter.notifyDataSetChanged()
+
+                        commentItems.forEachIndexed { index, comment ->
+                            if(comment.commentId == rewriteCommentId) {
+                                adapter.notifyItemChanged(index)
+                            }
+                        }
                     }
 
             } else if (BtnStatus == BtnStatusEnum.RE_EDIT_COMMENT) {
@@ -392,7 +396,13 @@ class CommentActivity : FragmentActivity() {
                         binding.commentWriteText.text.clear()
                         BtnStatus = BtnStatusEnum.WRITE_COMMENT
                         binding.commentWriteBtn.text = "댓글 작성"
-                        adapter.notifyDataSetChanged()
+
+                        commentItems.forEachIndexed { index, comment ->
+                            if(comment.commentId == reEditCommentId) {
+                                adapter.notifyItemChanged(index)
+                            }
+                        }
+
                     }
             }
         }
@@ -414,6 +424,9 @@ class CommentActivity : FragmentActivity() {
         )
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             reCommentEditReceiver
+        )
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+            reCommentDeleteReceiver
         )
     }
 
@@ -483,7 +496,7 @@ class CommentActivity : FragmentActivity() {
                                     commentDataLoading.loadingCompleteData.value = true
                                     binding.noItemText.visibility = View.GONE
 
-                                    adapter.notifyDataSetChanged()
+                                    adapter.notifyItemInserted(commentItems.size -1)
                                 } else {
                                     // 유저가 없는 경우
                                     val commentUserName = "탈퇴자"
@@ -515,7 +528,7 @@ class CommentActivity : FragmentActivity() {
                                     commentDataLoading.loadingCompleteData.value = true
                                     binding.noItemText.visibility = View.GONE
 
-                                    adapter.notifyDataSetChanged()
+                                    adapter.notifyItemInserted(commentItems.size -1)
                                 }
                             }
 
@@ -559,7 +572,7 @@ class CommentActivity : FragmentActivity() {
 
             if (commentItems.size != 0) {
                 commentItems.removeAt(deleteCommentPosition!!.toInt())
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemRemoved(deleteCommentPosition)
 
                 if (commentItems.size == 0) {
                     binding.noItemText.visibility = View.VISIBLE
@@ -614,10 +627,16 @@ class CommentActivity : FragmentActivity() {
 
     var reCommentDeleteReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            adapter.notifyDataSetChanged()
             binding.commentWriteText.text.clear()
             BtnStatus = BtnStatusEnum.WRITE_COMMENT
             binding.commentWriteBtn.text = "댓글 작성"
+
+            val deleteCommentId = intent?.getStringExtra("commentId")
+            commentItems.forEachIndexed { index, comment ->
+                if(comment.commentId == deleteCommentId) {
+                    adapter.notifyItemChanged(index)
+                }
+            }
         }
     }
 }

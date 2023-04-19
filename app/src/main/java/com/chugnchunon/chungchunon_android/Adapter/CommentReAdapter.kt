@@ -103,24 +103,31 @@ class CommentReAdapter(var context: Context, var items: ArrayList<ReComment>) :
             val DiaryRef = diaryDB.document(items[position].diaryId)
 
             // recomments DB 삭제
-            DiaryRef
-                .collection("comments")
+            DiaryRef.collection("comments")
                 .document(items[position].commentId)
                 .collection("reComments")
                 .document(items[position].reCommentId)
-                .delete()
-                .addOnSuccessListener {
+                .get()
+                .addOnSuccessListener { reCommentData ->
+                    if (reCommentData.exists()) {
+                        DiaryRef
+                            .collection("comments")
+                            .document(items[position].commentId)
+                            .collection("reComments")
+                            .document(items[position].reCommentId)
+                            .delete()
+                            .addOnSuccessListener {
 
-                    val deleteIntent =
-                        Intent(context, CommentActivity::class.java)
-                    deleteIntent.setAction("RE_COMMENT_DELETE_INTENT")
-                    deleteIntent.putExtra("commentId", items[position].commentId)
-                    deleteIntent.putExtra("deleteRecommentPosition", position)
-                    LocalBroadcastManager.getInstance(context)
-                        .sendBroadcast(deleteIntent);
+                                val deleteIntent =
+                                    Intent(context, CommentActivity::class.java)
+                                deleteIntent.setAction("RE_COMMENT_DELETE_INTENT")
+                                deleteIntent.putExtra("commentId", items[position].commentId)
+                                deleteIntent.putExtra("deleteRecommentPosition", position)
+                                LocalBroadcastManager.getInstance(context)
+                                    .sendBroadcast(deleteIntent);
+                            }
+                    }
                 }
-
-
         }
     }
 

@@ -1,10 +1,18 @@
 package com.chugnchunon.chungchunon_android.BroadcastReceiver
 
+import android.app.AlarmManager
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Service.MyService
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue

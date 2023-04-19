@@ -224,10 +224,10 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
         // 수정
         holder.itemView.editBtn.setOnClickListener { view ->
             val editIntent = Intent(context, CommentActivity::class.java)
-            editIntent.setAction("EDIT_INTENT")
+            editIntent.setAction("EDIT_COMMENT_INTENT")
             editIntent.putExtra("editCommentId", items[position].commentId)
             editIntent.putExtra("editCommentPosition", position)
-            editIntent.putExtra("originalDescription", originalDescription)
+            editIntent.putExtra("originalDescription", items[position].commentDescription)
             LocalBroadcastManager.getInstance(context).sendBroadcast(editIntent);
         }
 
@@ -237,31 +237,42 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
             val DiaryRef = diaryDB.document(items[position].diaryId)
 
             // comments DB 삭제
-            DiaryRef
-                .collection("comments")
+            DiaryRef.collection("comments")
                 .document(items[position].commentId)
-                .delete()
-                .addOnSuccessListener {
+                .get()
+                .addOnSuccessListener { commentData ->
+                    if (commentData.exists()) {
+                        DiaryRef
+                            .collection("comments")
+                            .document(items[position].commentId)
+                            .delete()
+                            .addOnSuccessListener {
+                                // diary DB 내 numComments -1
+                                DiaryRef.update("numComments", FieldValue.increment(-1))
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
 
-                    // diary DB 내 numComments -1
-                    DiaryRef.update("numComments", FieldValue.increment(-1))
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-
-                                val deleteIntent =
-                                    Intent(context, CommentActivity::class.java)
-                                deleteIntent.setAction("DELETE_INTENT")
-                                deleteIntent.putExtra("deleteDiaryId", items[position].diaryId)
-                                deleteIntent.putExtra(
-                                    "deleteDiaryPosition",
-                                    items[position].diaryPosition
-                                )
-                                deleteIntent.putExtra("deleteCommentPosition", position)
-                                LocalBroadcastManager.getInstance(context)
-                                    .sendBroadcast(deleteIntent);
+                                            val deleteIntent =
+                                                Intent(context, CommentActivity::class.java)
+                                            deleteIntent.setAction("DELETE_COMMENT_INTENT")
+                                            deleteIntent.putExtra(
+                                                "deleteDiaryId",
+                                                items[position].diaryId
+                                            )
+                                            deleteIntent.putExtra(
+                                                "deleteDiaryPosition",
+                                                items[position].diaryPosition
+                                            )
+                                            deleteIntent.putExtra("deleteCommentPosition", position)
+                                            LocalBroadcastManager.getInstance(context)
+                                                .sendBroadcast(deleteIntent);
+                                        }
+                                    }
                             }
-                        }
+                    }
                 }
+
+
         }
 
         // 답글 달기

@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.chugnchunon.chungchunon_android">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.SET_ALARM"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -44,7 +46,7 @@
         <service
             android:name=".Service.MyService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"/>
 
         <service android:name=".Service.MyFirebaseMessagingService"
             android:permission="signature"
@@ -162,6 +164,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".BroadcastReceiver.AlarmBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </receiver>
     </application>

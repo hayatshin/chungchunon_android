@@ -242,6 +242,11 @@ class DiaryTwoActivity : AppCompatActivity() {
             } else {
                 startService(startService);
             }
+
+            val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+            stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+            stepAuthIntent.putExtra("StepAuth", true)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
         }
 
         // 배터리 제한 없음 설정 안 한 경우
@@ -359,6 +364,11 @@ class DiaryTwoActivity : AppCompatActivity() {
                             startService(startService);
                         }
 
+                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+                        stepAuthIntent.putExtra("StepAuth", true)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
+
                     } else {
                         // 걸음수 권한 부여 x
                         val authSet = hashMapOf(
@@ -388,6 +398,11 @@ class DiaryTwoActivity : AppCompatActivity() {
                             startService(startService);
                         }
 
+                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+                        stepAuthIntent.putExtra("StepAuth", true)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
+
                     } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED) {
                         // 걸음수 권한 부여 o, 휴대폰 연동 권한 부여 x
 
@@ -403,6 +418,12 @@ class DiaryTwoActivity : AppCompatActivity() {
                         } else {
                             startService(startService);
                         }
+
+                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+                        stepAuthIntent.putExtra("StepAuth", true)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
+
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                         // 걸음수 권한 부여 x, 휴대폰 연동 권한 부여 o
                         val stepAuthSet = hashMapOf(

@@ -143,12 +143,12 @@ class UserRegionDataFragment : Fragment() {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
 
-            for (diaryItem in userRegionDiaryItems) {
+            userRegionDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {
                     diaryItem.numLikes = newNumLikes?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-            adapter.notifyDataSetChanged()
         }
     }
 
@@ -167,12 +167,12 @@ class UserRegionDataFragment : Fragment() {
             val createDiaryId = intent?.getStringExtra("newDiaryId")
             val createNumComments = intent?.getIntExtra("newNumComments", 0)
 
-            for (diaryItem in userRegionDiaryItems) {
+            userRegionDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == createDiaryId) {
                     diaryItem.numComments = createNumComments?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-            adapter.notifyDataSetChanged()
         }
     }
 

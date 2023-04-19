@@ -76,7 +76,7 @@ class RegionAdapter(private var context: Context, private var regionData: List<S
                 intent.putExtra("smallRegionCheck", smallRegionCheck)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
-                var regionIntent = Intent(context, SmallRegionRegisterFragment::class.java)
+                val regionIntent = Intent(context, SmallRegionRegisterFragment::class.java)
                 regionIntent.setAction("REGION_REGISTER")
                 regionIntent.putExtra("selectedRegion", selectedRegion)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(regionIntent)

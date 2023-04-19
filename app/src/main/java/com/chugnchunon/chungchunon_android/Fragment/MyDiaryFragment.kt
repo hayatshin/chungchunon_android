@@ -111,7 +111,6 @@ class MyDiaryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
@@ -128,6 +127,11 @@ class MyDiaryFragment : Fragment() {
             binding.stepCountLayout.visibility = View.GONE
             binding.stepAuthLayout.visibility = View.VISIBLE
         }
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            stepAuthGrantedReceiver,
+            IntentFilter("STEP_AUTH_UPDATE")
+        );
 
         // 스크롤뷰 키보드 터치다운
         binding.myDiaryScrollView.setOnTouchListener(object : View.OnTouchListener {
@@ -294,7 +298,6 @@ class MyDiaryFragment : Fragment() {
                 val writeTime = LocalDateTime.now()
                 val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
-
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
                         val username = document.data?.getValue("name")
@@ -323,7 +326,7 @@ class MyDiaryFragment : Fragment() {
                             .document(diaryId)
                             .set(diarySet, SetOptions.merge())
                             .addOnSuccessListener {
-                                var fragment = requireActivity().supportFragmentManager
+                                val fragment = requireActivity().supportFragmentManager
                                 fragment.beginTransaction()
                                     .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
                                 requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
@@ -331,7 +334,6 @@ class MyDiaryFragment : Fragment() {
                     }
             }
         })
-
 
         // 일기 작성 여부
         val writeTime = LocalDateTime.now().toString().substring(0, 10)
@@ -346,7 +348,6 @@ class MyDiaryFragment : Fragment() {
         val dayOfTheWeek = sdf.format(Date())
 
         binding.todayDate.text = "${monthUI}월 ${dateUI}일 (${DateFormat().doDayOfWeek()})"
-
 
         diaryDB
             .document("${userId}_${writeTime}")
@@ -378,7 +379,8 @@ class MyDiaryFragment : Fragment() {
                                     }
                                     photoAdapter = UploadPhotosAdapter(mcontext, oldImageList)
                                     binding.photoRecyclerView.adapter = photoAdapter
-                                    photoAdapter.notifyDataSetChanged()
+                                    photoAdapter.notifyItemInserted(oldImageList.size -1)
+//                                    photoAdapter.notifyDataSetChanged()
                                     binding.photoRecyclerView.visibility = View.VISIBLE
                                 }
 
@@ -430,7 +432,12 @@ class MyDiaryFragment : Fragment() {
                             // 일기 수정
                             binding.todayDiary.addTextChangedListener(
                                 object : TextWatcher {
-                                    override fun beforeTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                                    override fun beforeTextChanged(
+                                        char: CharSequence?,
+                                        p1: Int,
+                                        p2: Int,
+                                        p3: Int
+                                    ) {
                                         // null
                                     }
 
@@ -440,7 +447,8 @@ class MyDiaryFragment : Fragment() {
                                         before: Int,
                                         count: Int
                                     ) {
-                                        if(char != originalDiary) diaryEditCheck.diaryEdit.value = true
+                                        if (char != originalDiary) diaryEditCheck.diaryEdit.value =
+                                            true
                                     }
 
                                     override fun afterTextChanged(p0: Editable?) {
@@ -496,7 +504,6 @@ class MyDiaryFragment : Fragment() {
             if (readPermission == PackageManager.PERMISSION_DENIED) {
                 // 권한 요청
                 requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQ_GALLERY)
-
             } else {
                 val intent = Intent(Intent.ACTION_PICK)
                 intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -521,7 +528,6 @@ class MyDiaryFragment : Fragment() {
         val removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
         val currentMonthDate = MonthDate(currentMonth.toInt()).getDate
 
-
         val thisMonthCount = diaryDB
             .whereEqualTo("monthDate", currentYearMonth)
             .whereEqualTo("userId", userId)
@@ -537,7 +543,7 @@ class MyDiaryFragment : Fragment() {
                                 mcontext,
                                 R.color.main_color
                             )
-                        ) { append("${calendarThisMonthCount}") }
+                        ) { append(calendarThisMonthCount) }
                     }
                     .append(" / ${currentMonthDate}일")
 
@@ -599,7 +605,7 @@ class MyDiaryFragment : Fragment() {
                     before: Int,
                     count: Int
                 ) {
-                    if(!editDiary) {
+                    if (!editDiary) {
                         diaryFillCheck.diaryFill.value = char?.length != 0
                     }
                 }
@@ -636,7 +642,6 @@ class MyDiaryFragment : Fragment() {
                 if (newImageViewModel.newImageList.value!!.all { it ->
                         it.toString().startsWith("http://")
                     }) {
-                    Log.d("올리기", "모두 https://")
                     newImageViewModel.uploadFirebaseComplete.value = true
                 }
 
@@ -745,21 +750,19 @@ class MyDiaryFragment : Fragment() {
                         newImageViewModel.addImage(imageUri)
                         if (!editDiary) diaryFillCheck.photoFill.value =
                             true else diaryEditCheck.photoEdit.value = true
+                        photoAdapter = UploadPhotosAdapter(
+                            mcontext,
+                            newImageViewModel.newImageList.value!!
+                        )
+                        binding.photoRecyclerView.adapter = photoAdapter
+                        photoAdapter.notifyItemInserted(i)
                     }
-
-                    photoAdapter = UploadPhotosAdapter(
-                        mcontext,
-                        newImageViewModel.newImageList.value!!
-                    )
-                    binding.photoRecyclerView.adapter = photoAdapter
-                    photoAdapter.notifyDataSetChanged()
-
+//                    photoAdapter.notifyDataSetChanged()
                     binding.photoRecyclerView.visibility = View.VISIBLE
                 }
             }
         }
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -855,6 +858,16 @@ class MyDiaryFragment : Fragment() {
             })
     }
 
+    private var stepAuthGrantedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val stepAuth = intent?.getBooleanExtra("StepAuth", true)
+            if (stepAuth!!) {
+                binding.stepCountLayout.visibility = View.VISIBLE
+                binding.stepAuthLayout.visibility = View.GONE
+            }
+        }
+    }
+
     private var stepCountUpdateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("SetTextI18n")
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -891,11 +904,10 @@ class MyDiaryFragment : Fragment() {
 
             val deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
             newImageViewModel.removeImage(deleteImagePosition!!.toInt())
-            photoAdapter.notifyDataSetChanged()
+            photoAdapter.notifyItemRemoved(deleteImagePosition!!.toInt())
 
             if (!editDiary) diaryFillCheck.photoFill.value =
                 true else diaryEditCheck.photoEdit.value = true
-
         }
     }
 

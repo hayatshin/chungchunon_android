@@ -175,12 +175,12 @@ class FriendDataFragment : Fragment() {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
 
-            for (diaryItem in friendDiaryItems) {
+            friendDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {
                     diaryItem.numLikes = newNumLikes?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-            adapter.notifyDataSetChanged()
         }
     }
 
@@ -213,16 +213,15 @@ class FriendDataFragment : Fragment() {
     var newNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
-            var createDiaryId = intent?.getStringExtra("newDiaryId")
-            var createNumComments = intent?.getIntExtra("newNumComments", 0)
+            val createDiaryId = intent?.getStringExtra("newDiaryId")
+            val createNumComments = intent?.getIntExtra("newNumComments", 0)
 
-            for (diaryItem in friendDiaryItems) {
+            friendDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == createDiaryId) {
                     diaryItem.numComments = createNumComments?.toLong()
+                    adapter.notifyItemChanged(index)
                 }
             }
-
-            adapter.notifyDataSetChanged()
         }
     }
 
