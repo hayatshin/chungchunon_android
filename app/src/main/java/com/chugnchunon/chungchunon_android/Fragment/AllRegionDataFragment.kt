@@ -1,28 +1,39 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.AllDiaryCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.DisplayPhotosAdapter
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.EnlargeAvatarActivity
+import com.chugnchunon.chungchunon_android.EnlargeImageActivity
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
+import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.diary_card_two.view.*
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
 import kotlin.collections.ArrayList
 
@@ -75,7 +86,7 @@ class AllRegionDataFragment : Fragment() {
             activity?.intent?.getStringExtra("notificationCommentId").toString()
 
         if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
-            var openComment = Intent(requireActivity(), CommentActivity::class.java)
+            val openComment = Intent(requireActivity(), CommentActivity::class.java)
             openComment.putExtra("notificationDiaryId", notificationDiaryId)
             openComment.putExtra("notificationCommentId", notificationCommentId)
             startActivity(openComment)
@@ -86,7 +97,7 @@ class AllRegionDataFragment : Fragment() {
         swipeRefreshLayout = binding.swipeRecyclerDiary
         binding.swipeRecyclerDiary.setOnRefreshListener {
             swipeRefreshLayout.isRefreshing = false
-            var ft = parentFragmentManager.beginTransaction()
+            val ft = parentFragmentManager.beginTransaction()
             ft.detach(this).attach(this).commitAllowingStateLoss()
         }
 
@@ -110,14 +121,13 @@ class AllRegionDataFragment : Fragment() {
 
 
         // 어댑터 연결
-        adapter = AllDiaryCardAdapter(requireContext(), diaryItems)
+        adapter = AllDiaryCardAdapter(requireActivity(), diaryItems)
         binding.recyclerDiary.adapter = adapter
         binding.recyclerDiary.layoutManager = LinearLayoutManagerWrapper(
             mcontext,
             RecyclerView.VERTICAL,
             false
         )
-
 
         // 로컬 브로드캐스트
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -192,7 +202,7 @@ class AllRegionDataFragment : Fragment() {
             val createDiaryId = intent?.getStringExtra("newDiaryId")
             val createNumComments = intent?.getIntExtra("newNumComments", 0)
 
-            diaryItems.forEachIndexed {index, diaryItem ->
+            diaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == createDiaryId) {
                     diaryItem.numComments = createNumComments?.toLong()
                     adapter.notifyItemChanged(index)
@@ -473,7 +483,6 @@ class AllRegionDataFragment : Fragment() {
             }
         }
     }
-
 }
 
 

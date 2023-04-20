@@ -46,15 +46,8 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                 }
             }
         }
-
-        // 디비 저장
-        val currentDateTime = LocalDateTime.now()
-        val registerSet = hashMapOf(
-            "$currentDateTime" to true,
-        )
-        db.collection("register_test").document("$userId").set(registerSet, SetOptions.merge())
-
     }
+
 }
 
 

@@ -47,6 +47,72 @@
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/recognitionResultLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintDimensionRatio="1.3:1"
+            android:layout_marginHorizontal="40dp"
+            android:id="@+id/recognitionResultBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/mindbox_update"
+            android:orientation="vertical"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/resultEmoji"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/ic_throb"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    app:tint="@color/main_color" />
+
+                <TextView
+                    android:id="@+id/bigResultText"
+                    android:layout_marginBottom="15dp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="정답입니다!"
+                    android:textAlignment="center"
+                    android:textColor="@color/main_color"
+                    android:textSize="20dp" />
+
+                <TextView
+                    android:lineHeight="25dp"
+                    android:id="@+id/smallResultText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="정답은 1입니다\n꾸준히 지속하면 돼요 :)"
+                    android:textAlignment="center"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,9 +182,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textStyle="bold"
                 android:textColor="@color/custom_gray"
                 android:textSize="17dp"
+                android:textStyle="bold"
                 tools:text="12월 작성일" />
 
             <TextView
@@ -181,7 +247,6 @@
                             android:textStyle="bold" />
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:visibility="gone"
                             android:id="@+id/stepAuthLayout"
                             style="@style/Widget.AppCompat.Button.Borderless"
                             android:layout_width="140dp"
@@ -192,17 +257,18 @@
                             android:drawablePadding="10dp"
                             android:paddingHorizontal="20dp"
                             android:text="권한 없음"
-                            android:textSize="18dp" />
+                            android:textSize="18dp"
+                            android:visibility="gone" />
 
 
                         <LinearLayout
                             android:id="@+id/stepCountLayout"
-                            android:visibility="visible"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="bottom"
                             android:minWidth="140dp"
-                            android:paddingHorizontal="5dp">
+                            android:paddingHorizontal="5dp"
+                            android:visibility="visible">
 
                             <ImageView
                                 android:layout_width="30dp"
@@ -225,6 +291,121 @@
                     </LinearLayout>
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/recognitionLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:gravity="start">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="top">
+
+                        <ImageView
+                            android:id="@+id/recognitionCheckBox"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginRight="15dp"
+                            android:src="@drawable/ic_checkbox_no" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="인지"
+                            android:textColor="@color/black"
+                            android:textSize="20dp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:id="@+id/mathLayout"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:minWidth="140dp"
+                                android:visibility="visible">
+
+                                <TextView
+                                    android:id="@+id/firstNumber"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_vertical"
+                                    android:textColor="@color/custom_gray"
+                                    android:textSize="22dp"
+                                    android:textStyle="bold"
+                                    tools:text="2" />
+
+                                <TextView
+                                    android:id="@+id/operatorNumber"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_vertical"
+                                    android:textColor="@color/custom_gray"
+                                    android:textSize="22dp"
+                                    android:textStyle="bold"
+                                    tools:text="+" />
+
+                                <TextView
+                                    android:id="@+id/secondNumber"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="center_vertical"
+                                    android:textColor="@color/custom_gray"
+                                    android:textSize="22dp"
+                                    android:textStyle="bold"
+                                    tools:text="6" />
+
+                                <TextView
+                                    android:id="@+id/equalSign"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center_vertical"
+                                    android:text="="
+                                    android:textColor="@color/custom_gray"
+                                    android:textSize="22dp"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:inputType="number"
+                                    android:id="@+id/userRecognitionText"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="30dp"
+                                    android:layout_marginRight="5dp"
+                                    android:layout_weight="5"
+                                    android:background="@drawable/mindbox_gray"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/black"
+                                    android:textSize="25dp" />
+
+                                <ImageView
+                                    android:id="@+id/recognitionSubmit"
+                                    android:layout_width="20dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="0.5"
+                                    android:src="@drawable/ic_highlighter" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -329,12 +510,12 @@
                                     android:textSize="18dp" />
 
                                 <androidx.appcompat.widget.AppCompatButton
-                                    android:layout_marginTop="10dp"
                                     android:id="@+id/secretButton"
                                     style="@style/Widget.AppCompat.Button.Borderless"
                                     android:layout_width="140dp"
                                     android:layout_height="40dp"
                                     android:layout_gravity="end"
+                                    android:layout_marginTop="10dp"
                                     android:background="@drawable/register_fill_box"
                                     android:drawableStart="@drawable/ic_lock"
                                     android:drawablePadding="10dp"
@@ -357,6 +538,7 @@
                         android:fitsSystemWindows="true"
                         android:gravity="top"
                         android:hint="오늘 하루는 어떠셨나요?"
+                        android:minHeight="150dp"
                         android:paddingHorizontal="20dp"
                         android:paddingTop="20dp"
                         android:paddingBottom="50dp"
@@ -373,34 +555,34 @@
                     android:orientation="horizontal">
 
                     <LinearLayout
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="start|top"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <LinearLayout
-                            android:layout_marginRight="10dp"
-                            android:gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
                             android:orientation="vertical">
 
                             <ImageButton
-                                android:layout_marginBottom="5dp"
                                 android:id="@+id/photoButton"
                                 style="@style/Widget.AppCompat.Button.Borderless"
-                                android:padding="5dp"
                                 android:layout_width="60dp"
                                 android:layout_height="50dp"
+                                android:layout_marginBottom="5dp"
                                 android:background="@drawable/mindbox_radius_border"
-                                android:src="@drawable/ic_camera"/>
+                                android:padding="5dp"
+                                android:src="@drawable/ic_camera" />
 
                             <TextView
-                                android:gravity="center"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:gravity="center"
                                 android:text="사진"
                                 android:textColor="@color/light_gray"
                                 android:textSize="15dp"

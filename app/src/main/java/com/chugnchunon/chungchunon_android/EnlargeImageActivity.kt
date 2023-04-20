@@ -5,17 +5,15 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.text.SpannableStringBuilder
-import android.util.Log
 import android.view.View
-import android.widget.Adapter
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.ScaleAnimation
 import androidx.core.text.color
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.EnlargeImageAdapter
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.databinding.ActivityImageEnlargeBinding
-import kotlinx.android.synthetic.main.activity_image_enlarge.view.*
-import kotlinx.android.synthetic.main.fragment_mission.view.*
 
 class EnlargeImageActivity : Activity() {
 
@@ -27,19 +25,40 @@ class EnlargeImageActivity : Activity() {
     lateinit var enlargeImageAdapter: EnlargeImageAdapter
 
     override fun onBackPressed() {
-        super.onBackPressed()
         resumePause = true
+
+        val downAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_small)
+        binding.enlargeImageViewPager.startAnimation(downAnimation)
+
+        downAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?) {
+                finish()
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // 뷰페이저 애니메이션
+        val biggerAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_big)
+        binding.enlargeImageViewPager.startAnimation(biggerAnimation)
+
+        // 뒤로가기
         binding.enlargeGoBackBtn.setOnClickListener {
             resumePause = true
+
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_small)
+            binding.enlargeImageViewPager.startAnimation(downAnimation)
+
             Handler().postDelayed({
                 finish()
-            }, 100)
+            }, 300)
         }
 
         imageArray =
@@ -52,7 +71,7 @@ class EnlargeImageActivity : Activity() {
 
         binding.enlargeImageViewPager.setCurrentItem(imagePosition)
 
-        var spanText = SpannableStringBuilder()
+        val spanText = SpannableStringBuilder()
             .color(Color.WHITE) { append("${imagePosition + 1}") }
             .append(" / ${imageArray.size}")
         binding.enlargeImageIndex.text = spanText

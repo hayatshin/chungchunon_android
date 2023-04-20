@@ -60,8 +60,8 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
 
-            var decimal = DecimalFormat("#,###")
-            var step = decimal.format(items[position].stepCount)
+            val decimal = DecimalFormat("#,###")
+            val step = decimal.format(items[position].stepCount)
 
             if (items[position].userAvatar != null) {
                 Glide.with(context)
@@ -149,16 +149,16 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         holder.bind(position)
 
         holder.itemView.userAvatar.setOnClickListener { view ->
-            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
             goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
             context.startActivity(goEnlargeAvatar)
         }
 
         holder.itemView.likeIcon.setOnClickListener { view ->
 
-            var DiaryRef = diaryDB.document(items[position].diaryId)
+            val DiaryRef = diaryDB.document(items[position].diaryId)
 
-            var likeUserSet = hashMapOf(
+            val likeUserSet = hashMapOf(
                 "id" to userId,
                 "timestamp" to FieldValue.serverTimestamp(),
             )
@@ -192,7 +192,7 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         holder.itemView.commentBox.setOnClickListener { view ->
             resumePause = true
 
-            var openComment = Intent(context, CommentActivity::class.java)
+            val openComment = Intent(context, CommentActivity::class.java)
             openComment.putExtra("diaryId", items[position].diaryId)
             openComment.putExtra("diaryPosition", position)
             context.startActivity(openComment)
@@ -202,7 +202,7 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         holder.itemView.moreIcon.setOnClickListener { view ->
             resumePause = true
 
-            var openBlockActivity = Intent(context, BlockActivity::class.java)
+            val openBlockActivity = Intent(context, BlockActivity::class.java)
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)
             openBlockActivity.putExtra("diaryType", "my")
@@ -214,7 +214,7 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
             if(likeNumLikes[position] != 0) {
                 resumePause = true
 
-                var openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
+                val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
                 openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
                 openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
                 context.startActivity(openLikePersonActivity)

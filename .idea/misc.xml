@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/app_update_box.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/avatar_background.xml" value="0.1135" />
         <entry key="app/src/main/res/drawable/block_box.xml" value="0.147" />
+        <entry key="app/src/main/res/drawable/bottom_elevation.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/comment_box.xml" value="0.106" />
         <entry key="app/src/main/res/drawable/default_button.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/default_button_comment.xml" value="0.1955" />
@@ -19,6 +20,7 @@
         <entry key="app/src/main/res/drawable/diarybox_bold.xml" value="0.1175" />
         <entry key="app/src/main/res/drawable/diarycard_infobox.xml" value="0.1135" />
         <entry key="app/src/main/res/drawable/diarycard_totalbox.xml" value="0.1003072509765625" />
+        <entry key="app/src/main/res/drawable/empty_tall_devider.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/gender_spinner_item.xml" value="0.116" />
         <entry key="app/src/main/res/drawable/general_background.xml" value="0.167" />
         <entry key="app/src/main/res/drawable/ic____04.xml" value="0.1655" />
@@ -38,6 +40,7 @@
         <entry key="app/src/main/res/drawable/ic_camera.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_cancel.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/ic_chart_up_filled.xml" value="0.18" />
+        <entry key="app/src/main/res/drawable/ic_chart_up_outlined.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_check_agreement.xml" value="0.169" />
         <entry key="app/src/main/res/drawable/ic_check_agreement_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_check_agreement_main.xml" value="0.1865" />
@@ -59,8 +62,11 @@
         <entry key="app/src/main/res/drawable/ic_gallery.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_gift_filled.xml" value="0.164" />
         <entry key="app/src/main/res/drawable/ic_gloomy.xml" value="0.1765" />
+        <entry key="app/src/main/res/drawable/ic_graduation_cap_straight.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_hamburger.xml" value="0.1655" />
         <entry key="app/src/main/res/drawable/ic_headline.xml" value="0.168" />
+        <entry key="app/src/main/res/drawable/ic_highlighter_gray.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_hundred_points_bold.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_illustimage.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_image_back.xml" value="0.2045" />
         <entry key="app/src/main/res/drawable/ic_image_forward.xml" value="0.199" />
@@ -191,8 +197,8 @@
         <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.18795166015624998" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
         <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.22592875162760417" />
-        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.1769577026367188" />
-        <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.1515625" />
+        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.28909606933593757" />
+        <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.24391174316406244" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
         <entry key="app/src/main/res/layout/fragment_ranking_week.xml" value="0.16156616210937505" />
         <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.33264516194661453" />

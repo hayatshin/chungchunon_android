@@ -13,6 +13,7 @@ import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.PowerManager
 import android.provider.MediaStore
 import android.provider.Settings
@@ -24,6 +25,7 @@ import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
 import android.view.MotionEvent.ACTION_MOVE
+import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -64,8 +66,11 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_diary_two.*
+import org.apache.commons.lang3.RandomUtils.nextInt
 import org.apache.commons.lang3.StringUtils
 import kotlin.collections.ArrayList
+import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 
 class MyDiaryFragment : Fragment() {
 
@@ -94,6 +99,13 @@ class MyDiaryFragment : Fragment() {
     lateinit var mcontext: Context
     private lateinit var callback: OnBackPressedCallback
 
+    private var recognitionResult: Boolean = true
+    private var dbRealAnswer = ""
+    private var dbUserAnswer = ""
+    private var recognitionQuestion = ""
+    private var firstNumber = 1
+    private var secondNumber = 1
+
     companion object {
         private var editDiary: Boolean = false
         const val REQ_GALLERY = 200
@@ -113,6 +125,9 @@ class MyDiaryFragment : Fragment() {
 
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        // 인지 화면 숨기기
+        binding.recognitionResultLayout.visibility = View.GONE
 
         // 걸음수 권한 체크 후 버튼 노출
         binding.stepCountLayout.visibility = View.VISIBLE
@@ -217,6 +232,17 @@ class MyDiaryFragment : Fragment() {
             }
         })
 
+        diaryFillCheck.recognitionFill.observe(requireActivity(), Observer {
+            value ->
+            if (diaryFillCheck.recognitionFill.value!!) {
+                binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            } else if (!diaryFillCheck.recognitionFill.value!!) {
+                binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+            }
+
+            binding.diaryBtn.isEnabled = diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!!
+        })
+
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer
         { value ->
             if (diaryFillCheck.diaryFill.value!!) {
@@ -225,7 +251,7 @@ class MyDiaryFragment : Fragment() {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            binding.diaryBtn.isEnabled = diaryFillCheck.diaryFill.value!!
+            binding.diaryBtn.isEnabled = diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!!
         })
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -332,6 +358,25 @@ class MyDiaryFragment : Fragment() {
                                 requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
                             }
                     }
+
+                // 인지
+                val recognitionId = "${userId}_${writeMonthDate}"
+
+                if(!editDiary) {
+                    val recognitionSet = hashMapOf(
+                        "userId" to userId,
+                        "diaryId" to diaryId,
+                        "monthDate" to writeMonthDate,
+                        "timestamp" to FieldValue.serverTimestamp(),
+                        "recognitionResult" to recognitionResult,
+                        "recognitionQuestion" to recognitionQuestion,
+                        "realAnswer" to dbRealAnswer,
+                        "userAnswer" to dbUserAnswer,
+                    )
+                    db.collection("recognition").document("$recognitionId")
+                        .set(recognitionSet, SetOptions.merge())
+
+                }
             }
         })
 
@@ -358,6 +403,9 @@ class MyDiaryFragment : Fragment() {
                     if (document != null) {
                         if (document.exists()) {
                             // 일기 작성을 한 상태
+
+                            binding.recognitionLayout.visibility = View.GONE
+
                             val originalDiary = document.data?.getValue("todayDiary").toString()
 
                             binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -552,6 +600,101 @@ class MyDiaryFragment : Fragment() {
             }
         }
 
+        // 인지
+        val optOption1 = "+"
+        val optOption2 = "-"
+        val operator = if(Random.nextBoolean()) optOption1 else optOption2
+
+        val firstRandom = Random.nextInt(1, 11)
+        val secondRandom = Random.nextInt(1, 11)
+
+        if(operator == optOption2) {
+            if(firstRandom > secondRandom) {
+                firstNumber = firstRandom
+                secondNumber = secondRandom
+            }else {
+                firstNumber = secondNumber
+                secondNumber = firstNumber
+            }
+        } else {
+            firstNumber = firstRandom
+            secondNumber = secondRandom
+        }
+
+        binding.firstNumber.text = firstNumber.toString()
+        binding.secondNumber.text = secondNumber.toString()
+        binding.operatorNumber.text = operator
+
+        fun calculationResult (firstNum: Int, secondNum: Int, opt: String): Int {
+            var result : Int = 0
+            if(opt == "+") {
+                result = firstNum + secondNum
+            } else {
+                result = firstNum - secondNum
+            }
+            return result
+        }
+
+        recognitionQuestion = "${firstNumber} ${operator} ${secondNumber}"
+
+        binding.recognitionSubmit.setOnClickListener {
+
+            diaryFillCheck.recognitionFill.value = true
+
+            binding.recognitionSubmit.setImageResource(R.drawable.ic_highlighter_gray)
+            binding.recognitionSubmit.isClickable = false
+
+            val inputMethodManager =
+                mcontext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+
+            val realAnswer = calculationResult(firstNumber, secondNumber, operator)
+            val userAnswer = binding.userRecognitionText.text.trim()
+            dbRealAnswer = realAnswer.toString()
+            dbUserAnswer = userAnswer.toString()
+
+            if(realAnswer.toString() == userAnswer.toString()) {
+                recognitionResult = true
+                binding.recognitionResultLayout.visibility = View.VISIBLE
+                val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
+                binding.recognitionResultBox.startAnimation(biggerAnimation)
+
+                binding.resultEmoji.setImageResource(R.drawable.ic_throb)
+                binding.bigResultText.text = "정답입니다!"
+                binding.smallResultText.text = "대단해요~ 정말 똑똑하세요!"
+
+                Handler().postDelayed({
+                    val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
+                    binding.recognitionResultBox.startAnimation(downAnimation)
+
+                    Handler().postDelayed({
+                        binding.recognitionResultLayout.visibility = View.GONE
+                    }, 300)
+                }, 3000)
+
+            } else {
+                recognitionResult = false
+                binding.recognitionResultLayout.visibility = View.VISIBLE
+                val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
+                binding.recognitionResultBox.startAnimation(biggerAnimation)
+
+                binding.resultEmoji.setImageResource(R.drawable.ic_gloomy)
+                binding.bigResultText.text = "틀렸습니다!"
+                binding.smallResultText.text = "정답은 ${realAnswer}입니다.\n꾸준히 지속하면 돼요 :)"
+
+
+                Handler().postDelayed({
+                    val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
+                    binding.recognitionResultBox.startAnimation(downAnimation)
+
+                    Handler().postDelayed({
+                        binding.recognitionResultLayout.visibility = View.GONE
+                    }, 300)
+                }, 3000)
+            }
+        }
+
+
         // 기분 스니퍼
         binding.todayMood.adapter = activity?.applicationContext?.let {
             MoodArrayAdapter(
@@ -627,6 +770,7 @@ class MyDiaryFragment : Fragment() {
             val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
             if (diaryFillCheck.photoFill.value == true || diaryEditCheck.photoEdit.value == true) {
+                // 이미지 있는 경우
 
                 for (i in 0 until newImageViewModel.newImageList.value!!.size) {
                     if (!newImageViewModel.newImageList.value!![i].toString()
@@ -646,6 +790,26 @@ class MyDiaryFragment : Fragment() {
                 }
 
             } else {
+                // 이미지 없는 경우
+
+                // 인지
+                val recognitionId = "${userId}_${writeMonthDate}"
+                if(!editDiary) {
+                    val recognitionSet = hashMapOf(
+                        "userId" to userId,
+                        "diaryId" to diaryId,
+                        "monthDate" to writeMonthDate,
+                        "timestamp" to FieldValue.serverTimestamp(),
+                        "recognitionResult" to recognitionResult,
+                        "recognitionQuestion" to recognitionQuestion,
+                        "realAnswer" to dbRealAnswer,
+                        "userAnswer" to dbUserAnswer,
+                    )
+                    db.collection("recognition").document("$recognitionId")
+                        .set(recognitionSet, SetOptions.merge())
+                }
+
+                // 일기 업로드
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
                         var username = document.data?.getValue("name")
@@ -766,6 +930,9 @@ class MyDiaryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+        diaryFillCheck.recognitionFill.value = false
+
         // 이미지 애니메이션
         val womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)
         val manIcon = view?.findViewById<ImageView>(R.id.manIcon)
@@ -944,6 +1111,7 @@ class MyDiaryFragment : Fragment() {
 }
 
 class DiaryFillClass : ViewModel() {
+    val recognitionFill by lazy { MutableLiveData<Boolean>(false) }
     val diaryFill by lazy { MutableLiveData<Boolean>(false) }
     val moodFill by lazy { MutableLiveData<Boolean>(false) }
     val photoFill by lazy { MutableLiveData<Boolean>(false) }

@@ -1,5 +1,6 @@
 package com.chugnchunon.chungchunon_android.Adapter
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -10,10 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import androidx.core.app.ActivityOptionsCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.CommentActivity
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.EnlargeImageActivity
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
@@ -47,10 +50,12 @@ class DisplayPhotosAdapter(val context: Context, private val imageData: ArrayLis
     override fun onBindViewHolder(holder: DisplayPhotosAdapter.ViewHolder, position: Int) {
         holder.bind(context, imageData[position])
 
+        holder.itemView.displayImageCard.transitionName = "imageSharedItem"
+
         holder.itemView.displayImageCard.setOnClickListener {
             resumePause = true
 
-            var goEnlargeImage = Intent(context, EnlargeImageActivity::class.java)
+            val goEnlargeImage = Intent(context, EnlargeImageActivity::class.java)
             goEnlargeImage.putExtra("imageArray", imageData)
             goEnlargeImage.putExtra("imagePosition", position)
             context.startActivity(goEnlargeImage)

@@ -1,15 +1,23 @@
 package com.chugnchunon.chungchunon_android.Adapter
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.icu.text.DecimalFormat
+import android.os.Build
+import android.os.SystemClock
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
+import androidx.core.view.ViewCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -31,7 +39,6 @@ import kotlinx.android.synthetic.main.diary_card.view.likeText
 import kotlinx.android.synthetic.main.diary_card.view.moreIcon
 import kotlinx.android.synthetic.main.diary_card_two.view.*
 
-
 class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
     RecyclerView.Adapter<AllDiaryCardAdapter.CardViewHolder>() {
 
@@ -41,6 +48,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
 
     var likeToggleCheck: MutableMap<Int, Boolean> = mutableMapOf()
     var likeNumLikes: MutableMap<Int, Int> = mutableMapOf()
+
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -61,8 +69,8 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         @SuppressLint("SetTextI18n")
         fun bind(position: Int) {
 
-            var decimal = DecimalFormat("#,###")
-            var step = decimal.format(items[position].stepCount)
+            val decimal = DecimalFormat("#,###")
+            val step = decimal.format(items[position].stepCount)
 
             if (items[position].userAvatar != null) {
                 Glide.with(context)
@@ -125,7 +133,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        var document = task.result
+                        val document = task.result
                         if (document != null) {
                             if (document.exists()) {
                                 likeToggleCheck.put(position, true)
@@ -150,16 +158,16 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         holder.bind(position)
 
         holder.itemView.userAvatar.setOnClickListener { view ->
-            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
             goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
-            context.startActivity(goEnlargeAvatar)
+            context. startActivity(goEnlargeAvatar)
         }
 
         holder.itemView.likeIcon.setOnClickListener { view ->
 
-            var DiaryRef = diaryDB.document(items[position].diaryId)
+            val DiaryRef = diaryDB.document(items[position].diaryId)
 
-            var likeUserSet = hashMapOf(
+            val likeUserSet = hashMapOf(
                 "id" to userId,
                 "timestamp" to FieldValue.serverTimestamp(),
             )
@@ -167,7 +175,6 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             if (likeToggleCheck[position]!!) {
 
                 DiaryRef.update("numLikes", FieldValue.increment(-1))
-
 
                 likeNumLikes[position] = likeNumLikes[position]!!.toInt() - 1
                 holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
@@ -192,7 +199,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
 
             }
 
-            var intent = Intent(context, AllDiaryFragmentTwo::class.java)
+            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
             intent.setAction("LIKE_TOGGLE_ACTION")
             intent.putExtra("newDiaryId", items[position].diaryId)
             intent.putExtra("newLikeToggle", likeToggleCheck[position]!!)
@@ -205,7 +212,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         holder.itemView.commentBox.setOnClickListener { view ->
             resumePause = true
 
-            var openComment = Intent(context, CommentActivity::class.java)
+            val openComment = Intent(context, CommentActivity::class.java)
             openComment.putExtra("diaryId", items[position].diaryId)
             openComment.putExtra("diaryPosition", position)
             context.startActivity(openComment)
@@ -215,7 +222,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         holder.itemView.moreIcon.setOnClickListener { view ->
             resumePause = true
 
-            var openBlockActivity = Intent(context, BlockActivity::class.java)
+            val openBlockActivity = Intent(context, BlockActivity::class.java)
             openBlockActivity.putExtra("diaryId", items[position].diaryId)
             openBlockActivity.putExtra("diaryUserId", items[position].userId)
             openBlockActivity.putExtra("diaryType", "all")
@@ -227,7 +234,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             if(likeNumLikes[position] != 0) {
                 resumePause = true
 
-                var openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
+                val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
                 openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
                 openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
                 context.startActivity(openLikePersonActivity)

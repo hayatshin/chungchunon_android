@@ -1,45 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <LinearLayout
+        android:paddingHorizontal="10dp"
+        android:background="@color/white"
+        android:elevation="3dp"
+        android:outlineProvider="bounds"
+        android:id="@+id/appBarLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/menu_box"
-        android:paddingHorizontal="10dp">
+        android:orientation="horizontal">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/periodTabLayout"
+        <com.google.android.material.appbar.AppBarLayout
+            app:elevation="0dp"
+            android:id="@+id/appBarLayout"
+            android:background="@color/white"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            app:tabBackground="@drawable/tab_background"
-            app:tabIconTint="@color/tab_icon_color"
-            app:tabIndicatorColor="@color/main_color"
-            app:tabMode="scrollable"
-            app:tabTextAppearance="@style/TabFont"
-            app:tabTextColor="@color/text_color">
+            android:layout_height="wrap_content">
 
-            <com.google.android.material.tabs.TabItem
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/periodTabLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="이번주" />
+                android:layout_height="50dp"
+                app:tabBackground="@drawable/tab_background"
+                app:tabIconTint="@color/tab_icon_color"
+                app:tabIndicatorColor="@color/main_color"
+                app:tabMode="scrollable"
+                app:tabTextAppearance="@style/TabFont"
+                app:tabTextColor="@color/text_color">
 
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="지난주" />
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="이번주" />
 
-        </com.google.android.material.tabs.TabLayout>
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="지난주" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <TextView
+            android:paddingBottom="5dp"
+            android:gravity="bottom"
+            android:background="@color/white"
+            android:id="@+id/periodText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/custom_gray"
+            android:textSize="16dp"
+            tools:text="YYYY/MM/DD" />
+
+    </LinearLayout>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/rankingViewPager"
-        android:layout_below="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/appBarLinearLayout" />
 
 </RelativeLayout>

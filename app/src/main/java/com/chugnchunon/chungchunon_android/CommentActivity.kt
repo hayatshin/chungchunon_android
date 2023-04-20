@@ -492,11 +492,10 @@ class CommentActivity : FragmentActivity() {
                                         RecyclerView.VERTICAL,
                                         false
                                     )
-
                                     commentDataLoading.loadingCompleteData.value = true
                                     binding.noItemText.visibility = View.GONE
+                                    adapter.notifyDataSetChanged()
 
-                                    adapter.notifyItemInserted(commentItems.size -1)
                                 } else {
                                     // 유저가 없는 경우
                                     val commentUserName = "탈퇴자"
@@ -524,11 +523,9 @@ class CommentActivity : FragmentActivity() {
                                         RecyclerView.VERTICAL,
                                         false
                                     )
-
                                     commentDataLoading.loadingCompleteData.value = true
                                     binding.noItemText.visibility = View.GONE
-
-                                    adapter.notifyItemInserted(commentItems.size -1)
+                                    adapter.notifyDataSetChanged()
                                 }
                             }
 

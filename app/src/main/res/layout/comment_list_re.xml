@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/reCommentAvatar"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginRight="15dp"
             android:background="@drawable/avatar_background"
             android:clipToOutline="true"
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textColor="@color/custom_gray"
-                    android:textSize="13dp"
+                    android:textSize="12dp"
                     tools:text="2023-01-07 14:57" />
 
                 <LinearLayout
@@ -104,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:lineHeight="22dp"
                 android:textColor="@color/black"
-                android:textSize="16dp"
+                android:textSize="15dp"
                 tools:text="안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕" />
 
 
