@@ -48,13 +48,22 @@
     </string>
 
     <string name="point_introduction">
-"걸음수 1000보 10점 + 일기 1일 작성 100점
-+ 댓글 1번 20점 + 좋아요 1번 10점"
+"일기 1회 → 100점
+걸음수 1000보 → 10점
+댓글 1회 → 20점
+좋아요 1회 → 10점"
     </string>
 
     <string name="agreement_header">
 "회원가입 전
 약관을 동의해주세요"
+    </string>
+
+    <string name="friend_no_item">
+"휴대폰 주소록에 있는 친구 중에
+아직 오늘도청춘을 사용하는 친구가 없습니다 :(
+
+친구에게 추천하고 함께 사용해보세요!"
     </string>
 
     <string name="all_diary_no_item">

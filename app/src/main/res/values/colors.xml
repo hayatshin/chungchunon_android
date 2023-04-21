@@ -12,8 +12,10 @@
     <color name="light_main_color">#F3B4C9</color>
     <color name="dark_main_color">#440816</color>
     <color name="kakao_yellow">#FFFFE812</color>
+    <color name="black_diary">#3E3E3E</color>
+    <color name="custom_gray">#99000000</color>
     <color name="transparent_gray">#50000000</color>
-    <color name="custom_gray">#777575</color>
+<!--    <color name="custom_gray">#777575</color>-->
     <color name="light_gray">#ACABAB</color>
     <color name="very_light_gray">#F3F2F2</color>
     <color name="graph_back">#D66991</color>

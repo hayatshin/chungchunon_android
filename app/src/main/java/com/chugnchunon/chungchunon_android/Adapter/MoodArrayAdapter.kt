@@ -1,10 +1,13 @@
 package com.chugnchunon.chungchunon_android.Adapter
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.R
@@ -29,6 +32,7 @@ class MoodArrayAdapter(ctx: Context, moods: List<Mood>) : ArrayAdapter<Mood>(ctx
         )
 
         if (mood != null) {
+            ImageViewCompat.setImageTintList(view.moodImage, ColorStateList.valueOf(ContextCompat.getColor(context, R.color.custom_gray)))
             view.moodImage.setImageResource(mood.image)
             view.moodText.text = mood.description
         }

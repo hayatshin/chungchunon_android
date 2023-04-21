@@ -61,10 +61,13 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
 
             if(rankingLine.index!!.toString() == "1") {
                 rankingCrown.visibility = View.VISIBLE
-                rankingCrown.setImageResource(R.drawable.ic_crown_filled)
+                rankingCrown.setImageResource(R.drawable.ic_crown_1st)
             } else if (rankingLine.index!!.toString() == "2") {
                 rankingCrown.visibility = View.VISIBLE
-                rankingCrown.setImageResource(R.drawable.ic_crown_outlined)
+                rankingCrown.setImageResource(R.drawable.ic_crown_2nd)
+            } else if (rankingLine.index!!.toString() == "3") {
+                rankingCrown.visibility = View.VISIBLE
+                rankingCrown.setImageResource(R.drawable.ic_crown_3rd)
             } else {
                 rankingCrown.visibility = View.GONE
             }

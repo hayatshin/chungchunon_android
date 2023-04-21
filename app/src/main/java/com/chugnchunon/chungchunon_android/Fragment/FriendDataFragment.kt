@@ -403,10 +403,10 @@ class FriendDataFragment : Fragment() {
                                                                     adapter.notifyDataSetChanged()
 
                                                                     if (friendDiaryItems.size == 0) {
-                                                                        binding.noItemText.visibility =
+                                                                        binding.friendNoItemText.visibility =
                                                                             View.VISIBLE
                                                                     } else {
-                                                                        binding.noItemText.visibility =
+                                                                        binding.friendNoItemText.visibility =
                                                                             View.GONE
                                                                         binding.recyclerDiary.visibility =
                                                                             View.VISIBLE
@@ -465,10 +465,10 @@ class FriendDataFragment : Fragment() {
                                                                     adapter.notifyDataSetChanged()
 
                                                                     if (friendDiaryItems.size == 0) {
-                                                                        binding.noItemText.visibility =
+                                                                        binding.friendNoItemText.visibility =
                                                                             View.VISIBLE
                                                                     } else {
-                                                                        binding.noItemText.visibility =
+                                                                        binding.friendNoItemText.visibility =
                                                                             View.GONE
                                                                         binding.recyclerDiary.visibility =
                                                                             View.VISIBLE
@@ -525,10 +525,10 @@ class FriendDataFragment : Fragment() {
                                                         adapter.notifyDataSetChanged()
 
                                                         if (friendDiaryItems.size == 0) {
-                                                            binding.noItemText.visibility =
+                                                            binding.friendNoItemText.visibility =
                                                                 View.VISIBLE
                                                         } else {
-                                                            binding.noItemText.visibility =
+                                                            binding.friendNoItemText.visibility =
                                                                 View.GONE
                                                             binding.recyclerDiary.visibility =
                                                                 View.VISIBLE

@@ -42,6 +42,8 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:textFontWeight="900"
+                    android:fontFamily="@font/nanum_barun_gothic_bold"
                     android:id="@+id/commentName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -37,6 +37,7 @@
         <entry key="app/src/main/res/drawable/ic_arrow_circle_white.xml" value="0.121" />
         <entry key="app/src/main/res/drawable/ic_block_check.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/ic_block_user.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/ic_browser_filled.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_camera.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_cancel.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/ic_chart_up_filled.xml" value="0.18" />
@@ -44,11 +45,18 @@
         <entry key="app/src/main/res/drawable/ic_check_agreement.xml" value="0.169" />
         <entry key="app/src/main/res/drawable/ic_check_agreement_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_check_agreement_main.xml" value="0.1865" />
+        <entry key="app/src/main/res/drawable/ic_checkbox_filled.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_checkbox_no.xml" value="0.1215" />
+        <entry key="app/src/main/res/drawable/ic_checkbox_outlined.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_checkbox_yes.xml" value="0.1215" />
+        <entry key="app/src/main/res/drawable/ic_chevron_right_solid.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_cross_circle.xml" value="0.18627703857421873" />
+        <entry key="app/src/main/res/drawable/ic_crown_3rd.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_crown_black.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_crown_filled.xml" value="0.1465" />
+        <entry key="app/src/main/res/drawable/ic_crown_first.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_crown_outlined.xml" value="0.1465" />
+        <entry key="app/src/main/res/drawable/ic_crown_second.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_diary_filled.xml" value="0.1375" />
         <entry key="app/src/main/res/drawable/ic_edit.xml" value="0.192" />
         <entry key="app/src/main/res/drawable/ic_emotion_1.xml" value="0.1145" />
@@ -61,10 +69,13 @@
         <entry key="app/src/main/res/drawable/ic_friend.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_gallery.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_gift_filled.xml" value="0.164" />
+        <entry key="app/src/main/res/drawable/ic_gift_solid.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_gloomy.xml" value="0.1765" />
         <entry key="app/src/main/res/drawable/ic_graduation_cap_straight.xml" value="0.1485" />
+        <entry key="app/src/main/res/drawable/ic_graph_solid.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_hamburger.xml" value="0.1655" />
         <entry key="app/src/main/res/drawable/ic_headline.xml" value="0.168" />
+        <entry key="app/src/main/res/drawable/ic_highlighter.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_highlighter_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_hundred_points_bold.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_illustimage.xml" value="0.1" />
@@ -89,7 +100,9 @@
         <entry key="app/src/main/res/drawable/ic_sad.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_secret.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_shalom.xml" value="0.1655" />
+        <entry key="app/src/main/res/drawable/ic_sm_arrow.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_soso.xml" value="0.1655" />
+        <entry key="app/src/main/res/drawable/ic_stats_main.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_stepcount_icon_background.xml" value="0.1535" />
         <entry key="app/src/main/res/drawable/ic_throb.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_trash.xml" value="0.192" />
@@ -189,7 +202,7 @@
         <entry key="app/src/main/res/layout/comment_list_re.xml" value="0.27608915906788245" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="0.153125" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
-        <entry key="app/src/main/res/layout/diary_card_two.xml" value="0.2040461222330729" />
+        <entry key="app/src/main/res/layout/diary_card_two.xml" value="0.3161844889322917" />
         <entry key="app/src/main/res/layout/display_image_card.xml" value="0.14947916666666666" />
         <entry key="app/src/main/res/layout/enlarge_image_card.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.22742619168931155" />
@@ -200,8 +213,8 @@
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.28909606933593757" />
         <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.24391174316406244" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
-        <entry key="app/src/main/res/layout/fragment_ranking_week.xml" value="0.16156616210937505" />
-        <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.33264516194661453" />
+        <entry key="app/src/main/res/layout/fragment_ranking_week.xml" value="0.27500569168671607" />
+        <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.26448262532552075" />
         <entry key="app/src/main/res/layout/fragment_region_list.xml" value="0.23052536231884058" />
         <entry key="app/src/main/res/layout/fragment_region_register.xml" value="0.1171875" />
         <entry key="app/src/main/res/layout/gender_item_spinner.xml" value="0.14945652173913043" />
@@ -216,7 +229,7 @@
         <entry key="app/src/main/res/layout/partner_activity_diary.xml" value="0.10083589907045716" />
         <entry key="app/src/main/res/layout/partner_activity_region.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/partner_activity_register.xml" value="0.30092592592592593" />
-        <entry key="app/src/main/res/layout/ranking_line.xml" value="0.40135498046875" />
+        <entry key="app/src/main/res/layout/ranking_line.xml" value="0.29801177978515625" />
         <entry key="app/src/main/res/menu/nav_menu.xml" value="0.15" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon.xml" value="0.159" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_appIcon_round.xml" value="0.159" />

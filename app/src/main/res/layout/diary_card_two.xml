@@ -69,13 +69,15 @@
             app:layout_constraintRight_toLeftOf="@id/userActInfo">
 
             <TextView
+                android:textFontWeight="900"
+                android:fontFamily="@font/nanum_barun_gothic_bold"
+                android:textStyle="bold"
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/black"
                 android:textSize="21dp"
-                android:textStyle="bold"
                 tools:text="신혜정" />
 
             <TextView
@@ -169,7 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:lineHeight="33dp"
-                android:textColor="@color/black"
+                android:textColor="@color/black_diary"
                 android:textSize="24dp"
                 tools:text="@string/partner_introduction" />
 

@@ -34,6 +34,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.getSystemService
 import androidx.core.text.bold
 import androidx.core.text.color
@@ -103,8 +104,8 @@ class MyDiaryFragment : Fragment() {
     private var dbRealAnswer = ""
     private var dbUserAnswer = ""
     private var recognitionQuestion = ""
-    private var firstNumber = 1
-    private var secondNumber = 1
+    private var firstNumber = 7
+    private var secondNumber = 2
 
     companion object {
         private var editDiary: Boolean = false
@@ -637,31 +638,20 @@ class MyDiaryFragment : Fragment() {
 
         recognitionQuestion = "${firstNumber} ${operator} ${secondNumber}"
 
-        binding.recognitionSubmit.setOnClickListener {
+        binding.recognitionSubmit.setOnClickListener { view ->
 
-            diaryFillCheck.recognitionFill.value = true
-
-            binding.recognitionSubmit.setImageResource(R.drawable.ic_highlighter_gray)
-            binding.recognitionSubmit.isClickable = false
-
-            val inputMethodManager =
-                mcontext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+            val inputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 
             val realAnswer = calculationResult(firstNumber, secondNumber, operator)
             val userAnswer = binding.userRecognitionText.text.trim()
-            dbRealAnswer = realAnswer.toString()
-            dbUserAnswer = userAnswer.toString()
 
-            if(realAnswer.toString() == userAnswer.toString()) {
-                recognitionResult = true
+            if(userAnswer.toString().isEmpty() || userAnswer == null) {
                 binding.recognitionResultLayout.visibility = View.VISIBLE
-                val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
-                binding.recognitionResultBox.startAnimation(biggerAnimation)
 
-                binding.resultEmoji.setImageResource(R.drawable.ic_throb)
-                binding.bigResultText.text = "정답입니다!"
-                binding.smallResultText.text = "대단해요~ 정말 똑똑하세요!"
+                binding.resultEmoji.setImageResource(R.drawable.ic_soso)
+                binding.bigResultText.visibility = View.GONE
+                binding.smallResultText.text = "문제를 풀어주세요!"
 
                 Handler().postDelayed({
                     val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
@@ -671,26 +661,55 @@ class MyDiaryFragment : Fragment() {
                         binding.recognitionResultLayout.visibility = View.GONE
                     }, 300)
                 }, 3000)
-
             } else {
-                recognitionResult = false
-                binding.recognitionResultLayout.visibility = View.VISIBLE
-                val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
-                binding.recognitionResultBox.startAnimation(biggerAnimation)
 
-                binding.resultEmoji.setImageResource(R.drawable.ic_gloomy)
-                binding.bigResultText.text = "틀렸습니다!"
-                binding.smallResultText.text = "정답은 ${realAnswer}입니다.\n꾸준히 지속하면 돼요 :)"
+                diaryFillCheck.recognitionFill.value = true
 
+                binding.recognitionSubmit.setImageResource(R.drawable.ic_highlighter_gray)
+                binding.recognitionSubmit.isClickable = false
 
-                Handler().postDelayed({
-                    val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
-                    binding.recognitionResultBox.startAnimation(downAnimation)
+                dbRealAnswer = realAnswer.toString()
+                dbUserAnswer = userAnswer.toString()
+
+                if(realAnswer.toString() == userAnswer.toString()) {
+                    recognitionResult = true
+                    binding.recognitionResultLayout.visibility = View.VISIBLE
+                    val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
+                    binding.recognitionResultBox.startAnimation(biggerAnimation)
+
+                    binding.resultEmoji.setImageResource(R.drawable.ic_throb)
+                    binding.bigResultText.text = "정답입니다!"
+                    binding.smallResultText.text = "대단해요~ 정말 똑똑하세요!"
 
                     Handler().postDelayed({
-                        binding.recognitionResultLayout.visibility = View.GONE
-                    }, 300)
-                }, 3000)
+                        val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
+                        binding.recognitionResultBox.startAnimation(downAnimation)
+
+                        Handler().postDelayed({
+                            binding.recognitionResultLayout.visibility = View.GONE
+                        }, 300)
+                    }, 3000)
+
+                } else {
+                    recognitionResult = false
+                    binding.recognitionResultLayout.visibility = View.VISIBLE
+                    val biggerAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_big)
+                    binding.recognitionResultBox.startAnimation(biggerAnimation)
+
+                    binding.resultEmoji.setImageResource(R.drawable.ic_gloomy)
+                    binding.bigResultText.text = "틀렸습니다!"
+                    binding.smallResultText.text = "정답은 ${realAnswer}입니다.\n꾸준히 지속하면 돼요 :)"
+
+
+                    Handler().postDelayed({
+                        val downAnimation = AnimationUtils.loadAnimation(mcontext, R.anim.scale_small)
+                        binding.recognitionResultBox.startAnimation(downAnimation)
+
+                        Handler().postDelayed({
+                            binding.recognitionResultLayout.visibility = View.GONE
+                        }, 300)
+                    }, 3000)
+                }
             }
         }
 
@@ -932,6 +951,16 @@ class MyDiaryFragment : Fragment() {
         super.onResume()
 
         diaryFillCheck.recognitionFill.value = false
+        diaryFillCheck.diaryFill.value = false
+        diaryFillCheck.moodFill.value = false
+        diaryFillCheck.photoFill.value = false
+        diaryFillCheck.secretFill.value = false
+
+        diaryEditCheck.diaryEdit.value = false
+        diaryEditCheck.moodEdit.value = false
+        diaryEditCheck.photoEdit.value = false
+        diaryEditCheck.secretEdit.value = false
+
 
         // 이미지 애니메이션
         val womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)

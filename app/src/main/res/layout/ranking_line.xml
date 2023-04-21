@@ -6,14 +6,16 @@
     android:clipChildren="false"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="2dp"
     android:gravity="center_vertical"
     android:paddingHorizontal="20dp"
-    android:paddingVertical="10dp">
+    android:paddingTop="17dp"
+    android:paddingBottom="8dp">
 
     <TextView
+        android:textFontWeight="900"
+        android:fontFamily="@font/nanum_barun_gothic_bold"
         android:id="@+id/rankingIndex"
-        android:layout_width="wrap_content"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginRight="20dp"
@@ -28,8 +30,8 @@
         android:layout_height="30dp"
         android:rotation="-30"
         android:src="@drawable/ic_crown_filled"
-        android:translationX="20dp"
-        android:translationY="-10dp"
+        android:translationX="49dp"
+        android:translationY="-15dp"
         android:translationZ="90dp" />
 
     <ImageView
