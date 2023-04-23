@@ -20,6 +20,9 @@ import com.chugnchunon.chungchunon_android.Adapter.RegionAdapter
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionListBinding
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.text.Collator
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SmallRegionRegisterFragment : Fragment() {
 
@@ -28,8 +31,11 @@ class SmallRegionRegisterFragment : Fragment() {
 
     private var regionDB = Firebase.firestore.collection("region")
     private lateinit var adapter: RegionAdapter
-    private var selectedRegion : String = ""
+    private var selectedRegion: String = ""
     var regionData: ArrayList<String> = ArrayList()
+
+    val koreanCollator = Collator.getInstance(Locale.KOREAN)
+    val smallRegionItems = ArrayList<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,27 +44,19 @@ class SmallRegionRegisterFragment : Fragment() {
         _binding = FragmentRegionListBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        Log.d("결과", "스몰리지온프래그먼트")
+        adapter = RegionAdapter(requireActivity(), smallRegionItems, true)
+        binding.regionRecycler.adapter = adapter
+        binding.regionRecycler.layoutManager = LinearLayoutManager(activity)
+        adapter.notifyDataSetChanged()
 
-        var regionModel = ViewModelProvider(requireActivity()).get(SmallRegionRegisterFragment.MyViewModel::class.java)
-
-        regionModel.regionModelData.observe(viewLifecycleOwner) { value ->
-            adapter = RegionAdapter(requireActivity(), value, true)
-            binding.regionRecycler.adapter = adapter
-            binding.regionRecycler.layoutManager = LinearLayoutManager(activity)
-        }
-
-
-        var pref = activity?.getSharedPreferences("REGION_PREF", MODE_PRIVATE)
+        val pref = activity?.getSharedPreferences("REGION_PREF", MODE_PRIVATE)
         selectedRegion = pref?.getString("selectedRegion", "강원도").toString()
 
-        var regionRegister: BroadcastReceiver = object : BroadcastReceiver() {
+        val regionRegister: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                regionModel.clearRegion()
+                smallRegionItems.clear()
 
-                var changeRegion = intent!!.getStringExtra("selectedRegion").toString()
-
-                Log.d("지역확인", "${changeRegion}")
+                val changeRegion = intent!!.getStringExtra("selectedRegion").toString()
 
                 regionDB
                     .document("4ggk4cR82mz46CjrLg60")
@@ -68,10 +66,10 @@ class SmallRegionRegisterFragment : Fragment() {
                     .addOnSuccessListener { documents ->
 
                         documents.data?.forEach { (k, v) ->
-                            regionModel.addRegion(v.toString())
+                            smallRegionItems.add(v.toString())
+                            smallRegionItems.sortWith { a, b -> koreanCollator.compare(a, b) }
+                            adapter.notifyDataSetChanged()
                         }
-                        Log.d("리지온", "${documents.data}", )
-                        adapter.notifyDataSetChanged()
                     }
 
             }
@@ -82,44 +80,20 @@ class SmallRegionRegisterFragment : Fragment() {
             IntentFilter("REGION_REGISTER")
         )
 
-
         regionDB
             .document("4ggk4cR82mz46CjrLg60")
             .collection("small_region")
             .document(selectedRegion)
             .get()
             .addOnSuccessListener { documents ->
-                    documents.data?.forEach { (k, v) ->
-                        regionModel.addRegion(v.toString())
-                    }
-                Log.d("리지온", "${documents.data}", )
-                adapter.notifyDataSetChanged()
+                documents.data?.forEach { (k, v) ->
+                    smallRegionItems.add(v.toString())
+                    smallRegionItems.sortWith { a, b -> koreanCollator.compare(a, b) }
+                    adapter.notifyDataSetChanged()
+                }
             }
-
-
 
         return view
 
     }
-
-    class MyViewModel : ViewModel() {
-        var regionModelData = MutableLiveData<List<String>>()
-        var regionDataList = regionModelData.value
-        var templateList = mutableListOf<String>()
-
-        fun addRegion(text: String) {
-            regionDataList?.forEach { data ->
-                templateList.add(data.toString())
-            }
-            templateList.add(text)
-            regionModelData.value = templateList
-        }
-
-        fun clearRegion() {
-            regionModelData.value?.toMutableList()?.clear()
-            regionDataList?.toMutableList()?.clear()
-            templateList.clear()
-        }
-    }
-
 }

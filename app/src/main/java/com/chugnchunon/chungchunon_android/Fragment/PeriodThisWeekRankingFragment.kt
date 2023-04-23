@@ -125,7 +125,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 ObjectAnimator.ofFloat(binding.rankingRecyclerView, "translationY", -20f, 0f)
                     .apply {
                         duration = 300
-                        interpolator = AccelerateInterpolator()
+                        interpolator = LinearInterpolator()
                         start()
                     }
 
@@ -143,7 +143,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 ObjectAnimator.ofFloat(binding.rankingRecyclerView, "translationY", 0f, -40f)
                     .apply {
                         duration = 300
-                        interpolator = AccelerateInterpolator()
+                        interpolator = LinearInterpolator()
                         start()
                     }
 

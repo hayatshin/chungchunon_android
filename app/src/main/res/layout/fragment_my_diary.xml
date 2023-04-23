@@ -57,19 +57,19 @@
         android:visibility="gone">
 
         <LinearLayout
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintDimensionRatio="1.3:1"
-            android:layout_marginHorizontal="40dp"
             android:id="@+id/recognitionResultBox"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerInParent="true"
+            android:layout_marginHorizontal="40dp"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
-            android:weightSum="1">
+            android:weightSum="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1.3:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -80,28 +80,28 @@
 
                 <ImageView
                     android:id="@+id/resultEmoji"
-                    android:layout_marginBottom="20dp"
-                    android:src="@drawable/ic_throb"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/ic_throb"
                     app:tint="@color/main_color" />
 
                 <TextView
                     android:id="@+id/bigResultText"
-                    android:layout_marginBottom="15dp"
-                    android:textStyle="bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
                     android:text="정답입니다!"
                     android:textAlignment="center"
                     android:textColor="@color/main_color"
-                    android:textSize="20dp" />
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
 
                 <TextView
-                    android:lineHeight="25dp"
                     android:id="@+id/smallResultText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:lineHeight="25dp"
                     android:text="정답은 1입니다\n꾸준히 지속하면 돼요 :)"
                     android:textAlignment="center"
                     android:textColor="@color/custom_gray"
@@ -199,6 +199,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
+        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/diaryBtnLayout"
@@ -210,18 +211,22 @@
             android:id="@+id/myDiaryScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/white"
             android:fillViewport="true"
             android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/white"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:layout_marginBottom="5dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
+                    android:background="@color/white"
                     android:gravity="start">
 
                     <LinearLayout
@@ -256,8 +261,8 @@
                             android:drawableStart="@drawable/ic_run_20"
                             android:drawablePadding="10dp"
                             android:paddingHorizontal="20dp"
-                            android:textColor="@color/custom_gray"
                             android:text="권한 없음"
+                            android:textColor="@color/custom_gray"
                             android:textSize="18dp"
                             android:visibility="gone" />
 
@@ -294,20 +299,157 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/recognitionLayout"
+                    android:id="@+id/stepSuccessLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:gravity="center">
+                    android:layout_marginTop="10dp"
+                    android:gravity="top|end"
+                    android:translationZ="-10dp"
+                    android:visibility="gone">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginRight="20dp"
+                        android:lineHeight="20dp"
+                        android:text="@string/step_success_text"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/main_color"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="25dp"
+                    android:id="@+id/stepSuccessBelowLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/recognitionLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:id="@+id/recognitionCheckBox"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_marginRight="15dp"
+                                android:src="@drawable/ic_checkbox_no" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="인지"
+                                android:textColor="@color/black"
+                                android:textSize="20dp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <LinearLayout
+                                    android:id="@+id/mathLayout"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_vertical"
+                                    android:minWidth="140dp"
+                                    android:paddingStart="10dp"
+                                    android:visibility="visible">
+
+                                    <TextView
+                                        android:id="@+id/firstNumber"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="1"
+                                        android:gravity="center_vertical"
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="22dp"
+                                        android:textStyle="bold"
+                                        tools:text="2" />
+
+                                    <TextView
+                                        android:id="@+id/operatorNumber"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="1"
+                                        android:gravity="center_vertical"
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="22dp"
+                                        android:textStyle="bold"
+                                        tools:text="+" />
+
+                                    <TextView
+                                        android:id="@+id/secondNumber"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="1"
+                                        android:gravity="center_vertical"
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="22dp"
+                                        android:textStyle="bold"
+                                        tools:text="6" />
+
+                                    <TextView
+                                        android:id="@+id/equalSign"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center_vertical"
+                                        android:text="="
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="22dp"
+                                        android:textStyle="bold" />
+
+                                    <EditText
+                                        android:id="@+id/userRecognitionText"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:layout_marginRight="5dp"
+                                        android:layout_weight="5"
+                                        android:background="@drawable/mindbox_gray"
+                                        android:inputType="number"
+                                        android:textAlignment="center"
+                                        android:textColor="@color/black"
+                                        android:textSize="22dp" />
+
+                                    <!--                                <ImageView-->
+                                    <!--                                    android:id="@+id/recognitionSubmit"-->
+                                    <!--                                    android:layout_width="20dp"-->
+                                    <!--                                    android:layout_height="30dp"-->
+                                    <!--                                    android:layout_gravity="center"-->
+                                    <!--                                    android:layout_weight="0.5"-->
+                                    <!--                                    android:src="@drawable/ic_highlighter" />-->
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:id="@+id/recognitionCheckBox"
+                            android:id="@+id/moodCheckBox"
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             android:layout_marginRight="15dp"
@@ -317,293 +459,186 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="인지"
+                            android:text="마음"
                             android:textColor="@color/black"
                             android:textSize="20dp"
                             android:textStyle="bold" />
 
-                        <LinearLayout
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/todayMood"
                             android:layout_width="wrap_content"
+                            android:layout_height="45dp"
+                            android:background="@drawable/transparent_fill_box"
+                            android:gravity="end"
+                            android:minWidth="140dp"
+                            android:textColor="@color/custom_gray" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/diaryBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:layout_marginBottom="10dp"
+                            android:orientation="horizontal">
 
                             <LinearLayout
-                                android:paddingStart="10dp"
-                                android:id="@+id/mathLayout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:minWidth="140dp"
-                                android:visibility="visible">
-
-                                <TextView
-                                    android:id="@+id/firstNumber"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:gravity="center_vertical"
-                                    android:textColor="@color/custom_gray"
-                                    android:textSize="22dp"
-                                    android:textStyle="bold"
-                                    tools:text="2" />
-
-                                <TextView
-                                    android:id="@+id/operatorNumber"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:gravity="center_vertical"
-                                    android:textColor="@color/custom_gray"
-                                    android:textSize="22dp"
-                                    android:textStyle="bold"
-                                    tools:text="+" />
-
-                                <TextView
-                                    android:id="@+id/secondNumber"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="1"
-                                    android:gravity="center_vertical"
-                                    android:textColor="@color/custom_gray"
-                                    android:textSize="22dp"
-                                    android:textStyle="bold"
-                                    tools:text="6" />
-
-                                <TextView
-                                    android:id="@+id/equalSign"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:gravity="center_vertical"
-                                    android:text="="
-                                    android:textColor="@color/custom_gray"
-                                    android:textSize="22dp"
-                                    android:textStyle="bold" />
-
-                                <EditText
-                                    android:inputType="number"
-                                    android:id="@+id/userRecognitionText"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:layout_marginRight="5dp"
-                                    android:layout_weight="5"
-                                    android:background="@drawable/mindbox_gray"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/black"
-                                    android:textSize="25dp" />
+                                android:layout_marginBottom="10dp"
+                                android:layout_weight="1"
+                                android:gravity="start">
 
                                 <ImageView
-                                    android:id="@+id/recognitionSubmit"
-                                    android:layout_width="20dp"
-                                    android:layout_height="30dp"
-                                    android:layout_gravity="center"
-                                    android:layout_weight="0.5"
-                                    android:src="@drawable/ic_highlighter" />
+                                    android:id="@+id/diaryCheckBox"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_marginRight="15dp"
+                                    android:src="@drawable/ic_checkbox_no" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/diaryHeader"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="start"
+                                        android:text="일기"
+                                        android:textColor="@color/black"
+                                        android:textSize="20dp"
+                                        android:textStyle="bold"
+                                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:orientation="vertical">
+
+
+                                    <androidx.appcompat.widget.AppCompatButton
+                                        android:id="@+id/recordBtn"
+                                        style="@style/Widget.AppCompat.Button.Borderless"
+                                        android:layout_width="140dp"
+                                        android:layout_height="40dp"
+                                        android:layout_gravity="end"
+                                        android:background="@drawable/register_fill_box"
+                                        android:drawableStart="@drawable/ic_mic"
+                                        android:drawablePadding="10dp"
+                                        android:paddingHorizontal="20dp"
+                                        android:text="말로 쓰기"
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="18dp" />
+
+                                    <androidx.appcompat.widget.AppCompatButton
+                                        android:id="@+id/secretButton"
+                                        style="@style/Widget.AppCompat.Button.Borderless"
+                                        android:layout_width="140dp"
+                                        android:layout_height="40dp"
+                                        android:layout_gravity="end"
+                                        android:layout_marginTop="10dp"
+                                        android:background="@drawable/register_fill_box"
+                                        android:drawableStart="@drawable/ic_lock"
+                                        android:drawablePadding="10dp"
+                                        android:paddingHorizontal="20dp"
+                                        android:text="나만 보기"
+                                        android:textColor="@color/custom_gray"
+                                        android:textSize="18dp" />
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
                         </LinearLayout>
 
+                        <EditText
+                            android:id="@+id/todayDiary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/mindbox_bold"
+                            android:fitsSystemWindows="true"
+                            android:gravity="top"
+                            android:hint="오늘 하루는 어떠셨나요?"
+                            android:minHeight="150dp"
+                            android:paddingHorizontal="20dp"
+                            android:paddingTop="20dp"
+                            android:paddingBottom="50dp"
+                            android:textSize="20dp" />
+
                     </LinearLayout>
 
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/moodCheckBox"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginRight="15dp"
-                        android:src="@drawable/ic_checkbox_no" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="마음"
-                        android:textColor="@color/black"
-                        android:textSize="20dp"
-                        android:textStyle="bold" />
-
-                    <androidx.appcompat.widget.AppCompatSpinner
-                        android:id="@+id/todayMood"
-                        android:layout_width="wrap_content"
-                        android:layout_height="45dp"
-                        android:background="@drawable/transparent_fill_box"
-                        android:gravity="end"
-                        android:minWidth="140dp"
-                        android:textColor="@color/custom_gray" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/diaryBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
                     <LinearLayout
+                        android:id="@+id/photoLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:layout_weight="1"
-                            android:gravity="start">
-
-                            <ImageView
-                                android:id="@+id/diaryCheckBox"
-                                android:layout_width="25dp"
-                                android:layout_height="25dp"
-                                android:layout_marginRight="15dp"
-                                android:src="@drawable/ic_checkbox_no" />
+                            android:gravity="start|top"
+                            android:orientation="horizontal"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:layout_weight="1"
+                                android:layout_marginRight="10dp"
+                                android:gravity="center"
                                 android:orientation="vertical">
+
+                                <ImageButton
+                                    android:id="@+id/photoButton"
+                                    style="@style/Widget.AppCompat.Button.Borderless"
+                                    android:layout_width="60dp"
+                                    android:layout_height="50dp"
+                                    android:layout_marginBottom="5dp"
+                                    android:background="@drawable/mindbox_radius_border"
+                                    android:padding="5dp"
+                                    android:src="@drawable/ic_camera" />
 
                                 <TextView
-                                    android:id="@+id/diaryHeader"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:gravity="start"
-                                    android:text="일기"
-                                    android:textColor="@color/black"
-                                    android:textSize="20dp"
-                                    android:textStyle="bold"
-                                    app:layout_constraintTop_toTopOf="parent" />
+                                    android:gravity="center"
+                                    android:text="사진"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="15dp"
+                                    android:textStyle="bold" />
 
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="10dp"
-                                android:orientation="vertical">
-
-
-                                <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/recordBtn"
-                                    style="@style/Widget.AppCompat.Button.Borderless"
-                                    android:layout_width="140dp"
-                                    android:layout_height="40dp"
-                                    android:layout_gravity="end"
-                                    android:background="@drawable/register_fill_box"
-                                    android:drawableStart="@drawable/ic_mic"
-                                    android:drawablePadding="10dp"
-                                    android:paddingHorizontal="20dp"
-                                    android:textColor="@color/custom_gray"
-                                    android:text="말로 쓰기"
-                                    android:textSize="18dp" />
-
-                                <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/secretButton"
-                                    style="@style/Widget.AppCompat.Button.Borderless"
-                                    android:layout_width="140dp"
-                                    android:layout_height="40dp"
-                                    android:layout_gravity="end"
-                                    android:layout_marginTop="10dp"
-                                    android:background="@drawable/register_fill_box"
-                                    android:drawableStart="@drawable/ic_lock"
-                                    android:drawablePadding="10dp"
-                                    android:paddingHorizontal="20dp"
-                                    android:textColor="@color/custom_gray"
-                                    android:text="나만 보기"
-                                    android:textSize="18dp" />
 
                             </LinearLayout>
 
                         </LinearLayout>
 
-                    </LinearLayout>
-
-                    <EditText
-                        android:id="@+id/todayDiary"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@drawable/mindbox_bold"
-                        android:fitsSystemWindows="true"
-                        android:gravity="top"
-                        android:hint="오늘 하루는 어떠셨나요?"
-                        android:minHeight="150dp"
-                        android:paddingHorizontal="20dp"
-                        android:paddingTop="20dp"
-                        android:paddingBottom="50dp"
-                        android:textSize="20dp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/photoLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="start|top"
-                        android:orientation="horizontal"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/photoRecyclerView"
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginRight="10dp"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <ImageButton
-                                android:id="@+id/photoButton"
-                                style="@style/Widget.AppCompat.Button.Borderless"
-                                android:layout_width="60dp"
-                                android:layout_height="50dp"
-                                android:layout_marginBottom="5dp"
-                                android:background="@drawable/mindbox_radius_border"
-                                android:padding="5dp"
-                                android:src="@drawable/ic_camera" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="사진"
-                                android:textColor="@color/light_gray"
-                                android:textSize="15dp"
-                                android:textStyle="bold" />
-
-
-                        </LinearLayout>
+                            android:orientation="horizontal"
+                            android:visibility="visible"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                     </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/photoRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:visibility="visible"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                 </LinearLayout>
 

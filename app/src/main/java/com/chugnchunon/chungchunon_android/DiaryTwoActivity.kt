@@ -1,6 +1,7 @@
 package com.chugnchunon.chungchunon_android
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
@@ -80,6 +82,16 @@ class DiaryTwoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        // 버전 체크
+        val android_versionCode = Build.VERSION.SDK_INT
+        val android_versionName = Build.VERSION.RELEASE
+        val versionSet = hashMapOf(
+            "android_api_level" to android_versionCode,
+            "android_release_version" to android_versionName,
+        )
+        userDB.document("$userId")
+            .set(versionSet, SetOptions.merge())
 
         // diaryType 받아오기 - fragment 변동
         diaryType = intent.getStringExtra("diaryType").toString()
@@ -202,8 +214,26 @@ class DiaryTwoActivity : AppCompatActivity() {
                 } else {
                     // 파트너 x -> (휴대폰 연동 -> 걸음수) -> 배터리 사용 제한없음
 
-                    // 친구 연동 포함
+                    // 배터리 제한 없음 설정 안 한 경우
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        val powerManager = this.getSystemService(Context.POWER_SERVICE) as PowerManager
+                        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                            val intent = Intent().apply {
+                                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                data = Uri.parse("package:$packageName")
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            this.startActivity(intent)
+                        } else {
+                            // 배터리 사용량 제한없음 권한 부여 o
+                            val batteryAuthSet = hashMapOf(
+                                "auth_ignoring_battery" to true,
+                            )
+                            userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+                        }
+                    }
 
+                    // 친구 연동 포함
                     if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED && stepPermissionCheck == PackageManager.PERMISSION_DENIED) {
                         // 휴대폰 연동 x, 걸음수 x
                         requestPermissions(
@@ -251,25 +281,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
 
-
-
-
-        // 배터리 제한 없음 설정 안 한 경우
-//        val packageName = packageName
-//        val intent = Intent()
-//        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-//
-//        if(!pm.isIgnoringBatteryOptimizations(packageName)) {
-//            intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-//            intent.data = Uri.parse("packageName:$packageName")
-//            startActivityForResult(intent, IGNORING_BATTERY_OPT_REQ_CODE)
-//        } else {
-//            val batteryAuthSet = hashMapOf(
-//                "auth_ignoring_battery" to true,
-//            )
-//            userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-//        }
-
         // 메뉴 이동
         from = intent.getStringExtra("from").toString()
 
@@ -315,6 +326,10 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     override fun onDestroy() {
@@ -472,26 +487,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                         startService(startService)
                     }
                 }
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == IGNORING_BATTERY_OPT_REQ_CODE) {
-            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-            if(pm.isIgnoringBatteryOptimizations(packageName)) {
-                // 배터리 사용량 제한없음 권한 부여 o
-                val batteryAuthSet = hashMapOf(
-                    "auth_ignoring_battery" to true,
-                )
-                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-            } else {
-                // 권한 부여 x
-                val batteryAuthSet = hashMapOf(
-                    "auth_ignoring_battery" to false,
-                )
-                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
             }
         }
     }

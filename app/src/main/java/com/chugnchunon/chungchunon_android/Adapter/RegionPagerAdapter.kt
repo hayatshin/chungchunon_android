@@ -16,7 +16,6 @@ class RegionPagerAdapter(activity: FragmentActivity): FragmentStateAdapter(activ
 
     override fun createFragment(position: Int): Fragment {
 
-        Log.d("결과", "페이지어댑터: ${smallRegionCheck}")
         return when(smallRegionCheck) {
             false -> RegionRegisterFragment()
             true -> SmallRegionRegisterFragment()

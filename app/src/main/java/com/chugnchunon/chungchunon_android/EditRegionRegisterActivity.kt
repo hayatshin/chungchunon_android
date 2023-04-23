@@ -41,32 +41,26 @@ class EditRegionRegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.regionRegisterBtn.isEnabled = false
-
         binding.regionViewPager.isUserInputEnabled = false
-
 
         binding.backBtn.setOnClickListener {
             if(!RegionRegisterFragment.smallRegionCheck)  {
                 // 첫번째 화면
-
-                binding.regionResult.text = ""
+                binding.regionResult.setText(null)
                 finish()
             } else {
                 // 두번째 화면 -> 첫번째 화면
-                Log.d("결과", "클릭")
                 binding.regionRegisterBtn.isEnabled = false
                 RegionRegisterFragment.smallRegionCheck = false
 
                 binding.regionDescription.text = "거주지역을 목록에서 선택하세요."
-                binding.smallRegionResult.text = ""
-
+                binding.regionResult.setText(null)
+                binding.smallRegionResult.setText(null)
                 setupViewPager()
             }
         }
 
-
         binding.regionRegisterBtn.text = "지역 수정하기"
-
         LocalBroadcastManager.getInstance(this).registerReceiver(
             mMessageReceiver,
             IntentFilter("REGION_BROADCAST")
@@ -90,7 +84,6 @@ class EditRegionRegisterActivity : AppCompatActivity() {
             setResult(RESULT_OK, intent)
             finish()
 
-
 //            var regionIntent = Intent(this, EditProfileActivity::class.java)
 //            regionIntent.setAction("EDIT_REGION")
 //            regionIntent.putExtra("region", selectedRegion)
@@ -113,7 +106,6 @@ class EditRegionRegisterActivity : AppCompatActivity() {
 
             var smallRegionCheck = intent?.getBooleanExtra("smallRegionCheck", true)!!
             selectedRegion = intent?.getStringExtra("selectedRegion").toString()
-            Log.d("지역수정5", "$selectedRegion")
 
             binding.regionResult.text = spanTextFn(selectedRegion)
             binding.regionDescription.text="세부 거주지역을 목록에서 선택하세요."
@@ -132,7 +124,6 @@ class EditRegionRegisterActivity : AppCompatActivity() {
             binding.regionRegisterBtn.isEnabled = true
 
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
-            Log.d("지역수정6", "$selectedSmallRegion")
 
             binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
             binding.regionDescription.text="지역 수정하기 버튼을 눌러주세요"

@@ -544,6 +544,32 @@ class MyService : Service(), SensorEventListener {
     var BroadcastReregister: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
+            // 테스트 코드
+            if(intent?.hasExtra("alarm") == true) {
+                val alarmValue = intent.getBooleanExtra("alarm", false)
+                if(alarmValue == true) {
+                    val lastAlarmSet = hashMapOf(
+                        "last_alarm" to FieldValue.serverTimestamp()
+                    )
+
+                    db.collection("background_check")
+                        .document("$userId")
+                        .set(lastAlarmSet, SetOptions.merge())
+                }
+            } else if (intent?.hasExtra("no_noti") == true) {
+                val noNotiValue = intent.getBooleanExtra("no_noti", false)
+                if(noNotiValue == true) {
+                    val lastNoNotiSet = hashMapOf(
+                        "last_no_noti" to FieldValue.serverTimestamp()
+                    )
+
+                    db.collection("background_check")
+                        .document("$userId")
+                        .set(lastNoNotiSet, SetOptions.merge())
+                }
+            }
+
+
             LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
             LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
             LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
@@ -596,6 +622,8 @@ class MyService : Service(), SensorEventListener {
                 .setShowWhen(false)
                 .build()
             startForeground(NOTIFICATION_ID, notification)
+        } else {
+
         }
     }
 }

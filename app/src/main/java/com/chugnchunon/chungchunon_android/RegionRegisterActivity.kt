@@ -53,25 +53,23 @@ class RegionRegisterActivity : AppCompatActivity() {
         binding.backBtn.setOnClickListener {
             if (!RegionRegisterFragment.smallRegionCheck) {
                 // 첫번째 화면
-
-                binding.regionResult.text = ""
+                binding.regionResult.setText(null)
                 finish()
             } else {
                 // 두번째 화면 -> 첫번째 화면
 
                 binding.backBtn.visibility = View.GONE
 
-                Log.d("결과", "클릭")
                 binding.regionRegisterBtn.isEnabled = false
                 RegionRegisterFragment.smallRegionCheck = false
 
                 binding.regionDescription.text = "거주지역을 목록에서 선택하세요."
-                binding.smallRegionResult.text = ""
+                binding.regionResult.setText(null)
+                binding.smallRegionResult.setText(null)
 
                 setupViewPager()
             }
         }
-
 
         var userType = intent.getStringExtra("userType")
         var userAge = intent.getIntExtra("userAge", 0)
