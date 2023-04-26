@@ -49,6 +49,7 @@
 
         <service
             android:name=".Service.MyService"
+            android:stopWithTask="false"
             android:enabled="true"
             android:exported="true"/>
 

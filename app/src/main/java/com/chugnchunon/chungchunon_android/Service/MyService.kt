@@ -13,7 +13,9 @@ import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.work.*
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.*
 import com.chugnchunon.chungchunon_android.MainActivity
 import com.chugnchunon.chungchunon_android.R
@@ -49,6 +51,8 @@ class MyService : Service(), SensorEventListener {
         lateinit var step_sensor: Sensor
         var todayTotalStepCount: Int? = 0
         const val ALARM_REQ_CODE = 200
+
+        const val UNIQUE_WORK_NAME = "stepWork"
     }
 
     private var stepCount: Int = 0
@@ -60,21 +64,32 @@ class MyService : Service(), SensorEventListener {
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
         // 알람 매니저
-        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
-        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
-        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        pendingIntent = PendingIntent.getService(
-            applicationContext,
-            ALARM_REQ_CODE,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.setInexactRepeating(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            triggerTime,
-            repeatInterval,
-            pendingIntent
+//        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
+//        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
+//        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+//        pendingIntent = PendingIntent.getService(
+//            applicationContext,
+//            ALARM_REQ_CODE,
+//            intent,
+//            PendingIntent.FLAG_IMMUTABLE
+//        )
+//        alarmManager.setInexactRepeating(
+//            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//            triggerTime,
+//            repeatInterval,
+//            pendingIntent
+//        )
+
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
         )
 
         // 기본
@@ -88,7 +103,7 @@ class MyService : Service(), SensorEventListener {
             var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
             todayTotalStepCount = todayStepCountFromDB.toInt()
 
-           StepCountNotification(this, todayTotalStepCount)
+            StepCountNotification(this, todayTotalStepCount)
         }
 
         // 1. 1분마다 체크 (날짜 바뀔 때)
@@ -412,17 +427,28 @@ class MyService : Service(), SensorEventListener {
         super.onStart(intent, startId)
 
         // 알람 매니저
-        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
-        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
-        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        pendingIntent =
-            PendingIntent.getBroadcast(this, ALARM_REQ_CODE, intent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.setInexactRepeating(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            triggerTime,
-            repeatInterval,
-            pendingIntent
+//        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
+//        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
+//        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+//        pendingIntent =
+//            PendingIntent.getBroadcast(this, ALARM_REQ_CODE, intent, PendingIntent.FLAG_IMMUTABLE)
+//        alarmManager.setInexactRepeating(
+//            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//            triggerTime,
+//            repeatInterval,
+//            pendingIntent
+//        )
+
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
         )
 
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
@@ -468,19 +494,34 @@ class MyService : Service(), SensorEventListener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         // 알람 매니저
-        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
-        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
-        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        pendingIntent =
-            PendingIntent.getBroadcast(this, ALARM_REQ_CODE, intent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.setInexactRepeating(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            triggerTime,
-            repeatInterval,
-            pendingIntent
+//        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val repeatInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES
+//        val triggerTime = SystemClock.elapsedRealtime() + repeatInterval
+//        val intent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+//        pendingIntent =
+//            PendingIntent.getBroadcast(this, ALARM_REQ_CODE, intent, PendingIntent.FLAG_IMMUTABLE)
+//        alarmManager.setInexactRepeating(
+//            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//            triggerTime,
+//            repeatInterval,
+//            pendingIntent
+//        )
+
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
         )
 
+//        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+//        for(i in state){
+//            Log.d("워크", "startWorkManager: $state")
+//        }
 
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
@@ -532,10 +573,14 @@ class MyService : Service(), SensorEventListener {
         super.onDestroy()
         alarmManager.cancel(pendingIntent)
 
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
-        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(BroadcastReregister)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(dateChangeBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(stepInitializeReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(deviceShutdownBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(BroadcastReregister)
     }
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -546,34 +591,36 @@ class MyService : Service(), SensorEventListener {
         override fun onReceive(context: Context?, intent: Intent?) {
 
             // 테스트 코드
-//            if(intent?.hasExtra("alarm") == true) {
-//                val alarmValue = intent.getBooleanExtra("alarm", false)
-//                if(alarmValue == true) {
-//                    val lastAlarmSet = hashMapOf(
-//                        "last_alarm" to FieldValue.serverTimestamp()
-//                    )
-//
-//                    db.collection("background_check")
-//                        .document("$userId")
-//                        .set(lastAlarmSet, SetOptions.merge())
-//                }
-//            } else if (intent?.hasExtra("no_noti") == true) {
-//                val noNotiValue = intent.getBooleanExtra("no_noti", false)
-//                if(noNotiValue == true) {
-//                    val lastNoNotiSet = hashMapOf(
-//                        "last_no_noti" to FieldValue.serverTimestamp()
-//                    )
-//
-//                    db.collection("background_check")
-//                        .document("$userId")
-//                        .set(lastNoNotiSet, SetOptions.merge())
-//                }
-//            }
+            if(intent?.hasExtra("alarm") == true) {
+                val alarmValue = intent.getBooleanExtra("alarm", false)
+                if(alarmValue == true) {
+                    val lastAlarmSet = hashMapOf(
+                        "last_alarm" to FieldValue.serverTimestamp()
+                    )
 
+                    db.collection("background_check")
+                        .document("$userId")
+                        .set(lastAlarmSet, SetOptions.merge())
+                }
+            } else if (intent?.hasExtra("no_noti") == true) {
+                val noNotiValue = intent.getBooleanExtra("no_noti", false)
+                if(noNotiValue == true) {
+                    val lastNoNotiSet = hashMapOf(
+                        "last_no_noti" to FieldValue.serverTimestamp()
+                    )
 
-            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
-            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(deviceShutdownBroadcastReceiver)
-            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(stepInitializeReceiver)
+                    db.collection("background_check")
+                        .document("$userId")
+                        .set(lastNoNotiSet, SetOptions.merge())
+                }
+            }
+
+            LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(dateChangeBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(deviceShutdownBroadcastReceiver)
+            LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(stepInitializeReceiver)
 
             // 1. 1분마다 체크 (날짜 바뀔 때)
             dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
@@ -591,7 +638,10 @@ class MyService : Service(), SensorEventListener {
             deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
             val deviceShutdownIntent = IntentFilter()
             deviceShutdownIntent.addAction(Intent.ACTION_SHUTDOWN)
-            applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+            applicationContext?.registerReceiver(
+                deviceShutdownBroadcastReceiver,
+                deviceShutdownIntent
+            )
         }
     }
 
@@ -614,6 +664,7 @@ class MyService : Service(), SensorEventListener {
             )
             val decimal = DecimalFormat("#,###")
             val step = decimal.format(stepCount)
+            val notificationIntent = Intent(context, MainActivity::class.java)
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_new_alarm_icon)

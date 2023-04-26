@@ -1135,26 +1135,26 @@ class MyDiaryFragment : Fragment() {
         manAnimation.interpolator = LinearInterpolator()
         manAnimation.start()
 
-        userDB.document("$userId").get()
-            .addOnSuccessListener { document ->
-                val userType = document.data?.getValue("userType").toString()
-                if (userType == "파트너") {
-                    binding.partnerBlock.visibility = View.VISIBLE
-
-                    binding.todayMood.isEnabled = false
-                    binding.todayDiary.isEnabled = false
-                    binding.recordBtn.isEnabled = false
-                    binding.photoButton.isEnabled = false
-                    binding.diaryBtn.isEnabled = false
-
-                    val activity = activity
-                    if (activity != null) {
-                        val window = requireActivity().window
-                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                        window.setStatusBarColor(Color.parseColor("#B3000000"))
-                    }
-                } else binding.partnerBlock.visibility = View.GONE
-            }
+//        userDB.document("$userId").get()
+//            .addOnSuccessListener { document ->
+//                val userType = document.data?.getValue("userType").toString()
+//                if (userType == "파트너") {
+//                    binding.partnerBlock.visibility = View.VISIBLE
+//
+//                    binding.todayMood.isEnabled = false
+//                    binding.todayDiary.isEnabled = false
+//                    binding.recordBtn.isEnabled = false
+//                    binding.photoButton.isEnabled = false
+//                    binding.diaryBtn.isEnabled = false
+//
+//                    val activity = activity
+//                    if (activity != null) {
+//                        val window = requireActivity().window
+//                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+//                        window.setStatusBarColor(Color.parseColor("#B3000000"))
+//                    }
+//                } else binding.partnerBlock.visibility = View.GONE
+//            }
     }
 
     override fun onPause() {
