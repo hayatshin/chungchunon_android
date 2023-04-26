@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
@@ -18,6 +19,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,11 +32,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
+import com.chugnchunon.chungchunon_android.Adapter.UploadEditPhotosAdapter
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
+import com.chugnchunon.chungchunon_android.Fragment.LinearLayoutManagerWrapper
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditDiaryBinding
@@ -54,6 +59,7 @@ import kotlin.collections.ArrayList
 
 class EditDiaryActivity : AppCompatActivity() {
 
+    private val db = Firebase.firestore
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userDB = Firebase.firestore.collection("users")
     private val userId = Firebase.auth.currentUser?.uid
@@ -66,8 +72,9 @@ class EditDiaryActivity : AppCompatActivity() {
     lateinit var newImageViewModel: EditNewImageViewModel
 
     lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
-    lateinit var photoAdapter: UploadPhotosAdapter
+    lateinit var photoAdapter: UploadEditPhotosAdapter
     private var newDiarySet = hashMapOf<String, Any>()
+    private var itemListItems: ArrayList<Any> = ArrayList()
 
     private val model: BaseViewModel by viewModels()
 
@@ -93,10 +100,19 @@ class EditDiaryActivity : AppCompatActivity() {
 
         newImageViewModel = ViewModelProvider(this).get(EditNewImageViewModel::class.java)
 
+        photoAdapter = UploadEditPhotosAdapter(this, itemListItems)
+        binding.photoRecyclerView.layoutManager = LinearLayoutManagerWrapper(
+            this,
+            RecyclerView.HORIZONTAL,
+            false
+        )
+        binding.photoRecyclerView.adapter = photoAdapter
+
         var editDiaryId = intent.getStringExtra("editDiaryId")
 
-        binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-        binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+        binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+        binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+        binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
         diaryEditCheck = ViewModelProvider(this).get(DiaryEditClass::class.java)
 
@@ -170,10 +186,13 @@ class EditDiaryActivity : AppCompatActivity() {
         newImageViewModel.uploadFirebaseComplete.observe(this, Observer { value ->
 
             if (newImageViewModel.uploadFirebaseComplete.value == true) {
+
+                newDiarySet.put("images", newImageViewModel.newImageList.value!!)
+
                 diaryDB.document("$editDiaryId")
                     .set(newDiarySet, SetOptions.merge())
                     .addOnSuccessListener {
-                        var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
+                        val goAllDiary = Intent(this, DiaryTwoActivity::class.java)
                         goAllDiary.putExtra("from", "edit")
                         goAllDiary.putExtra("diaryType", diaryType)
                         startActivity(goAllDiary)
@@ -201,6 +220,66 @@ class EditDiaryActivity : AppCompatActivity() {
 
                 binding.todayDate.text = "${monthUI}월 ${dateUI}일 (${dateOfWeek})"
 
+                // 인지 보여주기
+                db.collection("recognition")
+                    .document(editDiaryId!!)
+                    .get()
+                    .addOnSuccessListener { recogDocument ->
+                        if (recogDocument.exists()) {
+                            // 있을 경우
+
+                            binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+                            binding.mathLayout.visibility = View.VISIBLE
+                            binding.noRecognitionLayout.visibility = View.GONE
+
+                            val oldFirstNumber =
+                                recogDocument.data?.getValue("firstNumber").toString()
+                            val oldSecondNumber =
+                                recogDocument.data?.getValue("secondNumber").toString()
+                            val oldOperator = recogDocument.data?.getValue("operator").toString()
+                            val oldUserAnswer =
+                                recogDocument.data?.getValue("userAnswer").toString()
+
+                            binding.firstNumber.text = oldFirstNumber
+                            binding.secondNumber.text = oldSecondNumber
+                            binding.operatorNumber.text = oldOperator
+                            binding.userRecognitionText.setText(oldUserAnswer)
+                            binding.userRecognitionText.isFocusable = false
+                            binding.userRecognitionText.isClickable = true
+
+                            binding.userRecognitionText.setOnClickListener {
+                                binding.recognitionResultLayout.visibility = View.VISIBLE
+                                val biggerAnimation =
+                                    AnimationUtils.loadAnimation(this, R.anim.scale_big)
+                                binding.recognitionResultBox.startAnimation(biggerAnimation)
+
+                                binding.resultEmoji.setImageResource(R.drawable.ic_soso)
+                                binding.bigResultText.setText(null)
+                                binding.smallResultText.text = "문제는 한번만 풀 수 있어요.\n내일 또 도전해보아요!"
+
+                                Handler().postDelayed({
+                                    val downAnimation =
+                                        AnimationUtils.loadAnimation(this, R.anim.scale_small)
+                                    binding.recognitionResultBox.startAnimation(downAnimation)
+
+                                    Handler().postDelayed({
+                                        binding.recognitionResultLayout.visibility = View.GONE
+                                        binding.userRecognitionText.isEnabled = false
+                                    }, 300)
+                                }, 1500)
+
+                            }
+
+                        } else {
+                            // 없을 경우
+                            binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+
+                            binding.mathLayout.visibility = View.GONE
+                            binding.noRecognitionLayout.visibility = View.VISIBLE
+                        }
+                    }
+
 
                 // 이미지 초기 셋업
                 if (document.data?.contains("images") == true) {
@@ -212,14 +291,13 @@ class EditDiaryActivity : AppCompatActivity() {
 
                         if (oldImageList.size != 0) {
                             for (i in 0 until oldImageList.size) {
+                                binding.photoRecyclerView.visibility = View.VISIBLE
+
                                 var uriParseImage = Uri.parse(oldImageList[i])
                                 newImageViewModel.addImage(uriParseImage)
+                                itemListItems.add(uriParseImage)
+                                photoAdapter.notifyItemInserted(oldImageList.size-1)
                             }
-
-                            photoAdapter = UploadPhotosAdapter(this, oldImageList)
-                            binding.photoRecyclerView.adapter = photoAdapter
-                            photoAdapter.notifyDataSetChanged()
-                            binding.photoRecyclerView.visibility = View.VISIBLE
                         }
                     }
 
@@ -248,7 +326,6 @@ class EditDiaryActivity : AppCompatActivity() {
 
         // 사진 업로드
         fun openGalleryForImages() {
-            Log.d("이미지", "오픈갤러리")
             var intent = Intent(Intent.ACTION_PICK)
             intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             intent.type = "image/*"
@@ -264,18 +341,16 @@ class EditDiaryActivity : AppCompatActivity() {
 
                         val count = it.data!!.clipData!!.itemCount
                         for (i in 0 until count) {
+                            binding.photoRecyclerView.visibility = View.VISIBLE
+
                             val imageUri = it.data?.clipData!!.getItemAt(i).uri.toString()
                             var uriParseImage = Uri.parse(imageUri)
                             newImageViewModel.addImage(uriParseImage)
+                            itemListItems.add(uriParseImage)
+                            photoAdapter.notifyItemInserted(itemListItems.size-1)
+
                             diaryEditCheck.photoEdit.value = true
                         }
-
-                        photoAdapter =
-                            UploadPhotosAdapter(this, newImageViewModel.newImageList.value)
-                        binding.photoRecyclerView.adapter = photoAdapter
-                        photoAdapter.notifyDataSetChanged()
-
-                        binding.photoRecyclerView.visibility = View.VISIBLE
 
                     }
                 }
@@ -388,16 +463,23 @@ class EditDiaryActivity : AppCompatActivity() {
             binding.diaryProgressBar.visibility = View.VISIBLE
 
             if (diaryEditCheck.photoEdit.value == true) {
-                Log.d("수정수정", "photoEdit oo")
 
-                for (i in 0 until newImageViewModel.newImageList.value!!.size) {
-                    if (!newImageViewModel.newImageList.value!![i].toString()
-                            .startsWith("https://")
-                    ) {
-                        uploadImageToFirebase(
-                            newImageViewModel.newImageList.value!![i] as Uri,
-                            i,
-                        )
+                val allStartsWithHttps = newImageViewModel.newImageList.value!!.all {
+                    it.toString().startsWith("https://")
+                }
+
+                if (allStartsWithHttps) {
+                    newImageViewModel.uploadFirebaseComplete.value = true
+                } else {
+                    for (i in 0 until newImageViewModel.newImageList.value!!.size) {
+                        if (!newImageViewModel.newImageList.value!![i].toString()
+                                .startsWith("https://")
+                        ) {
+                            uploadImageToFirebase(
+                                newImageViewModel.newImageList.value!![i] as Uri,
+                                i,
+                            )
+                        }
                     }
                 }
 
@@ -411,12 +493,6 @@ class EditDiaryActivity : AppCompatActivity() {
                 }
 
                 newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
-
-                if (newImageViewModel.newImageList.value!!.all { it ->
-                        it.toString().startsWith("http://")
-                    }) {
-                    newImageViewModel.uploadFirebaseComplete.value = true
-                }
 
             } else {
                 // 이미지 업로드 안 하는 경우
@@ -441,35 +517,6 @@ class EditDiaryActivity : AppCompatActivity() {
                         startActivity(goAllDiary)
                     }
             }
-
-
-//            if (diaryEditCheck.diaryEdit.value == true) {
-//                var newDiary = binding.todayDiary.text
-//                newDiarySet.put("todayDiary", newDiary.toString())
-//            }
-//
-//            if (diaryEditCheck.moodEdit.value == true) {
-//                newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
-//            }
-//
-//
-//            if (diaryEditCheck.photoEdit.value == true) {
-//                Log.d("수정1", "트루")
-//                for (i in 0 until imageSizeCheck.imageList.value!!.size) {
-//                    uploadImageToFirebase(imageSizeCheck.imageList.value!![i])
-//                }
-//            }
-//
-//
-//            diaryDB.document("$editDiaryId")
-//                .set(newDiarySet, SetOptions.merge())
-//                .addOnSuccessListener {
-//                    var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
-//                    goAllDiary.putExtra("from", "edit")
-//                    startActivity(goAllDiary)
-//                }
-
-
         }
 
     }
@@ -483,39 +530,37 @@ class EditDiaryActivity : AppCompatActivity() {
 
 
     private fun uploadImageToFirebase(fileUri: Uri, position: Int) {
-        if (fileUri != null) {
-            val fileName = UUID.randomUUID().toString() + ".jpg"
-            val database = FirebaseDatabase.getInstance()
-            val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+        val fileName = UUID.randomUUID().toString() + ".jpg"
+        val database = FirebaseDatabase.getInstance()
+        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
 
-            refStorage.putFile(fileUri)
-                .addOnSuccessListener(
-                    OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
-                        taskSnapshot.storage.downloadUrl.addOnSuccessListener {
-                            val imageUrl = it.toString()
-                            newImageViewModel.changeImage(imageUrl, position)
+        refStorage.putFile(fileUri)
+            .addOnSuccessListener(
+                OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                    taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                        val imageUrl = it.toString()
+                        newImageViewModel.changeImage(imageUrl, position)
 
-                            if (newImageViewModel.newImageList.value!!.all { it ->
-                                    it.toString().startsWith("https://")
-                                }) {
-                                newDiarySet.put("images", newImageViewModel.newImageList.value!!)
-                                newImageViewModel.uploadFirebaseComplete.value = true
-                            }
-
+                        if (newImageViewModel.newImageList.value!!.all { it ->
+                                it.toString().startsWith("https://")
+                            }) {
+//                            newDiarySet.put("images", newImageViewModel.newImageList.value!!)
+                            newImageViewModel.uploadFirebaseComplete.value = true
                         }
+
                     }
-                )
-                ?.addOnFailureListener(OnFailureListener { e ->
-                    print(e.message)
-                })
-        }
+                }
+            )
+            ?.addOnFailureListener(OnFailureListener { e ->
+                print(e.message)
+            })
     }
 
     override fun onResume() {
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             deleteImageFunction,
-            IntentFilter("DELETE_IMAGE")
+            IntentFilter("DELETE_IMAGE_EDIT")
         );
     }
 
@@ -533,15 +578,12 @@ class EditDiaryActivity : AppCompatActivity() {
 
     private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            var deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
+            val deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
+            newImageViewModel.removeImage(deleteImagePosition!!)
+            itemListItems.removeAt(deleteImagePosition)
+            photoAdapter.notifyItemRemoved(deleteImagePosition)
 
-            newImageViewModel.removeImage(deleteImagePosition!!.toInt())
             diaryEditCheck.photoEdit.value = true
-
-            photoAdapter = UploadPhotosAdapter(context!!, newImageViewModel.newImageList.value)
-            binding.photoRecyclerView.adapter = photoAdapter
-            photoAdapter.notifyDataSetChanged()
-
         }
     }
 

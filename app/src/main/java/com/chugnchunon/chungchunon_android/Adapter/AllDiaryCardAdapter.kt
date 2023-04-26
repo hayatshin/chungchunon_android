@@ -62,7 +62,8 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
-        var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
+        var imageDisplayRecyclerView: RecyclerView =
+            itemView.findViewById(R.id.imageDisplayRecyclerView)
         var secretStatusView: ImageView = itemView.findViewById(R.id.secretStatusView)
         var moreDiaryView: TextView = itemView.findViewById(R.id.moreDiary)
 
@@ -80,7 +81,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                 // nothing
             }
 
-            if(items[position].secret) {
+            if (items[position].secret) {
                 secretStatusView.visibility = View.VISIBLE
             } else {
                 secretStatusView.visibility = View.GONE
@@ -91,7 +92,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
 
-            if(items[position].diary.toString().length > 150) {
+            if (items[position].diary.toString().length > 150) {
                 userDiaryView.text = "${items[position].diary.toString().substring(0, 150)}..."
                 moreDiaryView.visibility = View.VISIBLE
             } else {
@@ -107,23 +108,59 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
 
-            when(items[position].mood!!.toInt()) {
-                0 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.main_color))
-                1 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.shalom_color))
-                2 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.throb_color))
-                3 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.soso_color))
-                4 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.anxious_color))
+            when (items[position].mood!!.toInt()) {
+                0 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.main_color
+                    )
+                )
+                1 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.shalom_color
+                    )
+                )
+                2 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.throb_color
+                    )
+                )
+                3 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.soso_color
+                    )
+                )
+                4 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.anxious_color
+                    )
+                )
                 5 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.sad_color))
-                6 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.gloomy_color))
-                7 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.angry_color))
+                6 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.gloomy_color
+                    )
+                )
+                7 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.angry_color
+                    )
+                )
             }
 
             // 이미지 작업
-            if(items[position].images == null || items[position].images?.size == 0) {
+            if (items[position].images == null || items[position].images?.size == 0) {
                 imageDisplayRecyclerView.visibility = View.GONE
             } else {
                 imageDisplayRecyclerView.visibility = View.VISIBLE
-                imageDisplayRecyclerView.adapter = DisplayPhotosAdapter(context, items[position].images!!)
+                imageDisplayRecyclerView.adapter =
+                    DisplayPhotosAdapter(context, items[position].images!!)
             }
 
             // 좋아요 토글 작업
@@ -160,9 +197,10 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
         holder.itemView.userAvatar.setOnClickListener { view ->
             val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
             goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
-            context. startActivity(goEnlargeAvatar)
+            context.startActivity(goEnlargeAvatar)
         }
 
+        // 좋아요 토글
         holder.itemView.likeIcon.setOnClickListener { view ->
 
             val DiaryRef = diaryDB.document(items[position].diaryId)
@@ -173,38 +211,64 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             )
 
             if (likeToggleCheck[position]!!) {
+                // 좋아요를 이미 누른 상태
 
-                DiaryRef.update("numLikes", FieldValue.increment(-1))
+                DiaryRef.collection("likes").document("$userId")
+                    .get()
+                    .addOnSuccessListener { likeDocument ->
+                        if (likeDocument.exists()) {
+                            // 문서가 존재하는 경우
+                            DiaryRef.update("numLikes", FieldValue.increment(-1))
 
-                likeNumLikes[position] = likeNumLikes[position]!!.toInt() - 1
-                holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
-                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
-                    .delete()
+                            likeNumLikes[position] = likeNumLikes[position]!!.toInt() - 1
+                            diaryDB.document(items[position].diaryId).collection("likes")
+                                .document("$userId")
+                                .delete()
 
-                likeToggleCheck[position] = false
+                            holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
+                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                            likeToggleCheck[position] = false
 
+                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                            intent.setAction("LIKE_TOGGLE_ACTION")
+                            intent.putExtra("newDiaryId", items[position].diaryId)
+                            intent.putExtra("newLikeToggle", false)
+                            intent.putExtra("newNumLikes", likeNumLikes[position]!!.toInt())
+                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                        } else {
+                            // 문서가 존재하지 않는 경우
+                        }
+                    }
             } else {
+                // 좋아요를 누르지 않은 상태
 
-                DiaryRef.update("numLikes", FieldValue.increment(1))
+                DiaryRef.collection("likes").document("$userId")
+                    .get()
+                    .addOnSuccessListener { likeDocument ->
+                        if (likeDocument.exists()) {
+                            // 문서가 존재하는 경우
+                        } else {
+                            // 문서가 존재하지 않는 경우
+                            DiaryRef.update("numLikes", FieldValue.increment(1))
 
+                            likeNumLikes[position] = likeNumLikes[position]!!.toInt() + 1
+                            diaryDB.document(items[position].diaryId).collection("likes")
+                                .document("$userId")
+                                .set(likeUserSet, SetOptions.merge())
 
-                likeNumLikes[position] = likeNumLikes[position]!!.toInt() + 1
-                holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
-                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
-                    .set(likeUserSet, SetOptions.merge())
+                            holder.itemView.likeText.text = "좋아요 ${likeNumLikes[position]}"
+                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                            likeToggleCheck[position] = true
 
-                likeToggleCheck[position] = true
-
+                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                            intent.setAction("LIKE_TOGGLE_ACTION")
+                            intent.putExtra("newDiaryId", items[position].diaryId)
+                            intent.putExtra("newLikeToggle", true)
+                            intent.putExtra("newNumLikes", likeNumLikes[position]!!.toInt())
+                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                        }
+                    }
             }
-
-            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-            intent.setAction("LIKE_TOGGLE_ACTION")
-            intent.putExtra("newDiaryId", items[position].diaryId)
-            intent.putExtra("newLikeToggle", likeToggleCheck[position]!!)
-            intent.putExtra("newNumLikes", likeNumLikes[position]!!.toInt())
-            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
 
         }
 
@@ -229,9 +293,9 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             context.startActivity(openBlockActivity)
         }
 
-        holder.itemView.likeText.setOnClickListener{
+        holder.itemView.likeText.setOnClickListener {
 
-            if(likeNumLikes[position] != 0) {
+            if (likeNumLikes[position] != 0) {
                 resumePause = true
 
                 val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)

@@ -5,6 +5,430 @@
     android:layout_height="match_parent"
     android:background="#ffffff">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/partnerAuthNotificationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/partnerAuthNotificationBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="40dp"
+            android:background="@drawable/mindbox_update"
+            android:orientation="vertical"
+            android:padding="15dp"
+            android:weightSum="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="0.8:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/partnerImageAuthBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_marginRight="20dp"
+                            android:background="@drawable/mindbox_gray"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_gallery"
+                            app:tint="@color/custom_gray" />
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:text="파일 및 미디어"
+                                    android:textSize="18dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom"
+                                    android:scrollbars="horizontal"
+                                    android:text="프로필 이미지 및 일기 이미지 저장"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="14dp" />
+
+                            </LinearLayout>
+                        </ScrollView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/partnerContactAuthBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_marginRight="20dp"
+                            android:background="@drawable/mindbox_gray"
+                            android:padding="12dp"
+                            android:src="@drawable/fui_ic_phone_white_24dp"
+                            app:tint="@color/custom_gray" />
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:text="연락처"
+                                    android:textSize="18dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom"
+                                    android:scrollbars="horizontal"
+                                    android:text="연락처에 있는 친구 연동"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="14dp" />
+
+                            </LinearLayout>
+                        </ScrollView>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/partnerAuthConfirmBtn"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/default_button_comment"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="확인"
+                    android:textColor="@color/white"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/authNotificationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/authNotificationBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="40dp"
+            android:background="@drawable/mindbox_update"
+            android:orientation="vertical"
+            android:padding="15dp"
+            android:weightSum="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="0.8:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/imageAuthBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/mindbox_gray"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_gallery"
+                                app:tint="@color/custom_gray" />
+
+                            <ScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:text="파일 및 미디어"
+                                        android:textSize="18dp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="bottom"
+                                        android:scrollbars="horizontal"
+                                        android:text="프로필 이미지 및 일기 이미지 저장"
+                                        android:textColor="@color/light_gray"
+                                        android:textSize="14dp" />
+
+                                </LinearLayout>
+                            </ScrollView>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/actionAuthBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/mindbox_gray"
+                                android:padding="10dp"
+                                android:src="@drawable/ic_run" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:text="신체 활동"
+                                    android:textSize="18dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom"
+                                    android:scrollbars="horizontal"
+                                    android:text="실시간 걸음 수"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="14dp" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/contactAuthBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/mindbox_gray"
+                                android:padding="12dp"
+                                android:src="@drawable/fui_ic_phone_white_24dp"
+                                app:tint="@color/custom_gray" />
+
+                            <ScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:text="연락처"
+                                        android:textSize="18dp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="bottom"
+                                        android:scrollbars="horizontal"
+                                        android:text="연락처에 있는 친구 연동"
+                                        android:textColor="@color/light_gray"
+                                        android:textSize="14dp" />
+
+                                </LinearLayout>
+                            </ScrollView>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/batteryAuthBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/mindbox_gray"
+                                android:padding="10dp"
+                                android:src="@drawable/common_full_open_on_phone"
+                                app:tint="@color/custom_gray" />
+
+                            <ScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:scrollbars="horizontal"
+                                        android:text="배터리 사용 제한없음"
+                                        android:textAlignment="textStart"
+                                        android:textSize="18dp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="bottom"
+                                        android:scrollbars="horizontal"
+                                        android:text="배터리 사용 제한 없이 걸음수 측정"
+                                        android:textColor="@color/light_gray"
+                                        android:textSize="14dp" />
+
+                                </LinearLayout>
+                            </ScrollView>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+                </ScrollView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/authConfirmBtn"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/default_button_comment"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="확인"
+                    android:textColor="@color/white"
+                    android:textSize="23dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     <FrameLayout
         android:id="@+id/enterFrameLayout"
         android:layout_width="0dp"
@@ -32,7 +456,6 @@
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
     <LinearLayout
-        android:weightSum="10"
         android:id="@+id/updateLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -40,7 +463,8 @@
         android:clickable="true"
         android:orientation="vertical"
         android:translationZ="90dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:weightSum="10">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/updateCardLayout"
@@ -49,24 +473,24 @@
             android:orientation="vertical">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                app:layout_constraintDimensionRatio="H,1:0.7"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/updateButtonGroup"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@id/updateButtonGroup"
+                app:layout_constraintDimensionRatio="H,1:0.7"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
 
                 <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/flower_back"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:layout_width="150dp"
@@ -87,19 +511,19 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
-                app:layout_constraintDimensionRatio="H,1:0.15"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:id="@+id/updateButtonGroup"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="H,1:0.15">
 
                 <LinearLayout
-                    android:background="@color/white"
-                    android:layout_weight="0.7"
                     android:id="@+id/updateCancelBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="0.7"
+                    android:background="@color/white"
                     android:gravity="center">
 
                     <TextView
@@ -113,11 +537,11 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:background="@color/main_color"
                     android:id="@+id/updateConfirmBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="0.3"
+                    android:background="@color/main_color"
                     android:gravity="center">
 
                     <TextView

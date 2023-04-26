@@ -177,6 +177,7 @@ class AllRegionDataFragment : Fragment() {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
 
+
             diaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {
                     diaryItem.numLikes = newNumLikes?.toLong()
@@ -196,7 +197,6 @@ class AllRegionDataFragment : Fragment() {
     }
 
     var newNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        @SuppressLint("NotifyDataSetChanged")
         override fun onReceive(context: Context?, intent: Intent?) {
 
             val createDiaryId = intent?.getStringExtra("newDiaryId")

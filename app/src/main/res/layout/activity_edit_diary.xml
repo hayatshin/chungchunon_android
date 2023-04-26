@@ -84,6 +84,72 @@
 
     </LinearLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/recognitionResultLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/recognitionResultBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="40dp"
+            android:background="@drawable/mindbox_update"
+            android:orientation="vertical"
+            android:weightSum="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1.3:1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/resultEmoji"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/ic_throb"
+                    app:tint="@color/main_color" />
+
+                <TextView
+                    android:id="@+id/bigResultText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:text="정답입니다!"
+                    android:textAlignment="center"
+                    android:textColor="@color/main_color"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/smallResultText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:lineHeight="25dp"
+                    android:text="정답은 1입니다\n꾸준히 지속하면 돼요 :)"
+                    android:textAlignment="center"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <LinearLayout
         android:background="@drawable/rule_header"
@@ -246,11 +312,134 @@
             <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/todayMood"
                 android:layout_width="wrap_content"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
                 android:background="@drawable/transparent_fill_box"
                 android:gravity="end"
                 android:minWidth="140dp"
                 android:textColor="@color/black" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/recognitionCheckBox"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_checkbox_no" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="인지"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/noRecognitionLayout"
+                    android:gravity="center"
+                    android:minWidth="140dp"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:visibility="gone"
+                        android:textSize="17dp"
+                        android:text="푼 문제가 없습니다."
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/mathLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:minWidth="140dp"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/firstNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/custom_gray"
+                        android:textSize="22dp"
+                        android:textStyle="bold"
+                        tools:text="2" />
+
+                    <TextView
+                        android:id="@+id/operatorNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/custom_gray"
+                        android:textSize="22dp"
+                        android:textStyle="bold"
+                        tools:text="+" />
+
+                    <TextView
+                        android:id="@+id/secondNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/custom_gray"
+                        android:textSize="22dp"
+                        android:textStyle="bold"
+                        tools:text="6" />
+
+                    <TextView
+                        android:id="@+id/equalSign"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:text="="
+                        android:textColor="@color/custom_gray"
+                        android:textSize="22dp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/userRecognitionText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="5"
+                        android:background="@drawable/mindbox_gray"
+                        android:inputType="number"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:textSize="22dp" />
+
+                    <!--                                <ImageView-->
+                    <!--                                    android:id="@+id/recognitionSubmit"-->
+                    <!--                                    android:layout_width="20dp"-->
+                    <!--                                    android:layout_height="30dp"-->
+                    <!--                                    android:layout_gravity="center"-->
+                    <!--                                    android:layout_weight="0.5"-->
+                    <!--                                    android:src="@drawable/ic_highlighter" />-->
+
+                </LinearLayout>
+
+            </LinearLayout>
+
 
         </LinearLayout>
 

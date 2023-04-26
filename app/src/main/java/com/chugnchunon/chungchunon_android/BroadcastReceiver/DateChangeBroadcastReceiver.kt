@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.icu.text.SimpleDateFormat
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -48,8 +49,12 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                 // 기존 날
                             } else {
                                 // 새로운 날
-                               if(document.contains(yesterday)){
+                                Log.d("걸음수체크", "데이트체인지 - 새로운 날")
+
+                                if(document.contains(yesterday)){
                                    // 어제 값 있음 -> dummy 값 추가
+                                   Log.d("걸음수체크", "어제 값 있음 -> dummy 값 추가")
+
                                    val dummyStepCount = (document.data?.getValue("dummy") as Long).toInt()
                                    val yesterdayStepCount = (document.data?.getValue(yesterday) as Long).toInt()
                                    val newDummy = dummyStepCount + yesterdayStepCount
@@ -87,37 +92,38 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 
                                } else {
                                    // 어제 값 없음 -> dummy 0 세팅
+                                   Log.d("걸음수체크", "어제 값 없음 -> dummy 0 세팅")
 
-                                   val newDummySet = hashMapOf(
-                                       "dummy" to 0
-                                   )
-                                   db.collection("user_step_count").document("$userId")
-                                       .set(newDummySet, SetOptions.merge())
-
-                                   val userStepCountSet = hashMapOf(
-                                       today to 0
-                                   )
-
-                                   val periodStepCountSet = hashMapOf(
-                                       "$userId" to 0
-                                   )
-
-                                   // user_step_count
-                                   db.collection("user_step_count")
-                                       .document("$userId")
-                                       .set(userStepCountSet, SetOptions.merge())
-
-                                   // period_step_count
-                                   db.collection("period_step_count")
-                                       .document(today)
-                                       .set(periodStepCountSet, SetOptions.merge())
-
-                                   // todayStepCount
-                                   val todayStepCountSet = hashMapOf(
-                                       "todayStepCount" to 0
-                                   )
-                                   userDB.document("$userId")
-                                       .set(todayStepCountSet, SetOptions.merge())
+//                                   val newDummySet = hashMapOf(
+//                                       "dummy" to 0
+//                                   )
+//                                   db.collection("user_step_count").document("$userId")
+//                                       .set(newDummySet, SetOptions.merge())
+//
+//                                   val userStepCountSet = hashMapOf(
+//                                       today to 0
+//                                   )
+//
+//                                   val periodStepCountSet = hashMapOf(
+//                                       "$userId" to 0
+//                                   )
+//
+//                                   // user_step_count
+//                                   db.collection("user_step_count")
+//                                       .document("$userId")
+//                                       .set(userStepCountSet, SetOptions.merge())
+//
+//                                   // period_step_count
+//                                   db.collection("period_step_count")
+//                                       .document(today)
+//                                       .set(periodStepCountSet, SetOptions.merge())
+//
+//                                   // todayStepCount
+//                                   val todayStepCountSet = hashMapOf(
+//                                       "todayStepCount" to 0
+//                                   )
+//                                   userDB.document("$userId")
+//                                       .set(todayStepCountSet, SetOptions.merge())
 
                                }
 

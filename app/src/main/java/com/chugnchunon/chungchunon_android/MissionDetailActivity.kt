@@ -137,16 +137,16 @@ class MissionDetailActivity : Activity() {
             withContext(Dispatchers.Main) {
                 launch {
 
-                    if(userPoint <= 2000) {
-                        binding.mdPointText.text = "$userPoint / 2000"
-                        val targetProgress = (userPoint.toFloat() / 2000f * 100f).toInt()
+                    if(userPoint <= 10000) {
+                        binding.mdPointText.text = "$userPoint / 10,000"
+                        val targetProgress = (userPoint.toFloat() / 10000f * 100f).toInt()
                         val animator = ObjectAnimator.ofInt(binding.mdPointProgress, "progress", 0, targetProgress)
                         animator.duration = 2000
                         animator.start()
 
-                        binding.mdPointProgress.progress = userPoint / 2000 * 100
+                        binding.mdPointProgress.progress = userPoint / 10000 * 100
                     } else {
-                        binding.mdPointText.text = "$userPoint / 2000"
+                        binding.mdPointText.text = "$userPoint / 10,000"
                         binding.mdPointProgress.progress = 100
 
                         val animator = ObjectAnimator.ofInt(binding.mdPointProgress, "progress", 0, 100)

@@ -277,6 +277,8 @@ class MyService : Service(), SensorEventListener {
 
                         if (userStepCount.contains(today)) {
                             // 리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중
+                            Log.d("걸음수체크", "리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중")
+
                             todayTotalStepCount = stepCount - dummyStepCount
 
                             StepCountNotification(this, todayTotalStepCount)
@@ -313,14 +315,11 @@ class MyService : Service(), SensorEventListener {
                             LocalBroadcastManager.getInstance(applicationContext!!)
                                 .sendBroadcast(intentToMyDiary)
                         } else {
-                            // 리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날
-
-                            val yesterdayStepCount =
-                                (userStepCount.data?.getValue(yesterday) as Long).toInt()
-                            val newDummy = dummyStepCount + yesterdayStepCount
+                            // 리부팅 x: 오늘 값이 없는 경우 -> 잘 작동 x
+                            Log.d("걸음수체크", "리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날")
 
                             val newDummySet = hashMapOf(
-                                "dummy" to newDummy
+                                "dummy" to stepCount
                             )
                             db.collection("user_step_count").document("$userId")
                                 .set(newDummySet, SetOptions.merge())
@@ -362,6 +361,8 @@ class MyService : Service(), SensorEventListener {
                         }
                     } else {
                         // 리부팅 x: 더미 값이 없는 경우 -> 처음 시작
+                        Log.d("걸음수체크", "리부팅 x: 더미 값이 없는 경우 -> 처음 시작")
+
                         val newDummySet = hashMapOf(
                             "dummy" to stepCount
                         )
@@ -545,29 +546,29 @@ class MyService : Service(), SensorEventListener {
         override fun onReceive(context: Context?, intent: Intent?) {
 
             // 테스트 코드
-            if(intent?.hasExtra("alarm") == true) {
-                val alarmValue = intent.getBooleanExtra("alarm", false)
-                if(alarmValue == true) {
-                    val lastAlarmSet = hashMapOf(
-                        "last_alarm" to FieldValue.serverTimestamp()
-                    )
-
-                    db.collection("background_check")
-                        .document("$userId")
-                        .set(lastAlarmSet, SetOptions.merge())
-                }
-            } else if (intent?.hasExtra("no_noti") == true) {
-                val noNotiValue = intent.getBooleanExtra("no_noti", false)
-                if(noNotiValue == true) {
-                    val lastNoNotiSet = hashMapOf(
-                        "last_no_noti" to FieldValue.serverTimestamp()
-                    )
-
-                    db.collection("background_check")
-                        .document("$userId")
-                        .set(lastNoNotiSet, SetOptions.merge())
-                }
-            }
+//            if(intent?.hasExtra("alarm") == true) {
+//                val alarmValue = intent.getBooleanExtra("alarm", false)
+//                if(alarmValue == true) {
+//                    val lastAlarmSet = hashMapOf(
+//                        "last_alarm" to FieldValue.serverTimestamp()
+//                    )
+//
+//                    db.collection("background_check")
+//                        .document("$userId")
+//                        .set(lastAlarmSet, SetOptions.merge())
+//                }
+//            } else if (intent?.hasExtra("no_noti") == true) {
+//                val noNotiValue = intent.getBooleanExtra("no_noti", false)
+//                if(noNotiValue == true) {
+//                    val lastNoNotiSet = hashMapOf(
+//                        "last_no_noti" to FieldValue.serverTimestamp()
+//                    )
+//
+//                    db.collection("background_check")
+//                        .document("$userId")
+//                        .set(lastNoNotiSet, SetOptions.merge())
+//                }
+//            }
 
 
             LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(dateChangeBroadcastReceiver)
