@@ -198,7 +198,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:translationZ="90dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <LinearLayout
             android:id="@+id/authNotificationBox"
@@ -223,9 +223,10 @@
                 android:padding="20dp">
 
                 <TextView
+                    android:textSize="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:lineHeight="20dp"
+                    android:lineHeight="23dp"
                     android:text="오늘도청춘 서비를 위해\n다음 권한을 허용해주세요."
                     android:textAlignment="center"
                     android:textColor="@color/black" />

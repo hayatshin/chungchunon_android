@@ -29,7 +29,7 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
 
-        if (intentAction == Intent.ACTION_BOOT_COMPLETED) {
+        if (intentAction == Intent.ACTION_BOOT_COMPLETED || intentAction == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
 
             // 부트값 저장
             val bootSet = hashMapOf(

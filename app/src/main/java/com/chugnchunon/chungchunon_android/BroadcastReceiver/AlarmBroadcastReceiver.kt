@@ -1,10 +1,13 @@
 package com.chugnchunon.chungchunon_android.BroadcastReceiver
 
+import android.app.AlarmManager
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -14,12 +17,17 @@ import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.NOTIFICATION_ID
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmBroadcastReceiverCalled
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmManager
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.calendar
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.pendingIntent
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDateTime
+import java.util.*
 
 lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
 lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
@@ -30,8 +38,8 @@ private val userId = Firebase.auth.currentUser?.uid
 class AlarmBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val now = LocalDateTime.now()
-
-        Log.d("알람매니저: 리시브", "${now}")
+        alarmBroadcastReceiverCalled = false
+        alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // 브로드캐스트 주기적 등록
         val alarmIntent = Intent(context, MyService::class.java)
