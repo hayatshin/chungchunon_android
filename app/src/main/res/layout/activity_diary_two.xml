@@ -23,7 +23,6 @@
             android:layout_marginHorizontal="40dp"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
-            android:padding="15dp"
             android:weightSum="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="0.8:1"
@@ -32,6 +31,24 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rule_header"
+                android:gravity="center"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:lineHeight="20dp"
+                    android:text="오늘도청춘 서비를 위해\n다음 권한을 허용해주세요."
+                    android:textAlignment="center"
+                    android:textColor="@color/black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:padding="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -52,8 +69,8 @@
                         android:padding="10dp">
 
                         <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
                             android:layout_marginRight="20dp"
                             android:background="@drawable/mindbox_gray"
                             android:padding="10dp"
@@ -101,8 +118,8 @@
                         android:padding="10dp">
 
                         <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
                             android:layout_marginRight="20dp"
                             android:background="@drawable/mindbox_gray"
                             android:padding="12dp"
@@ -147,6 +164,11 @@
             </LinearLayout>
 
             <LinearLayout
+                android:padding="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <LinearLayout
                 android:id="@+id/partnerAuthConfirmBtn"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
@@ -161,6 +183,7 @@
                     android:textSize="23dp"
                     android:textStyle="bold" />
 
+            </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -185,20 +208,37 @@
             android:layout_marginHorizontal="40dp"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
-            android:padding="15dp"
             android:weightSum="1"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="0.8:1"
+            app:layout_constraintDimensionRatio="0.7:1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rule_header"
+                android:gravity="center"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:lineHeight="20dp"
+                    android:text="오늘도청춘 서비를 위해\n다음 권한을 허용해주세요."
+                    android:textAlignment="center"
+                    android:textColor="@color/black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="15dp">
 
                 <ScrollView
                     android:layout_width="match_parent"
@@ -217,8 +257,8 @@
                             android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginRight="20dp"
                                 android:background="@drawable/mindbox_gray"
                                 android:padding="10dp"
@@ -266,8 +306,8 @@
                             android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginRight="20dp"
                                 android:background="@drawable/mindbox_gray"
                                 android:padding="10dp"
@@ -310,8 +350,8 @@
                             android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginRight="20dp"
                                 android:background="@drawable/mindbox_gray"
                                 android:padding="12dp"
@@ -360,8 +400,8 @@
                             android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:layout_marginRight="20dp"
                                 android:background="@drawable/mindbox_gray"
                                 android:padding="10dp"
@@ -409,20 +449,27 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/authConfirmBtn"
+                android:padding="15dp"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:background="@drawable/default_button_comment"
-                android:gravity="center">
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="확인"
-                    android:textColor="@color/white"
-                    android:textSize="23dp"
-                    android:textStyle="bold" />
+                <LinearLayout
+                    android:id="@+id/authConfirmBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:background="@drawable/default_button_comment"
+                    android:gravity="center">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="확인"
+                        android:textColor="@color/white"
+                        android:textSize="23dp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

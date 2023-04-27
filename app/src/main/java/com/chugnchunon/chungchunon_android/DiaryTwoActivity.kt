@@ -66,6 +66,8 @@ class DiaryTwoActivity : AppCompatActivity() {
         const val STEP_REQ_CODE: Int = 200
         const val CONTACT_REQ_CODE: Int = 300
         const val IGNORING_BATTERY_OPT_REQ_CODE: Int = 400
+
+        private var whiteCheck : Boolean = false
     }
 
     override fun onBackPressed() {
@@ -215,6 +217,7 @@ class DiaryTwoActivity : AppCompatActivity() {
 
             // 배터리 제한 없음 설정 안 한 경우
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
                 val powerManager =
                     this.getSystemService(Context.POWER_SERVICE) as PowerManager
                 if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
