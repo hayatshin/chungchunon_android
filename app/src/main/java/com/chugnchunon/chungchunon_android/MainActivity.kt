@@ -22,7 +22,6 @@ import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
 import org.json.JSONObject
-import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +35,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        try {
+            Thread.setDefaultUncaughtExceptionHandler { thread, ex -> ex.printStackTrace() }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
 
         // 오늘도청춘 아이콘 애니메이션
         onlccIconUpAnimation()

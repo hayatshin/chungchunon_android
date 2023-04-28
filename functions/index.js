@@ -41,7 +41,7 @@ exports.commentPushNotification = functions.firestore.document("/diary/{diaryId}
                                     notificationCommentId: commentId
                                }
                            }
-                  admin.messaging().sendToTopic("/topics/" + diaryUserIdFormat, payload)
+                  admin.messaging().sendToTopic(diaryUserIdFormat, payload)
 
             })
         })

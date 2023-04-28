@@ -35,8 +35,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
@@ -56,11 +54,9 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
-import com.chugnchunon.chungchunon_android.Adapter.UploadEditPhotosAdapter
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
-import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -70,11 +66,9 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_diary_two.*
-import org.apache.commons.lang3.RandomUtils.nextInt
 import org.apache.commons.lang3.StringUtils
 import kotlin.collections.ArrayList
 import kotlin.random.Random
-import kotlin.random.Random.Default.nextInt
 
 class MyDiaryFragment : Fragment() {
 
@@ -546,7 +540,6 @@ class MyDiaryFragment : Fragment() {
 //                                    binding.photoRecyclerView.adapter = photoAdapter
 //                                    photoAdapter.notifyDataSetChanged()
                                 }
-
 
                             } else {
                                 // null

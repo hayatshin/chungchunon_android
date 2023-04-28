@@ -20,5 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-#-keep class com.github.mikephil.charting.** { *; }
-#-keep class android.animation.ObjectAnimator { *;}
+-keep class com.github.mikephil.charting.** { *; }
+-keep class android.animation.ObjectAnimator { *;}

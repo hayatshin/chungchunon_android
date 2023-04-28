@@ -5,6 +5,7 @@ import android.provider.Telephony
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.Toast
 import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.RegionRegisterActivity
 import com.chugnchunon.chungchunon_android.MainActivity
@@ -29,8 +30,13 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
     private val TAG: String = "카톡로그인"
     private val userDB = Firebase.firestore.collection("users")
 
-
     override fun onSessionOpened() {
+
+        try {
+            Thread.setDefaultUncaughtExceptionHandler { thread, ex -> ex.printStackTrace() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         UserManagement.getInstance().me(object : MeV2ResponseCallback() {
             override fun onSuccess(result: MeV2Response?) {
@@ -38,14 +44,13 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
                 if (result != null) {
-
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
                     val phoneNumber = "010-${
                         result.kakaoAccount?.phoneNumber?.substring(7)
                     }"
-                    var birthYear = result.kakaoAccount?.birthyear
-                    var userAge = currentYear - birthYear!!.toInt() + 1
-                    var gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
+                    val birthYear = result.kakaoAccount?.birthyear
+                    val userAge = currentYear - birthYear!!.toInt() + 1
+                    val gender = if(result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
                     val newUserType = if(userAge < 50) "파트너" else "사용자"
 
@@ -71,20 +76,20 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         auth.signInWithCustomToken(firebaseToken!!)
                     }.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            var userId = "kakao:${result.id}"
+                            val userId = "kakao:${result.id}"
                             userDB
                                 .document(userId)
                                 .get()
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        var userDocument = task.result
+                                        val userDocument = task.result
                                         if (userDocument.exists()) {
                                             // user 이미 존재
                                             var userAge =
                                                 (userDocument.data?.getValue("userAge") as Long).toInt()
                                             var userType = userDocument.data?.getValue("userType")
 
-                                                var goDiary =
+                                                val goDiary =
                                                     Intent(context, DiaryTwoActivity::class.java)
                                                 context.startActivity(goDiary)
 
@@ -94,7 +99,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                                 .document("kakao:${result.id}")
                                                 .set(userSet, SetOptions.merge())
                                                 .addOnSuccessListener {
-                                                    var goRegionRegister = Intent(
+                                                    val goRegionRegister = Intent(
                                                         context,
                                                         RegionRegisterActivity::class.java
                                                     )
@@ -116,6 +121,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
             override fun onSessionClosed(errorResult: ErrorResult?) {
                 Log.e(TAG, "세션 종료")
+
                 context.kakaoActivityIndicator.visibility = View.GONE
                 context.kakaoLoginTextView.visibility = View.VISIBLE
             }

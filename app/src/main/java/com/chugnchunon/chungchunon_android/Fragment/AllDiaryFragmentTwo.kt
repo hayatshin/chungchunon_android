@@ -67,7 +67,7 @@ class AllDiaryFragmentTwo : Fragment() {
         }
 
         val adapter = RegionDiaryAdapter(requireActivity())
-        binding.regionViewPager.offscreenPageLimit = 4
+        binding.regionViewPager.offscreenPageLimit = 3
         binding.regionViewPager.adapter = adapter
         binding.regionViewPager.isUserInputEnabled = false
 

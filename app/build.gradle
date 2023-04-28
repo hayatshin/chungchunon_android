@@ -15,14 +15,14 @@ android {
             keyPassword 'hayat10250'
         }
     }
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.chugnchunon.chungchunon_android"
-        minSdk 31
-        targetSdk 31
-        versionCode 33
-        versionName "2.1.6"
+        minSdk 26
+        targetSdk 33
+        versionCode 46
+        versionName "2.1.14"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

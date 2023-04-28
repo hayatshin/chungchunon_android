@@ -160,6 +160,56 @@
 
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/partnerNotificationAuthBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginRight="20dp"
+                            android:background="@drawable/mindbox_gray"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_bell_solid"
+                            app:tint="@color/custom_gray" />
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:text="알림 접근"
+                                    android:textSize="18dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom"
+                                    android:scrollbars="horizontal"
+                                    android:text="걸음수 및 게시물 댓글 알림"
+                                    android:textColor="@color/light_gray"
+                                    android:textSize="14dp" />
+
+                            </LinearLayout>
+                        </ScrollView>
+
+                    </LinearLayout>
+
                 </LinearLayout>
             </LinearLayout>
 
@@ -198,19 +248,18 @@
         android:gravity="center"
         android:orientation="vertical"
         android:translationZ="90dp"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <LinearLayout
             android:id="@+id/authNotificationBox"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_marginHorizontal="40dp"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
             android:weightSum="1"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="0.7:1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -227,7 +276,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:lineHeight="23dp"
-                    android:text="오늘도청춘 서비를 위해\n다음 권한을 허용해주세요."
+                    android:text="오늘도청춘 서비스를 위해\n다음 권한을 허용해주세요."
                     android:textAlignment="center"
                     android:textColor="@color/black" />
 
@@ -443,6 +492,57 @@
                             </ScrollView>
 
                         </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/notificationAuthBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_marginRight="20dp"
+                                android:background="@drawable/mindbox_gray"
+                                android:padding="12dp"
+                                android:src="@drawable/ic_bell_solid"
+                                app:tint="@color/custom_gray" />
+
+                            <ScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="center"
+                                        android:text="알림 접근"
+                                        android:textSize="18dp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:gravity="bottom"
+                                        android:scrollbars="horizontal"
+                                        android:text="걸음수 및 게시물 댓글 알림"
+                                        android:textColor="@color/light_gray"
+                                        android:textSize="14dp" />
+
+                                </LinearLayout>
+                            </ScrollView>
+
+                        </LinearLayout>
+
 
 
                     </LinearLayout>

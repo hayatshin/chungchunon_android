@@ -1,7 +1,6 @@
 package com.chugnchunon.chungchunon_android
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,13 +15,12 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.DataClass.AppUpdate
 import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.Service.MyService
@@ -37,6 +35,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.gson.GsonBuilder
+import java.lang.NumberFormatException
 import java.time.LocalDateTime
 
 class DiaryTwoActivity : AppCompatActivity() {
@@ -59,6 +58,8 @@ class DiaryTwoActivity : AppCompatActivity() {
     }
 
     companion object {
+        private var permissionCheck = false
+
         const val ALL_REQ_CODE: Int = 500
         const val PARTNER_REQ_CODE: Int = 600
 
@@ -67,7 +68,7 @@ class DiaryTwoActivity : AppCompatActivity() {
         const val CONTACT_REQ_CODE: Int = 300
         const val IGNORING_BATTERY_OPT_REQ_CODE: Int = 400
 
-        private var whiteCheck : Boolean = false
+        private var whiteCheck: Boolean = false
     }
 
     override fun onBackPressed() {
@@ -84,6 +85,7 @@ class DiaryTwoActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(33)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -110,9 +112,9 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                var gson = GsonBuilder().create()
-                var result = remoteConfig.getString("app_update")
-                var resultJson = gson.fromJson(result, AppUpdate::class.java)
+                val gson = GsonBuilder().create()
+                val result = remoteConfig.getString("app_update")
+                val resultJson = gson.fromJson(result, AppUpdate::class.java)
 
                 val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
 
@@ -124,6 +126,8 @@ class DiaryTwoActivity : AppCompatActivity() {
 
                 // 현재 버전이 remote config 버전보다 낮을 경우
                 if (currentAppVersion < resultJson.app_version.toInt() && resultJson.force_update as Boolean) {
+
+
                     // 즉시 업데이트할 것
                     var window = this.window
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -136,6 +140,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                     // 현재 버전이 remote config 버전보다 낮지 않을 경우
                     binding.updateLayout.visibility = View.GONE
                 }
+
             } else {
                 // remote config에서 버전을 가져오지 못한 경우
             }
@@ -167,7 +172,7 @@ class DiaryTwoActivity : AppCompatActivity() {
         // 댓글 푸시 노티피케이션 구독
         val userIdFormat = userId!!.replace(":", "")
         val firebaseMessaging = FirebaseMessaging.getInstance()
-        firebaseMessaging.subscribeToTopic("/topics/$userIdFormat")
+        firebaseMessaging.subscribeToTopic("$userIdFormat")
 
         // FCM 토큰 저장
         userDB.document("$userId")
@@ -204,12 +209,22 @@ class DiaryTwoActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
         val readGalleryPermission =
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        val postNotificationPermission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            permissionCheck = readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                    && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                    && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+                    && postNotificationPermission == PackageManager.PERMISSION_GRANTED
+        } else {
+            permissionCheck = readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                    && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                    && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+        }
 
         // 파트너 구분 x
-        if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED ||
-            stepPermissionCheck == PackageManager.PERMISSION_DENIED ||
-            readGalleryPermission == PackageManager.PERMISSION_DENIED
-        ) {
+        if (!permissionCheck) {
             binding.authNotificationLayout.visibility = View.VISIBLE
         } else {
             // 모두 허용된 경우
@@ -241,6 +256,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                 "auth_step" to true,
                 "auth_contact" to true,
                 "auth_gallery" to true,
+                "auth_notification" to true,
             )
             userDB.document("$userId").set(authSet, SetOptions.merge())
 
@@ -392,26 +408,49 @@ class DiaryTwoActivity : AppCompatActivity() {
 //            }
 
         binding.partnerAuthConfirmBtn.setOnClickListener {
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
+            if (Build.VERSION.SDK_INT >= 33) {
+                requestPermissions(
+                    arrayOf(
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.POST_NOTIFICATIONS,
                     ),
-                PARTNER_REQ_CODE
-            )
+                    PARTNER_REQ_CODE
+                )
+            } else {
+                requestPermissions(
+                    arrayOf(
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                    ),
+                    PARTNER_REQ_CODE
+                )
+            }
         }
 
         binding.authConfirmBtn.setOnClickListener {
             binding.authNotificationLayout.visibility = View.GONE
 
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.ACTIVITY_RECOGNITION,
-                    Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                ALL_REQ_CODE
-            )
+            if (Build.VERSION.SDK_INT >= 33) {
+                requestPermissions(
+                    arrayOf(
+                        Manifest.permission.ACTIVITY_RECOGNITION,
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ),
+                    ALL_REQ_CODE
+                )
+            } else {
+                requestPermissions(
+                    arrayOf(
+                        Manifest.permission.ACTIVITY_RECOGNITION,
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                    ),
+                    ALL_REQ_CODE
+                )
+            }
         }
 
         // 메뉴 이동
@@ -498,12 +537,14 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         when (requestCode) {
             PARTNER_REQ_CODE -> {
-                if(grantResults.size > 0) {
-                    if(grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.size > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                    ) {
                         val authSet = hashMapOf(
                             "auth_contact" to true,
                             "auth_gallery" to true,
+                            "auth_notification" to true,
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
                     } else {
@@ -512,8 +553,8 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
             ALL_REQ_CODE -> {
-                if(grantResults.size > 0) {
-                    if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.size > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                         // 배터리 제한 없음 설정 안 한 경우
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -539,6 +580,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                             "auth_step" to true,
                             "auth_contact" to true,
                             "auth_gallery" to true,
+                            "auth_notification" to true,
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
 
