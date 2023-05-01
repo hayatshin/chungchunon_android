@@ -19,6 +19,7 @@
     <color name="light_gray">#ACABAB</color>
     <color name="very_light_gray">#F3F2F2</color>
     <color name="graph_back">#D66991</color>
+    <color name="yellow_highlight">#99FDFA35</color>
 
     // 감정
     <color name="shalom_color">#00E676</color>

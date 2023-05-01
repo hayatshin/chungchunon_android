@@ -34,6 +34,7 @@ import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.color
@@ -666,7 +667,7 @@ class MyDiaryFragment : Fragment() {
 
                     Handler().postDelayed({
                         binding.stepSuccessLayout.visibility = View.GONE
-                    }, 1100)
+                    }, 500)
 
                 }, 3000)
 
@@ -1252,12 +1253,14 @@ class MyDiaryFragment : Fragment() {
 
     private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+
             val deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
             newImageViewModel.removeImage(deleteImagePosition!!)
             itemListItems.removeAt(deleteImagePosition)
             photoAdapter.notifyItemRemoved(deleteImagePosition!!)
 
-            diaryEditCheck.photoEdit.value = true
+            if(editDiary)  diaryEditCheck.photoEdit.value = true
+
         }
     }
 
@@ -1293,6 +1296,7 @@ class MyDiaryFragment : Fragment() {
     }
 }
 
+@Keep
 class DiaryFillClass : ViewModel() {
     val recognitionFill by lazy { MutableLiveData<Boolean>(false) }
     val diaryFill by lazy { MutableLiveData<Boolean>(false) }
@@ -1301,6 +1305,7 @@ class DiaryFillClass : ViewModel() {
     val secretFill by lazy { MutableLiveData<Boolean>(false) }
 }
 
+@Keep
 class DiaryEditClass : ViewModel() {
     val diaryEdit by lazy { MutableLiveData<Boolean>(false) }
     val moodEdit by lazy { MutableLiveData<Boolean>(false) }

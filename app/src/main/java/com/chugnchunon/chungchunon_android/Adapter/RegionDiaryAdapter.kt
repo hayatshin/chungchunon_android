@@ -18,10 +18,14 @@ class RegionDiaryAdapter(activity: FragmentActivity) :
     override fun createFragment(position: Int): Fragment {
 
         when (position) {
-            0 -> return AllRegionDataFragment()
-            1 -> return UserRegionDataFragment()
-            2 -> return FriendDataFragment()
-            3 -> return MyDataFragment()
+            0 -> return UserRegionDataFragment()
+            1 -> return FriendDataFragment()
+            2 -> return MyDataFragment()
+
+//            0 -> return AllRegionDataFragment()
+//            1 -> return UserRegionDataFragment()
+//            2 -> return FriendDataFragment()
+//            3 -> return MyDataFragment()
         }
         return AllRegionDataFragment()
     }

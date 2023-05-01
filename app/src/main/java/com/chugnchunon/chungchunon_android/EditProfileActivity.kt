@@ -16,15 +16,14 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.KeyEvent
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -270,6 +269,20 @@ class EditProfileActivity : AppCompatActivity() {
             }
 
         // 지역 수정
+        binding.editRegion.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val editRegionLine =  binding.editRegion.lineCount
+
+                if(editRegionLine == 1) {
+                    binding.editRegion.gravity = Gravity.END
+                } else {
+                    binding.editRegion.gravity = Gravity.START
+                }
+                binding.editRegion.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        } )
+
+
         binding.editRegion.setOnClickListener {
             var goEditRegion = Intent(this, EditRegionRegisterActivity::class.java)
             startActivityForResult(goEditRegion, 1)
@@ -421,6 +434,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 }
 
+@Keep
 class EditCheckClass : ViewModel() {
     val avatarFill by lazy { MutableLiveData<Boolean>(false) }
     val nameFill by lazy { MutableLiveData<Boolean>(false) }

@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.Keep
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
@@ -56,15 +57,23 @@ class AllDiaryFragmentTwo : Fragment() {
 
         val diaryType = arguments?.getString("diaryType")
 
-        if(diaryType == "all") {
+       if (diaryType == "region") {
             binding.regionViewPager.currentItem = 0
-        } else if (diaryType == "region") {
-            binding.regionViewPager.currentItem = 1
         } else if (diaryType == "friend") {
-            binding.regionViewPager.currentItem = 2
+            binding.regionViewPager.currentItem = 1
         } else if (diaryType == "my") {
-            binding.regionViewPager.currentItem = 3
+            binding.regionViewPager.currentItem = 2
         }
+
+//        if(diaryType == "all") {
+//            binding.regionViewPager.currentItem = 0
+//        } else if (diaryType == "region") {
+//            binding.regionViewPager.currentItem = 1
+//        } else if (diaryType == "friend") {
+//            binding.regionViewPager.currentItem = 2
+//        } else if (diaryType == "my") {
+//            binding.regionViewPager.currentItem = 3
+//        }
 
         val adapter = RegionDiaryAdapter(requireActivity())
         binding.regionViewPager.offscreenPageLimit = 3
@@ -94,6 +103,7 @@ class AllDiaryFragmentTwo : Fragment() {
 
 }
 
+@Keep
 class LinearLayoutManagerWrapper : LinearLayoutManager {
     constructor(context: Context) : super(context) {}
 

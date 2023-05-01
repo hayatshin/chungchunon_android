@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -571,9 +572,9 @@ class EditDiaryActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(deleteImageFunction);
+        super.onDestroy()
     }
 
     private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
@@ -610,6 +611,7 @@ class EditDiaryActivity : AppCompatActivity() {
 }
 
 
+@Keep
 class DiaryEditClass : ViewModel() {
     val diaryEdit by lazy { MutableLiveData<Boolean>(false) }
     val moodEdit by lazy { MutableLiveData<Boolean>(false) }
@@ -617,7 +619,7 @@ class DiaryEditClass : ViewModel() {
     val secretEdit by lazy { MutableLiveData<Boolean>(false) }
 }
 
-
+@Keep
 class EditNewImageViewModel : ViewModel() {
     var uploadFirebaseComplete = MutableLiveData<Boolean>().apply {
         postValue(false)

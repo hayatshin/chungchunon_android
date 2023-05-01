@@ -165,32 +165,32 @@
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:weightSum="1"
                         android:id="@+id/regionLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:weightSum="1">
 
                         <TextView
-                            android:layout_weight=".4"
                             android:id="@+id/regionLabel"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight=".4"
                             android:text="지역"
                             android:textSize="20dp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <TextView
-                            android:singleLine="false"
-                            android:gravity="left|end"
-                            android:layout_weight=".6"
                             android:id="@+id/editRegion"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight=".6"
                             android:background="@null"
+                            android:gravity="right"
                             android:inputType="textMultiLine"
+                            android:singleLine="false"
                             android:textColor="@color/black"
                             android:textSize="21dp"
-                            tools:text="제주특별시 서귀포시 서귀포" />
+                            tools:text="제주특별시 서귀포시 서귀포구" />
 
                     </LinearLayout>
 
@@ -209,16 +209,16 @@
         android:layout_alignParentBottom="true"
         android:gravity="center">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/profileEditBtn"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@drawable/default_button"
-        android:enabled="false"
-        android:text="수정 완료"
-        android:textColor="@color/white"
-        android:textSize="23dp"
-        android:textStyle="bold" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/profileEditBtn"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="@drawable/default_button"
+            android:enabled="false"
+            android:text="수정 완료"
+            android:textColor="@color/white"
+            android:textSize="23dp"
+            android:textStyle="bold" />
 
         <ProgressBar
             android:id="@+id/profileProgressBtn"

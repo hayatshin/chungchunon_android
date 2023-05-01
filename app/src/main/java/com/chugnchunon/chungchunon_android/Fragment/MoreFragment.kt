@@ -46,6 +46,12 @@ class MoreFragment: Fragment() {
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
+        // 개인정보 수정 반영
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            editProfileWithNewInfo,
+            IntentFilter("EDIT_PROFILE")
+        )
+
         // 초기 셋업
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
@@ -65,38 +71,38 @@ class MoreFragment: Fragment() {
                 binding.profileRegion.text = userRegion
             }
 
-        // 개인정보 수정 반영
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            editProfileWithNewInfo,
-            IntentFilter("EDIT_PROFILE")
-        )
-
         binding.profileEditBtn.setOnClickListener {
-            var goProfileEdit = Intent(requireActivity(), EditProfileActivity::class.java)
+            val goProfileEdit = Intent(requireActivity(), EditProfileActivity::class.java)
             startActivity(goProfileEdit)
         }
 
         binding.application.setOnClickListener {
-            var app_intent = Intent(activity, ApplicationRuleActivity::class.java)
+            val app_intent = Intent(activity, ApplicationRuleActivity::class.java)
             startActivity(app_intent)
         }
 
         binding.personalInfo.setOnClickListener {
-            var personal_info_intent = Intent(activity, PersonalInfoRuleActivity::class.java)
+            val personal_info_intent = Intent(activity, PersonalInfoRuleActivity::class.java)
             startActivity(personal_info_intent)
         }
 
         binding.blockUserBtn.setOnClickListener {
-            var block_user_list_intent = Intent(activity, BlockUserListActivity::class.java)
+            val block_user_list_intent = Intent(activity, BlockUserListActivity::class.java)
             startActivity(block_user_list_intent)
         }
 
         binding.exitAppBtn.setOnClickListener {
-            var exit_intent = Intent(activity, ExitActivity::class.java)
+            val exit_intent = Intent(activity, ExitActivity::class.java)
             startActivity(exit_intent)
         }
 
         return view
+    }
+
+    override fun onDestroy() {
+        LocalBroadcastManager.getInstance(mcontext).unregisterReceiver(editProfileWithNewInfo);
+
+        super.onDestroy()
     }
 
 

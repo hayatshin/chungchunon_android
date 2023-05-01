@@ -34,6 +34,7 @@
 
     </RelativeLayout>
 
+
     <LinearLayout
         android:id="@+id/registerScrollView"
         android:layout_width="match_parent"
@@ -66,6 +67,7 @@
                     android:paddingVertical="10dp">
 
                     <ImageView
+                        android:layout_marginBottom="15dp"
                         android:id="@+id/avatarImage"
                         android:layout_width="70dp"
                         android:layout_height="70dp"
@@ -74,14 +76,14 @@
                         android:scaleType="centerInside"
                         android:src="@drawable/ic_user" />
 
-                    <androidx.appcompat.widget.AppCompatButton
+                    <TextView
+                        android:gravity="center"
+                        android:layout_weight="1"
                         android:id="@+id/avatarButton"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:text="사진 선택"
-                        android:textSize="18dp">
-
-                    </androidx.appcompat.widget.AppCompatButton>
+                        android:textSize="18dp" />
 
                 </LinearLayout>
 

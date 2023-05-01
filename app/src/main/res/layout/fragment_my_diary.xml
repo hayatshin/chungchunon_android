@@ -617,6 +617,8 @@
                             app:layout_constraintTop_toTopOf="parent">
 
                             <LinearLayout
+                                android:clickable="true"
+                                android:id="@+id/photoButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:layout_marginRight="10dp"
@@ -624,16 +626,17 @@
                                 android:orientation="vertical">
 
                                 <ImageButton
-                                    android:id="@+id/photoButton"
+                                    android:clickable="false"
                                     style="@style/Widget.AppCompat.Button.Borderless"
                                     android:layout_width="60dp"
                                     android:layout_height="50dp"
                                     android:layout_marginBottom="5dp"
                                     android:background="@drawable/mindbox_radius_border"
-                                    android:padding="5dp"
+                                    android:padding="15dp"
                                     android:src="@drawable/ic_camera" />
 
                                 <TextView
+                                    android:clickable="false"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"

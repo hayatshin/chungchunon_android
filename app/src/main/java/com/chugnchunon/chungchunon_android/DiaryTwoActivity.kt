@@ -15,11 +15,12 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import android.widget.Toast
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.DataClass.AppUpdate
 import com.chugnchunon.chungchunon_android.Fragment.*
@@ -48,10 +49,9 @@ class DiaryTwoActivity : AppCompatActivity() {
     val writeTime = LocalDateTime.now().toString().substring(0, 10)
     private var from = ""
     private lateinit var remoteConfig: FirebaseRemoteConfig
-    private val _mutableLiveData = MutableLiveData<AppUpdate>()
 
     private var diaryType = ""
-    private var lastBackPressTime: Long = 0
+    private var lastBackPressTime: Long = 0L
 
     private val binding by lazy {
         ActivityDiaryTwoBinding.inflate(layoutInflater)
@@ -63,18 +63,18 @@ class DiaryTwoActivity : AppCompatActivity() {
         const val ALL_REQ_CODE: Int = 500
         const val PARTNER_REQ_CODE: Int = 600
 
-        const val STEP_CONTACT_REQ_CODE: Int = 100
-        const val STEP_REQ_CODE: Int = 200
-        const val CONTACT_REQ_CODE: Int = 300
-        const val IGNORING_BATTERY_OPT_REQ_CODE: Int = 400
-
-        private var whiteCheck: Boolean = false
+//        const val STEP_CONTACT_REQ_CODE: Int = 100
+//        const val STEP_REQ_CODE: Int = 200
+//        const val CONTACT_REQ_CODE: Int = 300
+//        const val IGNORING_BATTERY_OPT_REQ_CODE: Int = 400
+//
+//        private var whiteCheck: Boolean = false
     }
 
     override fun onBackPressed() {
 
         val currentTime = System.currentTimeMillis()
-        val interval = 2000
+        val interval = 2000L
 
         if (currentTime - lastBackPressTime < interval) {
             super.onBackPressed()
@@ -85,10 +85,63 @@ class DiaryTwoActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(33)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
+
+        // 현재 버전값 저장
+        val currentVersionSet = hashMapOf(
+            "currentAppVersion" to currentAppVersion
+        )
+        userDB.document("$userId").set(currentVersionSet, SetOptions.merge())
+
+        // 인앱업데이트
+        remoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 3600
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val gson = GsonBuilder().create()
+                val result = remoteConfig.getString("app_update")
+
+                val resultJson = gson.fromJson(result, AppUpdate::class.java)
+
+                if (resultJson != null) {
+                    try {
+                        val remoteAppVersion = resultJson.app_version?.toInt()
+                        val remoteForceUpdate = resultJson.force_update
+
+//                        Toast.makeText(this, "$remoteAppVersion", Toast.LENGTH_LONG).show()
+
+                        // 현재 버전이 remote config 버전보다 낮을 경우
+                        if (currentAppVersion < remoteAppVersion!! && remoteForceUpdate!!) {
+
+                            // 즉시 업데이트할 것
+                            val window = this.window
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                            window.setStatusBarColor(Color.parseColor("#B3000000"))
+
+                            binding.updateLayout.visibility = View.VISIBLE
+                            val upAnimation =
+                                AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+                            binding.updateCardLayout.startAnimation(upAnimation)
+                        } else {
+                            // 현재 버전이 remote config 버전보다 낮지 않을 경우
+                            binding.updateLayout.visibility = View.GONE
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            } else {
+                // remote config에서 버전을 가져오지 못한 경우
+            }
+        }
 
         // 버전 체크
         val android_versionCode = Build.VERSION.SDK_INT
@@ -102,50 +155,6 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         // diaryType 받아오기 - fragment 변동
         diaryType = intent.getStringExtra("diaryType").toString()
-
-        // 인앱업데이트
-        remoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-
-        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val gson = GsonBuilder().create()
-                val result = remoteConfig.getString("app_update")
-                val resultJson = gson.fromJson(result, AppUpdate::class.java)
-
-                val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
-
-                // 현재 버전값 저장
-                val currentVersionSet = hashMapOf(
-                    "currentAppVersion" to currentAppVersion
-                )
-                userDB.document("$userId").set(currentVersionSet, SetOptions.merge())
-
-                // 현재 버전이 remote config 버전보다 낮을 경우
-                if (currentAppVersion < resultJson.app_version.toInt() && resultJson.force_update as Boolean) {
-
-
-                    // 즉시 업데이트할 것
-                    var window = this.window
-                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                    window.setStatusBarColor(Color.parseColor("#B3000000"))
-
-                    binding.updateLayout.visibility = View.VISIBLE
-                    var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-                    binding.updateCardLayout.startAnimation(upAnimation)
-                } else {
-                    // 현재 버전이 remote config 버전보다 낮지 않을 경우
-                    binding.updateLayout.visibility = View.GONE
-                }
-
-            } else {
-                // remote config에서 버전을 가져오지 못한 경우
-            }
-        }
-
 
         // 인앱업데이트 취소 클릭
         binding.updateCancelBox.setOnClickListener {
@@ -787,5 +796,11 @@ class DiaryTwoActivity : AppCompatActivity() {
 //                }
 //            }
         }
+    }
+    private class AppUpdateRunnable(private val activity: DiaryTwoActivity) : Runnable {
+        override fun run() {
+            TODO("Not yet implemented")
+        }
+
     }
 }

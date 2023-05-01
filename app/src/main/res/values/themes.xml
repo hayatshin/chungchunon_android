@@ -9,8 +9,6 @@
         <item name="android:radioButtonStyle">@style/customRadioButtonFontStyle</item>
         <item name="android:checkboxStyle">@style/customCheckboxFontStyle</item>
 
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/icon_transparent</item>
-
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/main_color</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>

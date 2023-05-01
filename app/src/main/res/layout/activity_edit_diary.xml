@@ -9,33 +9,33 @@
     tools:context=".Fragment.MyDiaryFragment">
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/secretNotificationLayout"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:translationZ="90dp"
-        android:background="@drawable/layer_screen"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
 
         <LinearLayout
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/mindbox_update"
             android:layout_width="300dp"
-            android:layout_height="250dp">
+            android:layout_height="250dp"
+            android:background="@drawable/mindbox_update"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/secreteNotificationText"
-                android:lineHeight="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/rule_header"
                 android:gravity="center"
-                android:textSize="16dp"
-                android:textColor="@color/black"
-                android:layout_weight="1"
+                android:lineHeight="20dp"
                 android:text="@string/secret_hide_notification"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:textColor="@color/black"
+                android:textSize="16dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -152,13 +152,13 @@
 
 
     <LinearLayout
-        android:background="@drawable/rule_header"
-        android:paddingTop="20dp"
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/rule_header"
         android:orientation="vertical"
-        android:paddingHorizontal="30dp">
+        android:paddingHorizontal="30dp"
+        android:paddingTop="20dp">
 
         <LinearLayout
             android:id="@+id/backBtn"
@@ -349,18 +349,18 @@
 
                 <LinearLayout
                     android:id="@+id/noRecognitionLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
                     android:minWidth="140dp"
-                    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:visibility="gone">
 
                     <TextView
-                        android:visibility="gone"
-                        android:textSize="17dp"
-                        android:text="푼 문제가 없습니다."
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:text="푼 문제가 없습니다."
+                        android:textSize="17dp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
 
@@ -500,12 +500,12 @@
 
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:layout_marginBottom="10dp"
                             android:id="@+id/recordBtn"
                             style="@style/Widget.AppCompat.Button.Borderless"
                             android:layout_width="140dp"
                             android:layout_height="40dp"
                             android:layout_gravity="end"
+                            android:layout_marginBottom="10dp"
                             android:background="@drawable/register_fill_box"
                             android:drawableStart="@drawable/ic_mic"
                             android:drawablePadding="10dp"
@@ -557,34 +557,36 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|top"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
-                    android:layout_marginRight="10dp"
-                    android:gravity="center"
+                    android:clickable="true"
+                    android:id="@+id/photoButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_marginRight="10dp"
+                    android:gravity="center"
                     android:orientation="vertical">
 
                     <ImageButton
-                        android:layout_marginBottom="5dp"
-                        android:id="@+id/photoButton"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:padding="5dp"
+                        android:clickable="false"
                         android:layout_width="60dp"
                         android:layout_height="50dp"
+                        android:layout_marginBottom="5dp"
                         android:background="@drawable/mindbox_radius_border"
-                        android:src="@drawable/ic_camera"/>
+                        android:padding="15dp"
+                        android:src="@drawable/ic_camera" />
 
                     <TextView
-                        android:gravity="center"
+                        android:clickable="false"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:text="사진"
                         android:textColor="@color/light_gray"
                         android:textSize="15dp"

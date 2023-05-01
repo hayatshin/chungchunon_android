@@ -1,7 +1,9 @@
 package com.chugnchunon.chungchunon_android.DataClass
 
 import android.net.Uri
+import androidx.annotation.Keep
 
+@Keep
 data class DiaryCard(
     var userId: String = "default_user",
     var username: String = "탈퇴자",

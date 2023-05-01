@@ -17,6 +17,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.BounceInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -362,23 +363,29 @@ class PeriodLastWeekRankingFragment : Fragment() {
         var userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
-            var userType = document.data.getValue("userType").toString()
+            if(document.data.containsKey("userType")){
+                val userType = document.data.getValue("userType").toString()
 
-            if(userType == "사용자") {
-                var userId = document.data?.getValue("userId").toString()
-                var username = document.data.getValue("name").toString()
-                var userAvatar = document.data.getValue("avatar").toString()
+                if(userType == "사용자") {
+                    try {
+                        val userId = document.data?.getValue("userId").toString()
+                        val username = document.data.getValue("name").toString()
+                        val userAvatar = document.data.getValue("avatar").toString()
 
-                var userEntry = RankingLine(
-                    0,
-                    userId,
-                    username,
-                    userAvatar,
-                    0,
-                )
+                        val userEntry = RankingLine(
+                            0,
+                            userId,
+                            username,
+                            userAvatar,
+                            0,
+                        )
 
-                userPointArray.add(userEntry)
-                userStepCountHashMap.put(userId, 0)
+                        userPointArray.add(userEntry)
+                        userStepCountHashMap.put(userId, 0)
+                    } catch (e:Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
         }
     }
@@ -519,6 +526,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
     }
 }
 
+@Keep
 class LastMyValueFormatter(var position: String, var lastWeekStepCount: Int) : ValueFormatter() {
     override fun getFormattedValue(value: Float): String {
 

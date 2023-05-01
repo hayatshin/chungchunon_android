@@ -1,5 +1,6 @@
 package com.chugnchunon.chungchunon_android.BroadcastReceiver
 
+import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,6 +17,7 @@ import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.chugnchunon.chungchunon_android.Service.MyService
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.ALARM_NOTIFICATION_NAME
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.NOTIFICATION_ID
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmBroadcastReceiverCalled
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmManager
@@ -36,38 +38,69 @@ private val userId = Firebase.auth.currentUser?.uid
 
 
 class AlarmBroadcastReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-        val now = LocalDateTime.now()
-        alarmBroadcastReceiverCalled = false
-        alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // 브로드캐스트 주기적 등록
+    override fun onReceive(context: Context?, intent: Intent?) {
+
+        Log.d("서비스", "알람: 브로드캐스트 리시버")
+
+        fun isServiceRunning(serviceClass: Class<*>): Boolean {
+            val activityManager =
+                context?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            for (service in activityManager.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.name == service.service.className) {
+                    return true
+                }
+            }
+            return false
+        }
+
         val alarmIntent = Intent(context, MyService::class.java)
-        alarmIntent.setAction("ALARM_BROADCAST_RECEIVER")
+        alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
         alarmIntent.putExtra("alarm", true)
         LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
 
-        // 노티피케이션 서비스 호출
-        val mNotificationManager =
-            context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val statusNotifications = mNotificationManager.activeNotifications
-        for (statusNotification in statusNotifications) {
-            if (statusNotification.id == MyService.NOTIFICATION_ID) {
-                // null
+        val isServiceRunningBoolean = isServiceRunning(MyService::class.java)
+        if (isServiceRunningBoolean) {
+            Log.d("서비스", "running")
+        } else {
+            Log.d("서비스", "no running")
+
+            alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
+            alarmIntent.putExtra("no_noti", true)
+            LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
+
+            val startService = Intent(context, MyService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(context, startService);
             } else {
-                // 노티피케이션 없는 경우
-
-                alarmIntent.setAction("ALARM_BROADCAST_RECEIVER")
-                alarmIntent.putExtra("no_noti", true)
-                LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
-
-                val startService = Intent(context, MyService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(context, startService);
-                } else {
-                    context.startService(startService);
-                }
+                context.startService(startService);
             }
         }
+
     }
 }
+
+
+// 노티피케이션 서비스 호출
+
+//        val mNotificationManager =
+//            context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+//        val statusNotifications = mNotificationManager.activeNotifications
+//        for (statusNotification in statusNotifications) {
+//            if (statusNotification.id == MyService.NOTIFICATION_ID) {
+//                // null
+//            } else {
+//                // 노티피케이션 없는 경우
+//
+//                alarmIntent.setAction("ALARM_BROADCAST_RECEIVER")
+//                alarmIntent.putExtra("no_noti", true)
+//                LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
+//
+//                val startService = Intent(context, MyService::class.java)
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    ContextCompat.startForegroundService(context, startService);
+//                } else {
+//                    context.startService(startService);
+//                }
+//            }
+//        }

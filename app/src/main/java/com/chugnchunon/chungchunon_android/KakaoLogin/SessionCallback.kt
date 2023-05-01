@@ -40,6 +40,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
         UserManagement.getInstance().me(object : MeV2ResponseCallback() {
             override fun onSuccess(result: MeV2Response?) {
+                Toast.makeText(context,"로그인 중입니다..", Toast.LENGTH_LONG).show()
 
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
@@ -113,6 +114,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         } else {
                             if (task.exception != null) {
                                 Log.e(TAG, task.exception.toString())
+                                Toast.makeText(context,"${task.exception.toString()}", Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -121,6 +123,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
             override fun onSessionClosed(errorResult: ErrorResult?) {
                 Log.e(TAG, "세션 종료")
+                Toast.makeText(context,"가입 종료", Toast.LENGTH_LONG).show()
 
                 context.kakaoActivityIndicator.visibility = View.GONE
                 context.kakaoLoginTextView.visibility = View.VISIBLE
@@ -132,10 +135,14 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
                 if (errorCode == clientErrorCode) {
                     Log.e(TAG, "카카오톡 서버의 네트워크가 불안정합니다. 잠시 후 다시 시도해주세요.")
+                    Toast.makeText(context,"onFailure: 서버 네트워크 불안정", Toast.LENGTH_LONG).show()
+
                     context.kakaoActivityIndicator.visibility = View.GONE
                     context.kakaoLoginTextView.visibility = View.VISIBLE
                 } else {
                     Log.e(TAG, "알 수 없는 오류로 카카오로그인 실패 \n${errorResult?.errorMessage}")
+                    Toast.makeText(context,"onFailure: ${errorResult?.errorMessage}", Toast.LENGTH_LONG).show()
+
                     context.kakaoActivityIndicator.visibility = View.GONE
                     context.kakaoLoginTextView.visibility = View.VISIBLE
                 }
@@ -146,7 +153,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
     }
 
     override fun onSessionOpenFailed(exception: KakaoException?) {
-        Log.e(TAG, "onSessionOpenFailed ${exception?.message}")
+        Log.e(TAG, "가입 실패: ${exception?.message}")
+        Toast.makeText(context,"onSessionOpenFailed ${exception?.message}", Toast.LENGTH_LONG).show()
         context.kakaoActivityIndicator.visibility = View.GONE
         context.kakaoLoginTextView.visibility = View.VISIBLE
     }

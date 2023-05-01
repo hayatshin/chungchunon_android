@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -552,7 +553,7 @@ class FriendDataFragment : Fragment() {
     }
 }
 
-
+@Keep
 class FriendDataLoadingState : ViewModel() {
     val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
 }

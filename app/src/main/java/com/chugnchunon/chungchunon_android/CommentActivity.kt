@@ -16,6 +16,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.Keep
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -638,7 +639,7 @@ class CommentActivity : FragmentActivity() {
     }
 }
 
-
+@Keep
 class CommentDataLoading : ViewModel() {
     val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
 }

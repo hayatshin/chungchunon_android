@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.Keep
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
@@ -156,7 +157,6 @@ class AllRegionDataFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
 
         LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(
             blockReloadFragment
@@ -169,6 +169,8 @@ class AllRegionDataFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(
             newLikeToggleReceiver
         );
+
+        super.onDestroy()
     }
 
     private var newLikeToggleReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -485,7 +487,7 @@ class AllRegionDataFragment : Fragment() {
     }
 }
 
-
+@Keep
 class AllRegionDataLoadingState : ViewModel() {
     val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
 }

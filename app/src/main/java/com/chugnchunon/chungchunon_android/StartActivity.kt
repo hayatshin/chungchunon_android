@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.WindowManager
+import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -17,13 +19,13 @@ class StartActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()
     private val userDB = Firebase.firestore.collection("users")
-    private var lastBackPressTime: Long = 0
+    private var lastBackPressTime: Long = 0L
 
     override fun onBackPressed() {
         super.onBackPressed()
 
         val currentTime = System.currentTimeMillis()
-        val interval = 2000
+        val interval = 2000L
 
         if (currentTime - lastBackPressTime < interval) {
             super.onBackPressed()
@@ -38,6 +40,8 @@ class StartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
     override fun onResume() {
@@ -53,26 +57,45 @@ class StartActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             val currentUser = auth.currentUser
 
-            if (currentUser != null) {
-                // auth에 user가 있음
-                val userId = Firebase.auth.currentUser?.uid
+            val userId = Firebase.auth.currentUser?.uid
+            Log.d("확인", "${userId}")
+
+
+            if (userId != null) {
                 userDB.document("$userId").get()
                     .addOnSuccessListener { document ->
-                        if(document != null) {
+                        if (document != null) {
                             // userDB에 있음
-                            val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
-                            startActivity(goDiaryTwoActivity)
+                            if (document.data!!.containsKey("smallRegion")) {
+                                // 정상 기록
+                                val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+                                startActivity(goDiaryTwoActivity)
+                            } else {
+                                // 정상기록 x
+
+                                FirebaseAuth.getInstance().signOut()
+
+                                userDB.document("$userId")
+                                    .delete().addOnSuccessListener {
+                                        // 정상 기록 x
+                                        val intent = Intent(this, MainActivity::class.java)
+                                        startActivity(intent)
+                                    }
+                            }
+
                         } else {
+
                             // userDB에 없음
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)
                         }
                     }
             } else {
-                // auth에 user가 없음
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }
+
+
         }, 1000)
     }
 }

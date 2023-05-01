@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
@@ -107,6 +108,17 @@ class BlockActivity : Activity() {
         }
 
         binding.deleteLayout.setOnClickListener {
+
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.blockBox.startAnimation(downAnimation)
+            Handler().postDelayed({
+                binding.blockBox.visibility = View.GONE
+            }, 500)
+
+            binding.deleteConfirmLayout.visibility = View.VISIBLE
+        }
+
+        binding.deleteConfirmBox.setOnClickListener {
             resumePause = false
 
             // 좋아요 삭제

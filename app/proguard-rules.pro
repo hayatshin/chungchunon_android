@@ -21,4 +21,6 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.github.mikephil.charting.** { *; }
--keep class android.animation.ObjectAnimator { *;}
+-keep class com.chugnchunon.chungchunon_android.DataClass.** { *; }
+
+#-keep class android.animation.ObjectAnimator { *;}

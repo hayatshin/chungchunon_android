@@ -1,112 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/blockBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/layer_screen"
     android:animateLayoutChanges="true"
-    >
+    android:background="@drawable/layer_screen"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/blockGobackArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/ic_arrow_circle_white"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:gravity="center"
-        android:id="@+id/blockBox"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/comment_box"
-        android:paddingTop="30dp"
-        android:paddingBottom="20dp"
-        android:orientation="vertical">
+        android:visibility="gone"
+        android:id="@+id/deleteConfirmLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="40dp"
+        android:background="@drawable/mindbox_update"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="H,1.4:1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:id="@+id/editLayout"
-            android:gravity="center"
-            android:background="@drawable/rule_header"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <ImageView
-                app:tint="@color/main_color"
-                android:layout_marginRight="15dp"
-                android:src="@drawable/ic_edit"
-                android:layout_width="20dp"
-                android:layout_height="20dp"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rule_header"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="오늘도청춘"
                 android:textColor="@color/main_color"
-                android:textSize="20dp"
-                android:text="수정하기"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/deleteLayout"
-            android:gravity="center"
-            android:background="@drawable/rule_header"
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <ImageView
-                android:layout_marginRight="15dp"
-                android:src="@drawable/ic_trash"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                app:tint="@color/main_color" />
-
+                android:textSize="15dp"
+                android:textStyle="bold" />
 
             <TextView
-                android:textColor="@color/main_color"
-                android:textSize="20dp"
-                android:text="삭제하기"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/blockDiaryLayout"
-            android:gravity="center"
-            android:background="@drawable/rule_header"
-            android:layout_width="match_parent"
-            android:layout_height="60dp">
-
-            <TextView
+                android:layout_height="wrap_content"
+                android:lineHeight="28dp"
+                android:text="정말 삭제하시겠습니까?"
+                android:textAlignment="center"
                 android:textColor="@color/black"
-                android:textSize="20dp"
-                android:text="일기 차단하기"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textSize="17dp" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/blockUserLayout"
-            android:gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="50dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:textColor="@color/black"
-                android:textSize="20dp"
-                android:text="사람 차단하기"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:id="@+id/deleteCancelBox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/diarycard_infobox"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="취소"
+                    android:textColor="@color/graph_back"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/deleteConfirmBox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="확인"
+                    android:textColor="@color/main_color"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:visibility="visible"
+        android:id="@+id/blockBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/comment_box"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="30dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/editLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/rule_header"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_edit"
+                app:tint="@color/main_color" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수정하기"
+                android:textColor="@color/main_color"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/deleteLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/rule_header"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_trash"
+                app:tint="@color/main_color" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="삭제하기"
+                android:textColor="@color/main_color"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blockDiaryLayout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/rule_header"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="일기 차단하기"
+                android:textColor="@color/black"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blockUserLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사람 차단하기"
+                android:textColor="@color/black"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

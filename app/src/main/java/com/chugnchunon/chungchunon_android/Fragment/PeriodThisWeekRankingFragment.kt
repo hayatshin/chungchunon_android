@@ -17,6 +17,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -375,24 +376,31 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
-            var userType = document.data.getValue("userType").toString()
+            if(document.data.containsKey("userType")){
+                val userType = document.data.getValue("userType").toString()
 
-            if(userType == "사용자") {
-                var userId = document.data?.getValue("userId").toString()
-                var username = document.data.getValue("name").toString()
-                var userAvatar = document.data.getValue("avatar").toString()
+                if(userType == "사용자") {
+                    try {
+                        val userId = document.data?.getValue("userId").toString()
+                        val username = document.data.getValue("name").toString()
+                        val userAvatar = document.data.getValue("avatar").toString()
 
-                var userEntry = RankingLine(
-                    0,
-                    userId,
-                    username,
-                    userAvatar,
-                    0,
-                )
+                        val userEntry = RankingLine(
+                            0,
+                            userId,
+                            username,
+                            userAvatar,
+                            0,
+                        )
 
-                userPointArray.add(userEntry)
-                userStepCountHashMap.put(userId, 0)
+                        userPointArray.add(userEntry)
+                        userStepCountHashMap.put(userId, 0)
+                    } catch (e:Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
+
         }
     }
 
@@ -532,6 +540,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 }
 
+@Keep
 class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) : ValueFormatter() {
     override fun getFormattedValue(value: Float): String {
 

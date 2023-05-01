@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.Keep
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -445,7 +446,7 @@ class UserRegionDataFragment : Fragment() {
     }
 }
 
-
+@Keep
 class UserRegionDataLoadingState : ViewModel() {
     val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
 }
