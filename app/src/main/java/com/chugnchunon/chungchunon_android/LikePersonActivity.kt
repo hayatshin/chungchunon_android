@@ -36,7 +36,7 @@ class LikePersonActivity: Activity() {
     override fun onBackPressed() {
         resumePause = true
 
-        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
         binding.likePersonLayout.startAnimation(downAnimation)
 
         downAnimation.setAnimationListener(object : Animation.AnimationListener {
@@ -48,36 +48,47 @@ class LikePersonActivity: Activity() {
 
             override fun onAnimationRepeat(animation: Animation?) {}
         })
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        val upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
         binding.likePersonLayout.startAnimation(upAnimation)
 
         binding.likePersonBackground.setOnClickListener {
             resumePause = true
 
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.likePersonLayout.startAnimation(downAnimation)
 
-            Handler().postDelayed({
-                finish()
-            }, 500)
+            downAnimation.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    finish()
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) {}
+            })
         }
 
         binding.likePersonGoBackArrow.setOnClickListener {
             resumePause = true
-            finish()
 
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
             binding.likePersonLayout.startAnimation(downAnimation)
-            Handler().postDelayed({
-                finish()
-            }, 500)
+
+            downAnimation.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation?) {}
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    finish()
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) {}
+            })
         }
 
         diaryId = intent.getStringExtra("diaryId").toString()

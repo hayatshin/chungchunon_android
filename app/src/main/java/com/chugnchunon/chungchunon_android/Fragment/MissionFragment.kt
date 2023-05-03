@@ -94,16 +94,18 @@ class MissionFragment: Fragment() {
         missionDB.get()
             .addOnSuccessListener { documents ->
                 for(document in documents) {
-                    var community = document.data.getValue("community").toString()
-                    var communityLogo = document.data.getValue("communityLogo").toString()
-                    var missionImage = document.data.getValue("missionImage").toString()
-                    var title = document.data.getValue("title").toString()
-                    var startPeriod = document.data.getValue("startPeriod").toString()
-                    var endPeriod = document.data.getValue("endPeriod").toString()
-                    var description = document.data.getValue("description").toString()
-                    var state = document.data.getValue("state").toString()
+                    val missionDocId = document.data.getValue("documentId").toString()
+                    val community = document.data.getValue("community").toString()
+                    val communityLogo = document.data.getValue("communityLogo").toString()
+                    val missionImage = document.data.getValue("missionImage").toString()
+                    val title = document.data.getValue("title").toString()
+                    val startPeriod = document.data.getValue("startPeriod").toString()
+                    val endPeriod = document.data.getValue("endPeriod").toString()
+                    val description = document.data.getValue("description").toString()
+                    val state = document.data.getValue("state").toString()
 
                     missionSet = Mission(
+                        missionDocId,
                         community,
                         communityLogo,
                         missionImage,

@@ -453,14 +453,14 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
 
     suspend fun diaryToArrayFun() {
-        var diaryDocuments = db.collection("diary")
+        val diaryDocuments = db.collection("diary")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
             .await()
 
         for (diaryDocument in diaryDocuments) {
-            var userId = diaryDocument.data.getValue("userId").toString()
+            val userId = diaryDocument.data.getValue("userId").toString()
 
             userPointArray.forEach {
                 if (it.userId == userId) {
@@ -472,7 +472,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun commentToArrayFun() {
-        var commentDocuments = db.collectionGroup("comments")
+        val commentDocuments = db.collectionGroup("comments")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
@@ -490,14 +490,14 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun likeToArrayFun() {
-        var likeDocuments = db.collectionGroup("likes")
+        val likeDocuments = db.collectionGroup("likes")
             .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
             .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
             .get()
             .await()
 
         for (likeDocument in likeDocuments) {
-            var userId = likeDocument.data.getValue("id").toString()
+            val userId = likeDocument.data.getValue("id").toString()
             userPointArray.forEach {
                 if (it.userId == userId) {
                     var currentpoint = it.point as Int
@@ -551,8 +551,8 @@ class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) :
             thisStepCheck = !thisStepCheck
             return "4 회"
         } else if (position != "goal" && thisStepCheck) {
-            var decimal = DecimalFormat("#,###")
-            var stepLabel = decimal.format(thisWeekMyStepCount)
+            val decimal = DecimalFormat("#,###")
+            val stepLabel = decimal.format(thisWeekMyStepCount)
             thisStepCheck = !thisStepCheck
             return "${stepLabel} 보"
         } else {

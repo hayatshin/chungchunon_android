@@ -17,9 +17,11 @@ import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.chugnchunon.chungchunon_android.BroadcastReceiver.*
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.MainActivity
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.Service.MyFirebaseMessagingService.Companion.CHANNEL_ID
+import com.chugnchunon.chungchunon_android.StartActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -45,7 +47,10 @@ class MyService : Service(), SensorEventListener {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
             "com.chungchunon.chunchunon_android.STEP_COUNTER_NOTIFICATION"
         const val ALARM_NOTIFICATION_NAME = "android.intent.action.MAIN"
+
         const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_CHANNEL_ID = "1000"
+
         lateinit var sensorManager: SensorManager
         lateinit var step_sensor: Sensor
         var todayTotalStepCount: Int? = 0
@@ -54,9 +59,6 @@ class MyService : Service(), SensorEventListener {
         const val UNIQUE_WORK_NAME = "stepWork"
 
         var alarmBroadcastReceiverCalled: Boolean = false
-        lateinit var alarmManager: AlarmManager
-        lateinit var pendingIntent: PendingIntent
-        lateinit var calendar: Calendar
     }
 
     private var stepCount: Int = 0
@@ -66,11 +68,82 @@ class MyService : Service(), SensorEventListener {
 
         Log.d("서비스", "onCreate")
 
-        // 기본
-        sensorManager =
-            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        // 알람 매니저
+//        val alarmBroadcastReceiver = AlarmBroadcastReceiver()
+//        registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
+//        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//
+//        val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+//        pendingIntent = PendingIntent.getBroadcast(
+//            applicationContext,
+//            ALARM_REQ_CODE,
+//            alarmIntent,
+//            PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//        calendar = Calendar.getInstance().apply {
+//            timeInMillis = System.currentTimeMillis()
+//
+////            if(before(Calendar.getInstance())) {
+////                add(Calendar.MINUTE, 30)
+////            }
+//        }
+//
+//        alarmManager.setAndAllowWhileIdle(
+//            AlarmManager.RTC_WAKEUP,
+//            calendar.timeInMillis,
+//            pendingIntent
+//        )
+//
+//        // 워크매니저
+//        val workManager = WorkManager.getInstance(applicationContext)
+//        val periodicWorkRequest: PeriodicWorkRequest =
+//            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
+//
+//        workManager.enqueueUniquePeriodicWork(
+//            UNIQUE_WORK_NAME,
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            periodicWorkRequest
+//        )
+//
+////        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+////        for(i in state){
+////            Log.d("워크", "startWorkManager: $state")
+////        }
+//
+//        // 오늘 걸음수 초기화
+//        userDB.document("$userId").get().addOnSuccessListener { document ->
+//            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
+//            todayTotalStepCount = todayStepCountFromDB.toInt()
+//
+//            StepCountNotification(this, todayTotalStepCount)
+//        }
+//
+//        // 1. 1분마다 체크 (날짜 바뀔 때)
+//        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+//        val dateChangeIntent = IntentFilter()
+//        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+//        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+//
+//        // 2. 날짜 바뀔 때
+//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            stepInitializeReceiver,
+//            IntentFilter("NEW_DATE_STEP_ZERO")
+//        )
+//
+//        // 3. 핸드폰 꺼질 때
+//        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+//        val deviceShutdownIntent = IntentFilter()
+//        deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
+//        deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+//        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+//
+//        // 알람 주기적 브로드캐스터
+//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            BroadcastReregister,
+//            IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
+//        )
+
     }
 
 
@@ -370,51 +443,72 @@ class MyService : Service(), SensorEventListener {
 
         Log.d("서비스", "onStart")
 
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(15, TimeUnit.MINUTES).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
+
+        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+
 
         // 알람 매니저
+        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
-        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(
+        val pendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             ALARM_REQ_CODE,
             alarmIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-        }
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            pendingIntent
-        )
+        if(pendingIntent != null) {
+            // 알람 등록
+            val nextAlarmClock = alarmManager.nextAlarmClock
+            if(nextAlarmClock != null) {
+                Log.d("서비스 - onStartCommand", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
+            } else {
+                Log.d("서비스 - onStartCommand", "알람등록 o, 다음 시간 설정 x")
 
-        // 워크매니저
-//        val workManager = WorkManager.getInstance(applicationContext)
-//        val periodicWorkRequest: PeriodicWorkRequest =
-//            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
-//
-//        workManager.enqueueUniquePeriodicWork(
-//            UNIQUE_WORK_NAME,
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            periodicWorkRequest
-//        )
-//
-//        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
-//        for(i in state){
-//            Log.d("워크", "startWorkManager: $state")
-//        }
+                val newCalendar = Calendar.getInstance().apply {
+                    timeInMillis = System.currentTimeMillis()
+                }
+
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    newCalendar.timeInMillis,
+                    pendingIntent
+                )
+            }
+        } else {
+            Log.d("서비스 - onStartCommand", "알람설정 x")
+
+            val newCalendar = Calendar.getInstance().apply {
+                timeInMillis = System.currentTimeMillis()
+            }
+
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                newCalendar.timeInMillis,
+                pendingIntent
+            )
+        }
+
 
 
         // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
             todayTotalStepCount = todayStepCountFromDB.toInt()
+
             StepCountNotification(this, todayTotalStepCount)
         }
 
@@ -448,44 +542,64 @@ class MyService : Service(), SensorEventListener {
 
         Log.d("서비스", "onStartCommand")
 
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(15, TimeUnit.MINUTES).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
+
+        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+
+
         // 알람 매니저
+        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
-        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        pendingIntent = PendingIntent.getBroadcast(
+        val pendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             ALARM_REQ_CODE,
             alarmIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
+        if(pendingIntent != null) {
+            // 알람 등록
+            val nextAlarmClock = alarmManager.nextAlarmClock
+            if(nextAlarmClock != null) {
+                Log.d("서비스 - onStartCommand", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
+            } else {
+                Log.d("서비스 - onStartCommand", "알람등록 o, 다음 시간 설정 x")
+
+                val newCalendar = Calendar.getInstance().apply {
+                    timeInMillis = System.currentTimeMillis()
+                }
+
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    newCalendar.timeInMillis,
+                    pendingIntent
+                )
+            }
+        } else {
+            Log.d("서비스 - onStartCommand", "알람설정 x")
+
+            val newCalendar = Calendar.getInstance().apply {
+                timeInMillis = System.currentTimeMillis()
+            }
+
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                newCalendar.timeInMillis,
+                pendingIntent
+            )
         }
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            pendingIntent
-        )
-
-        // 워크매니저
-//        val workManager = WorkManager.getInstance(applicationContext)
-//        val periodicWorkRequest: PeriodicWorkRequest =
-//            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
-//
-//        workManager.enqueueUniquePeriodicWork(
-//            UNIQUE_WORK_NAME,
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            periodicWorkRequest
-//        )
-
-//        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
-//        for(i in state){
-//            Log.d("워크", "startWorkManager: $state")
-//        }
 
 
         // 오늘 걸음수 초기화
@@ -582,63 +696,121 @@ class MyService : Service(), SensorEventListener {
     var BroadcastReregister: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
-            if(intent!!.action == "ALARM_BROADCAST_RECEIVER_RING") {
-                Log.d("서비스", "알람 - 브로드캐스트 로컬브로드캐스트")
+            val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val alarmBroadcastReceiver = AlarmBroadcastReceiver()
+            registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
+            val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                applicationContext,
+                ALARM_REQ_CODE,
+                alarmIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
 
-                // 테스트 코드
-                if (intent?.hasExtra("alarm") == true) {
-                    val alarmValue = intent.getBooleanExtra("alarm", false)
-                    if (alarmValue == true) {
-                        val lastAlarmSet = hashMapOf(
-                            "last_alarm" to FieldValue.serverTimestamp()
+            if (intent!!.action == "ALARM_BROADCAST_RECEIVER_RING") {
+
+                if (alarmBroadcastReceiverCalled) {
+                    Log.d("서비스 - onBroad", "알람 - 브로드캐스트 로컬브로드캐스트")
+
+                    if(pendingIntent != null) {
+                        Log.d("서비스 - onBroad", "알람 설정 o")
+
+                        // 알람 등록
+                        val nextAlarmClock = alarmManager.nextAlarmClock
+                        if(nextAlarmClock != null) {
+                            Log.d("서비스 - onBroad", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
+                        } else {
+                            Log.d("서비스 - onBroad", "알람등록 o, 다음 시간 설정 x")
+
+                            val newCalendar = Calendar.getInstance().apply {
+                                timeInMillis = System.currentTimeMillis()
+                            }
+                            newCalendar.add(Calendar.MINUTE, 30)
+
+                            Log.d("서비스 - onBroad", "알람 등록 o, 다음 시간 설정 x , 설정 후 -> ${newCalendar.get(Calendar.HOUR)} /  ${newCalendar.get(Calendar.MINUTE)}")
+
+                            alarmManager.setAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                newCalendar.timeInMillis,
+                                pendingIntent
+                            )
+                        }
+
+                    } else {
+                        Log.d("서비스 - onBroad", "알람설정 x")
+
+                        val newCalendar = Calendar.getInstance().apply {
+                            timeInMillis = System.currentTimeMillis()
+                        }
+
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            newCalendar.timeInMillis,
+                            pendingIntent
                         )
-
-                        db.collection("background_check")
-                            .document("$userId")
-                            .set(lastAlarmSet, SetOptions.merge())
                     }
-                } else if (intent?.hasExtra("no_noti") == true) {
-                    val noNotiValue = intent.getBooleanExtra("no_noti", false)
-                    if (noNotiValue == true) {
-                        val lastNoNotiSet = hashMapOf(
-                            "last_no_noti" to FieldValue.serverTimestamp()
-                        )
 
-                        db.collection("background_check")
-                            .document("$userId")
-                            .set(lastNoNotiSet, SetOptions.merge())
+                    // 테스트 코드
+                    if (intent?.hasExtra("alarm") == true) {
+                        val alarmValue = intent.getBooleanExtra("alarm", false)
+                        if (alarmValue == true) {
+
+                            val lastAlarmSet = hashMapOf(
+                                "last_alarm" to FieldValue.serverTimestamp()
+                            )
+
+                            db.collection("background_check")
+                                .document("$userId")
+                                .set(lastAlarmSet, SetOptions.merge())
+                        }
+                    } else if (intent?.hasExtra("no_noti") == true) {
+                        val noNotiValue = intent.getBooleanExtra("no_noti", false)
+                        if (noNotiValue == true) {
+                            val lastNoNotiSet = hashMapOf(
+                                "last_no_noti" to FieldValue.serverTimestamp()
+                            )
+
+                            db.collection("background_check")
+                                .document("$userId")
+                                .set(lastNoNotiSet, SetOptions.merge())
+                        }
                     }
+
+                    // 브로드 캐스트 다시 등록
+                    LocalBroadcastManager.getInstance(applicationContext)
+                        .unregisterReceiver(dateChangeBroadcastReceiver)
+                    LocalBroadcastManager.getInstance(applicationContext)
+                        .unregisterReceiver(deviceShutdownBroadcastReceiver)
+                    LocalBroadcastManager.getInstance(applicationContext)
+                        .unregisterReceiver(stepInitializeReceiver)
+
+                    // 1. 1분마다 체크 (날짜 바뀔 때)
+                    dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+                    val dateChangeIntent = IntentFilter()
+                    dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+                    applicationContext?.registerReceiver(
+                        dateChangeBroadcastReceiver,
+                        dateChangeIntent
+                    )
+
+                    // 2. 날짜 바뀔 때
+                    LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+                        stepInitializeReceiver,
+                        IntentFilter("NEW_DATE_STEP_ZERO")
+                    )
+
+                    // 3. 핸드폰 꺼질 때
+                    deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+                    val deviceShutdownIntent = IntentFilter()
+                    deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
+                    deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+                    applicationContext?.registerReceiver(
+                        deviceShutdownBroadcastReceiver,
+                        deviceShutdownIntent
+                    )
                 }
 
-                // 브로드 캐스트 다시 등록
-                LocalBroadcastManager.getInstance(applicationContext)
-                    .unregisterReceiver(dateChangeBroadcastReceiver)
-                LocalBroadcastManager.getInstance(applicationContext)
-                    .unregisterReceiver(deviceShutdownBroadcastReceiver)
-                LocalBroadcastManager.getInstance(applicationContext)
-                    .unregisterReceiver(stepInitializeReceiver)
-
-                // 1. 1분마다 체크 (날짜 바뀔 때)
-                dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-                val dateChangeIntent = IntentFilter()
-                dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-                applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
-
-                // 2. 날짜 바뀔 때
-                LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-                    stepInitializeReceiver,
-                    IntentFilter("NEW_DATE_STEP_ZERO")
-                )
-
-                // 3. 핸드폰 꺼질 때
-                deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
-                val deviceShutdownIntent = IntentFilter()
-                deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
-                deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-                applicationContext?.registerReceiver(
-                    deviceShutdownBroadcastReceiver,
-                    deviceShutdownIntent
-                )
+                alarmBroadcastReceiverCalled = false
             }
         }
     }
@@ -649,35 +821,65 @@ class MyService : Service(), SensorEventListener {
         }
     }
 
-    fun StepCountNotification(context: Context, stepCount: Int?) {
+    private fun StepCountNotification(context: Context, stepCount: Int?) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val CHANNEL_ID = "my_app"
             val channel = NotificationChannel(
-                CHANNEL_ID,
-                "MyApp", NotificationManager.IMPORTANCE_LOW
+                NOTIFICATION_CHANNEL_ID,
+                "MyApp",
+                NotificationManager.IMPORTANCE_LOW
             )
-            (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
-                channel
-            )
+
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+//            NotificationManagerCompat.from(context).createNotificationChannel(channel)
+
             val decimal = DecimalFormat("#,###")
             val step = decimal.format(stepCount)
 
-            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            val notificationPendingIntent: PendingIntent =
+                Intent(context, DiaryTwoActivity::class.java).let { notificationIntent ->
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        notificationIntent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
+                }
+
+            val stepNotification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_new_alarm_icon)
                 .setContentTitle("$step 걸음")
-                .setDefaults(Notification.DEFAULT_LIGHTS)
+                .setContentIntent(notificationPendingIntent)
                 .setOngoing(true)
                 .setShowWhen(false)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(false)
+                .setPriority(Notification.PRIORITY_HIGH)
                 .build()
-            startForeground(NOTIFICATION_ID, notification)
+
+            startForeground(NOTIFICATION_ID, stepNotification)
         }
+
+
+//            (context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+//                channel
+//            )
+//
+//            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+//                .setSmallIcon(R.drawable.ic_new_alarm_icon)
+//                .setContentTitle("$step 걸음")
+//                .setDefaults(Notification.DEFAULT_LIGHTS)
+//                .setOngoing(true)
+//                .setShowWhen(false)
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                .setAutoCancel(false)
+//                .build()
+//            startForeground(NOTIFICATION_ID, notification)
+
     }
-
-
 }
+
+
 
 
 

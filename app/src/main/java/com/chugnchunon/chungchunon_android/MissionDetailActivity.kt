@@ -2,6 +2,7 @@ package com.chugnchunon.chungchunon_android
 
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -10,9 +11,12 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import com.chugnchunon.chungchunon_android.DataClass.RankingLine
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
+import com.chugnchunon.chungchunon_android.Fragment.MissionFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityMissionDetailBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
@@ -21,6 +25,7 @@ import me.moallemi.tools.daterange.localdate.rangeTo
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
 class MissionDetailActivity : Activity() {
@@ -35,6 +40,7 @@ class MissionDetailActivity : Activity() {
 
     private var userPoint: Int = 0
 
+    private var mdDocId = ""
     private var mdTitle = ""
     private var mdDescription = ""
     private var mdImage = ""
@@ -51,12 +57,18 @@ class MissionDetailActivity : Activity() {
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
-    var timer : Timer? = null
+    var timer: Timer? = null
     var deltaTime = 0
+
+    private var participateState: Boolean = false
+
+    companion object {
+        const val REFRESH_RESULT_MISSION_CODE = 100
+    }
 
     override fun onBackPressed() {
 
-        var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+        val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
         binding.mdLayout.startAnimation(downAnimation)
 
         downAnimation.setAnimationListener(object : Animation.AnimationListener {
@@ -83,30 +95,8 @@ class MissionDetailActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        var upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-        binding.mdLayout.startAnimation(upAnimation)
-
-        binding.mdGobackArrow.setOnClickListener {
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
-            binding.mdLayout.startAnimation(downAnimation)
-            Handler().postDelayed({
-                finish()
-            }, 500)
-        }
-
-        binding.mdBackground.setOnClickListener {
-            AllDiaryFragmentTwo.resumePause = true
-
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
-            binding.mdLayout.startAnimation(downAnimation)
-
-            Handler().postDelayed({
-                finish()
-            }, 500)
-        }
-
-
         // 데이터 받기
+        mdDocId = intent.getStringExtra("mdDocID").toString()
         mdTitle = intent.getStringExtra("mdTitle").toString()
         mdDescription = intent.getStringExtra("mdDescription").toString()
         mdCommunity = intent.getStringExtra("mdCommunity").toString()
@@ -119,6 +109,88 @@ class MissionDetailActivity : Activity() {
         binding.mdCommunity.text = mdCommunity
         binding.mdPeriod.text = mdPeriod
 
+        db.collection("mission")
+            .document(mdDocId)
+            .collection("participants")
+            .document("$userId")
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val userCheck = task.result
+                    if (userCheck != null) {
+                        if (userCheck.exists()) {
+                            // 이미 참여
+                            participateState = true
+                            binding.mdParticipationBtn.alpha = 0.4f
+                            binding.mProgressTextBox.visibility = View.VISIBLE
+                        } else {
+                            participateState = false
+                            binding.mdParticipationBtn.alpha = 1f
+                            binding.mProgressTextBox.visibility = View.GONE
+                        }
+                    } else {
+                        participateState = false
+                        binding.mdParticipationBtn.alpha = 1f
+                        binding.mProgressTextBox.visibility = View.GONE
+                    }
+                }
+            }
+
+        val upAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+        binding.mdLayout.startAnimation(upAnimation)
+
+        binding.mdGobackArrow.setOnClickListener {
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.mdLayout.startAnimation(downAnimation)
+            Handler().postDelayed({
+                finish()
+            }, 500)
+        }
+
+        binding.mdBackground.setOnClickListener {
+            AllDiaryFragmentTwo.resumePause = true
+
+            val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+            binding.mdLayout.startAnimation(downAnimation)
+
+            Handler().postDelayed({
+                finish()
+            }, 500)
+        }
+
+        binding.mdParticipationBtn.setOnClickListener {
+            if (!participateState) {
+                // 디비 저장
+                val userParticipateSet = hashMapOf(
+                    "documentId" to mdDocId,
+                    "userId" to userId,
+                    "timestamp" to FieldValue.serverTimestamp()
+                )
+
+                db.collection("mission")
+                    .document(mdDocId)
+                    .collection("participants")
+                    .document("$userId")
+                    .set(userParticipateSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        val goMissionResult =
+                            Intent(this, MissionResultActivity::class.java)
+                        goMissionResult.putExtra(
+                            "participateState",
+                            participateState
+                        )
+                        startActivityForResult(
+                            goMissionResult,
+                            REFRESH_RESULT_MISSION_CODE
+                        )
+                    }
+            } else {
+                val goMissionResult = Intent(this, MissionResultActivity::class.java)
+                goMissionResult.putExtra("participateState", participateState)
+                startActivityForResult(goMissionResult, REFRESH_RESULT_MISSION_CODE)
+            }
+        }
+
         val pattern = "yyyy-MM-dd"
         formatStartDate = mdStartPeriod.replace(".", "-")
         formatEndDate = mdEndPeriod.replace(".", "-")
@@ -127,7 +199,8 @@ class MissionDetailActivity : Activity() {
         mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
 
         // 점수 계산
-        uiScope.launch(Dispatchers.IO) {
+        uiScope.launch(Dispatchers.IO)
+        {
             listOf(
                 launch { stepCountToArrayFun() },
                 launch { diaryToArrayFun() },
@@ -137,10 +210,15 @@ class MissionDetailActivity : Activity() {
             withContext(Dispatchers.Main) {
                 launch {
 
-                    if(userPoint <= 10000) {
+                    if (userPoint <= 10000) {
                         binding.mdPointText.text = "$userPoint / 10,000"
                         val targetProgress = (userPoint.toFloat() / 10000f * 100f).toInt()
-                        val animator = ObjectAnimator.ofInt(binding.mdPointProgress, "progress", 0, targetProgress)
+                        val animator = ObjectAnimator.ofInt(
+                            binding.mdPointProgress,
+                            "progress",
+                            0,
+                            targetProgress
+                        )
                         animator.duration = 2000
                         animator.start()
 
@@ -149,7 +227,13 @@ class MissionDetailActivity : Activity() {
                         binding.mdPointText.text = "$userPoint / 10,000"
                         binding.mdPointProgress.progress = 100
 
-                        val animator = ObjectAnimator.ofInt(binding.mdPointProgress, "progress", 0, 100)
+                        val animator =
+                            ObjectAnimator.ofInt(
+                                binding.mdPointProgress,
+                                "progress",
+                                0,
+                                100
+                            )
                         animator.duration = 2000
                         animator.start()
                     }
@@ -223,7 +307,40 @@ class MissionDetailActivity : Activity() {
             .await()
 
         for (likeDocument in likeDocuments) {
-                userPoint += 10
+            userPoint += 10
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REFRESH_RESULT_MISSION_CODE) {
+            db.collection("mission")
+                .document(mdDocId)
+                .collection("participants")
+                .document("$userId")
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val userCheck = task.result
+                        if (userCheck != null) {
+                            if (userCheck.exists()) {
+                                // 이미 참여
+                                participateState = true
+                                binding.mdParticipationBtn.alpha = 0.4f
+                                binding.mProgressTextBox.visibility = View.VISIBLE
+                            } else {
+                                participateState = false
+                                binding.mdParticipationBtn.alpha = 1f
+                                binding.mProgressTextBox.visibility = View.GONE
+                            }
+                        } else {
+                            participateState = false
+                            binding.mdParticipationBtn.alpha = 1f
+                            binding.mProgressTextBox.visibility = View.GONE
+                        }
+                    }
+                }
         }
     }
 }

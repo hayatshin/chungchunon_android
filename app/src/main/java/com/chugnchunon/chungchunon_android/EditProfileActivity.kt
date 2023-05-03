@@ -20,6 +20,8 @@ import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +70,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private var newAvatar = ""
     private var newName = ""
+    private var newGender = ""
     private var newBirthYear = ""
     private var newBirthDay = ""
     private var newRegion = ""
@@ -122,8 +125,12 @@ class EditProfileActivity : AppCompatActivity() {
                 binding.profileEditBtn.isEnabled = true
             }
         })
-
         editFillClass.nameFill.observe(this, Observer { value ->
+            if (value) {
+                binding.profileEditBtn.isEnabled = true
+            }
+        })
+        editFillClass.genderFill.observe(this, Observer { value ->
             if (value) {
                 binding.profileEditBtn.isEnabled = true
             }
@@ -139,15 +146,23 @@ class EditProfileActivity : AppCompatActivity() {
             }
         })
 
+        // 성별
+        binding.editGender.adapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.genderList,
+            R.layout.item_spinner_gender
+        )
+
         // 초기 셋업
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
                 newAvatar = document.data?.getValue("avatar").toString()
                 newName = document.data?.getValue("name").toString()
-                var gender = document.data?.getValue("gender").toString()
+                newGender = document.data?.getValue("gender").toString()
+                val genderIndex : Int = if(newGender == "여성") 0 else 1
                 newBirthYear = document.data?.getValue("birthYear").toString()
                 newBirthDay = document.data?.getValue("birthDay").toString()
-                var showBirth =
+                val showBirth =
                     "${newBirthYear}-${newBirthDay.substring(0, 2)}-${newBirthDay.substring(2, 4)}"
                 birthMonth = newBirthDay.substring(0, 2)
                 birthDate = newBirthDay.substring(2, 4)
@@ -159,9 +174,23 @@ class EditProfileActivity : AppCompatActivity() {
                     .into(binding.avatarImage)
 
                 binding.editName.setText(newName)
+                binding.editGender.setSelection(genderIndex)
                 binding.editBirth.setText(showBirth)
                 binding.editRegion.setText("${newRegion} ${newSmallRegion}")
+
             }
+
+        binding.editGender.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                editFillClass.genderFill.value = true
+                newGender = binding.editGender.selectedItem.toString()
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                // null
+            }
+        })
+
 
 
         // 이미지 수정
@@ -296,8 +325,9 @@ class EditProfileActivity : AppCompatActivity() {
             if (editFillClass.avatarFill.value == false) {
                 // 이미지 없는 경우
 
-                var newPersonalInfoSet = hashMapOf(
+                val newPersonalInfoSet = hashMapOf(
                     "name" to newName,
+                    "gender" to newGender,
                     "birthYear" to newBirthYear,
                     "birthDay" to newBirthDay,
                     "region" to newRegion,
@@ -307,12 +337,9 @@ class EditProfileActivity : AppCompatActivity() {
                 userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
                     .addOnSuccessListener {
                         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                        var newUserAge = currentYear - newBirthYear.toInt() + 1
+                        val newUserAge = currentYear - newBirthYear.toInt() + 1
 
-
-                        Log.d("지역수정1", "${newRegion} ${newSmallRegion}")
-
-                        var intent = Intent(this, MoreFragment::class.java)
+                        val intent = Intent(this, MoreFragment::class.java)
                         intent.setAction("EDIT_PROFILE")
                         intent.putExtra("newName", newName)
                         intent.putExtra("newUserAge", newUserAge)
@@ -321,6 +348,7 @@ class EditProfileActivity : AppCompatActivity() {
 
                         finish()
                     }
+
             } else {
                 // 이미지 수정
 
@@ -334,9 +362,10 @@ class EditProfileActivity : AppCompatActivity() {
                             taskSnapshot.storage.downloadUrl.addOnSuccessListener {
                                 val avatarUrl = it.toString()
 
-                                var newPersonalInfoSet = hashMapOf(
+                                val newPersonalInfoSet = hashMapOf(
                                     "avatar" to avatarUrl,
                                     "name" to newName,
+                                    "gender" to newGender,
                                     "birthYear" to newBirthYear,
                                     "birthDay" to newBirthDay,
                                     "region" to newRegion,
@@ -347,10 +376,10 @@ class EditProfileActivity : AppCompatActivity() {
                                     .set(newPersonalInfoSet, SetOptions.merge())
                                     .addOnSuccessListener {
                                         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                                        var newUserAge = currentYear - newBirthYear.toInt() + 1
+                                        val newUserAge = currentYear - newBirthYear.toInt() + 1
 
 
-                                        var intent = Intent(this, MoreFragment::class.java)
+                                        val intent = Intent(this, MoreFragment::class.java)
                                         intent.setAction("EDIT_PROFILE")
                                         intent.putExtra("newAvatar", avatarUrl)
                                         intent.putExtra("newName", newName)
@@ -438,6 +467,7 @@ class EditProfileActivity : AppCompatActivity() {
 class EditCheckClass : ViewModel() {
     val avatarFill by lazy { MutableLiveData<Boolean>(false) }
     val nameFill by lazy { MutableLiveData<Boolean>(false) }
+    val genderFill by lazy { MutableLiveData<Boolean>(false) }
     val birthFill by lazy { MutableLiveData<Boolean>(false) }
     val regionFill by lazy { MutableLiveData<Boolean>(false) }
 }

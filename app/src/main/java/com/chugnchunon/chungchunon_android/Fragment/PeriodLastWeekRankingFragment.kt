@@ -360,7 +360,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
     }
 
     suspend fun userIdToArrayFun() {
-        var userdocuments = userDB.get().await()
+        val userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
             if(document.data.containsKey("userType")){
@@ -405,7 +405,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
         )
 
         for (stepDate in startDate..endDate) {
-            var dataSteps = db.collection("period_step_count")
+            val dataSteps = db.collection("period_step_count")
                 .document("$stepDate")
                 .get()
                 .await()
@@ -429,7 +429,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
 
             userPointArray.forEach {
                 if (it.userId == keyUserId) {
-                    var currentpoint = it.point as Int
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + valueStepCount
                 }
 
@@ -439,18 +439,18 @@ class PeriodLastWeekRankingFragment : Fragment() {
 
 
     suspend fun diaryToArrayFun() {
-        var diaryDocuments = db.collection("diary")
+        val diaryDocuments = db.collection("diary")
             .whereGreaterThanOrEqualTo("timestamp", lastWeekStart)
             .whereLessThanOrEqualTo("timestamp", lastWeekEnd)
             .get()
             .await()
 
         for (diaryDocument in diaryDocuments) {
-            var userId = diaryDocument.data.getValue("userId").toString()
+            val userId = diaryDocument.data.getValue("userId").toString()
 
             userPointArray.forEach {
                 if (it.userId == userId) {
-                    var currentpoint = it.point as Int
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + 100
                 }
             }
@@ -458,17 +458,17 @@ class PeriodLastWeekRankingFragment : Fragment() {
     }
 
     suspend fun commentToArrayFun() {
-        var commentDocuments = db.collectionGroup("comments")
+        val commentDocuments = db.collectionGroup("comments")
             .whereGreaterThanOrEqualTo("timestamp", lastWeekStart)
             .whereLessThanOrEqualTo("timestamp", lastWeekEnd)
             .get()
             .await()
 
         for (commentDocument in commentDocuments) {
-            var userId = commentDocument.data.getValue("userId").toString()
+            val userId = commentDocument.data.getValue("userId").toString()
             userPointArray.forEach {
                 if (it.userId == userId) {
-                    var currentpoint = it.point as Int
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + 20
                 }
             }
@@ -476,14 +476,14 @@ class PeriodLastWeekRankingFragment : Fragment() {
     }
 
     suspend fun likeToArrayFun() {
-        var likeDocuments = db.collectionGroup("likes")
+        val likeDocuments = db.collectionGroup("likes")
             .whereGreaterThanOrEqualTo("timestamp", lastWeekStart)
             .whereLessThanOrEqualTo("timestamp", lastWeekEnd)
             .get()
             .await()
 
         for (likeDocument in likeDocuments) {
-            var userId = likeDocument.data.getValue("id").toString()
+            val userId = likeDocument.data.getValue("id").toString()
             userPointArray.forEach {
                 if (it.userId == userId) {
                     var currentpoint = it.point as Int
@@ -537,8 +537,8 @@ class LastMyValueFormatter(var position: String, var lastWeekStepCount: Int) : V
             lastStepCheck = !lastStepCheck
             return "4 회"
         } else if (position != "goal" && lastStepCheck) {
-            var decimal = DecimalFormat("#,###")
-            var stepLabel = decimal.format(lastWeekStepCount)
+            val decimal = DecimalFormat("#,###")
+            val stepLabel = decimal.format(lastWeekStepCount)
             lastStepCheck = !lastStepCheck
             return "${stepLabel} 보"
         } else {

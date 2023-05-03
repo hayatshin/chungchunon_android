@@ -61,7 +61,8 @@ class MissionCardAdapter(val context: Context, private val missionList: ArrayLis
 
         if(missionList[position].state == "진행") {
             holder.itemView.missionImage.setOnClickListener {
-                var goMissionDetail = Intent(context, MissionDetailActivity::class.java)
+                val goMissionDetail = Intent(context, MissionDetailActivity::class.java)
+                goMissionDetail.putExtra("mdDocID", missionList[position].documentId)
                 goMissionDetail.putExtra("mdTitle", missionList[position].title)
                 goMissionDetail.putExtra("mdDescription", missionList[position].description)
                 goMissionDetail.putExtra("mdImage", missionList[position].missionImage)

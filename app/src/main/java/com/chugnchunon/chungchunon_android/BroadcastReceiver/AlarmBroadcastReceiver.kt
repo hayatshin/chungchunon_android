@@ -1,9 +1,6 @@
 package com.chugnchunon.chungchunon_android.BroadcastReceiver
 
-import android.app.ActivityManager
-import android.app.AlarmManager
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
@@ -18,11 +15,9 @@ import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.ALARM_NOTIFICATION_NAME
+import com.chugnchunon.chungchunon_android.Service.MyService.Companion.ALARM_REQ_CODE
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.NOTIFICATION_ID
 import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmBroadcastReceiverCalled
-import com.chugnchunon.chungchunon_android.Service.MyService.Companion.alarmManager
-import com.chugnchunon.chungchunon_android.Service.MyService.Companion.calendar
-import com.chugnchunon.chungchunon_android.Service.MyService.Companion.pendingIntent
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -42,6 +37,8 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
 
         Log.d("서비스", "알람: 브로드캐스트 리시버")
+
+        alarmBroadcastReceiverCalled = true
 
         fun isServiceRunning(serviceClass: Class<*>): Boolean {
             val activityManager =
@@ -69,12 +66,30 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
             alarmIntent.putExtra("no_noti", true)
             LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
 
-            val startService = Intent(context, MyService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(context, startService);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                try {
+                    val startService = Intent(context, MyService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(context, startService);
+                    } else {
+                        context.startService(startService);
+                    }
+                } catch (e: ForegroundServiceStartNotAllowedException) {
+                    Log.d("서비스: 포그라운드 오류", "$e")
+                }
             } else {
-                context.startService(startService);
+                try {
+                    val startService = Intent(context, MyService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(context, startService);
+                    } else {
+                        context.startService(startService);
+                    }
+                } catch (e: Exception) {
+                    Log.d("서비스: 일반 오류", "$e")
+                }
             }
+
         }
 
     }

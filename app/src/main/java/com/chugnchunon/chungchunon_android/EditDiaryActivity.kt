@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -84,16 +85,25 @@ class EditDiaryActivity : AppCompatActivity() {
     private var newImageList: ArrayList<String> = ArrayList()
     private var editButtonClick: Boolean = false
 
-//    companion object {
-//        private var secretStatus : Boolean = false
-//    }
+    companion object {
+        private var photoResumeForEditDiary: Boolean = false
+        private var recordResumeForEditDiary: Boolean = false
+        private var editOrNotForEditDiary: Boolean = false
+
+        const val REQ_GALLERY = 200
+        const val REQ_MULTI_PHOTO = 2000
+
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        var diaryType = intent.getStringExtra("diaryType")
+        binding.diaryBtn.alpha = 0.4f
+
+        val diaryType = intent.getStringExtra("diaryType")
+        val editDiaryId = intent.getStringExtra("editDiaryId")
 
         binding.backBtn.setOnClickListener {
             finish()
@@ -109,7 +119,6 @@ class EditDiaryActivity : AppCompatActivity() {
         )
         binding.photoRecyclerView.adapter = photoAdapter
 
-        var editDiaryId = intent.getStringExtra("editDiaryId")
 
         binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
         binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
@@ -117,10 +126,7 @@ class EditDiaryActivity : AppCompatActivity() {
 
         diaryEditCheck = ViewModelProvider(this).get(DiaryEditClass::class.java)
 
-        binding.diaryBtn.isEnabled = false
-
         // 수정
-
         diaryEditCheck.secretEdit.observe(this, Observer { value ->
             if (diaryEditCheck.secretEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
@@ -140,7 +146,8 @@ class EditDiaryActivity : AppCompatActivity() {
                     diaryEditCheck.secretEdit.value = false
                     binding.secretNotificationLayout.visibility = View.GONE
                     window.setStatusBarColor(Color.WHITE);
-                    binding.diaryBtn.isEnabled = true
+                    editOrNotForEditDiary = true
+                    binding.diaryBtn.alpha = 1f
                 }
             } else {
 
@@ -157,24 +164,46 @@ class EditDiaryActivity : AppCompatActivity() {
                     diaryEditCheck.secretEdit.value = true
                     binding.secretNotificationLayout.visibility = View.GONE
                     window.setStatusBarColor(Color.WHITE);
-                    binding.diaryBtn.isEnabled = true
+                    editOrNotForEditDiary = true
+                    binding.diaryBtn.alpha = 1f
                 }
             }
         })
 
         diaryEditCheck.diaryEdit.observe(this, Observer { value ->
-            binding.diaryBtn.isEnabled = true
-            if (diaryEditCheck.diaryEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            if (diaryEditCheck.diaryEdit.value == true) {
+                editOrNotForEditDiary = true
+                binding.diaryBtn.alpha = 1f
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            }
         })
 
         diaryEditCheck.moodEdit.observe(this, Observer { value ->
-            binding.diaryBtn.isEnabled = true
-            if (diaryEditCheck.moodEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            if (diaryEditCheck.moodEdit.value == true) {
+                editOrNotForEditDiary = true
+                binding.diaryBtn.alpha = 1f
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            }
         })
 
         diaryEditCheck.photoEdit.observe(this, Observer { value ->
-            binding.diaryBtn.isEnabled = true
+            if (diaryEditCheck.photoEdit.value == true) {
+                editOrNotForEditDiary = true
+                binding.diaryBtn.alpha = 1f
+            }
         })
+
+        // 화면 변경
+        if (!photoResumeForEditDiary && !recordResumeForEditDiary) {
+            editOrNotForEditDiary = false
+
+            if (editOrNotForEditDiary) {
+                diaryEditCheck.diaryEdit.value = false
+                diaryEditCheck.moodEdit.value = false
+                diaryEditCheck.photoEdit.value = false
+                diaryEditCheck.secretEdit.value = false
+            }
+        }
 
 
         newImageViewModel.newImageList.observe(this, Observer { value ->
@@ -205,9 +234,9 @@ class EditDiaryActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
 
-                var diaryTimestamp =
+                val diaryTimestamp =
                     document.data!!.getValue("timestamp") as com.google.firebase.Timestamp
-                var diaryDate = DateFormat().convertTimeStampToDate(diaryTimestamp)
+                val diaryDate = DateFormat().convertTimeStampToDate(diaryTimestamp)
 
                 val year = diaryDate.substring(0, 4)
                 val month = diaryDate.substring(5, 7)
@@ -257,7 +286,7 @@ class EditDiaryActivity : AppCompatActivity() {
 
                                 binding.resultEmoji.setImageResource(R.drawable.ic_soso)
                                 binding.bigResultText.setText(null)
-                                binding.smallResultText.text = "문제는 한번만 풀 수 있어요.\n내일 또 도전해보아요!"
+                                binding.smallResultText.text = "문제는 한번만 풀 수 있어요.\n다음에 또 도전해보아요!"
 
                                 Handler().postDelayed({
                                     val downAnimation =
@@ -297,7 +326,7 @@ class EditDiaryActivity : AppCompatActivity() {
                                 var uriParseImage = Uri.parse(oldImageList[i])
                                 newImageViewModel.addImage(uriParseImage)
                                 itemListItems.add(uriParseImage)
-                                photoAdapter.notifyItemInserted(oldImageList.size-1)
+                                photoAdapter.notifyItemInserted(oldImageList.size - 1)
                             }
                         }
                     }
@@ -309,81 +338,82 @@ class EditDiaryActivity : AppCompatActivity() {
                 }
 
 
-                // 일기 보여주기
-                var oldDiary = document.data?.getValue("todayDiary").toString()
+                // 다이어리 작성
+                val oldDiary = document.data?.getValue("todayDiary").toString()
                 binding.todayDiary.setText(oldDiary)
+
+                binding.todayDiary.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                        // null
+                    }
+
+                    override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                        if (char != oldDiary) diaryEditCheck.diaryEdit.value = true
+                    }
+
+                    override fun afterTextChanged(p0: Editable?) {
+                        // null
+                    }
+                })
+
 
                 // 마음 보여주기
                 var spinnerAdapter = binding.todayMood.adapter
-                var dbMoodPosition =
+                val dbMoodPosition =
                     (document.data?.getValue("todayMood") as Map<*, *>)["position"].toString()
                         .toInt()
                 binding.todayMood.setSelection(dbMoodPosition)
 
                 // 숨기기 보여주기
-                var DBsecretStatus = document.data?.getValue("secret") as Boolean
+                val DBsecretStatus = document.data?.getValue("secret") as Boolean
                 diaryEditCheck.secretEdit.value = DBsecretStatus
             }
 
         // 사진 업로드
-        fun openGalleryForImages() {
-            var intent = Intent(Intent.ACTION_PICK)
-            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            intent.type = "image/*"
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-
-            activityResultLauncher.launch(intent)
-        }
-
-        activityResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (it.resultCode == RESULT_OK) {
-                    if (it.data?.clipData != null) {
-
-                        val count = it.data!!.clipData!!.itemCount
-                        for (i in 0 until count) {
-                            binding.photoRecyclerView.visibility = View.VISIBLE
-
-                            val imageUri = it.data?.clipData!!.getItemAt(i).uri.toString()
-                            var uriParseImage = Uri.parse(imageUri)
-                            newImageViewModel.addImage(uriParseImage)
-                            itemListItems.add(uriParseImage)
-                            photoAdapter.notifyItemInserted(itemListItems.size-1)
-
-                            diaryEditCheck.photoEdit.value = true
-                        }
-
-                    }
-                }
-            }
-
-
         fun selectGallery() {
-            val writePermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            val readPermission = ContextCompat.checkSelfPermission(
+            val readGalleryPermission = ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
+            val readMediaImagesPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
 
             // 권한 확인
-            if (writePermission == PackageManager.PERMISSION_DENIED || readPermission == PackageManager.PERMISSION_DENIED) {
-                // 권한 요청
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ),
-                    1
-                )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
-                // 권한이 있는 경우 실행
-                openGalleryForImages()
-            } else {
-                openGalleryForImages()
+                    if (readMediaImagesPermission == PackageManager.PERMISSION_DENIED) {
+                        // 권한 요청
+                        requestPermissions(
+                            arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                            MyDiaryFragment.REQ_GALLERY
+                        )
+                    } else {
+                        val intent = Intent(Intent.ACTION_PICK)
+                        intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        intent.type = "image/*"
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+
+                        startActivityForResult(intent, REQ_MULTI_PHOTO)
+                    }
+
+                } else {
+
+                    if (readGalleryPermission == PackageManager.PERMISSION_DENIED) {
+                        // 권한 요청
+                        requestPermissions(
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                            REQ_GALLERY
+                        )
+                    } else {
+                        val intent = Intent(Intent.ACTION_PICK)
+                        intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        intent.type = "image/*"
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+
+                        startActivityForResult(intent, REQ_MULTI_PHOTO)
+                    }
             }
         }
 
@@ -428,21 +458,6 @@ class EditDiaryActivity : AppCompatActivity() {
 //            model.speak(if (text.isNotEmpty()) text else "일기를 써보세요")
         }
 
-        // 다이어리 작성
-        binding.todayDiary.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                // null
-            }
-
-            override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                diaryEditCheck.diaryEdit.value = char?.length != 0
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-                // null
-            }
-        })
-
 
         // 숨기기
         binding.secretButton.setOnClickListener {
@@ -456,67 +471,73 @@ class EditDiaryActivity : AppCompatActivity() {
         }
 
 
-        // 다이어리 작성 버튼
+        // ** 종합 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
-            resumePause = false
 
-            binding.diaryBtn.text = ""
-            binding.diaryProgressBar.visibility = View.VISIBLE
+            if (!editOrNotForEditDiary) {
+                val goEditWarning = Intent(this, EditDiaryWarningActivity::class.java)
+                startActivity(goEditWarning)
+            } else {
+                resumePause = false
 
-            if (diaryEditCheck.photoEdit.value == true) {
+                binding.diaryBtn.text = ""
+                binding.diaryProgressBar.visibility = View.VISIBLE
 
-                val allStartsWithHttps = newImageViewModel.newImageList.value!!.all {
-                    it.toString().startsWith("https://")
-                }
+                if (diaryEditCheck.photoEdit.value == true) {
 
-                if (allStartsWithHttps) {
-                    newImageViewModel.uploadFirebaseComplete.value = true
-                } else {
-                    for (i in 0 until newImageViewModel.newImageList.value!!.size) {
-                        if (!newImageViewModel.newImageList.value!![i].toString()
-                                .startsWith("https://")
-                        ) {
-                            uploadImageToFirebase(
-                                newImageViewModel.newImageList.value!![i] as Uri,
-                                i,
-                            )
+                    val allStartsWithHttps = newImageViewModel.newImageList.value!!.all {
+                        it.toString().startsWith("https://")
+                    }
+
+                    if (allStartsWithHttps) {
+                        newImageViewModel.uploadFirebaseComplete.value = true
+                    } else {
+                        for (i in 0 until newImageViewModel.newImageList.value!!.size) {
+                            if (!newImageViewModel.newImageList.value!![i].toString()
+                                    .startsWith("https://")
+                            ) {
+                                uploadImageToFirebase(
+                                    newImageViewModel.newImageList.value!![i] as Uri,
+                                    i,
+                                )
+                            }
                         }
                     }
-                }
 
-                if (diaryEditCheck.diaryEdit.value == true) {
-                    var newDiary = binding.todayDiary.text
-                    newDiarySet.put("todayDiary", newDiary.toString())
-                }
-
-                if (diaryEditCheck.moodEdit.value == true) {
-                    newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
-                }
-
-                newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
-
-            } else {
-                // 이미지 업로드 안 하는 경우
-                if (diaryEditCheck.diaryEdit.value == true) {
-                    var newDiary = binding.todayDiary.text
-                    newDiarySet.put("todayDiary", newDiary.toString())
-                }
-
-                if (diaryEditCheck.moodEdit.value == true) {
-                    newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
-                }
-
-                newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
-
-
-                diaryDB.document("$editDiaryId")
-                    .set(newDiarySet, SetOptions.merge())
-                    .addOnSuccessListener {
-                        var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
-                        goAllDiary.putExtra("from", "edit")
-                        goAllDiary.putExtra("diaryType", diaryType)
-                        startActivity(goAllDiary)
+                    if (diaryEditCheck.diaryEdit.value == true) {
+                        var newDiary = binding.todayDiary.text
+                        newDiarySet.put("todayDiary", newDiary.toString())
                     }
+
+                    if (diaryEditCheck.moodEdit.value == true) {
+                        newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
+                    }
+
+                    newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+
+                } else {
+                    // 이미지 업로드 안 하는 경우
+                    if (diaryEditCheck.diaryEdit.value == true) {
+                        var newDiary = binding.todayDiary.text
+                        newDiarySet.put("todayDiary", newDiary.toString())
+                    }
+
+                    if (diaryEditCheck.moodEdit.value == true) {
+                        newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
+                    }
+
+                    newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+
+
+                    diaryDB.document("$editDiaryId")
+                        .set(newDiarySet, SetOptions.merge())
+                        .addOnSuccessListener {
+                            var goAllDiary = Intent(this, DiaryTwoActivity::class.java)
+                            goAllDiary.putExtra("from", "edit")
+                            goAllDiary.putExtra("diaryType", diaryType)
+                            startActivity(goAllDiary)
+                        }
+                }
             }
         }
 
@@ -559,22 +580,26 @@ class EditDiaryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
         LocalBroadcastManager.getInstance(this).registerReceiver(
             deleteImageFunction,
             IntentFilter("DELETE_IMAGE_EDIT")
-        );
+        )
     }
 
     override fun onPause() {
         super.onPause()
+
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(deleteImageFunction);
     }
 
     override fun onDestroy() {
-        LocalBroadcastManager.getInstance(this)
-            .unregisterReceiver(deleteImageFunction);
         super.onDestroy()
+
+        photoResumeForEditDiary = false
+        recordResumeForEditDiary = false
+
     }
 
     private var deleteImageFunction: BroadcastReceiver = object : BroadcastReceiver() {
@@ -593,6 +618,8 @@ class EditDiaryActivity : AppCompatActivity() {
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        recordResumeForEditDiary = true
+
         if (result.resultCode == RESULT_OK) {
             val spokenText: String? =
                 result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
@@ -606,6 +633,55 @@ class EditDiaryActivity : AppCompatActivity() {
     private val textToSpeechEngine: TextToSpeech by lazy {
         TextToSpeech(this) {
             if (it == TextToSpeech.SUCCESS) textToSpeechEngine.language = Locale("in_ID")
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        // 사진 보기 권한 요청
+        if (requestCode == REQ_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            intent.type = "image/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+
+            startActivityForResult(intent, MyDiaryFragment.REQ_MULTI_PHOTO)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            REQ_MULTI_PHOTO -> {
+                photoResumeForEditDiary = true
+
+                if (resultCode == RESULT_OK) {
+                    if (data?.clipData != null) {
+
+                        val count = data!!.clipData!!.itemCount
+                        for (i in 0 until count) {
+                            binding.photoRecyclerView.visibility = View.VISIBLE
+
+                            val imageUri = data?.clipData!!.getItemAt(i).uri.toString()
+                            val uriParseImage = Uri.parse(imageUri)
+                            newImageViewModel.addImage(uriParseImage)
+                            itemListItems.add(uriParseImage)
+                            photoAdapter.notifyItemInserted(itemListItems.size - 1)
+
+                            diaryEditCheck.photoEdit.value = true
+                        }
+
+                    }
+                }
+            }
         }
     }
 }

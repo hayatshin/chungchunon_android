@@ -58,8 +58,6 @@ class StartActivity : AppCompatActivity() {
             val currentUser = auth.currentUser
 
             val userId = Firebase.auth.currentUser?.uid
-            Log.d("확인", "${userId}")
-
 
             if (userId != null) {
                 userDB.document("$userId").get()

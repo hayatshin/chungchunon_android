@@ -154,7 +154,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
 
     override fun onSessionOpenFailed(exception: KakaoException?) {
         Log.e(TAG, "가입 실패: ${exception?.message}")
-        Toast.makeText(context,"onSessionOpenFailed ${exception?.message}", Toast.LENGTH_LONG).show()
+        Toast.makeText(context,"다시 한번 클릭해주세요", Toast.LENGTH_LONG).show()
         context.kakaoActivityIndicator.visibility = View.GONE
         context.kakaoLoginTextView.visibility = View.VISIBLE
     }

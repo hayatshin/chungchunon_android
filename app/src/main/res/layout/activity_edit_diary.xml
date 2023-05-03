@@ -623,7 +623,7 @@
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:background="@drawable/default_button"
-            android:text="일기 작성"
+            android:text="일기 수정"
             android:textColor="@color/white"
             android:textSize="23dp"
             android:textStyle="bold" />

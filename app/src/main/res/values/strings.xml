@@ -6,6 +6,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="edit_diary_warning_text">
+"수정하신 내용이 없습니다.
+수정 후 확인을 눌러주세요!"
+    </string>
+
     <string name="step_success_text">
 "오늘 걸음수가 3,000보 달성되었어요! 대단해요 :)"
     </string>

@@ -113,6 +113,7 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+
         binding.goBackBtn.setOnClickListener {
             finish()
         }
@@ -147,22 +148,23 @@ class RegisterActivity : AppCompatActivity() {
         totalTxtCheck = ViewModelProvider(this).get(FillCheckClass::class.java)
         phoneTxtCheck = ViewModelProvider(this).get(PhoneFillClass::class.java)
 
+        binding.registerBtn.alpha = 0.4f
 
-//        totalTxtCheck.avatarFill.observe(this, Observer { value ->
-//            binding.registerBtn.isEnabled =
-//                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
-////                        totalTxtCheck.genderFill.value == true &&
-//                        totalTxtCheck.birthFill.value == true &&
-//                        totalTxtCheck.phoneFill.value == true
-//        })
-//
-//        totalTxtCheck.nameFill.observe(this, Observer { value ->
-//            binding.registerBtn.isEnabled =
-//                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
-////                        totalTxtCheck.genderFill.value == true &&
-//                        totalTxtCheck.birthFill.value == true &&
-//                        totalTxtCheck.phoneFill.value == true
-//        })
+        if( totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+            totalTxtCheck.birthFill.value == true &&
+            totalTxtCheck.phoneFill.value == true) binding.registerBtn.alpha = 1f
+
+        totalTxtCheck.avatarFill.observe(this, Observer { value ->
+            if( totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                totalTxtCheck.birthFill.value == true &&
+                totalTxtCheck.phoneFill.value == true) binding.registerBtn.alpha = 1f
+        })
+
+        totalTxtCheck.nameFill.observe(this, Observer { value ->
+            if( totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                totalTxtCheck.birthFill.value == true &&
+                totalTxtCheck.phoneFill.value == true) binding.registerBtn.alpha = 1f
+        })
 
 //        totalTxtCheck.genderFill.observe(this, Observer { value ->
 //            binding.registerBtn.isEnabled =
@@ -172,21 +174,17 @@ class RegisterActivity : AppCompatActivity() {
 //                        totalTxtCheck.phoneFill.value == true
 //        })
 
-//        totalTxtCheck.birthFill.observe(this, Observer { value ->
-//            binding.registerBtn.isEnabled =
-//                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
-////                        totalTxtCheck.genderFill.value == true &&
-//                        totalTxtCheck.birthFill.value == true &&
-//                        totalTxtCheck.phoneFill.value == true
-//        })
-//
-//        totalTxtCheck.phoneFill.observe(this, Observer { value ->
-//            binding.registerBtn.isEnabled =
-//                totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
-////                        totalTxtCheck.genderFill.value == true &&
-//                        totalTxtCheck.birthFill.value == true &&
-//                        totalTxtCheck.phoneFill.value == true
-//        })
+        totalTxtCheck.birthFill.observe(this, Observer { value ->
+            if( totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                totalTxtCheck.birthFill.value == true &&
+                totalTxtCheck.phoneFill.value == true) binding.registerBtn.alpha = 1f
+        })
+
+        totalTxtCheck.phoneFill.observe(this, Observer { value ->
+            if( totalTxtCheck.avatarFill.value == true && totalTxtCheck.nameFill.value == true &&
+                totalTxtCheck.birthFill.value == true &&
+                totalTxtCheck.phoneFill.value == true) binding.registerBtn.alpha = 1f
+        })
 
         phoneTxtCheck.phoneEditText1.observe(this, Observer { value ->
             Log.d("9일", "$value")

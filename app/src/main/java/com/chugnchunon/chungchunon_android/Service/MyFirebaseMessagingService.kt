@@ -88,6 +88,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             .setDefaults(Notification.DEFAULT_LIGHTS)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            .setPriority(Notification.PRIORITY_HIGH)
 
         val random = Random
         val m = random.nextInt(9999-1000) + 1000

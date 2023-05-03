@@ -310,7 +310,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="20dp"
                         android:lineHeight="20dp"
                         android:text="@string/step_success_text"
                         android:textAlignment="textEnd"
@@ -681,7 +680,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="@drawable/default_button"
-            android:enabled="false"
+            android:enabled="true"
             android:text="일기 작성"
             android:textColor="@color/white"
             android:textSize="23dp"

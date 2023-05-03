@@ -24,24 +24,34 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:paddingHorizontal="10dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp">
 
         <LinearLayout
+            android:paddingBottom="10dp"
+            android:paddingHorizontal="10dp"
             android:gravity="center"
             android:id="@+id/likePersonHeader"
             android:background="@drawable/rule_header"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="45dp">
+
+            <ImageView
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_filledheart"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+
             <TextView
-                android:textColor="@color/black"
+                android:layout_marginRight="15dp"
+                android:textColor="@color/custom_gray"
                 android:textStyle="bold"
-                android:textSize="20dp"
+                android:textSize="18dp"
                 android:text="좋아요 누른 사람"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -63,8 +73,8 @@
 
         <ProgressBar
             android:id="@+id/dataLoadingProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerInParent="true"
             android:indeterminateTint="@color/custom_gray"
             android:keepScreenOn="true" />
