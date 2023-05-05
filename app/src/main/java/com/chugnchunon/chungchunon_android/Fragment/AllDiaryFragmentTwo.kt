@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android.Fragment
 import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity.Companion.diaryType
 import com.chugnchunon.chungchunon_android.databinding.FragmentAllDiaryTwoBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.ktx.auth
@@ -39,6 +41,7 @@ class AllDiaryFragmentTwo : Fragment() {
     lateinit var mcontext: Context
 
     companion object {
+        var onBlock = false
         var resumePause : Boolean = false
         var tabChange: Boolean = false
     }
@@ -52,18 +55,22 @@ class AllDiaryFragmentTwo : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         _binding = FragmentAllDiaryTwoBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        val diaryType = arguments?.getString("diaryType")
+        diaryType = arguments?.getString("diaryType").toString()
 
-       if (diaryType == "region") {
-            binding.regionViewPager.currentItem = 0
-        } else if (diaryType == "friend") {
-            binding.regionViewPager.currentItem = 1
-        } else if (diaryType == "my") {
-            binding.regionViewPager.currentItem = 2
-        }
+        if (diaryType == "friend") {
+           binding.regionViewPager.setCurrentItem(0, false)
+           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
+       } else if (diaryType == "region") {
+           binding.regionViewPager.setCurrentItem(1, false)
+           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
+       } else if (diaryType == "my") {
+           binding.regionViewPager.setCurrentItem(2, false)
+           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(2))
+       }
 
 //        if(diaryType == "all") {
 //            binding.regionViewPager.currentItem = 0
@@ -99,6 +106,25 @@ class AllDiaryFragmentTwo : Fragment() {
         })
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        binding.regionViewPager.postDelayed(object : Runnable {
+            override fun run() {
+                if (diaryType == "friend") {
+                    binding.regionViewPager.setCurrentItem(0, false)
+                    binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
+                } else if (diaryType == "region") {
+                    binding.regionViewPager.setCurrentItem(1, false)
+                    binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
+                } else if (diaryType == "my") {
+                    binding.regionViewPager.setCurrentItem(2, false)
+                    binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(2))
+                }
+            }
+        }, 0)
     }
 
 }

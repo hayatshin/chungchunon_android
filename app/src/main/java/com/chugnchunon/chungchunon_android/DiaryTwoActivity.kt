@@ -51,7 +51,6 @@ class DiaryTwoActivity : AppCompatActivity() {
     private var from = ""
     private lateinit var remoteConfig: FirebaseRemoteConfig
 
-    private var diaryType = ""
     private var lastBackPressTime: Long = 0L
 
     private val binding by lazy {
@@ -59,8 +58,11 @@ class DiaryTwoActivity : AppCompatActivity() {
     }
 
     companion object {
+        var diaryType : String? = null
         private var permissionCheck = false
 
+        const val ALL_ABOVE_13_CODE: Int = 300
+        const val ALL_BELOW_13_CODE: Int = 400
         const val ALL_REQ_CODE: Int = 500
         const val PARTNER_REQ_CODE: Int = 600
 
@@ -91,6 +93,19 @@ class DiaryTwoActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
+
+        // 거주 지역 설정 안되어있으면 설정하도록 넘기기
+        userDB.document("$userId")
+            .get()
+            .addOnSuccessListener { regionSnapShot ->
+                if(regionSnapShot.contains("region") && regionSnapShot.contains("smallRegion")) {
+                    // 모두 존재
+                } else {
+                    val goWarning = Intent(this, DefaultDiaryWarningActivity::class.java)
+                    goWarning.putExtra("warningType", "emptyRegion")
+                    startActivity(goWarning)
+                }
+            }
 
         // 현재 버전값 저장
         val currentVersionSet = hashMapOf(
@@ -273,28 +288,11 @@ class DiaryTwoActivity : AppCompatActivity() {
             userDB.document("$userId").set(authSet, SetOptions.merge())
 
             // 걸음수 호출
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                try {
-                    val startService = Intent(this, MyService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(this, startService);
-                    } else {
-                        startService(startService);
-                    }
-                } catch (e: ForegroundServiceStartNotAllowedException) {
-                    Log.d("서비스: 포그라운드 오류", "$e")
-                }
+            val startService = Intent(this, MyService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(this, startService);
             } else {
-                try {
-                    val startService = Intent(this, MyService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(this, startService);
-                    } else {
-                        startService(startService);
-                    }
-                } catch (e: Exception) {
-                    Log.d("서비스: 일반 오류", "$e")
-                }
+                startService(startService);
             }
 
             val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
@@ -436,26 +434,26 @@ class DiaryTwoActivity : AppCompatActivity() {
 //                }
 //            }
 
-        binding.partnerAuthConfirmBtn.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                    ),
-                    PARTNER_REQ_CODE
-                )
-            } else {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                    ),
-                    PARTNER_REQ_CODE
-                )
-            }
-        }
+//        binding.partnerAuthConfirmBtn.setOnClickListener {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                requestPermissions(
+//                    arrayOf(
+//                        Manifest.permission.READ_CONTACTS,
+//                        Manifest.permission.READ_MEDIA_IMAGES,
+//                        Manifest.permission.POST_NOTIFICATIONS,
+//                    ),
+//                    PARTNER_REQ_CODE
+//                )
+//            } else {
+//                requestPermissions(
+//                    arrayOf(
+//                        Manifest.permission.READ_CONTACTS,
+//                        Manifest.permission.READ_EXTERNAL_STORAGE,
+//                    ),
+//                    PARTNER_REQ_CODE
+//                )
+//            }
+//        }
 
         binding.authConfirmBtn.setOnClickListener {
             binding.authNotificationLayout.visibility = View.GONE
@@ -468,7 +466,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                         Manifest.permission.READ_MEDIA_IMAGES,
                         Manifest.permission.POST_NOTIFICATIONS,
                     ),
-                    ALL_REQ_CODE
+                    ALL_ABOVE_13_CODE
                 )
             } else {
                 requestPermissions(
@@ -477,7 +475,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                         Manifest.permission.READ_CONTACTS,
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                     ),
-                    ALL_REQ_CODE
+                    ALL_BELOW_13_CODE
                 )
             }
         }
@@ -489,18 +487,22 @@ class DiaryTwoActivity : AppCompatActivity() {
             setOnItemSelectedListener {
                 when (it.itemId) {
                     R.id.myTodayMenu -> {
+                        diaryType = null
                         changeFragment(MyDiaryFragment())
                     }
                     R.id.ourTodayMenu -> {
                         changeFragment(AllDiaryFragmentTwo())
                     }
                     R.id.missionMenu -> {
+                        diaryType = null
                         changeFragment(MissionFragment())
                     }
                     R.id.rankingMenu -> {
+                        diaryType = null
                         changeFragment(RankingFragment())
                     }
                     R.id.moreMenu -> {
+                        diaryType = null
                         changeFragment(MoreFragment())
                     }
                 }
@@ -508,7 +510,10 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
 
             // 초기값 세팅
-            if (from == "edit") {
+            if(from == "write") {
+                changeFragment(AllDiaryFragmentTwo())
+                binding.bottomNav.selectedItemId = R.id.ourTodayMenu
+            } else if (from == "edit") {
                 changeFragment(AllDiaryFragmentTwo())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu
             } else if (from == "delete") {
@@ -581,7 +586,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                     }
                 }
             }
-            ALL_REQ_CODE -> {
+            ALL_ABOVE_13_CODE, ALL_BELOW_13_CODE -> {
                 if (grantResults.size > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -613,30 +618,20 @@ class DiaryTwoActivity : AppCompatActivity() {
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            try {
-                                val startService = Intent(this, MyService::class.java)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    ContextCompat.startForegroundService(this, startService);
-                                } else {
-                                    startService(startService);
-                                }
-                            } catch (e: ForegroundServiceStartNotAllowedException) {
-                                Log.d("서비스: 포그라운드 오류", "$e")
-                            }
+                        val startService = Intent(this, MyService::class.java)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            ContextCompat.startForegroundService(this, startService);
                         } else {
-                            try {
-                                val startService = Intent(this, MyService::class.java)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    ContextCompat.startForegroundService(this, startService);
-                                } else {
-                                    startService(startService);
-                                }
-                            } catch (e: Exception) {
-                                Log.d("서비스: 일반 오류", "$e")
-                            }
+                            startService(startService);
                         }
+                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+                        stepAuthIntent.putExtra("StepAuth", true)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
+                    } else {
+                        // 걸음수 권한 x
                     }
+
                 }
 
 //            STEP_REQ_CODE -> {

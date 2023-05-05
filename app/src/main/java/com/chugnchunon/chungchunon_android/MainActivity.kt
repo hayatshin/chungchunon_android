@@ -91,20 +91,24 @@ class MainActivity : AppCompatActivity() {
             // 파트너 - 카톡 로그인 버튼 클릭
             binding.partnerKakaoLoginBtn.setOnClickListener {
 
-                binding.partnerKakaoTextView.visibility = View.GONE
-                binding.partnerKakaoAcitivityIndicator.visibility = View.VISIBLE
+                val goRegisterUser = Intent(this, DefaultDiaryWarningActivity::class.java)
+                goRegisterUser.putExtra("warningType", "partnerRegister")
+                startActivity(goRegisterUser)
 
-                val keyHash = Utility.getKeyHash(this) // keyHash 발급
-
-                Session.getCurrentSession().addCallback(partnerCallback)
-                Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
+//                binding.partnerKakaoTextView.visibility = View.GONE
+//                binding.partnerKakaoAcitivityIndicator.visibility = View.VISIBLE
+//
+//                val keyHash = Utility.getKeyHash(this) // keyHash 발급
+//
+//                Session.getCurrentSession().addCallback(partnerCallback)
+//                Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
             }
 
             // 파트너 - 일반 회원가입
             binding.partnerRegisterBtn.setOnClickListener {
 
-                val goRegisterUser = Intent(this, AgreementActivity::class.java)
-                goRegisterUser.putExtra("userType", "파트너")
+                val goRegisterUser = Intent(this, DefaultDiaryWarningActivity::class.java)
+                goRegisterUser.putExtra("warningType", "partnerRegister")
                 startActivity(goRegisterUser)
             }
 

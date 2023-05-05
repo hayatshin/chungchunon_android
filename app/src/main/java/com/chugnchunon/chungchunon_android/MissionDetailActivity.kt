@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils
 import com.chugnchunon.chungchunon_android.DataClass.RankingLine
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
 import com.chugnchunon.chungchunon_android.Fragment.MissionFragment
+import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityMissionDetailBinding
 import com.google.firebase.auth.ktx.auth
@@ -63,8 +64,10 @@ class MissionDetailActivity : Activity() {
     private var participateState: Boolean = false
 
     companion object {
+        private var partnerOrNotForMission: Boolean = false
         const val REFRESH_RESULT_MISSION_CODE = 100
     }
+
 
     override fun onBackPressed() {
 
@@ -95,6 +98,14 @@ class MissionDetailActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // 파트너 체크
+        userDB.document("$userId")
+            .get()
+            .addOnSuccessListener { userData ->
+                val userType = userData.data?.getValue("userType")
+                partnerOrNotForMission = userType == "파트너"
+            }
+
         // 데이터 받기
         mdDocId = intent.getStringExtra("mdDocID").toString()
         mdTitle = intent.getStringExtra("mdTitle").toString()
@@ -117,22 +128,33 @@ class MissionDetailActivity : Activity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userCheck = task.result
-                    if (userCheck != null) {
-                        if (userCheck.exists()) {
-                            // 이미 참여
-                            participateState = true
-                            binding.mdParticipationBtn.alpha = 0.4f
-                            binding.mProgressTextBox.visibility = View.VISIBLE
+
+                    if (partnerOrNotForMission) {
+                        // 파트너
+                        binding.mdParticipationBtn.alpha = 0.4f
+                        binding.mProgressTextBox.visibility = View.VISIBLE
+                    } else {
+                        // 파트너 아닌 경우
+                        if (userCheck != null) {
+                            if (userCheck.exists()) {
+                                // 이미 참여
+                                participateState = true
+                                binding.mdParticipationBtn.alpha = 0.4f
+                                binding.mProgressTextBox.visibility = View.VISIBLE
+
+                                drawProgress()
+                            } else {
+                                participateState = false
+                                binding.mdParticipationBtn.alpha = 1f
+                                binding.mProgressTextBox.visibility = View.GONE
+                            }
                         } else {
                             participateState = false
                             binding.mdParticipationBtn.alpha = 1f
                             binding.mProgressTextBox.visibility = View.GONE
                         }
-                    } else {
-                        participateState = false
-                        binding.mdParticipationBtn.alpha = 1f
-                        binding.mProgressTextBox.visibility = View.GONE
                     }
+
                 }
             }
 
@@ -159,35 +181,64 @@ class MissionDetailActivity : Activity() {
         }
 
         binding.mdParticipationBtn.setOnClickListener {
-            if (!participateState) {
-                // 디비 저장
-                val userParticipateSet = hashMapOf(
-                    "documentId" to mdDocId,
-                    "userId" to userId,
-                    "timestamp" to FieldValue.serverTimestamp()
-                )
 
-                db.collection("mission")
-                    .document(mdDocId)
-                    .collection("participants")
-                    .document("$userId")
-                    .set(userParticipateSet, SetOptions.merge())
-                    .addOnSuccessListener {
-                        val goMissionResult =
-                            Intent(this, MissionResultActivity::class.java)
-                        goMissionResult.putExtra(
-                            "participateState",
-                            participateState
-                        )
-                        startActivityForResult(
-                            goMissionResult,
-                            REFRESH_RESULT_MISSION_CODE
-                        )
-                    }
+            if (partnerOrNotForMission) {
+                // 파트너
+                val goMissionResult =
+                    Intent(this, DefaultDiaryWarningActivity::class.java)
+                goMissionResult.putExtra("warningType", "partnerMission")
+                startActivityForResult(
+                    goMissionResult,
+                    REFRESH_RESULT_MISSION_CODE
+                )
             } else {
-                val goMissionResult = Intent(this, MissionResultActivity::class.java)
-                goMissionResult.putExtra("participateState", participateState)
-                startActivityForResult(goMissionResult, REFRESH_RESULT_MISSION_CODE)
+                if (!participateState) {
+                    // 참여 안 한 상태
+
+                    db.collection("mission")
+                        .document(mdDocId)
+                        .collection("participants")
+                        .get()
+                        .addOnSuccessListener { missionSnapShot ->
+                            val missionCount = missionSnapShot.size()
+                            if (missionCount < 100) {
+                                // 참여 가능
+
+                                val userParticipateSet = hashMapOf(
+                                    "documentId" to mdDocId,
+                                    "userId" to userId,
+                                    "timestamp" to FieldValue.serverTimestamp()
+                                )
+
+                                db.collection("mission")
+                                    .document(mdDocId)
+                                    .collection("participants")
+                                    .document("$userId")
+                                    .set(userParticipateSet, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        val goMissionResult =
+                                            Intent(this, MissionResultActivity::class.java)
+                                        goMissionResult.putExtra("participateState", "Possible")
+                                        startActivityForResult(
+                                            goMissionResult,
+                                            REFRESH_RESULT_MISSION_CODE
+                                        )
+                                    }
+
+                            } else {
+                                // 100명 초과
+                                val goMissionResult =
+                                    Intent(this, MissionResultActivity::class.java)
+                                goMissionResult.putExtra("participateState", "Excess")
+                                startActivityForResult(goMissionResult, REFRESH_RESULT_MISSION_CODE)
+                            }
+                        }
+                } else {
+                    // 이미 참여한 상태
+                    val goMissionResult = Intent(this, MissionResultActivity::class.java)
+                    goMissionResult.putExtra("participateState", "Already")
+                    startActivityForResult(goMissionResult, REFRESH_RESULT_MISSION_CODE)
+                }
             }
         }
 
@@ -198,6 +249,10 @@ class MissionDetailActivity : Activity() {
         mdDateFormatStartPeriod = SimpleDateFormat(pattern).parse(formatStartDate)
         mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
 
+
+    }
+
+    private fun drawProgress() {
         // 점수 계산
         uiScope.launch(Dispatchers.IO)
         {
@@ -329,6 +384,8 @@ class MissionDetailActivity : Activity() {
                                 participateState = true
                                 binding.mdParticipationBtn.alpha = 0.4f
                                 binding.mProgressTextBox.visibility = View.VISIBLE
+
+                                drawProgress()
                             } else {
                                 participateState = false
                                 binding.mdParticipationBtn.alpha = 1f

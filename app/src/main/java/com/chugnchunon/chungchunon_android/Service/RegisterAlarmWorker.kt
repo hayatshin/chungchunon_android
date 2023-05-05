@@ -37,28 +37,11 @@ class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Wo
             } else {
                 Log.d("서비스 - 워크", "no running")
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    try {
-                        val startService = Intent(applicationContext, MyService::class.java)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            ContextCompat.startForegroundService(applicationContext, startService);
-                        } else {
-                            applicationContext.startService(startService);
-                        }
-                    } catch (e: ForegroundServiceStartNotAllowedException) {
-                        Log.d("서비스 - 워크: 포그라운드 오류", "$e")
-                    }
+                val startService = Intent(applicationContext, MyService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(applicationContext, startService);
                 } else {
-                    try {
-                        val startService = Intent(applicationContext, MyService::class.java)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            ContextCompat.startForegroundService(applicationContext, startService);
-                        } else {
-                            applicationContext.startService(startService);
-                        }
-                    } catch (e: Exception) {
-                        Log.d("서비스 - 워크: 일반 오류", "$e")
-                    }
+                    applicationContext.startService(startService);
                 }
 
             }

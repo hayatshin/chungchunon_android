@@ -133,7 +133,7 @@
             android:name=".EditDiaryActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".EditDiaryWarningActivity"
+            android:name=".DefaultDiaryWarningActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity

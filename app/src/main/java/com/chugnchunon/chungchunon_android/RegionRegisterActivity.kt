@@ -57,11 +57,10 @@ class RegionRegisterActivity : AppCompatActivity() {
                 finish()
             } else {
                 // 두번째 화면 -> 첫번째 화면
-
                 binding.backBtn.visibility = View.GONE
 
                 binding.regionRegisterBtn.isEnabled = false
-                RegionRegisterFragment.smallRegionCheck = false
+                smallRegionCheck = false
 
                 binding.regionDescription.text = "거주지역을 목록에서 선택하세요."
                 binding.regionResult.setText(null)
@@ -71,9 +70,8 @@ class RegionRegisterActivity : AppCompatActivity() {
             }
         }
 
-        var userType = intent.getStringExtra("userType")
-        var userAge = intent.getIntExtra("userAge", 0)
-
+//        var userType = intent.getStringExtra("userType")
+//        var userAge = intent.getIntExtra("userAge", 0)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             mMessageReceiver,
@@ -96,16 +94,11 @@ class RegionRegisterActivity : AppCompatActivity() {
             userDB.document("$userId")
                 .set(regionSet, SetOptions.merge())
                 .addOnSuccessListener {
-
-                    var goDiary =
-                        Intent(applicationContext, DiaryTwoActivity::class.java)
+                    val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
                     startActivity(goDiary)
-
-
                 }
         }
     }
-
 
     private fun setupViewPager() {
         adapter = RegionPagerAdapter(this)

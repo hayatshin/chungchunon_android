@@ -66,28 +66,11 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
             alarmIntent.putExtra("no_noti", true)
             LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                try {
-                    val startService = Intent(context, MyService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(context, startService);
-                    } else {
-                        context.startService(startService);
-                    }
-                } catch (e: ForegroundServiceStartNotAllowedException) {
-                    Log.d("서비스: 포그라운드 오류", "$e")
-                }
+            val startService = Intent(context, MyService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(context, startService);
             } else {
-                try {
-                    val startService = Intent(context, MyService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(context, startService);
-                    } else {
-                        context.startService(startService);
-                    }
-                } catch (e: Exception) {
-                    Log.d("서비스: 일반 오류", "$e")
-                }
+                context.startService(startService);
             }
 
         }

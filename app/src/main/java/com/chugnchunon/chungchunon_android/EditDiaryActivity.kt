@@ -17,7 +17,6 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -27,7 +26,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -37,7 +35,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.Adapter.UploadEditPhotosAdapter
-import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
@@ -55,7 +52,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.mutable.MutableBoolean
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -475,7 +471,8 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.diaryBtn.setOnClickListener {
 
             if (!editOrNotForEditDiary) {
-                val goEditWarning = Intent(this, EditDiaryWarningActivity::class.java)
+                val goEditWarning = Intent(this, DefaultDiaryWarningActivity::class.java)
+                goEditWarning.putExtra("warningType","editDiary")
                 startActivity(goEditWarning)
             } else {
                 resumePause = false

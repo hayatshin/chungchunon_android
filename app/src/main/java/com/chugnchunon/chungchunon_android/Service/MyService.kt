@@ -68,82 +68,6 @@ class MyService : Service(), SensorEventListener {
 
         Log.d("서비스", "onCreate")
 
-        // 알람 매니저
-//        val alarmBroadcastReceiver = AlarmBroadcastReceiver()
-//        registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
-//        alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//
-//        val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-//        pendingIntent = PendingIntent.getBroadcast(
-//            applicationContext,
-//            ALARM_REQ_CODE,
-//            alarmIntent,
-//            PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//        calendar = Calendar.getInstance().apply {
-//            timeInMillis = System.currentTimeMillis()
-//
-////            if(before(Calendar.getInstance())) {
-////                add(Calendar.MINUTE, 30)
-////            }
-//        }
-//
-//        alarmManager.setAndAllowWhileIdle(
-//            AlarmManager.RTC_WAKEUP,
-//            calendar.timeInMillis,
-//            pendingIntent
-//        )
-//
-//        // 워크매니저
-//        val workManager = WorkManager.getInstance(applicationContext)
-//        val periodicWorkRequest: PeriodicWorkRequest =
-//            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(1, TimeUnit.HOURS).build()
-//
-//        workManager.enqueueUniquePeriodicWork(
-//            UNIQUE_WORK_NAME,
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            periodicWorkRequest
-//        )
-//
-////        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
-////        for(i in state){
-////            Log.d("워크", "startWorkManager: $state")
-////        }
-//
-//        // 오늘 걸음수 초기화
-//        userDB.document("$userId").get().addOnSuccessListener { document ->
-//            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
-//            todayTotalStepCount = todayStepCountFromDB.toInt()
-//
-//            StepCountNotification(this, todayTotalStepCount)
-//        }
-//
-//        // 1. 1분마다 체크 (날짜 바뀔 때)
-//        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-//        val dateChangeIntent = IntentFilter()
-//        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-//        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
-//
-//        // 2. 날짜 바뀔 때
-//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-//            stepInitializeReceiver,
-//            IntentFilter("NEW_DATE_STEP_ZERO")
-//        )
-//
-//        // 3. 핸드폰 꺼질 때
-//        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
-//        val deviceShutdownIntent = IntentFilter()
-//        deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
-//        deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-//        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
-//
-//        // 알람 주기적 브로드캐스터
-//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-//            BroadcastReregister,
-//            IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
-//        )
-
     }
 
 
@@ -151,6 +75,8 @@ class MyService : Service(), SensorEventListener {
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
 
         stepCount = sensorEvent!!.values[0].toInt()
+
+        Log.d("걸음", "$stepCount")
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val yesterdayCal = Calendar.getInstance()
@@ -458,7 +384,8 @@ class MyService : Service(), SensorEventListener {
 
 
         // 알람 매니저
-        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
@@ -470,38 +397,21 @@ class MyService : Service(), SensorEventListener {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        if(pendingIntent != null) {
-            // 알람 등록
-            val nextAlarmClock = alarmManager.nextAlarmClock
-            if(nextAlarmClock != null) {
-                Log.d("서비스 - onStartCommand", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
-            } else {
-                Log.d("서비스 - onStartCommand", "알람등록 o, 다음 시간 설정 x")
-
-                val newCalendar = Calendar.getInstance().apply {
-                    timeInMillis = System.currentTimeMillis()
-                }
-
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    newCalendar.timeInMillis,
-                    pendingIntent
-                )
-            }
-        } else {
-            Log.d("서비스 - onStartCommand", "알람설정 x")
-
-            val newCalendar = Calendar.getInstance().apply {
-                timeInMillis = System.currentTimeMillis()
-            }
-
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                newCalendar.timeInMillis,
-                pendingIntent
-            )
+        val newCalendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
         }
 
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            newCalendar.timeInMillis,
+            pendingIntent
+        )
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
 
         // 오늘 걸음수 초기화
@@ -557,7 +467,8 @@ class MyService : Service(), SensorEventListener {
 
 
         // 알람 매니저
-        val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
@@ -569,37 +480,21 @@ class MyService : Service(), SensorEventListener {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        if(pendingIntent != null) {
-            // 알람 등록
-            val nextAlarmClock = alarmManager.nextAlarmClock
-            if(nextAlarmClock != null) {
-                Log.d("서비스 - onStartCommand", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
-            } else {
-                Log.d("서비스 - onStartCommand", "알람등록 o, 다음 시간 설정 x")
-
-                val newCalendar = Calendar.getInstance().apply {
-                    timeInMillis = System.currentTimeMillis()
-                }
-
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    newCalendar.timeInMillis,
-                    pendingIntent
-                )
-            }
-        } else {
-            Log.d("서비스 - onStartCommand", "알람설정 x")
-
-            val newCalendar = Calendar.getInstance().apply {
-                timeInMillis = System.currentTimeMillis()
-            }
-
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                newCalendar.timeInMillis,
-                pendingIntent
-            )
+        val newCalendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
         }
+
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            newCalendar.timeInMillis,
+            pendingIntent
+        )
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
 
         // 오늘 걸음수 초기화
@@ -696,7 +591,8 @@ class MyService : Service(), SensorEventListener {
     var BroadcastReregister: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
-            val alarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val alarmManager =
+                applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val alarmBroadcastReceiver = AlarmBroadcastReceiver()
             registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
             val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
@@ -710,45 +606,20 @@ class MyService : Service(), SensorEventListener {
             if (intent!!.action == "ALARM_BROADCAST_RECEIVER_RING") {
 
                 if (alarmBroadcastReceiverCalled) {
-                    Log.d("서비스 - onBroad", "알람 - 브로드캐스트 로컬브로드캐스트")
 
-                    if(pendingIntent != null) {
-                        Log.d("서비스 - onBroad", "알람 설정 o")
-
-                        // 알람 등록
-                        val nextAlarmClock = alarmManager.nextAlarmClock
-                        if(nextAlarmClock != null) {
-                            Log.d("서비스 - onBroad", "알람 등록 o, 다음 시간 설정 o -> ${nextAlarmClock.toString()}")
-                        } else {
-                            Log.d("서비스 - onBroad", "알람등록 o, 다음 시간 설정 x")
-
-                            val newCalendar = Calendar.getInstance().apply {
-                                timeInMillis = System.currentTimeMillis()
-                            }
-                            newCalendar.add(Calendar.MINUTE, 30)
-
-                            Log.d("서비스 - onBroad", "알람 등록 o, 다음 시간 설정 x , 설정 후 -> ${newCalendar.get(Calendar.HOUR)} /  ${newCalendar.get(Calendar.MINUTE)}")
-
-                            alarmManager.setAndAllowWhileIdle(
-                                AlarmManager.RTC_WAKEUP,
-                                newCalendar.timeInMillis,
-                                pendingIntent
-                            )
-                        }
-
-                    } else {
-                        Log.d("서비스 - onBroad", "알람설정 x")
-
-                        val newCalendar = Calendar.getInstance().apply {
-                            timeInMillis = System.currentTimeMillis()
-                        }
-
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            newCalendar.timeInMillis,
-                            pendingIntent
-                        )
+                    val newCalendar = Calendar.getInstance().apply {
+                        timeInMillis = System.currentTimeMillis()
                     }
+                    newCalendar.add(Calendar.MINUTE, 30)
+
+                    Log.d("서비스 - onBroad", " ${newCalendar.get(Calendar.HOUR)} /  ${newCalendar.get(Calendar.MINUTE)}")
+
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        newCalendar.timeInMillis,
+                        pendingIntent
+                    )
+
 
                     // 테스트 코드
                     if (intent?.hasExtra("alarm") == true) {
@@ -809,7 +680,6 @@ class MyService : Service(), SensorEventListener {
                         deviceShutdownIntent
                     )
                 }
-
                 alarmBroadcastReceiverCalled = false
             }
         }

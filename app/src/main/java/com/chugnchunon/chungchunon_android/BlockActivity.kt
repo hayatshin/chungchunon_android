@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
+import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.onBlock
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
 import com.chugnchunon.chungchunon_android.databinding.ActivityBlockBinding
@@ -163,8 +164,8 @@ class BlockActivity : Activity() {
             // 글 삭제
             diaryDB.document(diaryId).delete()
 
-
             val goMyFragment = Intent(this, DiaryTwoActivity::class.java)
+            goMyFragment.putExtra("diaryType", diaryType)
             goMyFragment.putExtra("from", "delete")
             startActivity(goMyFragment)
         }

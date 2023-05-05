@@ -56,44 +56,54 @@ class StartActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             val currentUser = auth.currentUser
-
             val userId = Firebase.auth.currentUser?.uid
 
             if (userId != null) {
                 userDB.document("$userId").get()
-                    .addOnSuccessListener { document ->
-                        if (document != null) {
-                            // userDB에 있음
-                            if (document.data!!.containsKey("smallRegion")) {
-                                // 정상 기록
-                                val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
-                                startActivity(goDiaryTwoActivity)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val userData = task.result
+                            if (userData != null) {
+                                if (userData.exists()) {
+                                    Log.d("접속", "1")
+                                    val goDiaryTwoActivity =
+                                        Intent(this, DiaryTwoActivity::class.java)
+                                    startActivity(goDiaryTwoActivity)
+                                } else {
+                                    Log.d("접속", "2")
+                                    val intent = Intent(this, MainActivity::class.java)
+                                    startActivity(intent)
+                                }
                             } else {
-                                // 정상기록 x
-
-                                FirebaseAuth.getInstance().signOut()
-
-                                userDB.document("$userId")
-                                    .delete().addOnSuccessListener {
-                                        // 정상 기록 x
-                                        val intent = Intent(this, MainActivity::class.java)
-                                        startActivity(intent)
-                                    }
+                                // userDB에 없음
+                                Log.d("접속", "3")
+                                val intent = Intent(this, MainActivity::class.java)
+                                startActivity(intent)
                             }
-
-                        } else {
-
-                            // userDB에 없음
-                            val intent = Intent(this, MainActivity::class.java)
-                            startActivity(intent)
                         }
                     }
             } else {
+                Log.d("접속", "4")
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }
-
-
         }, 1000)
     }
 }
+
+// userDB에 있음
+//                            if (document.data!!.containsKey("smallRegion")) {
+//                                // 정상 기록
+//                                val goDiaryTwoActivity = Intent(this, DiaryTwoActivity::class.java)
+//                                startActivity(goDiaryTwoActivity)
+//                            } else {
+//                                // 정상기록 x
+//                                FirebaseAuth.getInstance().signOut()
+//
+//                                userDB.document("$userId")
+//                                    .delete().addOnSuccessListener {
+//                                        // 정상 기록 x
+//                                        val intent = Intent(this, MainActivity::class.java)
+//                                        startActivity(intent)
+//                                    }
+//                            }

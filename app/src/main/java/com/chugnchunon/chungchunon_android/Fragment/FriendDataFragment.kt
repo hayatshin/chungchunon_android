@@ -35,6 +35,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.tasks.await
 import okhttp3.internal.toImmutableList
 import kotlin.collections.ArrayList
 import kotlin.text.StringBuilder
@@ -57,6 +60,10 @@ class FriendDataFragment : Fragment() {
 
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var friendDataLoadingState: FriendDataLoadingState
+
+    private val mutex = Mutex()
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -114,11 +121,13 @@ class FriendDataFragment : Fragment() {
         } else {
             // 권한 있음
             binding.authLayout.visibility = View.GONE
-
             if (resumePause == false) {
                 friendDataLoadingState.loadingCompleteData.value = false
                 friendDiaryItems.clear()
-                getData()
+
+                uiScope.launch {
+                    getData()
+                }
             }
         }
 
@@ -189,7 +198,9 @@ class FriendDataFragment : Fragment() {
         override fun onReceive(context: Context?, intent: Intent?) {
             friendDiaryItems.clear()
             if (friendDiaryItems.isEmpty()) {
-                getData()
+                uiScope.launch {
+                    getData()
+                }
             }
         }
     }
@@ -203,7 +214,10 @@ class FriendDataFragment : Fragment() {
 
         if (requestCode == CONTACT_REQ && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             // 휴대폰 연동 권한 부여 o
-            getData()
+            uiScope.launch {
+                getData()
+            }
+
         } else {
             // 휴대폰 연동 권한 부여 x
             binding.authLayout.visibility = View.VISIBLE
@@ -226,9 +240,9 @@ class FriendDataFragment : Fragment() {
         }
     }
 
-    private fun getRefinedAllContactNumbers(): List<String> {
+    suspend fun getRefinedAllContactNumbers(): List<String> {
         val numbersList = getAllContactNumbers(requireActivity())
-        var newNumberList = ArrayList<String>()
+        var newNumberList = myContactNumber()
 
         for (number in numbersList) {
             val numberBuilder = StringBuilder(number)
@@ -257,6 +271,15 @@ class FriendDataFragment : Fragment() {
         return newNumberList.distinct().toImmutableList()
     }
 
+    suspend fun myContactNumber(): ArrayList<String> {
+        var newNumberList = ArrayList<String>()
+
+        val userData = userDB.document("$userId").get().await()
+        val userPhone = userData.data?.getValue("phone").toString()
+        newNumberList.add(userPhone)
+        return newNumberList
+    }
+
     @SuppressLint("Range")
     private fun getAllContactNumbers(context: Context): List<String> {
         val numbersList = mutableListOf<String>()
@@ -278,7 +301,7 @@ class FriendDataFragment : Fragment() {
         return numbersList
     }
 
-    private fun getData() {
+    private suspend fun getData() {
 
         val myContactList = getRefinedAllContactNumbers()
 
@@ -399,7 +422,9 @@ class FriendDataFragment : Fragment() {
                                                                         )
                                                                     }
                                                                     friendDiaryItems.add(diarySet)
-                                                                    friendDiaryItems.sortWith(compareBy({ it.writeTime }))
+                                                                    friendDiaryItems.sortWith(
+                                                                        compareBy({ it.writeTime })
+                                                                    )
                                                                     friendDiaryItems.reverse()
                                                                     adapter.notifyDataSetChanged()
 
