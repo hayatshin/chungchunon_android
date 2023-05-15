@@ -32,7 +32,7 @@ class MissionResultActivity : Activity() {
 
         if (participateState == "Already") {
             binding.bigResultText.text = "이미 참여하셨습니다"
-            binding.smallResultText.text = "열심히 점수 쌓고 계신가요? 화이팅!"
+            binding.smallResultText.text = "열심히 점수 쌓고 계신가요?"
         } else if (participateState == "Excess") {
             binding.bigResultText.text = "100명이 이미 참여했습니다"
             binding.smallResultText.text = "아쉽지만 다음에 도전해보아요!"

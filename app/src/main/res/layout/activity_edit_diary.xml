@@ -482,12 +482,22 @@
                             android:id="@+id/diaryHeader"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:gravity="start"
                             android:text="일기"
                             android:textColor="@color/black"
                             android:textSize="20dp"
                             android:textStyle="bold"
                             app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/secretInfoText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="비공개 일기입니다."
+                            android:textColor="@color/custom_gray"
+                            android:textSize="17dp"
+                            android:visibility="gone" />
 
 
                     </LinearLayout>
@@ -565,27 +575,27 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
-                    android:clickable="true"
                     android:id="@+id/photoButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginRight="10dp"
+                    android:clickable="true"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <ImageButton
-                        android:clickable="false"
                         android:layout_width="60dp"
                         android:layout_height="50dp"
                         android:layout_marginBottom="5dp"
                         android:background="@drawable/mindbox_radius_border"
+                        android:clickable="false"
                         android:padding="15dp"
                         android:src="@drawable/ic_camera" />
 
                     <TextView
-                        android:clickable="false"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:clickable="false"
                         android:gravity="center"
                         android:text="사진"
                         android:textColor="@color/light_gray"

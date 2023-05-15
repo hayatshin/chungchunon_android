@@ -17,7 +17,6 @@ import com.chugnchunon.chungchunon_android.DataClass.Mission
 import com.chugnchunon.chungchunon_android.EnlargeAvatarActivity
 import com.chugnchunon.chungchunon_android.EnlargeImageActivity
 import com.chugnchunon.chungchunon_android.R
-import com.chugnchunon.chungchunon_android.databinding.EnlargeImageCardBinding
 import kotlinx.android.synthetic.main.activity_image_enlarge.view.*
 import kotlinx.android.synthetic.main.enlarge_image_card.view.*
 import kotlinx.android.synthetic.main.like_person_line.view.*
@@ -31,7 +30,7 @@ class LikePersonAdapter(
     inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         val likePersonAvatar = view?.findViewById<ImageView>(R.id.likePersonAvatar)
         val likePersonName = view?.findViewById<TextView>(R.id.likePersonName)
-        val likePersonRegion = view?.findViewById<TextView>(R.id.likePersonRegion)
+        val partnerCheckImg = view?.findViewById<ImageView>(R.id.partnerCheckImg)
 
         fun bind(context: Context, position: Int) {
             Glide.with(context)
@@ -39,7 +38,12 @@ class LikePersonAdapter(
                 .into(likePersonAvatar!!)
 
             likePersonName!!.text = likePersonList[position].userName
-            likePersonRegion!!.text = likePersonList[position].userRegion
+
+            if(likePersonList[position].userType != "사용자"){
+                partnerCheckImg?.visibility = View.VISIBLE
+            } else {
+                partnerCheckImg?.visibility = View.GONE
+            }
         }
     }
 
@@ -56,7 +60,7 @@ class LikePersonAdapter(
         holder.bind(context, position)
 
         holder.itemView.likePersonAvatar.setOnClickListener { view ->
-            var goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+            val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
             goEnlargeAvatar.putExtra("userAvatar", likePersonList[position].userAvatar)
             context.startActivity(goEnlargeAvatar)
         }

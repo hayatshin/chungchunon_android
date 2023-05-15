@@ -6,4 +6,5 @@ data class LikePerson(
     var userAvatar: String,
     var userName: String,
     var userRegion: String,
+    var userType: String,
     )

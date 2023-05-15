@@ -57,13 +57,13 @@ class RankingFragment: Fragment() {
 
         val startOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         }.time
 
         val endOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         }.time
 

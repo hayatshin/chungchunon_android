@@ -70,7 +70,7 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
                 commentEditDeleteView.visibility = View.VISIBLE
             }
 
-            if (commentUserType == "파트너") {
+            if (commentUserType != "사용자") {
                 commentPartnerCheckImage.visibility = View.VISIBLE
             } else {
                 commentPartnerCheckImage.visibility = View.GONE

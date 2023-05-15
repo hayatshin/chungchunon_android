@@ -43,10 +43,6 @@ class LockDiaryActivity : FragmentActivity() {
         ActivityLockDiaryBinding.inflate(layoutInflater)
     }
 
-    companion object {
-        var secretOrNot = false
-    }
-
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
@@ -58,6 +54,8 @@ class LockDiaryActivity : FragmentActivity() {
         setContentView(binding.root)
 
         window.setStatusBarColor(Color.parseColor("#B3000000"));
+        val secretStatus = intent?.getBooleanExtra("secretStatus", false) as Boolean
+        Log.d("숨기기 - LockDiaryActivity", "$secretStatus")
 
         binding.goBackArrow.setOnClickListener {
             finish()
@@ -68,24 +66,24 @@ class LockDiaryActivity : FragmentActivity() {
         }
 
 
-        if (secretOrNot) {
-
+        if (secretStatus) {
+            // 비밀 -> 공개
             binding.secreteNotificationText.text =
                 "${this.getString(R.string.secret_unhide_notification)}"
 
         } else {
-
+            // 공개 -> 비밀
             binding.secreteNotificationText.text =
                 "${this.getString(R.string.secret_hide_notification)}"
 
         }
 
         binding.secretConfirmBox.setOnClickListener {
-            secretOrNot = !secretOrNot
+            val newSecretStatus = !secretStatus
 
-            var intent = Intent(this, MyDiaryFragment::class.java)
+            val intent = Intent(this, MyDiaryFragment::class.java)
             intent.setAction("SECRET_OR_NOT")
-            intent.putExtra("secretOrNot", secretOrNot)
+            intent.putExtra("newSecretStatus", newSecretStatus)
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
 
             finish()

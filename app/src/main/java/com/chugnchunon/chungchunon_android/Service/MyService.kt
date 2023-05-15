@@ -42,6 +42,10 @@ class MyService : Service(), SensorEventListener {
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
 
+    lateinit var alarmManager: AlarmManager
+    lateinit var alarmIntent: Intent
+    lateinit var pendingIntent: PendingIntent
+    private val alarmBroadcastReceiver: AlarmBroadcastReceiver = AlarmBroadcastReceiver()
 
     companion object {
         const val ACTION_STEP_COUNTER_NOTIFICATION =
@@ -384,13 +388,12 @@ class MyService : Service(), SensorEventListener {
 
 
         // 알람 매니저
-        val alarmManager =
+        alarmManager =
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
-        val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
+        alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+        pendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             ALARM_REQ_CODE,
             alarmIntent,
@@ -441,11 +444,12 @@ class MyService : Service(), SensorEventListener {
         deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // 알람 주기적 브로드캐스터
+        // 4. 알람 주기적 브로드캐스터
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
             BroadcastReregister,
             IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
         );
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -467,13 +471,12 @@ class MyService : Service(), SensorEventListener {
 
 
         // 알람 매니저
-        val alarmManager =
+        alarmManager =
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmBroadcastReceiver = AlarmBroadcastReceiver()
         registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
 
-        val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
+        alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+        pendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             ALARM_REQ_CODE,
             alarmIntent,
@@ -524,12 +527,11 @@ class MyService : Service(), SensorEventListener {
         deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // 알람 주기적 브로드캐스터
+        // 4. 알람 주기적 브로드캐스터
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
             BroadcastReregister,
             IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
-        );
-
+        )
         return START_STICKY
     }
 
@@ -575,11 +577,11 @@ class MyService : Service(), SensorEventListener {
         deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
         applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
 
-        // 알람 주기적 브로드캐스터
+        // 4. 알람 주기적 브로드캐스터
         LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
             BroadcastReregister,
             IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
-        );
+        )
 
         super.onDestroy()
     }
@@ -591,17 +593,17 @@ class MyService : Service(), SensorEventListener {
     var BroadcastReregister: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
 
-            val alarmManager =
-                applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val alarmBroadcastReceiver = AlarmBroadcastReceiver()
-            registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
-            val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                applicationContext,
-                ALARM_REQ_CODE,
-                alarmIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
+//            val alarmManager =
+//                applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//            val alarmBroadcastReceiver = AlarmBroadcastReceiver()
+//            registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
+//            val alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+//            val pendingIntent = PendingIntent.getBroadcast(
+//                applicationContext,
+//                ALARM_REQ_CODE,
+//                alarmIntent,
+//                PendingIntent.FLAG_IMMUTABLE
+//            )
 
             if (intent!!.action == "ALARM_BROADCAST_RECEIVER_RING") {
 
@@ -612,8 +614,6 @@ class MyService : Service(), SensorEventListener {
                     }
                     newCalendar.add(Calendar.MINUTE, 30)
 
-                    Log.d("서비스 - onBroad", " ${newCalendar.get(Calendar.HOUR)} /  ${newCalendar.get(Calendar.MINUTE)}")
-
                     alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         newCalendar.timeInMillis,
@@ -622,30 +622,30 @@ class MyService : Service(), SensorEventListener {
 
 
                     // 테스트 코드
-                    if (intent?.hasExtra("alarm") == true) {
-                        val alarmValue = intent.getBooleanExtra("alarm", false)
-                        if (alarmValue == true) {
-
-                            val lastAlarmSet = hashMapOf(
-                                "last_alarm" to FieldValue.serverTimestamp()
-                            )
-
-                            db.collection("background_check")
-                                .document("$userId")
-                                .set(lastAlarmSet, SetOptions.merge())
-                        }
-                    } else if (intent?.hasExtra("no_noti") == true) {
-                        val noNotiValue = intent.getBooleanExtra("no_noti", false)
-                        if (noNotiValue == true) {
-                            val lastNoNotiSet = hashMapOf(
-                                "last_no_noti" to FieldValue.serverTimestamp()
-                            )
-
-                            db.collection("background_check")
-                                .document("$userId")
-                                .set(lastNoNotiSet, SetOptions.merge())
-                        }
-                    }
+//                    if (intent?.hasExtra("alarm") == true) {
+//                        val alarmValue = intent.getBooleanExtra("alarm", false)
+//                        if (alarmValue == true) {
+//
+//                            val lastAlarmSet = hashMapOf(
+//                                "last_alarm" to FieldValue.serverTimestamp()
+//                            )
+//
+//                            db.collection("background_check")
+//                                .document("$userId")
+//                                .set(lastAlarmSet, SetOptions.merge())
+//                        }
+//                    } else if (intent?.hasExtra("no_noti") == true) {
+//                        val noNotiValue = intent.getBooleanExtra("no_noti", false)
+//                        if (noNotiValue == true) {
+//                            val lastNoNotiSet = hashMapOf(
+//                                "last_no_noti" to FieldValue.serverTimestamp()
+//                            )
+//
+//                            db.collection("background_check")
+//                                .document("$userId")
+//                                .set(lastNoNotiSet, SetOptions.merge())
+//                        }
+//                    }
 
                     // 브로드 캐스트 다시 등록
                     LocalBroadcastManager.getInstance(applicationContext)

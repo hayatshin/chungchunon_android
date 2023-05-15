@@ -120,7 +120,6 @@ class AllRegionDataFragment : Fragment() {
                 }
             })
 
-
         // 어댑터 연결
         adapter = AllDiaryCardAdapter(requireActivity(), diaryItems)
         binding.recyclerDiary.adapter = adapter

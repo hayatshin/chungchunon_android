@@ -46,7 +46,7 @@ class AttractionAdapter(val context: Context, private val attractionData: ArrayL
         holder.bind(context, position)
 
         holder.itemView.attractionImage.setOnClickListener {
-            var goAttractionDetail = Intent(context, AttractionDetailActivity::class.java)
+            val goAttractionDetail = Intent(context, AttractionDetailActivity::class.java)
             goAttractionDetail.putExtra("adName", attractionData[position].name)
             goAttractionDetail.putExtra("adDescription", attractionData[position].description)
             goAttractionDetail.putExtra("adLocation", attractionData[position].location)

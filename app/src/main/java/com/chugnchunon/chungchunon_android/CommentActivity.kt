@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.os.Handler
@@ -129,6 +130,9 @@ class CommentActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        binding.commentWriteText.background = null
+        binding.commentWriteText.setBackgroundColor(Color.TRANSPARENT)
 
         // 가장 아래 글로 스크롤
         binding.commentRecyclerView.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {

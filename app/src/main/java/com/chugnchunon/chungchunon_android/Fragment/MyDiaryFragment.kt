@@ -18,6 +18,7 @@ import android.provider.MediaStore
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
+import android.text.style.BackgroundColorSpan
 import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
@@ -36,7 +37,6 @@ import androidx.core.text.color
 import androidx.fragment.app.Fragment
 import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Mood
-import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
 import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.firebase.auth.ktx.auth
@@ -50,12 +50,10 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
+import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
-import com.chugnchunon.chungchunon_android.DefaultDiaryWarningActivity
-import com.chugnchunon.chungchunon_android.DiaryTwoActivity
-import com.chugnchunon.chungchunon_android.LockDiaryActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.FirebaseDatabase
@@ -106,10 +104,13 @@ class MyDiaryFragment : Fragment() {
     private var itemListItems: ArrayList<Any> = ArrayList()
 
     companion object {
+        private var secretStatus: Boolean = false
+
         private var photoResume: Boolean = false
         private var recordResume: Boolean = false
 
         private var partnerOrNot: Boolean = false
+        private var fulfilledOrNot: Boolean = false
         private var editOrNot: Boolean = false
 
         private var editDiary: Boolean = false
@@ -130,6 +131,31 @@ class MyDiaryFragment : Fragment() {
 
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        binding.diaryBtn.alpha = 0.4f
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            stepAuthGrantedReceiver,
+            IntentFilter("STEP_AUTH_UPDATE")
+        );
+
+        // StepCount Notification Receiver: 변경된 걸음수 UI 반영
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            stepCountUpdateReceiver,
+            IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
+        )
+
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            secretOrNotFunction,
+            IntentFilter("SECRET_OR_NOT")
+        );
+
+
+        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
+            myDiaryWarningFeedbackFunction,
+            IntentFilter("MY_DIARY_WARNING_FEEDBACK")
+        );
 
         // 파트너 체크
         userDB.document("$userId")
@@ -156,11 +182,6 @@ class MyDiaryFragment : Fragment() {
             binding.stepAuthLayout.visibility = View.VISIBLE
         }
 
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            stepAuthGrantedReceiver,
-            IntentFilter("STEP_AUTH_UPDATE")
-        );
-
         // 스크롤뷰 키보드 터치다운
         binding.myDiaryScrollView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
@@ -178,12 +199,6 @@ class MyDiaryFragment : Fragment() {
                 return false
             }
         })
-
-        // StepCount Notification Receiver: 변경된 걸음수 UI 반영
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            stepCountUpdateReceiver,
-            IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
-        )
 
         // 이미지 애니메이션
         val womanIcon = binding.womanIcon
@@ -230,7 +245,7 @@ class MyDiaryFragment : Fragment() {
         // 필드별 작성 시 변화
         diaryFillCheck.secretFill.observe(requireActivity(), Observer
         { value ->
-            if (diaryFillCheck.secretFill.value!!) {
+            if (secretStatus) {
                 binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_unlock,
@@ -238,6 +253,7 @@ class MyDiaryFragment : Fragment() {
                     0,
                     0
                 )
+                binding.secretInfoText.visibility = View.VISIBLE
 
             } else {
                 binding.secretButton.text = "나만 보기"
@@ -247,7 +263,7 @@ class MyDiaryFragment : Fragment() {
                     0,
                     0
                 )
-
+                binding.secretInfoText.visibility = View.GONE
             }
         })
 
@@ -258,9 +274,11 @@ class MyDiaryFragment : Fragment() {
                 binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if(!partnerOrNot) {
-                binding.diaryBtn.isEnabled =
-                    !editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!
+            if (!partnerOrNot) {
+                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+                    binding.diaryBtn.alpha = 1f
+                    fulfilledOrNot = true
+                }
             }
 
         })
@@ -273,9 +291,11 @@ class MyDiaryFragment : Fragment() {
                 binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if(!partnerOrNot) {
-                binding.diaryBtn.isEnabled =
-                    !editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!
+            if (!partnerOrNot) {
+                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+                    binding.diaryBtn.alpha = 1f
+                    fulfilledOrNot = true
+                }
             }
         })
 
@@ -287,16 +307,13 @@ class MyDiaryFragment : Fragment() {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if(!partnerOrNot) {
-                binding.diaryBtn.isEnabled =
-                    !editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!
+            if (!partnerOrNot) {
+                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+                    binding.diaryBtn.alpha = 1f
+                    fulfilledOrNot = true
+                }
             }
         })
-
-        LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
-            secretOrNotFunction,
-            IntentFilter("SECRET_OR_NOT")
-        );
 
         // 수정 시 필드별 변화
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer
@@ -325,6 +342,27 @@ class MyDiaryFragment : Fragment() {
 
         diaryEditCheck.secretEdit.observe(requireActivity(), Observer
         { value ->
+
+            if (secretStatus) {
+                binding.secretButton.text = "함께 보기"
+                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_unlock,
+                    0,
+                    0,
+                    0
+                )
+                binding.secretInfoText.visibility = View.VISIBLE
+            } else {
+                binding.secretButton.text = "나만 보기"
+                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_lock,
+                    0,
+                    0,
+                    0
+                )
+                binding.secretInfoText.visibility = View.GONE
+            }
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 editOrNot = true
                 binding.diaryBtn.alpha = 1f
@@ -333,8 +371,9 @@ class MyDiaryFragment : Fragment() {
 
         // 화면 변경
         if (!photoResume && !recordResume) {
-            binding.diaryBtn.isEnabled = editDiary
+            binding.diaryBtn.alpha = 0.4f
             editOrNot = false
+            fulfilledOrNot = false
 
             if (!editDiary) {
                 diaryFillCheck.recognitionFill.value = false
@@ -399,7 +438,6 @@ class MyDiaryFragment : Fragment() {
                         val region = document.data?.getValue("region")
                         val smallRegion = document.data?.getValue("smallRegion")
                         val regionGroup = "${region} ${smallRegion}"
-                        val secretStatus = diaryFillCheck.secretFill.value
 
                         val diarySet = hashMapOf(
                             "regionGroup" to regionGroup,
@@ -455,7 +493,7 @@ class MyDiaryFragment : Fragment() {
                         if (document.exists()) {
                             // 일기 작성을 한 상태
 
-                            binding.diaryBtn.isEnabled = true
+//                            binding.diaryBtn.isEnabled = true
                             binding.diaryBtn.alpha = 0.4f
                             editDiary = true
                             binding.diaryBtn.text = "일기 수정"
@@ -565,8 +603,28 @@ class MyDiaryFragment : Fragment() {
                             }
 
                             // 숨기기 보여주기
-                            val secretStatus = document.data?.getValue("secret") as Boolean
-                            diaryFillCheck.secretFill.value = secretStatus
+                            val secretStatusFromDB = document.data?.getValue("secret") as Boolean
+                            secretStatus = secretStatusFromDB
+
+                            if (secretStatus) {
+                                binding.secretButton.text = "함께 보기"
+                                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                                    R.drawable.ic_unlock,
+                                    0,
+                                    0,
+                                    0
+                                )
+                                binding.secretInfoText.visibility = View.VISIBLE
+                            } else {
+                                binding.secretButton.text = "나만 보기"
+                                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                                    R.drawable.ic_lock,
+                                    0,
+                                    0,
+                                    0
+                                )
+                                binding.secretInfoText.visibility = View.GONE
+                            }
 
                             // 일기 보여주기
                             val oldDiary = document.data?.getValue("todayDiary").toString()
@@ -628,12 +686,21 @@ class MyDiaryFragment : Fragment() {
 
                         } else {
                             // 일기 작성 x
-                            if(partnerOrNot) {
-                                binding.diaryBtn.isEnabled = true
-                                binding.diaryBtn.alpha = 0.4f
-                            } else {
+                            binding.diaryBtn.alpha = 0.4f
+                            binding.secretInfoText.visibility = View.GONE
+
+                            if (!partnerOrNot) {
                                 editDiary = false
+                                fulfilledOrNot = false
+                                binding.diaryBtn.text = "일기 작성"
                             }
+
+//                            if(partnerOrNot) {
+//                                binding.diaryBtn.isEnabled = true
+//                                binding.diaryBtn.alpha = 0.4f
+//                            } else {
+//                                editDiary = false
+//                            }
                         }
                     }
                 } else {
@@ -892,15 +959,27 @@ class MyDiaryFragment : Fragment() {
         binding.todayMood.adapter = activity?.applicationContext?.let {
             MoodArrayAdapter(
                 it,
+//                listOf(
+//                    Mood(R.drawable.ic_joy, "기뻐요", 0),
+//                    Mood(R.drawable.ic_shalom, "평온해요", 1),
+//                    Mood(R.drawable.ic_throb, "설레요", 2),
+//                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
+//                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
+//                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
+//                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
+//                    Mood(R.drawable.ic_angry, "화나요", 7),
+//                )
                 listOf(
                     Mood(R.drawable.ic_joy, "기뻐요", 0),
-                    Mood(R.drawable.ic_shalom, "평온해요", 1),
-                    Mood(R.drawable.ic_throb, "설레요", 2),
-                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
-                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
-                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
-                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
-                    Mood(R.drawable.ic_angry, "화나요", 7),
+                    Mood(R.drawable.ic_throb, "설레요", 1),
+                    Mood(R.drawable.ic_thanksful, "감사해요", 2),
+                    Mood(R.drawable.ic_shalom, "평온해요", 3),
+                    Mood(R.drawable.ic_soso, "그냥 그래요", 4),
+                    Mood(R.drawable.ic_lonely, "외로워요", 5),
+                    Mood(R.drawable.ic_anxious, "불안해요", 6),
+                    Mood(R.drawable.ic_gloomy, "우울해요", 7),
+                    Mood(R.drawable.ic_sad, "슬퍼요", 8),
+                    Mood(R.drawable.ic_angry, "화나요", 9),
                 )
             )
         }
@@ -920,6 +999,7 @@ class MyDiaryFragment : Fragment() {
         // 글 숨기기
         binding.secretButton.setOnClickListener {
             val goLockDiary = Intent(requireActivity(), LockDiaryActivity::class.java)
+            goLockDiary.putExtra("secretStatus", secretStatus)
             startActivity(goLockDiary)
         }
 
@@ -959,7 +1039,14 @@ class MyDiaryFragment : Fragment() {
         // ** 종합 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
             if (!partnerOrNot) {
-                if (editDiary && !editOrNot) {
+                if (!editDiary && !fulfilledOrNot) {
+                    // 작성인데 빈칸이 있음
+                    val goMyDiaryWarning = Intent(context, MyDiaryWarningActivity::class.java)
+                    goMyDiaryWarning.putExtra("recognition", diaryFillCheck.recognitionFill.value)
+                    goMyDiaryWarning.putExtra("mood", diaryFillCheck.moodFill.value)
+                    goMyDiaryWarning.putExtra("diary", diaryFillCheck.diaryFill.value)
+                    startActivity(goMyDiaryWarning)
+                } else if (editDiary && !editOrNot) {
                     // 수정인데 수정 안함
                     val goEditWarning = Intent(context, DefaultDiaryWarningActivity::class.java)
                     goEditWarning.putExtra("warningType", "editDiary")
@@ -1014,7 +1101,6 @@ class MyDiaryFragment : Fragment() {
                                 "operator" to operator,
                                 "realAnswer" to dbRealAnswer,
                                 "userAnswer" to dbUserAnswer,
-
                                 )
                             db.collection("recognition").document(diaryId)
                                 .set(recognitionSet, SetOptions.merge())
@@ -1028,7 +1114,6 @@ class MyDiaryFragment : Fragment() {
                                 val region = document.data?.getValue("region")
                                 val smallRegion = document.data?.getValue("smallRegion")
                                 val regionGroup = "${region} ${smallRegion}"
-                                val secretStatus = diaryFillCheck.secretFill.value
 
                                 val diarySet = hashMapOf(
                                     "regionGroup" to regionGroup,
@@ -1055,11 +1140,6 @@ class MyDiaryFragment : Fragment() {
                                             .commit()
                                         requireActivity().bottomNav.selectedItemId =
                                             R.id.ourTodayMenu
-
-//                                        val goDiaryTwo = Intent(context, DiaryTwoActivity::class.java)
-//                                        goDiaryTwo.putExtra("from", "write")
-//                                        goDiaryTwo.putExtra("diaryType", "my")
-//                                        startActivity(goDiaryTwo)
                                     }
                             }
                     }
@@ -1276,13 +1356,13 @@ class MyDiaryFragment : Fragment() {
 
     private var secretOrNotFunction: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-
-            val secretOrNot = intent?.getBooleanExtra("secretOrNot", false)
+            val newSecretStatus = intent?.getBooleanExtra("newSecretStatus", false) as Boolean
+            secretStatus = newSecretStatus
 
             if (!editDiary) {
-                diaryFillCheck.secretFill.value = secretOrNot
+                diaryFillCheck.secretFill.value = true
             } else {
-                diaryEditCheck.secretEdit.value = secretOrNot
+                diaryEditCheck.secretEdit.value = true
             }
         }
 
@@ -1300,6 +1380,33 @@ class MyDiaryFragment : Fragment() {
 
         }
     }
+
+
+    private var myDiaryWarningFeedbackFunction: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            val recognitionBoolean = intent?.getBooleanExtra("recognitionBoolean", true)
+            val moodBoolean = intent?.getBooleanExtra("moodBoolean", true)
+            val diaryBoolean = intent?.getBooleanExtra("diaryBoolean", true)
+
+            if (!recognitionBoolean!!) binding.recognitionHeader.setText(spanTextFn("인지"))
+            if (!moodBoolean!!) binding.moodHeader.setText(spanTextFn("마음"))
+            if (!diaryBoolean!!) binding.diaryHeader.setText(spanTextFn("일기"))
+        }
+    }
+
+    private fun spanTextFn(text: String): Spannable {
+        val spanText = Spannable.Factory.getInstance().newSpannable(text)
+        val color = ContextCompat.getColor(mcontext, R.color.yellow_highlight)
+        spanText.setSpan(
+            BackgroundColorSpan(color),
+            0,
+            text.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        return spanText
+    }
+
 
     class NewImageViewModel : ViewModel() {
         var uploadFirebaseComplete = MutableLiveData<Boolean>().apply {

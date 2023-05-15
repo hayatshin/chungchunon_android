@@ -70,7 +70,7 @@ class DefaultDiaryWarningActivity : FragmentActivity() {
             }
         } else if (warningType == "partnerDiary") {
             // 파트너 일기 작성
-            binding.edWarningText.text = "50세 미만은 일기 쓰기가 제한됩니다."
+            binding.edWarningText.text = "50세 미만은 일기 쓰기가 제한됩니다.\n댓글과 좋아요로 응원해주세요!"
 
             binding.edConfirmBox.setOnClickListener {
                 finish()

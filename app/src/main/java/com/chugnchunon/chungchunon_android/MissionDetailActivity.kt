@@ -203,28 +203,52 @@ class MissionDetailActivity : Activity() {
                             val missionCount = missionSnapShot.size()
                             if (missionCount < 100) {
                                 // 참여 가능
-
-                                val userParticipateSet = hashMapOf(
-                                    "documentId" to mdDocId,
-                                    "userId" to userId,
-                                    "timestamp" to FieldValue.serverTimestamp()
+                                val userParticipateSet = hashMapOf<String, Any>(
+                                    "dummy" to FieldValue.serverTimestamp()
                                 )
 
                                 db.collection("mission")
                                     .document(mdDocId)
                                     .collection("participants")
                                     .document("$userId")
-                                    .set(userParticipateSet, SetOptions.merge())
+                                    .update(userParticipateSet)
                                     .addOnSuccessListener {
+                                        // 이미 존재
                                         val goMissionResult =
                                             Intent(this, MissionResultActivity::class.java)
-                                        goMissionResult.putExtra("participateState", "Possible")
+                                        goMissionResult.putExtra("participateState", "Already")
                                         startActivityForResult(
                                             goMissionResult,
                                             REFRESH_RESULT_MISSION_CODE
                                         )
-                                    }
 
+                                    }
+                                    .addOnFailureListener {
+                                        // 존재 안함
+                                        val userParticipateTimestamp = hashMapOf(
+                                            "documentId" to mdDocId,
+                                            "userId" to userId,
+                                            "timestamp" to FieldValue.serverTimestamp()
+                                        )
+
+                                        db.collection("mission")
+                                            .document(mdDocId)
+                                            .collection("participants")
+                                            .document("$userId")
+                                            .set(userParticipateTimestamp, SetOptions.merge())
+                                            .addOnSuccessListener {
+                                                val goMissionResult =
+                                                    Intent(this, MissionResultActivity::class.java)
+                                                goMissionResult.putExtra(
+                                                    "participateState",
+                                                    "Possible"
+                                                )
+                                                startActivityForResult(
+                                                    goMissionResult,
+                                                    REFRESH_RESULT_MISSION_CODE
+                                                )
+                                            }
+                                    }
                             } else {
                                 // 100명 초과
                                 val goMissionResult =

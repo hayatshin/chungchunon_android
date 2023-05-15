@@ -6,24 +6,56 @@
     android:layout_height="wrap_content"
     android:layout_marginRight="18dp">
 
-    <ImageView
-        android:clipToOutline="true"
-        android:background="@drawable/mission_card_background"
+    <RelativeLayout
+        android:id="@+id/attractionPartLayout"
+        android:orientation="vertical"
         android:layout_marginBottom="25dp"
-        android:id="@+id/attractionImage"
         android:layout_width="180dp"
         android:layout_height="220dp"
-        android:scaleType="centerCrop" />
+        android:background="@drawable/mission_card_background"
+        android:clipToOutline="true">
+
+        <ImageView
+            android:translationZ="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/attractionImage"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:id="@+id/finishMissionLayout"
+            android:layout_width="180dp"
+            android:layout_height="220dp"
+            android:background="@drawable/layer_screen"
+            android:clipToOutline="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:translationZ="90dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineHeight="25dp"
+                android:text="서비스를\n준비 중입니다."
+                android:textAlignment="center"
+                android:textColor="@color/light_gray"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <TextView
-        android:layout_alignParentBottom="true"
         android:id="@+id/attractionTitle"
-        android:textSize="18dp"
-        android:textColor="@color/custom_gray"
-        android:gravity="top|center_horizontal"
-        tools:text="안녕하세요"
-        android:layout_below="@id/attractionImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/attractionPartLayout"
+        android:layout_alignParentBottom="true"
+        android:gravity="top|center_horizontal"
+        android:textColor="@color/custom_gray"
+        android:textSize="18dp"
+        tools:text="안녕하세요" />
 
 </RelativeLayout>

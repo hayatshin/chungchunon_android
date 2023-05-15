@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/exitBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,7 +12,7 @@
     <ImageView
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:id="@+id/exitGobackArrow"
+        android:id="@+id/gobackArrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -51,10 +52,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/warningText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:lineHeight="28dp"
-                    android:text="@string/exit_notification"
+                    tools:text="@string/exit_notification"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="17dp" />
@@ -67,7 +69,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:id="@+id/exitCancelBox"
+                    android:id="@+id/cancelBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -85,7 +87,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/exitConfirmBox"
+                    android:id="@+id/confirmBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

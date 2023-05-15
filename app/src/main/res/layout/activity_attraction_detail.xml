@@ -7,10 +7,10 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
+        android:translationZ="180dp"
         android:id="@+id/adTotalHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rule_header"
         android:paddingVertical="20dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -33,6 +33,30 @@
             android:textStyle="bold" />
 
     </RelativeLayout>
+
+
+    <LinearLayout
+        android:translationZ="90dp"
+        android:visibility="visible"
+        android:id="@+id/finishMissionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:clipToOutline="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:textStyle="bold"
+            android:textSize="18dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineHeight="25dp"
+            android:text="서비스를\n준비 중입니다."
+            android:textAlignment="center"
+            android:textColor="@color/light_gray" />
+
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"

@@ -95,6 +95,10 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".MyDiaryWarningActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".DiaryTwoActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
@@ -152,7 +156,7 @@
             android:name=".BlockUserListActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ExitActivity"
+            android:name=".DefaultCancelWarningActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity

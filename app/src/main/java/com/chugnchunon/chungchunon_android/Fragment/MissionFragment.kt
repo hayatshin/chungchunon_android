@@ -141,11 +141,11 @@ class MissionFragment: Fragment() {
                         for(attraction in attractions) {
                             var attractionRegion = attraction.data.getValue("region")
                             if(attractionRegion == "전체" || attractionRegion == userRegion) {
-                                var attractionName = attraction.data.getValue("name").toString()
-                                var attractionDescription = attraction.data.getValue("description").toString()
-                                var attractionLocation = attraction.data.getValue("location").toString()
-                                var attractionMainImage = attraction.data.getValue("mainImage").toString()
-                                var attractionSubImage = attraction.data.getValue("subImage") as ArrayList<String>
+                                val attractionName = attraction.data.getValue("name").toString()
+                                val attractionDescription = attraction.data.getValue("description").toString()
+                                val attractionLocation = attraction.data.getValue("location").toString()
+                                val attractionMainImage = attraction.data.getValue("mainImage").toString()
+                                val attractionSubImage = attraction.data.getValue("subImage") as ArrayList<String>
 
                                 binding.attractionTitle.text = "${userRegion} 명소"
 

@@ -288,12 +288,17 @@ class DiaryTwoActivity : AppCompatActivity() {
             userDB.document("$userId").set(authSet, SetOptions.merge())
 
             // 걸음수 호출
-            val startService = Intent(this, MyService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(this, startService);
-            } else {
-                startService(startService);
+            try {
+                val startService = Intent(this, MyService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(this, startService);
+                } else {
+                    startService(startService);
+                }
+            }catch (e: Exception) {
+                e.printStackTrace()
             }
+
 
             val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
             stepAuthIntent.setAction("STEP_AUTH_UPDATE")
@@ -618,12 +623,17 @@ class DiaryTwoActivity : AppCompatActivity() {
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
 
-                        val startService = Intent(this, MyService::class.java)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            ContextCompat.startForegroundService(this, startService);
-                        } else {
-                            startService(startService);
+                        try {
+                            val startService = Intent(this, MyService::class.java)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                ContextCompat.startForegroundService(this, startService);
+                            } else {
+                                startService(startService);
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
+
                         val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
                         stepAuthIntent.setAction("STEP_AUTH_UPDATE")
                         stepAuthIntent.putExtra("StepAuth", true)

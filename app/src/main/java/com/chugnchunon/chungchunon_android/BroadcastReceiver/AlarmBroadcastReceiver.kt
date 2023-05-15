@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.CommentActivity
@@ -51,10 +52,10 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
             return false
         }
 
-        val alarmIntent = Intent(context, MyService::class.java)
-        alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
-        alarmIntent.putExtra("alarm", true)
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
+//        val alarmIntent = Intent(context, MyService::class.java)
+//        alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
+//        alarmIntent.putExtra("alarm", true)
+//        LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
 
         val isServiceRunningBoolean = isServiceRunning(MyService::class.java)
         if (isServiceRunningBoolean) {
@@ -62,16 +63,21 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
         } else {
             Log.d("서비스", "no running")
 
-            alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
-            alarmIntent.putExtra("no_noti", true)
-            LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
+//            alarmIntent.setAction("ALARM_BROADCAST_RECEIVER_RING")
+//            alarmIntent.putExtra("no_noti", true)
+//            LocalBroadcastManager.getInstance(context!!).sendBroadcast(alarmIntent);
 
-            val startService = Intent(context, MyService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(context, startService);
-            } else {
-                context.startService(startService);
+            try {
+                val startService = Intent(context, MyService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(context!!, startService);
+                } else {
+                    context!!.startService(startService);
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
+
 
         }
 

@@ -37,12 +37,17 @@ class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Wo
             } else {
                 Log.d("서비스 - 워크", "no running")
 
-                val startService = Intent(applicationContext, MyService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(applicationContext, startService);
-                } else {
-                    applicationContext.startService(startService);
+                try {
+                    val startService = Intent(applicationContext, MyService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(applicationContext, startService);
+                    } else {
+                        applicationContext.startService(startService);
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+
 
             }
 

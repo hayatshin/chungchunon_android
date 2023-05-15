@@ -138,30 +138,47 @@ class PeriodLastWeekRankingFragment : Fragment() {
         }
 
         // 이번주 시작
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
         val today = Calendar.getInstance()
         val timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
         val startOfWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
             set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.time
 
         val endOfWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 59)
         }.time
 
         val startOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.time
 
         val endOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 59)
         }.time
 
         formatLastWeekStart = dateFormat.format(startOfLastWeek)
@@ -449,7 +466,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
             val userId = diaryDocument.data.getValue("userId").toString()
 
             userPointArray.forEach {
-                if (it.userId == userId) {
+                if (userId == it.userId) {
                     val currentpoint = it.point as Int
                     it.point = currentpoint + 100
                 }
@@ -467,7 +484,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
         for (commentDocument in commentDocuments) {
             val userId = commentDocument.data.getValue("userId").toString()
             userPointArray.forEach {
-                if (it.userId == userId) {
+                if (userId == it.userId) {
                     val currentpoint = it.point as Int
                     it.point = currentpoint + 20
                 }
@@ -485,7 +502,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
         for (likeDocument in likeDocuments) {
             val userId = likeDocument.data.getValue("id").toString()
             userPointArray.forEach {
-                if (it.userId == userId) {
+                if (userId == it.userId) {
                     var currentpoint = it.point as Int
                     it.point = currentpoint + 10
                 }

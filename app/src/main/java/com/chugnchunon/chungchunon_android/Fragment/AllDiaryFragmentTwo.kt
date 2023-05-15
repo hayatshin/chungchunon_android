@@ -41,9 +41,7 @@ class AllDiaryFragmentTwo : Fragment() {
     lateinit var mcontext: Context
 
     companion object {
-        var onBlock = false
         var resumePause : Boolean = false
-        var tabChange: Boolean = false
     }
 
     override fun onAttach(context: Context) {
@@ -61,29 +59,18 @@ class AllDiaryFragmentTwo : Fragment() {
 
         diaryType = arguments?.getString("diaryType").toString()
 
-        if (diaryType == "friend") {
-           binding.regionViewPager.setCurrentItem(0, false)
-           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
-       } else if (diaryType == "region") {
-           binding.regionViewPager.setCurrentItem(1, false)
-           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
-       } else if (diaryType == "my") {
-           binding.regionViewPager.setCurrentItem(2, false)
-           binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(2))
-       }
-
-//        if(diaryType == "all") {
-//            binding.regionViewPager.currentItem = 0
-//        } else if (diaryType == "region") {
-//            binding.regionViewPager.currentItem = 1
-//        } else if (diaryType == "friend") {
-//            binding.regionViewPager.currentItem = 2
-//        } else if (diaryType == "my") {
-//            binding.regionViewPager.currentItem = 3
-//        }
+        if(diaryType == "all") {
+            binding.regionViewPager.currentItem = 0
+        } else if (diaryType == "friend") {
+            binding.regionViewPager.currentItem = 1
+        } else if (diaryType == "region") {
+            binding.regionViewPager.currentItem = 2
+        } else if (diaryType == "my") {
+            binding.regionViewPager.currentItem = 3
+        }
 
         val adapter = RegionDiaryAdapter(requireActivity())
-        binding.regionViewPager.offscreenPageLimit = 3
+        binding.regionViewPager.offscreenPageLimit = 4
         binding.regionViewPager.adapter = adapter
         binding.regionViewPager.isUserInputEnabled = false
 
@@ -113,15 +100,18 @@ class AllDiaryFragmentTwo : Fragment() {
 
         binding.regionViewPager.postDelayed(object : Runnable {
             override fun run() {
-                if (diaryType == "friend") {
+                if(diaryType == "all") {
                     binding.regionViewPager.setCurrentItem(0, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
-                } else if (diaryType == "region") {
+                } else if (diaryType == "friend") {
                     binding.regionViewPager.setCurrentItem(1, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
-                } else if (diaryType == "my") {
+                } else if (diaryType == "region") {
                     binding.regionViewPager.setCurrentItem(2, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(2))
+                } else if (diaryType == "my") {
+                    binding.regionViewPager.setCurrentItem(3, false)
+                    binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(3))
                 }
             }
         }, 0)

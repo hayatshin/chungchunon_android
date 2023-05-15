@@ -22,11 +22,15 @@
     <color name="yellow_highlight">#99FDFA35</color>
 
     // 감정
-    <color name="shalom_color">#00E676</color>
-    <color name="throb_color">#D500F9</color>
-    <color name="soso_color">#FF9100</color>
-    <color name="anxious_color">#F2E205</color>
-    <color name="sad_color">#0048FF</color>
-    <color name="gloomy_color">#00ACC1</color>
-    <color name="angry_color">#550000</color>
+    <color name="shalom_color">#7DB7D5</color>*
+    <color name="throb_color">#F68E50</color>*
+    <color name="soso_color">#F9E1C9</color>*
+    <color name="anxious_color">#FEE05D</color>*
+    <color name="sad_color">#104474</color>
+    <color name="gloomy_color">#5A5A5A</color>*
+    <color name="angry_color">#EE3438</color>*
+    // 추가
+    <color name="lonely_color">#BDD84C</color>*
+    <color name="thanksful_color">#B994C5</color>*
+
 </resources>

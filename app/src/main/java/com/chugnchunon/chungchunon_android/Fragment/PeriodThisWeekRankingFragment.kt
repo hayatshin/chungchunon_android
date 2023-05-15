@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.RankingRecyclerAdapter
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.RankingLine
 import com.chugnchunon.chungchunon_android.Fragment.PeriodThisWeekRankingFragment.Companion.thisStepCheck
 import com.chugnchunon.chungchunon_android.Layout.CustomBarChartRender
@@ -41,6 +42,7 @@ import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.utils.ViewPortHandler
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.ktx.firestore
@@ -153,18 +155,27 @@ class PeriodThisWeekRankingFragment : Fragment() {
         }
 
         // 이번주 시작
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
         val today = Calendar.getInstance()
         val timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
         val startOfWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
             set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.time
 
         val endOfWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 59)
         }.time
 
         val startOfLastWeek = Calendar.getInstance(timeZone).apply {
@@ -376,10 +387,10 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
-            if(document.data.containsKey("userType")){
+            if (document.data.containsKey("userType")) {
                 val userType = document.data.getValue("userType").toString()
 
-                if(userType == "사용자") {
+                if (userType == "사용자") {
                     try {
                         val userId = document.data?.getValue("userId").toString()
                         val username = document.data.getValue("name").toString()
@@ -395,7 +406,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
                         userPointArray.add(userEntry)
                         userStepCountHashMap.put(userId, 0)
-                    } catch (e:Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
@@ -406,7 +417,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
 
     suspend fun stepCountToArrayFun() {
-
         val startDate = LocalDate.of(
             formatThisWeekStart.substring(0, 4).toInt(),
             formatThisWeekStart.substring(5, 7).toInt(),
@@ -419,7 +429,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
         )
 
         for (stepDate in startDate..endDate) {
-            var dataSteps = db.collection("period_step_count")
+            val dataSteps = db.collection("period_step_count")
                 .document("$stepDate")
                 .get()
                 .await()
@@ -443,10 +453,9 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
             userPointArray.forEach {
                 if (it.userId == keyUserId) {
-                    var currentpoint = it.point as Int
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + valueStepCount
                 }
-
             }
         }
     }
@@ -461,10 +470,11 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
         for (diaryDocument in diaryDocuments) {
             val userId = diaryDocument.data.getValue("userId").toString()
+            val diaryTimestamp = diaryDocument.data.getValue("timestamp") as Timestamp
 
             userPointArray.forEach {
-                if (it.userId == userId) {
-                    var currentpoint = it.point as Int
+                if (userId == it.userId) {
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + 100
                 }
             }
@@ -479,10 +489,11 @@ class PeriodThisWeekRankingFragment : Fragment() {
             .await()
 
         for (commentDocument in commentDocuments) {
-            var userId = commentDocument.data.getValue("userId").toString()
+            val userId = commentDocument.data.getValue("userId").toString()
+
             userPointArray.forEach {
-                if (it.userId == userId) {
-                    var currentpoint = it.point as Int
+                if (userId == it.userId) {
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + 20
                 }
             }
@@ -498,9 +509,11 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
         for (likeDocument in likeDocuments) {
             val userId = likeDocument.data.getValue("id").toString()
+            val likeTimestamp = likeDocument.data.getValue("timestamp") as Timestamp
+
             userPointArray.forEach {
-                if (it.userId == userId) {
-                    var currentpoint = it.point as Int
+                if (userId == it.userId) {
+                    val currentpoint = it.point as Int
                     it.point = currentpoint + 10
                 }
             }

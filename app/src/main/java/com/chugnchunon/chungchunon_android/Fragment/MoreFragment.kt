@@ -1,7 +1,6 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -92,7 +91,8 @@ class MoreFragment: Fragment() {
         }
 
         binding.exitAppBtn.setOnClickListener {
-            val exit_intent = Intent(activity, ExitActivity::class.java)
+            val exit_intent = Intent(activity, DefaultCancelWarningActivity::class.java)
+            exit_intent.putExtra("warningType", "exit")
             startActivity(exit_intent)
         }
 

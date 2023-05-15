@@ -37,12 +37,17 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
             )
             userDB.document("$userId").set(bootSet, SetOptions.merge())
 
-            val startService = Intent(context, MyService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(context!!, startService);
-            } else {
-                context!!.startService(startService);
+            try {
+                val startService = Intent(context, MyService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(context!!, startService);
+                } else {
+                    context!!.startService(startService);
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
+
 
         }
     }

@@ -101,16 +101,18 @@ class LikePersonActivity: Activity() {
                     userDB.document("$likePersonId")
                         .get()
                         .addOnSuccessListener { likePersonUser ->
-                            var likePersonAvatar = likePersonUser.data!!.getValue("avatar").toString()
-                            var likePersonName = likePersonUser.data!!.getValue("name").toString()
-                            var userRegion = likePersonUser.data!!.getValue("region").toString()
-                            var userSmallRegion = likePersonUser.data!!.getValue("smallRegion").toString()
-                            var likePersonRegion = "${userRegion} ${userSmallRegion}"
+                            val likePersonAvatar = likePersonUser.data!!.getValue("avatar").toString()
+                            val likePersonName = likePersonUser.data!!.getValue("name").toString()
+                            val likePersonType = likePersonUser.data!!.getValue("userType").toString()
+                            val userRegion = likePersonUser.data!!.getValue("region").toString()
+                            val userSmallRegion = likePersonUser.data!!.getValue("smallRegion").toString()
+                            val likePersonRegion = "${userRegion} ${userSmallRegion}"
 
-                            var likePersonSet = LikePerson(
+                            val likePersonSet = LikePerson(
                                 likePersonAvatar,
                                 likePersonName,
-                                likePersonRegion
+                                likePersonRegion,
+                                likePersonType
                             )
                             likePersonList.add(likePersonSet)
 

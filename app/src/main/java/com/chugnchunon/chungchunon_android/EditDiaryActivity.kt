@@ -82,6 +82,8 @@ class EditDiaryActivity : AppCompatActivity() {
     private var editButtonClick: Boolean = false
 
     companion object {
+        private var secretStatusForEditDiary: Boolean = false
+
         private var photoResumeForEditDiary: Boolean = false
         private var recordResumeForEditDiary: Boolean = false
         private var editOrNotForEditDiary: Boolean = false
@@ -126,8 +128,7 @@ class EditDiaryActivity : AppCompatActivity() {
         diaryEditCheck.secretEdit.observe(this, Observer { value ->
             if (diaryEditCheck.secretEdit.value == true) binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
-            if (diaryEditCheck.secretEdit.value!!) {
-
+            if (secretStatusForEditDiary) {
                 binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_unlock,
@@ -137,16 +138,8 @@ class EditDiaryActivity : AppCompatActivity() {
                 )
                 binding.secreteNotificationText.text =
                     getString(R.string.secret_unhide_notification)
-
-                binding.secretConfirmBox.setOnClickListener {
-                    diaryEditCheck.secretEdit.value = false
-                    binding.secretNotificationLayout.visibility = View.GONE
-                    window.setStatusBarColor(Color.WHITE);
-                    editOrNotForEditDiary = true
-                    binding.diaryBtn.alpha = 1f
-                }
+                binding.secretInfoText.visibility = View.VISIBLE
             } else {
-
                 binding.secretButton.text = "나만 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_lock,
@@ -155,14 +148,7 @@ class EditDiaryActivity : AppCompatActivity() {
                     0
                 )
                 binding.secreteNotificationText.text = getString(R.string.secret_hide_notification)
-
-                binding.secretConfirmBox.setOnClickListener {
-                    diaryEditCheck.secretEdit.value = true
-                    binding.secretNotificationLayout.visibility = View.GONE
-                    window.setStatusBarColor(Color.WHITE);
-                    editOrNotForEditDiary = true
-                    binding.diaryBtn.alpha = 1f
-                }
+                binding.secretInfoText.visibility = View.GONE
             }
         })
 
@@ -362,7 +348,30 @@ class EditDiaryActivity : AppCompatActivity() {
 
                 // 숨기기 보여주기
                 val DBsecretStatus = document.data?.getValue("secret") as Boolean
-                diaryEditCheck.secretEdit.value = DBsecretStatus
+                secretStatusForEditDiary = DBsecretStatus
+
+                if (secretStatusForEditDiary) {
+                    binding.secretButton.text = "함께 보기"
+                    binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.ic_unlock,
+                        0,
+                        0,
+                        0
+                    )
+                    binding.secreteNotificationText.text =
+                        getString(R.string.secret_unhide_notification)
+                    binding.secretInfoText.visibility = View.VISIBLE
+                } else {
+                    binding.secretButton.text = "나만 보기"
+                    binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.ic_lock,
+                        0,
+                        0,
+                        0
+                    )
+                    binding.secreteNotificationText.text = getString(R.string.secret_hide_notification)
+                    binding.secretInfoText.visibility = View.GONE
+                }
             }
 
         // 사진 업로드
@@ -423,15 +432,27 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.todayMood.adapter = applicationContext?.let {
             MoodArrayAdapter(
                 it,
+//                listOf(
+//                    Mood(R.drawable.ic_joy, "기뻐요", 0),
+//                    Mood(R.drawable.ic_shalom, "평온해요", 1),
+//                    Mood(R.drawable.ic_throb, "설레요", 2),
+//                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
+//                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
+//                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
+//                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
+//                    Mood(R.drawable.ic_angry, "화나요", 7),
+//                )
                 listOf(
                     Mood(R.drawable.ic_joy, "기뻐요", 0),
-                    Mood(R.drawable.ic_shalom, "평온해요", 1),
-                    Mood(R.drawable.ic_throb, "설레요", 2),
-                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
-                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
-                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
-                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
-                    Mood(R.drawable.ic_angry, "화나요", 7),
+                    Mood(R.drawable.ic_throb, "설레요", 1),
+                    Mood(R.drawable.ic_thanksful, "감사해요", 2),
+                    Mood(R.drawable.ic_shalom, "평온해요", 3),
+                    Mood(R.drawable.ic_soso, "그냥 그래요", 4),
+                    Mood(R.drawable.ic_lonely, "외로워요", 5),
+                    Mood(R.drawable.ic_anxious, "불안해요", 6),
+                    Mood(R.drawable.ic_gloomy, "우울해요", 7),
+                    Mood(R.drawable.ic_sad, "슬퍼요", 8),
+                    Mood(R.drawable.ic_angry, "화나요", 9),
                 )
             )
         }
@@ -464,6 +485,16 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.secretCancelBox.setOnClickListener {
             binding.secretNotificationLayout.visibility = View.GONE
             window.setStatusBarColor(Color.WHITE);
+        }
+
+        binding.secretConfirmBox.setOnClickListener {
+
+            secretStatusForEditDiary = !secretStatusForEditDiary
+            diaryEditCheck.secretEdit.value = true
+            binding.secretNotificationLayout.visibility = View.GONE
+            window.setStatusBarColor(Color.WHITE);
+            editOrNotForEditDiary = true
+            binding.diaryBtn.alpha = 1f
         }
 
 
@@ -510,7 +541,7 @@ class EditDiaryActivity : AppCompatActivity() {
                         newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
                     }
 
-                    newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+                    newDiarySet.put("secret", secretStatusForEditDiary)
 
                 } else {
                     // 이미지 업로드 안 하는 경우
@@ -523,7 +554,7 @@ class EditDiaryActivity : AppCompatActivity() {
                         newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
                     }
 
-                    newDiarySet.put("secret", diaryEditCheck.secretEdit.value as Boolean)
+                    newDiarySet.put("secret", secretStatusForEditDiary)
 
 
                     diaryDB.document("$editDiaryId")
