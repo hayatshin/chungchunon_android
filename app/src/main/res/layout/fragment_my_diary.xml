@@ -246,7 +246,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="걸음수"
+                            android:text="걸음"
                             android:textColor="@color/black"
                             android:textSize="20dp"
                             android:textStyle="bold" />

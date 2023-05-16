@@ -541,8 +541,9 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun filterItemUpdate() = withContext(Dispatchers.Main) {
 //        rankingItems = ArrayList(userPointArray.filter { it.index!! <= 10 })
+        rankingItems = ArrayList(userPointArray.filter { it.point!! != 0 })
 
-        rankingAdapter = RankingRecyclerAdapter(requireActivity(), userPointArray)
+        rankingAdapter = RankingRecyclerAdapter(requireActivity(), rankingItems)
         binding.rankingRecyclerView.adapter = rankingAdapter
         binding.rankingRecyclerView.layoutManager =
             LinearLayoutManagerWrapper(

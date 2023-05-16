@@ -187,10 +187,9 @@
 
             </LinearLayout>
 
-
             <LinearLayout
                 android:layout_marginTop="30dp"
-                android:id="@+id/appRuleLayout"
+                android:id="@+id/invitationLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -200,18 +199,19 @@
                 app:layout_constraintTop_toBottomOf="@+id/editProfileLayout">
 
                 <ImageView
-                    android:id="@+id/application"
+                    android:id="@+id/invitationIcon"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:layout_marginBottom="15dp"
                     android:background="@drawable/rule_background"
                     android:padding="23dp"
-                    android:src="@drawable/ic_rule" />
+                    android:src="@drawable/ic_envelope" />
 
                 <TextView
+                    android:textAlignment="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="이용약관"
+                    android:text="친구\n초대하기"
                     android:textColor="@color/custom_gray"
                     android:textSize="17dp" />
 
@@ -224,8 +224,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                app:layout_constraintLeft_toRightOf="@+id/appRuleLayout"
-                app:layout_constraintRight_toLeftOf="@id/exitAppLayout"
+                app:layout_constraintLeft_toRightOf="@+id/invitationLayout"
+                app:layout_constraintRight_toLeftOf="@id/appRuleLayout"
                 app:layout_constraintTop_toBottomOf="@+id/blockUserLayout">
 
                 <ImageView
@@ -246,6 +246,38 @@
                     android:textSize="17dp" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_marginTop="30dp"
+                android:id="@+id/appRuleLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toRightOf="@+id/personalInfoLayout"
+                app:layout_constraintTop_toBottomOf="@+id/exitAppLayout"
+               >
+
+                <ImageView
+                    android:id="@+id/application"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/rule_background"
+                    android:padding="23dp"
+                    android:src="@drawable/ic_rule" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="이용약관"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="17dp" />
+
+            </LinearLayout>
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

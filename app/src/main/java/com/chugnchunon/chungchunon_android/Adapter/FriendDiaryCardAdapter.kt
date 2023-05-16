@@ -131,12 +131,12 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                     if (task.isSuccessful) {
                         val document = task.result
                         if (document != null) {
-                            if (document.exists()) {
-                                likeToggleCheckForFriendData.put(position, true)
-                                likeIcon.setImageResource(R.drawable.ic_filledheart)
-                            } else {
+                            if (!document.exists()) {
                                 likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                likeToggleCheckForFriendData.put(position, false)
+                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, false)
+                            } else {
+                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, true)
+                                likeIcon.setImageResource(R.drawable.ic_filledheart)
                             }
                         } else {
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)

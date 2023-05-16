@@ -66,6 +66,7 @@
         <entry key="app/src/main/res/drawable/ic_emotion_2.xml" value="0.1145" />
         <entry key="app/src/main/res/drawable/ic_emptychat.xml" value="0.1565" />
         <entry key="app/src/main/res/drawable/ic_emptyheart.xml" value="0.1165" />
+        <entry key="app/src/main/res/drawable/ic_envelope.xml" value="0.1175" />
         <entry key="app/src/main/res/drawable/ic_exit.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_filledchat.xml" value="0.1165" />
         <entry key="app/src/main/res/drawable/ic_filledheart.xml" value="0.128" />
@@ -91,6 +92,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.14" />
         <entry key="app/src/main/res/drawable/ic_lock.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_lonely.xml" value="0.102" />
+        <entry key="app/src/main/res/drawable/ic_love_letter.xml" value="0.1485" />
         <entry key="app/src/main/res/drawable/ic_mic.xml" value="0.1165" />
         <entry key="app/src/main/res/drawable/ic_more_icon.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/ic_new_icon_pink_foreground.xml" value="0.1135" />

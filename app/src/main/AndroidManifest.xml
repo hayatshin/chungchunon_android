@@ -38,6 +38,8 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_new_alarm_icon" />
+        <meta-data android:name="com.kakao.sdk.AppKey"
+            android:value="@string/kakao_native_key" />
 
         <activity
             android:name=".StartActivity"
@@ -46,6 +48,14 @@
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="@string/kakao_scheme_key"
+                    android:host="kakaolink"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

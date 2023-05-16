@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -36,11 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
-import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.Fragment.MoreFragment
-import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
-import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
-import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileBinding
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileTwoBinding
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
@@ -84,6 +81,11 @@ class EditProfileActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition (0, R.anim.slide_down_enter)
+    }
+
+    companion object {
+        const val REQ_GALLERY: Int = 100
+        const val REQ_MULTI_PHOTO: Int = 2000
     }
 
     @SuppressLint("SetTextI18n")
@@ -195,28 +197,45 @@ class EditProfileActivity : AppCompatActivity() {
 
         // 이미지 수정
         fun selectGallery() {
-            val readPermission = ContextCompat.checkSelfPermission(
+            val readGalleryPermission = ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             )
+            val readMediaImagesPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
 
             // 권한 확인
-            if (readPermission == PackageManager.PERMISSION_DENIED) {
-                // 권한 요청
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    ),
-                    100
-                )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (readMediaImagesPermission == PackageManager.PERMISSION_DENIED) {
+                    // 권한 요청
+                    requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                        REQ_GALLERY
+                    )
+                } else {
+                    var intent = Intent(Intent.ACTION_PICK)
+                    intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    intent.type = "image/*"
+
+                    startActivityForResult(intent, REQ_MULTI_PHOTO)
+                }
+
             } else {
+                if (readGalleryPermission == PackageManager.PERMISSION_DENIED) {
+                    // 권한 요청
+                    requestPermissions(
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        REQ_GALLERY
+                    )
+                } else {
+                    var intent = Intent(Intent.ACTION_PICK)
+                    intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    intent.type = "image/*"
 
-                var intent = Intent(Intent.ACTION_PICK)
-                intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                intent.type = "image/*"
-
-                startActivityForResult(intent, 2000)
+                    startActivityForResult(intent, REQ_MULTI_PHOTO)
+                }
             }
         }
 
@@ -408,13 +427,14 @@ class EditProfileActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
 
-        if (requestCode == 100 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQ_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             var intent = Intent(Intent.ACTION_PICK)
             intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             intent.type = "image/*"
 
-            startActivityForResult(intent, 2000)
+            startActivityForResult(intent, REQ_MULTI_PHOTO)
+
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -439,7 +459,7 @@ class EditProfileActivity : AppCompatActivity() {
                     editFillClass.regionFill.value = true
                 }
             }
-            2000 -> {
+            REQ_MULTI_PHOTO -> {
                 // 사진 가져오기
                 if(data?.data != null) {
                     selectedAvatarURI = data?.data!!

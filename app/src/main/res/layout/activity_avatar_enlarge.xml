@@ -16,7 +16,7 @@
         android:translationZ="90dp"
         android:visibility="visible" />
 
-    <ImageView
+    <com.chugnchunon.chungchunon_android.Layout.ZoomClass
         android:id="@+id/enlargeAvatarView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

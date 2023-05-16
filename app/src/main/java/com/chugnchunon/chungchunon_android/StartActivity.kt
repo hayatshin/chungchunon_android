@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kakao.auth.KakaoSDK
+import com.kakao.sdk.common.KakaoSdk
 
 class StartActivity : AppCompatActivity() {
 

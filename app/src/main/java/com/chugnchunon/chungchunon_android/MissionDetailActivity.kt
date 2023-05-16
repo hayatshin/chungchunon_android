@@ -370,6 +370,7 @@ class MissionDetailActivity : Activity() {
         var commentDocuments = db.collectionGroup("comments")
             .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
             .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
+            .whereEqualTo("userId", userId)
             .get()
             .await()
 
@@ -382,6 +383,7 @@ class MissionDetailActivity : Activity() {
         var likeDocuments = db.collectionGroup("likes")
             .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
             .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
+            .whereEqualTo("userId", userId)
             .get()
             .await()
 

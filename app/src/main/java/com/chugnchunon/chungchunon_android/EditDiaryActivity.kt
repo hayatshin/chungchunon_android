@@ -392,7 +392,7 @@ class EditDiaryActivity : AppCompatActivity() {
                         // 권한 요청
                         requestPermissions(
                             arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                            MyDiaryFragment.REQ_GALLERY
+                            REQ_GALLERY
                         )
                     } else {
                         val intent = Intent(Intent.ACTION_PICK)

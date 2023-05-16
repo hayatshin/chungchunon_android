@@ -81,6 +81,12 @@ class DefaultDiaryWarningActivity : FragmentActivity() {
             binding.edConfirmBox.setOnClickListener {
                 finish()
             }
+        } else if (warningType == "appInvitation") {
+            binding.edWarningText.text = "초대하기에 오류가 있습니다."
+
+            binding.edConfirmBox.setOnClickListener {
+                finish()
+            }
         }
     }
 }

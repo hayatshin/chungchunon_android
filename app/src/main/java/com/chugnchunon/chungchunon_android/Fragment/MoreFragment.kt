@@ -1,11 +1,9 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +15,14 @@ import com.chugnchunon.chungchunon_android.databinding.FragmentMoreTwoBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.kakao.sdk.common.KakaoSdk
+import com.kakao.sdk.common.util.KakaoCustomTabsClient
+import com.kakao.sdk.share.ShareClient
+import com.kakao.sdk.share.WebSharerClient
+import com.kakao.sdk.template.model.Button
+import com.kakao.sdk.template.model.Content
+import com.kakao.sdk.template.model.FeedTemplate
+import com.kakao.sdk.template.model.Link
 import java.util.*
 
 class MoreFragment: Fragment() {
@@ -44,6 +50,8 @@ class MoreFragment: Fragment() {
         _binding = FragmentMoreTwoBinding.inflate(inflater, container, false)
         val view = binding.root
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+        KakaoSdk.init(requireActivity(), getString(R.string.kakao_native_key))
 
         // 개인정보 수정 반영
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -96,6 +104,10 @@ class MoreFragment: Fragment() {
             startActivity(exit_intent)
         }
 
+        binding.invitationIcon.setOnClickListener {
+            sendKakaoLink()
+        }
+
         return view
     }
 
@@ -122,6 +134,80 @@ class MoreFragment: Fragment() {
             binding.profileRegion.text = newRegionSmallRegion
         }
     }
+
+    private fun sendKakaoLink(){
+        val defaultFeed = FeedTemplate(
+            content = Content(
+                title = "오늘도청춘",
+                description = "세상에서 가장 쉬운 치매 예방 플랫폼",
+                imageUrl = "https://postfiles.pstatic.net/MjAyMzA1MTVfMTA0/MDAxNjg0MTU5OTgwNjI5.hETmcfk6juGW1EEqRkIcYHe6nmMxDYf_560hojOKiOog.z7obOXdYtZPP2K8jSwwjRGL2dF3BSJaE4IsdLbYaqrsg.PNG.hayat_shin/%EC%95%84%EC%9D%B4%EC%BD%98_%EC%9D%B4%EB%AF%B8%EC%A7%80_%ED%95%91%ED%81%AC2.png?type=w773",
+                link = Link(
+                    webUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android",
+                    mobileWebUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android"
+                )
+            ),
+            buttons = listOf(
+                Button(
+                    "앱 다운 받기",
+//                    Link(
+//                        androidExecutionParams = mapOf(
+//                            "key1" to "value1",
+//                            "key2" to "value2"
+//                        )
+//                    )
+                    Link(
+                        webUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android",
+                        mobileWebUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android"
+                    )
+                )
+            )
+        )
+        if(ShareClient.instance.isKakaoTalkSharingAvailable(requireActivity())) {
+            ShareClient.instance.shareDefault(requireActivity(), defaultFeed) {sharingResult, error ->
+                if(error != null) {
+                    // 실패
+                    val goWarning = Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
+                    goWarning.putExtra("warningType", "appInvitation")
+                    startActivity(goWarning)
+                } else if (sharingResult != null) {
+                    Log.d("카카오", "카카오 공유 성공")
+                    Log.d("카카오: Warning", "${sharingResult.warningMsg}")
+                    Log.d("카카오: Argument", "${sharingResult.argumentMsg}")
+
+                    startActivity(sharingResult.intent)
+                }
+            }
+        } else {
+            // 카카오 미설치: 웹 공유 사용 권장
+            val shareUrl = WebSharerClient.instance.makeDefaultUrl(defaultFeed)
+            // customTabs 로 웹 브라우저 열기
+
+            // 1. CustomTabsServiceConnection 지원 브라우저 열기
+            // ex) Chrome, 삼성 인터넷, FireFox, 웨일 등
+            try {
+                KakaoCustomTabsClient.openWithDefault(requireActivity(), shareUrl)
+            } catch (e: UnsupportedOperationException) {
+                // CustomTabsServiceConnection 지원 브라우저가 없을 때 예외 처리
+                val goWarning = Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
+                goWarning.putExtra("warningType", "appInvitation")
+                startActivity(goWarning)
+            }
+
+            // 2. CustomTabsServiceConnection 미지원 브라우저 열기
+            // ex) 다음, 네이버 등
+            try {
+                KakaoCustomTabsClient.open(requireActivity(), shareUrl)
+            } catch (e: ActivityNotFoundException) {
+                // 디바이스에 설치된 인터넷 브라우저가 없을 때 예외처리
+                val goWarning = Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
+                goWarning.putExtra("warningType", "appInvitation")
+                startActivity(goWarning)
+            }
+        }
+    }
+
+
+
 
 }
 
