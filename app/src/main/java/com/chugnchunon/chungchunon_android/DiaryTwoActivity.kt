@@ -37,6 +37,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import java.lang.NumberFormatException
 import java.time.LocalDateTime
 
@@ -57,21 +59,23 @@ class DiaryTwoActivity : AppCompatActivity() {
         ActivityDiaryTwoBinding.inflate(layoutInflater)
     }
 
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+
     companion object {
-        var diaryType : String? = null
+        var diaryType: String? = null
+
+        private var stepAllowBanCheck = true
         private var permissionCheck = false
+        private var permissionCase: Int = 1
 
         const val ALL_ABOVE_13_CODE: Int = 300
         const val ALL_BELOW_13_CODE: Int = 400
+        const val BAN_STEP_ABOVE_13_CODE: Int = 300
+        const val BAN_STEP_BELOW_13_CODE: Int = 400
+
         const val ALL_REQ_CODE: Int = 500
         const val PARTNER_REQ_CODE: Int = 600
-
-//        const val STEP_CONTACT_REQ_CODE: Int = 100
-//        const val STEP_REQ_CODE: Int = 200
-//        const val CONTACT_REQ_CODE: Int = 300
-//        const val IGNORING_BATTERY_OPT_REQ_CODE: Int = 400
-//
-//        private var whiteCheck: Boolean = false
     }
 
     override fun onBackPressed() {
@@ -98,7 +102,7 @@ class DiaryTwoActivity : AppCompatActivity() {
         userDB.document("$userId")
             .get()
             .addOnSuccessListener { regionSnapShot ->
-                if(regionSnapShot.contains("region") && regionSnapShot.contains("smallRegion")) {
+                if (regionSnapShot.contains("region") && regionSnapShot.contains("smallRegion")) {
                     // 모두 존재
                 } else {
                     val goWarning = Intent(this, DefaultDiaryWarningActivity::class.java)
@@ -228,261 +232,65 @@ class DiaryTwoActivity : AppCompatActivity() {
 
 
         // 권한 체크
-        val readContactPermissionCheck =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
-        val stepPermissionCheck =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
-        val readGalleryPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        val readMediaImagesPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-        val postNotificationPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionCheck = readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
-                    && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
-                    && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
-                    && postNotificationPermission == PackageManager.PERMISSION_GRANTED
-        } else {
-            permissionCheck = readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
-                    && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
-                    && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+        uiScope.launch(Dispatchers.IO) {
+            launch { permissionAssign() }.join()
+            withContext(Dispatchers.Main) {
+                launch {
+                    permissionNotification()
+                }
+            }
         }
+
 
         // 파트너 구분 x
-        if (!permissionCheck) {
-            binding.authNotificationLayout.visibility = View.VISIBLE
-        } else {
-            // 모두 허용된 경우
-            binding.authNotificationLayout.visibility = View.GONE
-
-            // 배터리 제한 없음 설정 안 한 경우
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-                val powerManager =
-                    this.getSystemService(Context.POWER_SERVICE) as PowerManager
-                if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-                    val intent = Intent().apply {
-                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                        data = Uri.parse("package:$packageName")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    this.startActivity(intent)
-                } else {
-                    // 배터리 사용량 제한없음 권한 부여 o
-                    val batteryAuthSet = hashMapOf(
-                        "auth_ignoring_battery" to true,
-                    )
-                    userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-                }
-            }
-
-            // db에 권한 저장
-            var authSet = hashMapOf(
-                "auth_step" to true,
-                "auth_contact" to true,
-                "auth_gallery" to true,
-                "auth_notification" to true,
-            )
-            userDB.document("$userId").set(authSet, SetOptions.merge())
-
-            // 걸음수 호출
-            try {
-                val startService = Intent(this, MyService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(this, startService);
-                } else {
-                    startService(startService);
-                }
-            }catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-
-            val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-            stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-            stepAuthIntent.putExtra("StepAuth", true)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-        }
-
-        // 파트너 구분 o
-//        userDB.document("$userId").get()
-//            .addOnSuccessListener { document ->
-//                var userType = document.data?.getValue("userType").toString()
-//                if (userType == "파트너") {
-//                    if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED ||
-//                            readGalleryPermission == PackageManager.PERMISSION_DENIED) {
-//                        //
-//                        binding.partnerAuthNotificationLayout.visibility = View.VISIBLE
-//                    } else {
-//                        // 모두 허용된 경우
-//                        binding.partnerAuthNotificationLayout.visibility = View.GONE
-//                    }
-//                } else {
-//                    // 파트너 x -> (휴대폰 연동 -> 걸음수) -> 배터리 사용 제한없음
-//                    if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED ||
-//                        stepPermissionCheck == PackageManager.PERMISSION_DENIED ||
-//                        readGalleryPermission == PackageManager.PERMISSION_DENIED
-//                    ) {
-//                        binding.authNotificationLayout.visibility = View.VISIBLE
-//                    } else {
-//                        // 모두 허용된 경우
-//                        binding.authNotificationLayout.visibility = View.GONE
-//
-//                        // 배터리 제한 없음 설정 안 한 경우
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            val powerManager =
-//                                this.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-//                                val intent = Intent().apply {
-//                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//                                    data = Uri.parse("package:$packageName")
-//                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                                }
-//                                this.startActivity(intent)
-//                            } else {
-//                                // 배터리 사용량 제한없음 권한 부여 o
-//                                val batteryAuthSet = hashMapOf(
-//                                    "auth_ignoring_battery" to true,
-//                                )
-//                                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-//                            }
-//                        }
-//
-//                        // db에 권한 저장
-//                        var authSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to true,
-//                            "auth_gallery" to true,
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//
-//                        // 걸음수 호출
-//                        val startService = Intent(this, MyService::class.java)
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            ContextCompat.startForegroundService(this, startService);
-//                        } else {
-//                            startService(startService);
-//                        }
-//
-//                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-//                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-//                        stepAuthIntent.putExtra("StepAuth", true)
-//                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-//                    }
-//
-////                    // 친구 연동 포함
-////                    if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED && stepPermissionCheck == PackageManager.PERMISSION_DENIED) {
-////                        // 휴대폰 연동 x, 걸음수 x
-////                        requestPermissions(
-////                            arrayOf(
-////                                Manifest.permission.ACTIVITY_RECOGNITION,
-////                                Manifest.permission.READ_CONTACTS
-////                            ),
-////                            STEP_CONTACT_REQ_CODE
-////                        )
-////                    } else if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED && stepPermissionCheck == PackageManager.PERMISSION_GRANTED) {
-////                        // 휴대폰 연동 x, 걸음수 o
-////                        requestPermissions(
-////                            arrayOf(Manifest.permission.READ_CONTACTS),
-////                            CONTACT_REQ_CODE
-////                        )
-////                    } else if (readContactPermissionCheck == PackageManager.PERMISSION_GRANTED && stepPermissionCheck == PackageManager.PERMISSION_DENIED) {
-////                        // 휴대폰 연동 o, 걸음수 x
-////                        requestPermissions(
-////                            arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-////                            STEP_REQ_CODE
-////                        )
-////                    } else if (readContactPermissionCheck == PackageManager.PERMISSION_GRANTED && stepPermissionCheck == PackageManager.PERMISSION_GRANTED) {
-////                        // 휴대폰 연동 o, 걸음수 o
-////
-////                        // 배터리 제한 없음 설정 안 한 경우
-////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-////                            val powerManager = this.getSystemService(Context.POWER_SERVICE) as PowerManager
-////                            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-////                                val intent = Intent().apply {
-////                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-////                                    data = Uri.parse("package:$packageName")
-////                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-////                                }
-////                                this.startActivity(intent)
-////                            } else {
-////                                // 배터리 사용량 제한없음 권한 부여 o
-////                                val batteryAuthSet = hashMapOf(
-////                                    "auth_ignoring_battery" to true,
-////                                )
-////                                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-////                            }
-////                        }
-////
-////                        // db에 권한 저장
-////                        var authSet = hashMapOf(
-////                            "auth_step" to true,
-////                            "auth_contact" to true
-////                        )
-////                        userDB.document("$userId").set(authSet, SetOptions.merge())
-////
-////                        // 걸음수 호출
-////                        val startService = Intent(this, MyService::class.java)
-////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-////                            ContextCompat.startForegroundService(this, startService);
-////                        } else {
-////                            startService(startService);
-////                        }
-////
-////                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-////                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-////                        stepAuthIntent.putExtra("StepAuth", true)
-////                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-////                    }
-//                }
-//            }
-
-//        binding.partnerAuthConfirmBtn.setOnClickListener {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                requestPermissions(
-//                    arrayOf(
-//                        Manifest.permission.READ_CONTACTS,
-//                        Manifest.permission.READ_MEDIA_IMAGES,
-//                        Manifest.permission.POST_NOTIFICATIONS,
-//                    ),
-//                    PARTNER_REQ_CODE
-//                )
-//            } else {
-//                requestPermissions(
-//                    arrayOf(
-//                        Manifest.permission.READ_CONTACTS,
-//                        Manifest.permission.READ_EXTERNAL_STORAGE,
-//                    ),
-//                    PARTNER_REQ_CODE
-//                )
-//            }
-//        }
-
         binding.authConfirmBtn.setOnClickListener {
             binding.authNotificationLayout.visibility = View.GONE
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.ACTIVITY_RECOGNITION,
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                    ),
-                    ALL_ABOVE_13_CODE
-                )
+            if (permissionCase == 1 || permissionCase == 2) {
+                // 걸음수 사용
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.ACTIVITY_RECOGNITION,
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ),
+                        ALL_ABOVE_13_CODE
+                    )
+                } else {
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.ACTIVITY_RECOGNITION,
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                        ),
+                        ALL_BELOW_13_CODE
+                    )
+                }
             } else {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.ACTIVITY_RECOGNITION,
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                    ),
-                    ALL_BELOW_13_CODE
-                )
+                // 걸음수 사용 x
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ),
+                        BAN_STEP_ABOVE_13_CODE
+                    )
+                } else {
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                        ),
+                        BAN_STEP_BELOW_13_CODE
+                    )
+                }
             }
+
         }
 
         // 메뉴 이동
@@ -515,7 +323,7 @@ class DiaryTwoActivity : AppCompatActivity() {
             }
 
             // 초기값 세팅
-            if(from == "write") {
+            if (from == "write") {
                 changeFragment(AllDiaryFragmentTwo())
                 binding.bottomNav.selectedItemId = R.id.ourTodayMenu
             } else if (from == "edit") {
@@ -552,6 +360,153 @@ class DiaryTwoActivity : AppCompatActivity() {
             .sendBroadcast(sendCloseIntent);
     }
 
+    suspend fun permissionAssign() {
+        val readContactPermissionCheck =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+        val stepPermissionCheck =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+        val readGalleryPermission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        val readMediaImagesPermission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+        val postNotificationPermission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+        val userData = userDB.document("$userId").get().await()
+
+        try {
+            val stepStatus = userData.data?.getValue("step_status") as Boolean
+
+            if (stepStatus) {
+                // 걸음수 허용
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionCase = 1
+                    permissionCheck =
+                        readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                                && postNotificationPermission == PackageManager.PERMISSION_GRANTED
+                } else {
+                    permissionCase = 2
+                    permissionCheck =
+                        readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+                }
+            } else {
+                // 걸음수 불허
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionCase = 3
+                    permissionCheck =
+                        readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                                && postNotificationPermission == PackageManager.PERMISSION_GRANTED
+                } else {
+                    permissionCase = 4
+                    permissionCheck =
+                        readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                                && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+                }
+            }
+
+        } catch (e: Exception) {
+            // step_status 없는 경우
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionCase = 1
+                permissionCheck =
+                    readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                            && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                            && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                            && postNotificationPermission == PackageManager.PERMISSION_GRANTED
+            } else {
+                permissionCase = 2
+                permissionCheck =
+                    readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
+                            && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
+                            && readGalleryPermission == PackageManager.PERMISSION_GRANTED
+            }
+        }
+    }
+
+    suspend fun permissionNotification() {
+        if (!permissionCheck) {
+            binding.authNotificationLayout.visibility = View.VISIBLE
+        } else {
+            // 모두 허용된 경우
+            binding.authNotificationLayout.visibility = View.GONE
+
+            // 배터리 제한 없음 설정 안 한 경우
+
+            if (permissionCase == 1 || permissionCase == 2) {
+                // 걸음수 사용
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                    val powerManager =
+                        this.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                            data = Uri.parse("package:$packageName")
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        this.startActivity(intent)
+                    } else {
+                        // 배터리 사용량 제한없음 권한 부여 o
+                        val batteryAuthSet = hashMapOf(
+                            "auth_ignoring_battery" to true,
+                        )
+                        userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
+                    }
+                }
+
+                // db에 권한 저장
+                val authSet = hashMapOf(
+                    "auth_step" to true,
+                    "auth_contact" to true,
+                    "auth_gallery" to true,
+                    "auth_notification" to true,
+                )
+                userDB.document("$userId").set(authSet, SetOptions.merge())
+
+                // 걸음수 호출
+                try {
+                    val startService = Intent(this, MyService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ContextCompat.startForegroundService(this, startService);
+                    } else {
+                        startService(startService);
+                    }
+                } catch (e: Exception) {
+                    val serviceError = hashMapOf(
+                        "service_error" to e,
+                        "service_step_status" to false,
+                    )
+                    userDB.document("$userId")
+                        .set(serviceError, SetOptions.merge())
+                }
+
+                val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
+                stepAuthIntent.setAction("STEP_AUTH_UPDATE")
+                stepAuthIntent.putExtra("StepAuth", true)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
+
+            } else {
+                // 걸음수 사용 x
+
+                // db에 권한 저장
+                val authSet = hashMapOf(
+                    "auth_step" to false,
+                    "auth_contact" to true,
+                    "auth_gallery" to true,
+                    "auth_notification" to true,
+                    "step_status" to false,
+                )
+                userDB.document("$userId").set(authSet, SetOptions.merge())
+            }
+        }
+    }
+
     private fun changeFragment(fragment: Fragment) {
         val data = Bundle()
         data.putString("diaryType", diaryType)
@@ -584,10 +539,16 @@ class DiaryTwoActivity : AppCompatActivity() {
                             "auth_contact" to true,
                             "auth_gallery" to true,
                             "auth_notification" to true,
+                            "step_status" to true,
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
                     } else {
                         // 권한 부여 x
+                        val authSet = hashMapOf(
+                            "auth_step" to false,
+                            "step_status" to false,
+                        )
+                        userDB.document("$userId").set(authSet, SetOptions.merge())
                     }
                 }
             }
@@ -620,6 +581,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                             "auth_contact" to true,
                             "auth_gallery" to true,
                             "auth_notification" to true,
+                            "step_status" to true,
                         )
                         userDB.document("$userId").set(authSet, SetOptions.merge())
 
@@ -631,7 +593,12 @@ class DiaryTwoActivity : AppCompatActivity() {
                                 startService(startService);
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            val serviceError = hashMapOf(
+                                "service_error" to e,
+                                "service_step_status" to false,
+                            )
+                            userDB.document("$userId")
+                                .set(serviceError, SetOptions.merge())
                         }
 
                         val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
@@ -640,194 +607,22 @@ class DiaryTwoActivity : AppCompatActivity() {
                         LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
                     } else {
                         // 걸음수 권한 x
+                        val authSet = hashMapOf(
+                            "auth_step" to false,
+                            "step_status" to false,
+                        )
+                        userDB.document("$userId").set(authSet, SetOptions.merge())
                     }
 
                 }
+            }
+            BAN_STEP_ABOVE_13_CODE, BAN_STEP_BELOW_13_CODE -> {
+                val authSet = hashMapOf(
+                    "auth_step" to false,
+                    "step_status" to false,
+                )
+                userDB.document("$userId").set(authSet, SetOptions.merge())
 
-//            STEP_REQ_CODE -> {
-//                if (grantResults.size > 0) {
-//                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                        // 걸음수 권한 부여
-//
-//                        // 배터리 제한 없음 설정 안 한 경우
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            val powerManager =
-//                                this.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-//                                val intent = Intent().apply {
-//                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//                                    data = Uri.parse("package:$packageName")
-//                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                                }
-//                                this.startActivity(intent)
-//                            } else {
-//                                // 배터리 사용량 제한없음 권한 부여 o
-//                                val batteryAuthSet = hashMapOf(
-//                                    "auth_ignoring_battery" to true,
-//                                )
-//                                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-//                            }
-//                        }
-//
-//                        // DB 저장
-//                        val authSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to true
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//
-//                        // 걸음수 서비스 호출
-//                        val startService = Intent(this, MyService::class.java)
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            ContextCompat.startForegroundService(this, startService);
-//                        } else {
-//                            startService(startService);
-//                        }
-//
-//                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-//                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-//                        stepAuthIntent.putExtra("StepAuth", true)
-//                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-//
-//                    } else {
-//                        // 걸음수 권한 부여 x
-//                        val authSet = hashMapOf(
-//                            "auth_step" to false,
-//                            "auth_contact" to true
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//                    }
-//                }
-//            }
-//            STEP_CONTACT_REQ_CODE -> {
-//                // 0 걸음수, 1 휴대폰 연동
-//                if (grantResults.size > 0) {
-//                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-//                        // 걸음수 권한 부여 o, 휴대폰 연동 권한 부여 o
-//
-//                        // 배터리 제한 없음 설정 안 한 경우
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            val powerManager =
-//                                this.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-//                                val intent = Intent().apply {
-//                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//                                    data = Uri.parse("package:$packageName")
-//                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                                }
-//                                this.startActivity(intent)
-//                            } else {
-//                                // 배터리 사용량 제한없음 권한 부여 o
-//                                val batteryAuthSet = hashMapOf(
-//                                    "auth_ignoring_battery" to true,
-//                                )
-//                                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-//                            }
-//                        }
-//
-//                        val authSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to true
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//
-//                        val startService = Intent(this, MyService::class.java)
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            ContextCompat.startForegroundService(this, startService);
-//                        } else {
-//                            startService(startService);
-//                        }
-//
-//                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-//                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-//                        stepAuthIntent.putExtra("StepAuth", true)
-//                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-//
-//                    } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_DENIED) {
-//                        // 걸음수 권한 부여 o, 휴대폰 연동 권한 부여 x
-//
-//                        // 배터리 제한 없음 설정 안 한 경우
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            val powerManager =
-//                                this.getSystemService(Context.POWER_SERVICE) as PowerManager
-//                            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-//                                val intent = Intent().apply {
-//                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//                                    data = Uri.parse("package:$packageName")
-//                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                                }
-//                                this.startActivity(intent)
-//                            } else {
-//                                // 배터리 사용량 제한없음 권한 부여 o
-//                                val batteryAuthSet = hashMapOf(
-//                                    "auth_ignoring_battery" to true,
-//                                )
-//                                userDB.document("$userId").set(batteryAuthSet, SetOptions.merge())
-//                            }
-//                        }
-//
-//                        val stepAuthSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to false
-//                        )
-//                        userDB.document("$userId").set(stepAuthSet, SetOptions.merge())
-//
-//                        val startService = Intent(this, MyService::class.java)
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            ContextCompat.startForegroundService(this, startService);
-//                        } else {
-//                            startService(startService);
-//                        }
-//
-//                        val stepAuthIntent = Intent(this, MyDiaryFragment::class.java)
-//                        stepAuthIntent.setAction("STEP_AUTH_UPDATE")
-//                        stepAuthIntent.putExtra("StepAuth", true)
-//                        LocalBroadcastManager.getInstance(this).sendBroadcast(stepAuthIntent)
-//
-//                    } else if (grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-//                        // 걸음수 권한 부여 x, 휴대폰 연동 권한 부여 o
-//                        val stepAuthSet = hashMapOf(
-//                            "auth_step" to false,
-//                            "auth_contact" to true
-//                        )
-//                        userDB.document("$userId").set(stepAuthSet, SetOptions.merge())
-//                    } else if (grantResults[0] == PackageManager.PERMISSION_DENIED && grantResults[1] == PackageManager.PERMISSION_DENIED) {
-//                        // 걸음수 권한 부여 x, 휴대폰 연동 권한 부여 x
-//                        val stepAuthSet = hashMapOf(
-//                            "auth_step" to false,
-//                            "auth_contact" to false
-//                        )
-//                        userDB.document("$userId").set(stepAuthSet, SetOptions.merge())
-//                    }
-//
-//                }
-//            }
-//            CONTACT_REQ_CODE -> {
-//                if (grantResults.size > 0) {
-//                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                        // 휴대폰 연동 권한 부여 o
-//                        val authSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to true
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//                    } else {
-//                        // 휴대폰 연동 권한 부여 x
-//                        val authSet = hashMapOf(
-//                            "auth_step" to true,
-//                            "auth_contact" to false
-//                        )
-//                        userDB.document("$userId").set(authSet, SetOptions.merge())
-//                    }
-//
-//                    val startService = Intent(this, MyService::class.java)
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                        ContextCompat.startForegroundService(this, startService);
-//                    } else {
-//                        startService(startService)
-//                    }
-//                }
-//            }
             }
         }
     }

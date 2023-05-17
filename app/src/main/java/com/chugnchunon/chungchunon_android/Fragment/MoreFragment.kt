@@ -1,18 +1,24 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.*
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.*
+import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.databinding.FragmentMoreTwoBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.common.KakaoSdk
@@ -25,7 +31,7 @@ import com.kakao.sdk.template.model.FeedTemplate
 import com.kakao.sdk.template.model.Link
 import java.util.*
 
-class MoreFragment: Fragment() {
+class MoreFragment : Fragment() {
 
     private var _binding: FragmentMoreTwoBinding? = null
     private val binding get() = _binding!!
@@ -39,6 +45,12 @@ class MoreFragment: Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mcontext = context
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        banStepInitialSetup()
     }
 
     @SuppressLint("Range", "SetTextI18n")
@@ -108,6 +120,9 @@ class MoreFragment: Fragment() {
             sendKakaoLink()
         }
 
+        // 걸음수
+        banStepInitialSetup()
+
         return view
     }
 
@@ -117,6 +132,106 @@ class MoreFragment: Fragment() {
         super.onDestroy()
     }
 
+    private fun banStepInitialSetup() {
+        userDB.document("$userId").get()
+            .addOnCompleteListener { userTask ->
+                if (userTask.isSuccessful) {
+                    val userResult = userTask.result
+                    if (userResult != null && userResult.exists()) {
+                        val userData = userResult.data
+                        val isStepStatusExist = userData?.containsKey("step_status") ?: false
+                        if (isStepStatusExist) {
+                            // step_status 존재
+                            val stepStatusValue = userData?.getValue("step_status") as Boolean
+                            if (stepStatusValue) {
+                                // 1. 카운트 o
+                                binding.banStepCountIcon.setImageResource(R.drawable.ic_ban_walking)
+                                binding.banStepCountText.text = "걸음수\n끄기"
+
+                                binding.banStepCountIcon.setOnClickListener {
+
+                                    val goBanStepNotification = Intent(
+                                        requireActivity(),
+                                        DefaultCancelWarningActivity::class.java
+                                    )
+                                    goBanStepNotification.putExtra("warningType", "banStep")
+                                    startActivity(goBanStepNotification)
+                                }
+
+                            } else {
+                                // 2. 카운트 x
+                                binding.banStepCountIcon.setImageResource(R.drawable.ic_allow_walk)
+                                binding.banStepCountText.text = "걸음수\n켜기"
+
+                             binding.banStepCountIcon.setOnClickListener {
+                                 val stepPermissionCheck =
+                                     ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACTIVITY_RECOGNITION)
+
+                                 if(stepPermissionCheck == PackageManager.PERMISSION_GRANTED) {
+                                     // 권한 있음
+                                     binding.banStepCountIcon.setOnClickListener {
+
+                                         val goAllowStepNotification = Intent(
+                                             requireActivity(),
+                                             DefaultDiaryWarningActivity::class.java
+                                         )
+                                         goAllowStepNotification.putExtra("warningType", "allowStep")
+                                         startActivity(goAllowStepNotification)
+                                     }
+                                 } else {
+                                     val goDefaultWarning = Intent(
+                                         requireActivity(),
+                                         DefaultDiaryWarningActivity::class.java
+                                     )
+                                     goDefaultWarning.putExtra("warningType", "authStepNo")
+                                     startActivity(goDefaultWarning)
+                                 }
+                             }
+
+                            }
+                        } else {
+                            // step_status 존재 안 함 -> auth_step 체크
+                            val stepPermissionCheck =
+                                ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACTIVITY_RECOGNITION)
+
+                            if (stepPermissionCheck == PackageManager.PERMISSION_GRANTED) {
+                                // 3. auth_step 존재 -> 카운트 o
+                                binding.banStepCountIcon.setImageResource(R.drawable.ic_ban_walking)
+                                binding.banStepCountText.text = "걸음수\n끄기"
+
+                                binding.banStepCountIcon.setOnClickListener {
+                                    val stepStatusSet = hashMapOf(
+                                        "step_status" to false,
+                                    )
+
+                                    userDB.document("$userId")
+                                        .set(stepStatusSet, SetOptions.merge())
+                                        .addOnSuccessListener {
+                                            val exitIntent = Intent(activity, MyService::class.java)
+                                            exitIntent.setAction("EXIT_APP")
+                                            LocalBroadcastManager.getInstance(requireActivity())
+                                                .sendBroadcast(exitIntent)
+                                        }
+                                }
+                            } else {
+                                // 4. auth_step 존재 안 함 -> 카운트 x & 권한 설정 필요
+                                binding.banStepCountIcon.setImageResource(R.drawable.ic_allow_walk)
+                                binding.banStepCountText.text = "걸음수\n켜기"
+
+                                binding.banStepCountIcon.setOnClickListener {
+                                    val goDefaultWarning = Intent(
+                                        requireActivity(),
+                                        DefaultDiaryWarningActivity::class.java
+                                    )
+                                    goDefaultWarning.putExtra("warningType", "authStepNo")
+                                    startActivity(goDefaultWarning)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    }
 
     var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -135,7 +250,7 @@ class MoreFragment: Fragment() {
         }
     }
 
-    private fun sendKakaoLink(){
+    private fun sendKakaoLink() {
         val defaultFeed = FeedTemplate(
             content = Content(
                 title = "오늘도청춘",
@@ -162,11 +277,15 @@ class MoreFragment: Fragment() {
                 )
             )
         )
-        if(ShareClient.instance.isKakaoTalkSharingAvailable(requireActivity())) {
-            ShareClient.instance.shareDefault(requireActivity(), defaultFeed) {sharingResult, error ->
-                if(error != null) {
+        if (ShareClient.instance.isKakaoTalkSharingAvailable(requireActivity())) {
+            ShareClient.instance.shareDefault(
+                requireActivity(),
+                defaultFeed
+            ) { sharingResult, error ->
+                if (error != null) {
                     // 실패
-                    val goWarning = Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
+                    val goWarning =
+                        Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
                     goWarning.putExtra("warningType", "appInvitation")
                     startActivity(goWarning)
                 } else if (sharingResult != null) {
@@ -205,8 +324,6 @@ class MoreFragment: Fragment() {
             }
         }
     }
-
-
 
 
 }

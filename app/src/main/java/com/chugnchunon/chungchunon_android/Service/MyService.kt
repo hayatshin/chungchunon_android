@@ -71,7 +71,6 @@ class MyService : Service(), SensorEventListener {
         super.onCreate()
 
         Log.d("서비스", "onCreate")
-
     }
 
 
@@ -450,6 +449,12 @@ class MyService : Service(), SensorEventListener {
             IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
         );
 
+        // 5. 앱 탈퇴
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            exitAppReceiver,
+            IntentFilter("EXIT_APP")
+        )
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -499,7 +504,6 @@ class MyService : Service(), SensorEventListener {
         step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
 
-
         // 오늘 걸음수 초기화
         userDB.document("$userId").get().addOnSuccessListener { document ->
             var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
@@ -532,6 +536,12 @@ class MyService : Service(), SensorEventListener {
             BroadcastReregister,
             IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
         )
+
+        // 5. 앱 탈퇴
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            exitAppReceiver,
+            IntentFilter("EXIT_APP")
+        )
         return START_STICKY
     }
 
@@ -547,7 +557,7 @@ class MyService : Service(), SensorEventListener {
     override fun onDestroy() {
         Log.d("서비스", "onDestroy")
 
-        stopForeground(false)
+//        stopForeground(false)
 
         LocalBroadcastManager.getInstance(applicationContext)
             .unregisterReceiver(dateChangeBroadcastReceiver)
@@ -557,31 +567,39 @@ class MyService : Service(), SensorEventListener {
             .unregisterReceiver(deviceShutdownBroadcastReceiver)
         LocalBroadcastManager.getInstance(applicationContext)
             .unregisterReceiver(BroadcastReregister)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(exitAppReceiver)
 
         // 1. 1분마다 체크 (날짜 바뀔 때)
-        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
-        val dateChangeIntent = IntentFilter()
-        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
-        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
-
-        // 2. 날짜 바뀔 때
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            stepInitializeReceiver,
-            IntentFilter("NEW_DATE_STEP_ZERO")
-        )
-
-        // 3. 핸드폰 꺼질 때
-        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
-        val deviceShutdownIntent = IntentFilter()
-        deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
-        deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
-
-        // 4. 알람 주기적 브로드캐스터
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-            BroadcastReregister,
-            IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
-        )
+//        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+//        val dateChangeIntent = IntentFilter()
+//        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+//        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+//
+//        // 2. 날짜 바뀔 때
+//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            stepInitializeReceiver,
+//            IntentFilter("NEW_DATE_STEP_ZERO")
+//        )
+//
+//        // 3. 핸드폰 꺼질 때
+//        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+//        val deviceShutdownIntent = IntentFilter()
+//        deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
+//        deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+//        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+//
+//        // 4. 알람 주기적 브로드캐스터
+//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            BroadcastReregister,
+//            IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
+//        )
+//
+//        // 5. 앱 탈퇴
+//        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            exitAppReceiver,
+//            IntentFilter("EXIT_APP")
+//        )
 
         super.onDestroy()
     }
@@ -654,6 +672,8 @@ class MyService : Service(), SensorEventListener {
                         .unregisterReceiver(deviceShutdownBroadcastReceiver)
                     LocalBroadcastManager.getInstance(applicationContext)
                         .unregisterReceiver(stepInitializeReceiver)
+                    LocalBroadcastManager.getInstance(applicationContext)
+                        .unregisterReceiver(exitAppReceiver)
 
                     // 1. 1분마다 체크 (날짜 바뀔 때)
                     dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
@@ -679,6 +699,12 @@ class MyService : Service(), SensorEventListener {
                         deviceShutdownBroadcastReceiver,
                         deviceShutdownIntent
                     )
+
+                    // 5. 앱 탈퇴
+                    LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+                        exitAppReceiver,
+                        IntentFilter("EXIT_APP")
+                    )
                 }
                 alarmBroadcastReceiverCalled = false
             }
@@ -688,6 +714,22 @@ class MyService : Service(), SensorEventListener {
     var stepInitializeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             StepCountNotification(context!!, 0)
+        }
+    }
+
+    var exitAppReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("탈퇴", "탈퇴했음")
+
+            sensorManager.unregisterListener(this@MyService)
+            alarmManager.cancel(pendingIntent)
+
+            val workManager = WorkManager.getInstance(applicationContext)
+            workManager.cancelAllWork()
+
+            NotificationManagerCompat.from(this@MyService).cancelAll()
+            stopForeground(true)
+            stopSelf()
         }
     }
 

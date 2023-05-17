@@ -701,15 +701,17 @@ class RegisterActivity : AppCompatActivity() {
                             if (task.isSuccessful) {
                                 var document = task.result
                                 if (document.exists()) {
+                                    // 유저 존재
                                     var userAge =
                                         (document.data?.getValue("userAge") as Long).toInt()
                                     var userType = document.data?.getValue("userType")
-
-                                    var goDiary =
-                                        Intent(applicationContext, DiaryTwoActivity::class.java)
-                                    startActivity(goDiary)
-
-
+                                    val userName = document.data?.getValue("name").toString()
+                                    if(userName != "탈퇴자") {
+                                        // 탈퇴자가 아닌 경우
+                                        val goDiary =
+                                            Intent(applicationContext, DiaryTwoActivity::class.java)
+                                        startActivity(goDiary)
+                                    }
                                 } else {
                                     // 인증 성공
                                     binding.phoneLayout.removeView(binding.phoneAuthLayout)

@@ -26,15 +26,15 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_centerInParent="true"
-            app:layout_constraintDimensionRatio="H,1.4:1"
             android:layout_marginHorizontal="40dp"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
             android:weightSum="1">
 
             <LinearLayout
+                android:padding="40dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -56,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:lineHeight="28dp"
-                    tools:text="@string/exit_notification"
+                    tools:text="오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘오늘도청춘"
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="17dp" />

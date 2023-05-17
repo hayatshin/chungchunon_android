@@ -55,7 +55,8 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
         var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
         var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
-        var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
+        var imageDisplayRecyclerView: RecyclerView =
+            itemView.findViewById(R.id.imageDisplayRecyclerView)
         var secretStatusView: ImageView = itemView.findViewById(R.id.secretStatusView)
         var moreDiaryView: TextView = itemView.findViewById(R.id.moreDiary)
 
@@ -73,7 +74,7 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                 // nothing
             }
 
-            if(items[position].secret) {
+            if (items[position].secret) {
                 secretStatusView.visibility = View.VISIBLE
             } else {
                 secretStatusView.visibility = View.GONE
@@ -84,7 +85,7 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
 
-            if(items[position].diary.toString().length > 150) {
+            if (items[position].diary.toString().length > 150) {
                 userDiaryView.text = "${items[position].diary.toString().substring(0, 150)}..."
                 moreDiaryView.visibility = View.VISIBLE
             } else {
@@ -100,25 +101,71 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
 
-            when(items[position].mood!!.toInt()) {
-                0 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.main_color))
-                1 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.throb_color))
-                2 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.thanksful_color))
-                3 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.shalom_color))
-                4 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.soso_color))
-                5 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.lonely_color))
-                6 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.anxious_color))
-                7 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.gloomy_color))
+            when (items[position].mood!!.toInt()) {
+                0 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.main_color
+                    )
+                )
+                1 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.throb_color
+                    )
+                )
+                2 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.thanksful_color
+                    )
+                )
+                3 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.shalom_color
+                    )
+                )
+                4 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.soso_color
+                    )
+                )
+                5 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.lonely_color
+                    )
+                )
+                6 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.anxious_color
+                    )
+                )
+                7 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.gloomy_color
+                    )
+                )
                 8 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.sad_color))
-                9 -> userMoodView.setColorFilter(ContextCompat.getColor(context, R.color.angry_color))
+                9 -> userMoodView.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.angry_color
+                    )
+                )
             }
 
             // 이미지 작업
-            if(items[position].images == null || items[position].images?.size == 0) {
+            if (items[position].images == null || items[position].images?.size == 0) {
                 imageDisplayRecyclerView.visibility = View.GONE
             } else {
                 imageDisplayRecyclerView.visibility = View.VISIBLE
-                imageDisplayRecyclerView.adapter = DisplayPhotosAdapter(context, items[position].images!!)
+                imageDisplayRecyclerView.adapter =
+                    DisplayPhotosAdapter(context, items[position].images!!)
             }
 
             // 좋아요 토글 작업
@@ -130,16 +177,16 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                     if (task.isSuccessful) {
                         var document = task.result
                         if (document != null) {
-                            if (!document.exists()) {
-                                likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, false)
-                            } else {
-                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, true)
+                            if (document.exists()) {
+                                likeToggleCheckForRegionData.put(position, true)
                                 likeIcon.setImageResource(R.drawable.ic_filledheart)
+                            } else {
+                                likeToggleCheckForRegionData.put(position, false)
+                                likeIcon.setImageResource(R.drawable.ic_emptyheart)
                             }
                         } else {
+                            likeToggleCheckForRegionData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                            AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, false)
                         }
                     }
                 }
@@ -177,28 +224,37 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                 DiaryRef.collection("likes").document("$userId")
                     .get()
                     .addOnCompleteListener { task ->
-                        if(task.isSuccessful) {
+                        if (task.isSuccessful) {
                             val likeDocument = task.result
-                            if(likeDocument != null) {
-                                if(likeDocument.exists()) {
+                            if (likeDocument != null) {
+                                if (likeDocument.exists()) {
                                     // 문서가 존재하는 경우
                                     DiaryRef.update("numLikes", FieldValue.increment(-1))
+                                        .addOnSuccessListener {
+                                            likeNumLikesForRegionData[position] =
+                                                likeNumLikesForRegionData[position]!!.toInt() - 1
+                                            diaryDB.document(items[position].diaryId)
+                                                .collection("likes")
+                                                .document("$userId")
+                                                .delete()
 
-                                    likeNumLikesForRegionData[position] = likeNumLikesForRegionData[position]!!.toInt() - 1
-                                    diaryDB.document(items[position].diaryId).collection("likes")
-                                        .document("$userId")
-                                        .delete()
+                                            holder.itemView.likeText.text =
+                                                "좋아요 ${likeNumLikesForRegionData[position]}"
+                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                                            likeToggleCheckForRegionData[position] = false
 
-                                    holder.itemView.likeText.text = "좋아요 ${likeNumLikesForRegionData[position]}"
-                                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                    likeToggleCheckForRegionData[position] = false
-
-                                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                    intent.setAction("LIKE_TOGGLE_ACTION")
-                                    intent.putExtra("newDiaryId", items[position].diaryId)
-                                    intent.putExtra("newLikeToggle", false)
-                                    intent.putExtra("newNumLikes", likeNumLikesForRegionData[position]!!.toInt())
-                                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                            val intent =
+                                                Intent(context, AllDiaryFragmentTwo::class.java)
+                                            intent.setAction("LIKE_TOGGLE_ACTION")
+                                            intent.putExtra("newDiaryId", items[position].diaryId)
+                                            intent.putExtra("newLikeToggle", false)
+                                            intent.putExtra(
+                                                "newNumLikes",
+                                                likeNumLikesForRegionData[position]!!.toInt()
+                                            )
+                                            LocalBroadcastManager.getInstance(context!!)
+                                                .sendBroadcast(intent)
+                                        }
                                 }
                             }
                         }
@@ -208,48 +264,66 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                 DiaryRef.collection("likes").document("$userId")
                     .get()
                     .addOnCompleteListener { task ->
-                        if(task.isSuccessful) {
+                        if (task.isSuccessful) {
                             val likeDocument = task.result
-                            if(likeDocument != null) {
-                                if(!likeDocument.exists()) {
+                            if (likeDocument != null) {
+                                if (!likeDocument.exists()) {
                                     // 문서가 존재하지 않는 경우
                                     DiaryRef.update("numLikes", FieldValue.increment(1))
+                                        .addOnSuccessListener {
+                                            likeNumLikesForRegionData[position] =
+                                                likeNumLikesForRegionData[position]!!.toInt() + 1
+                                            diaryDB.document(items[position].diaryId)
+                                                .collection("likes")
+                                                .document("$userId")
+                                                .set(likeUserSet, SetOptions.merge())
 
-                                    likeNumLikesForRegionData[position] = likeNumLikesForRegionData[position]!!.toInt() + 1
-                                    diaryDB.document(items[position].diaryId).collection("likes")
-                                        .document("$userId")
-                                        .set(likeUserSet, SetOptions.merge())
+                                            holder.itemView.likeText.text =
+                                                "좋아요 ${likeNumLikesForRegionData[position]}"
+                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                                            likeToggleCheckForRegionData[position] = true
 
-                                    holder.itemView.likeText.text = "좋아요 ${likeNumLikesForRegionData[position]}"
-                                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                    likeToggleCheckForRegionData[position] = true
-
-                                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                    intent.setAction("LIKE_TOGGLE_ACTION")
-                                    intent.putExtra("newDiaryId", items[position].diaryId)
-                                    intent.putExtra("newLikeToggle", true)
-                                    intent.putExtra("newNumLikes", likeNumLikesForRegionData[position]!!.toInt())
-                                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                            val intent =
+                                                Intent(context, AllDiaryFragmentTwo::class.java)
+                                            intent.setAction("LIKE_TOGGLE_ACTION")
+                                            intent.putExtra("newDiaryId", items[position].diaryId)
+                                            intent.putExtra("newLikeToggle", true)
+                                            intent.putExtra(
+                                                "newNumLikes",
+                                                likeNumLikesForRegionData[position]!!.toInt()
+                                            )
+                                            LocalBroadcastManager.getInstance(context!!)
+                                                .sendBroadcast(intent)
+                                        }
                                 }
                             } else {
                                 // 문서가 존재하지 않는 경우
                                 DiaryRef.update("numLikes", FieldValue.increment(1))
+                                    .addOnSuccessListener {
+                                        likeNumLikesForRegionData[position] =
+                                            likeNumLikesForRegionData[position]!!.toInt() + 1
+                                        diaryDB.document(items[position].diaryId)
+                                            .collection("likes")
+                                            .document("$userId")
+                                            .set(likeUserSet, SetOptions.merge())
 
-                                likeNumLikesForRegionData[position] = likeNumLikesForRegionData[position]!!.toInt() + 1
-                                diaryDB.document(items[position].diaryId).collection("likes")
-                                    .document("$userId")
-                                    .set(likeUserSet, SetOptions.merge())
+                                        holder.itemView.likeText.text =
+                                            "좋아요 ${likeNumLikesForRegionData[position]}"
+                                        holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                                        likeToggleCheckForRegionData[position] = true
 
-                                holder.itemView.likeText.text = "좋아요 ${likeNumLikesForRegionData[position]}"
-                                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                likeToggleCheckForRegionData[position] = true
-
-                                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                intent.setAction("LIKE_TOGGLE_ACTION")
-                                intent.putExtra("newDiaryId", items[position].diaryId)
-                                intent.putExtra("newLikeToggle", true)
-                                intent.putExtra("newNumLikes", likeNumLikesForRegionData[position]!!.toInt())
-                                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                        val intent =
+                                            Intent(context, AllDiaryFragmentTwo::class.java)
+                                        intent.setAction("LIKE_TOGGLE_ACTION")
+                                        intent.putExtra("newDiaryId", items[position].diaryId)
+                                        intent.putExtra("newLikeToggle", true)
+                                        intent.putExtra(
+                                            "newNumLikes",
+                                            likeNumLikesForRegionData[position]!!.toInt()
+                                        )
+                                        LocalBroadcastManager.getInstance(context!!)
+                                            .sendBroadcast(intent)
+                                    }
                             }
                         }
                     }
@@ -278,9 +352,9 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             context.startActivity(openBlockActivity)
         }
 
-        holder.itemView.likeText.setOnClickListener{
+        holder.itemView.likeText.setOnClickListener {
 
-            if(likeNumLikesForRegionData[position] != 0) {
+            if (likeNumLikesForRegionData[position] != 0) {
                 resumePause = true
 
                 val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)

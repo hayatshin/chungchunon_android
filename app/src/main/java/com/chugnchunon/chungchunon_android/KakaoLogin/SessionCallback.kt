@@ -43,6 +43,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
                     if (result != null) {
+                        val dbUserId = "kakao:${result.id}"
                         val accessToken = Session.getCurrentSession().tokenInfo.accessToken
                         val phoneNumber = "010-${
                             result.kakaoAccount?.phoneNumber?.substring(7)
@@ -57,7 +58,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         val userSet = hashMapOf(
                             "userType" to newUserType,
                             "loginType" to "카카오",
-                            "userId" to (result.id),
+                            "userId" to dbUserId,
                             "timestamp" to FieldValue.serverTimestamp(),
                             "name" to (result.nickname),
                             "avatar" to result.profileImagePath,
@@ -85,14 +86,73 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                             val userDocument = task.result
                                             if (userDocument.exists()) {
                                                 // user 이미 존재
-                                                var userAge =
-                                                    (userDocument.data?.getValue("userAge") as Long).toInt()
-                                                var userType = userDocument.data?.getValue("userType")
+                                                val userName = userDocument.data!!.getValue("name").toString()
+                                                if(userName == "탈퇴자") {
+                                                    // 탈퇴한 경우
+                                                    userDB.document("$userId")
+                                                        .set(userSet, SetOptions.merge())
+                                                        .addOnSuccessListener {
+                                                            try {
+                                                                // 지역 있는 경우
+                                                                var userRegion =
+                                                                    userDocument.data?.getValue("region")
+                                                                var userSmallRegion =
+                                                                    userDocument.data?.getValue("smallRegion")
 
-                                                val goDiary =
-                                                    Intent(context, DiaryTwoActivity::class.java)
-                                                context.startActivity(goDiary)
+                                                                val goDiary =
+                                                                    Intent(
+                                                                        context,
+                                                                        DiaryTwoActivity::class.java
+                                                                    )
+                                                                context.startActivity(goDiary)
+                                                            } catch (e: Exception) {
+                                                                // 지역 없는 경우
+                                                                val goRegionRegister = Intent(
+                                                                    context,
+                                                                    RegionRegisterActivity::class.java
+                                                                )
+                                                                goRegionRegister.putExtra(
+                                                                    "userType",
+                                                                    newUserType
+                                                                )
+                                                                goRegionRegister.putExtra(
+                                                                    "userAge",
+                                                                    userAge
+                                                                )
+                                                                context.startActivity(
+                                                                    goRegionRegister
+                                                                )
+                                                            }
+                                                        }
+                                                } else {
+                                                    // 탈퇴 아닌 경우
+                                                    try {
+                                                        // 지역 있는 경우
+                                                        var userRegion =
+                                                            userDocument.data?.getValue("region")
+                                                        var userSmallRegion =
+                                                            userDocument.data?.getValue("smallRegion")
 
+                                                        val goDiary =
+                                                            Intent(
+                                                                context,
+                                                                DiaryTwoActivity::class.java
+                                                            )
+                                                        context.startActivity(goDiary)
+                                                    } catch (e: Exception) {
+                                                        // 지역 없는 경우
+                                                        val goRegionRegister = Intent(
+                                                            context,
+                                                            RegionRegisterActivity::class.java
+                                                        )
+                                                        goRegionRegister.putExtra(
+                                                            "userType",
+                                                            newUserType
+                                                        )
+                                                        goRegionRegister.putExtra("userAge", userAge)
+                                                        context.startActivity(goRegionRegister)
+                                                    }
+                                                }
                                             } else {
                                                 // user 존재 x
                                                 userDB
@@ -107,27 +167,35 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                                             "userType",
                                                             newUserType
                                                         )
-                                                        goRegionRegister.putExtra("userAge", userAge)
+                                                        goRegionRegister.putExtra(
+                                                            "userAge",
+                                                            userAge
+                                                        )
                                                         context.startActivity(goRegionRegister)
                                                     }
                                             }
                                         } else {
                                             Log.d("카톡", "실패")
+                                            val goError =
+                                                Intent(context, DefaultDiaryWarningActivity::class.java)
+                                            goError.putExtra("warningType", "kakaoLoginError")
+                                            context.startActivity(goError)
                                         }
                                     }
                             } else {
                                 if (task.exception != null) {
                                     Log.e(TAG, task.exception.toString())
                                     // 카톡 로그인 에러
-                                    val goError = Intent(context, DefaultDiaryWarningActivity::class.java)
+                                    val goError =
+                                        Intent(context, DefaultDiaryWarningActivity::class.java)
                                     goError.putExtra("warningType", "kakaoLoginError")
                                     context.startActivity(goError)
                                 }
                             }
                         }
                     }
-                } catch (e:Exception) {
-                 // 정보 불충분한 에러
+                } catch (e: Exception) {
+                    // 정보 불충분한 에러
                     val goError = Intent(context, DefaultDiaryWarningActivity::class.java)
                     goError.putExtra("warningType", "kakaoLoginError")
                     context.startActivity(goError)

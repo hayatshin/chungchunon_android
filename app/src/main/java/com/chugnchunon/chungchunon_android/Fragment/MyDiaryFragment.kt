@@ -459,8 +459,17 @@ class MyDiaryFragment : Fragment() {
                             .set(diarySet, SetOptions.merge())
                             .addOnSuccessListener {
                                 val fragment = requireActivity().supportFragmentManager
+//                                fragment.beginTransaction()
+//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+
+                                val allFragment = AllDiaryFragmentTwo()
+                                val bundle = Bundle()
+                                bundle.putString("diaryType", "my")
+                                allFragment.arguments = bundle
                                 fragment.beginTransaction()
-                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+                                    .replace(R.id.enterFrameLayout, allFragment).commit()
+
                                 requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
                             }
                     }
@@ -1101,7 +1110,7 @@ class MyDiaryFragment : Fragment() {
                                 "operator" to operator,
                                 "realAnswer" to dbRealAnswer,
                                 "userAnswer" to dbUserAnswer,
-                                )
+                            )
                             db.collection("recognition").document(diaryId)
                                 .set(recognitionSet, SetOptions.merge())
                         }
@@ -1135,12 +1144,22 @@ class MyDiaryFragment : Fragment() {
                                     .set(diarySet, SetOptions.merge())
                                     .addOnSuccessListener {
                                         val fragment = requireActivity().supportFragmentManager
+//                                fragment.beginTransaction()
+//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+
+                                        val allFragment = AllDiaryFragmentTwo()
+                                        val bundle = Bundle()
+                                        bundle.putString("diaryType", "my")
+                                        allFragment.arguments = bundle
                                         fragment.beginTransaction()
-                                            .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo())
-                                            .commit()
+                                            .replace(R.id.enterFrameLayout, allFragment).commit()
+
                                         requireActivity().bottomNav.selectedItemId =
                                             R.id.ourTodayMenu
                                     }
+
+
                             }
                     }
                 }

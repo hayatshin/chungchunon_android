@@ -12,14 +12,18 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.KakaoSDK
 import com.kakao.sdk.common.KakaoSdk
+import java.util.*
 
 class StartActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()
+    private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private var lastBackPressTime: Long = 0L
 
@@ -59,6 +63,7 @@ class StartActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             val currentUser = auth.currentUser
             val userId = Firebase.auth.currentUser?.uid
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
             if (userId != null) {
                 userDB.document("$userId").get()
@@ -67,25 +72,190 @@ class StartActivity : AppCompatActivity() {
                             val userData = task.result
                             if (userData != null) {
                                 if (userData.exists()) {
-                                    Log.d("접속", "1")
-                                    val goDiaryTwoActivity =
-                                        Intent(this, DiaryTwoActivity::class.java)
-                                    startActivity(goDiaryTwoActivity)
+                                    val exitReference =
+                                        FirebaseFirestore.getInstance().collection("exit")
+                                            .document("$userId")
+                                            .get()
+                                            .addOnCompleteListener { task ->
+                                                if (task.isSuccessful) {
+                                                    if (task.result != null) {
+                                                        // 탈퇴 기록 있음
+                                                        if (task.result.exists()) {
+                                                            // 탈퇴 기록 있음
+                                                            Log.d("탈퇴", "기록 있음")
+                                                            val dbUserName =
+                                                                userData.data?.getValue("name")
+                                                                    .toString()
+                                                            if (dbUserName == "탈퇴자") {
+                                                                // 진짜 탈퇴
+                                                                val intent = Intent(
+                                                                    this,
+                                                                    MainActivity::class.java
+                                                                )
+                                                                startActivity(intent)
+                                                            } else {
+                                                                // 재가입
+                                                                val goDiaryTwoActivity =
+                                                                    Intent(
+                                                                        this,
+                                                                        DiaryTwoActivity::class.java
+                                                                    )
+                                                                startActivity(goDiaryTwoActivity)
+                                                            }
+
+                                                        } else {
+                                                            Log.d("탈퇴", "기록 없음")
+
+                                                            val dbUserAge =
+                                                                (userData.data?.getValue("userAge")!! as Long).toInt()
+                                                            val dbUserType =
+                                                                userData.data?.getValue("userType")
+                                                                    .toString()
+
+                                                            val userBirthYear =
+                                                                userData.data?.getValue("birthYear")!!
+                                                                    .toString().toInt()
+                                                            val newUserAge =
+                                                                currentYear - userBirthYear + 1
+
+                                                            if (newUserAge != dbUserAge) {
+                                                                var newUserType = ""
+
+                                                                if (dbUserType == "마스터") {
+                                                                    newUserType = "마스터"
+                                                                } else {
+                                                                    if (newUserAge >= 50) {
+                                                                        newUserType = "사용자"
+                                                                    } else {
+                                                                        newUserType = "파트너"
+                                                                    }
+                                                                }
+
+                                                                val newUserAgeSet = hashMapOf(
+                                                                    "userAge" to newUserAge,
+                                                                    "userType" to newUserType
+                                                                )
+
+                                                                userDB.document(userId)
+                                                                    .set(
+                                                                        newUserAgeSet,
+                                                                        SetOptions.merge()
+                                                                    )
+                                                                    .addOnSuccessListener {
+                                                                        val goDiaryTwoActivity =
+                                                                            Intent(
+                                                                                this,
+                                                                                DiaryTwoActivity::class.java
+                                                                            )
+                                                                        startActivity(
+                                                                            goDiaryTwoActivity
+                                                                        )
+                                                                    }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        // 탈퇴 기록 있음
+                                                        Log.d("탈퇴", "기록 있음")
+                                                        val dbUserName =
+                                                            userData.data?.getValue("name")
+                                                                .toString()
+                                                        if (dbUserName == "탈퇴자") {
+                                                            // 진짜 탈퇴
+                                                            val intent = Intent(
+                                                                this,
+                                                                MainActivity::class.java
+                                                            )
+                                                            startActivity(intent)
+                                                        } else {
+                                                            // 재가입
+                                                            val goDiaryTwoActivity =
+                                                                Intent(
+                                                                    this,
+                                                                    DiaryTwoActivity::class.java
+                                                                )
+                                                            startActivity(goDiaryTwoActivity)
+                                                        }
+                                                    }
+                                                } else {
+                                                    // 값을 가져오는데 에러
+                                                    val dbUserAge =
+                                                        (userData.data?.getValue("userAge")!! as Long).toInt()
+                                                    val dbUserType =
+                                                        userData.data?.getValue("userType")
+                                                            .toString()
+
+                                                    val userBirthYear =
+                                                        userData.data?.getValue("birthYear")!!
+                                                            .toString().toInt()
+                                                    val newUserAge = currentYear - userBirthYear + 1
+
+                                                    if (newUserAge != dbUserAge) {
+                                                        var newUserType = ""
+
+                                                        if (dbUserType == "마스터") {
+                                                            newUserType = "마스터"
+                                                        } else {
+                                                            if (newUserAge >= 50) {
+                                                                newUserType = "사용자"
+                                                            } else {
+                                                                newUserType = "파트너"
+                                                            }
+                                                        }
+
+                                                        val newUserAgeSet = hashMapOf(
+                                                            "userAge" to newUserAge,
+                                                            "userType" to newUserType
+                                                        )
+
+                                                        userDB.document(userId)
+                                                            .set(newUserAgeSet, SetOptions.merge())
+                                                            .addOnSuccessListener {
+                                                                val goDiaryTwoActivity =
+                                                                    Intent(
+                                                                        this,
+                                                                        DiaryTwoActivity::class.java
+                                                                    )
+                                                                startActivity(goDiaryTwoActivity)
+                                                            }
+                                                    } else {
+                                                        // 탈퇴 기록 있음
+                                                        val dbUserName =
+                                                            userData.data?.getValue("name")
+                                                                .toString()
+                                                        if (dbUserName == "탈퇴자") {
+                                                            // 진짜 탈퇴
+                                                            val intent = Intent(
+                                                                this,
+                                                                MainActivity::class.java
+                                                            )
+                                                            startActivity(intent)
+                                                        } else {
+                                                            // 재가입
+                                                            val goDiaryTwoActivity =
+                                                                Intent(
+                                                                    this,
+                                                                    DiaryTwoActivity::class.java
+                                                                )
+                                                            startActivity(goDiaryTwoActivity)
+                                                        }
+                                                    }
+                                                }
+                                            }
                                 } else {
-                                    Log.d("접속", "2")
+                                    Log.d("접속", "3")
                                     val intent = Intent(this, MainActivity::class.java)
                                     startActivity(intent)
                                 }
                             } else {
                                 // userDB에 없음
-                                Log.d("접속", "3")
+                                Log.d("접속", "4")
                                 val intent = Intent(this, MainActivity::class.java)
                                 startActivity(intent)
                             }
                         }
                     }
             } else {
-                Log.d("접속", "4")
+                Log.d("접속", "5")
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }

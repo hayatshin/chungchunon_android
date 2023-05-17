@@ -37,18 +37,53 @@ class DeviceShutdownBroadcastReceiver : BroadcastReceiver() {
             )
             userDB.document("$userId").set(bootSet, SetOptions.merge())
 
-            try {
-                val startService = Intent(context, MyService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(context!!, startService);
-                } else {
-                    context!!.startService(startService);
+            userDB.document("$userId").get()
+                .addOnCompleteListener { task ->
+                    if(task.isSuccessful) {
+                        val document = task.result
+                        if(document != null) {
+                            if(document.exists()) {
+                                try {
+                                    val stepStatus = document.data?.getValue("step_status") as Boolean
+                                    if(stepStatus) {
+                                        // 허용
+                                        try {
+                                            val startService = Intent(context, MyService::class.java)
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                ContextCompat.startForegroundService(context!!, startService);
+                                            } else {
+                                                context!!.startService(startService);
+                                            }
+                                        } catch (e: Exception) {
+                                            val serviceError = hashMapOf(
+                                                "service_error" to e,
+                                                "service_step_status" to false,
+                                            )
+                                            userDB.document("$userId")
+                                                .set(serviceError, SetOptions.merge())
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    try {
+                                        val startService = Intent(context, MyService::class.java)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            ContextCompat.startForegroundService(context!!, startService);
+                                        } else {
+                                            context!!.startService(startService);
+                                        }
+                                    } catch (e: Exception) {
+                                        val serviceError = hashMapOf(
+                                            "service_error" to e,
+                                            "service_step_status" to false,
+                                        )
+                                        userDB.document("$userId")
+                                            .set(serviceError, SetOptions.merge())
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-
         }
     }
 }

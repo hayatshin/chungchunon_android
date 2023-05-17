@@ -10,11 +10,21 @@ import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+
+
+private val db = Firebase.firestore
+private val userDB = Firebase.firestore.collection("users")
+private val userId = Firebase.auth.currentUser?.uid
 
 class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Worker(
     context,
     workerParams
 ) {
+
     override fun doWork(): Result {
 
         Log.d("서비스 - 워크", "리시버")
@@ -37,16 +47,64 @@ class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Wo
             } else {
                 Log.d("서비스 - 워크", "no running")
 
-                try {
-                    val startService = Intent(applicationContext, MyService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(applicationContext, startService);
-                    } else {
-                        applicationContext.startService(startService);
+                userDB.document("$userId").get()
+                    .addOnCompleteListener { task ->
+                        if(task.isSuccessful) {
+                            val document = task.result
+                            if(document != null) {
+                                if(document.exists()) {
+                                    try {
+                                        val stepStatus = document.data?.getValue("step_status") as Boolean
+                                        if(stepStatus) {
+                                            // 허용
+                                            try {
+                                                val startService = Intent(applicationContext, MyService::class.java)
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                    ContextCompat.startForegroundService(applicationContext!!, startService);
+                                                } else {
+                                                    applicationContext!!.startService(startService);
+                                                }
+                                            } catch (e: Exception) {
+                                                val serviceError = hashMapOf(
+                                                    "service_error" to e,
+                                                    "service_step_status" to false,
+                                                )
+                                                userDB.document("$userId")
+                                                    .set(serviceError, SetOptions.merge())
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        try {
+                                            val startService = Intent(applicationContext, MyService::class.java)
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                ContextCompat.startForegroundService(applicationContext!!, startService);
+                                            } else {
+                                                applicationContext!!.startService(startService);
+                                            }
+                                        } catch (e: Exception) {
+                                            val serviceError = hashMapOf(
+                                                "service_error" to e,
+                                                "service_step_status" to false,
+                                            )
+                                            userDB.document("$userId")
+                                                .set(serviceError, SetOptions.merge())
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+
+//                try {
+//                    val startService = Intent(applicationContext, MyService::class.java)
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                        ContextCompat.startForegroundService(applicationContext, startService);
+//                    } else {
+//                        applicationContext.startService(startService);
+//                    }
+//                } catch (e: Exception) {
+//                    e.printStackTrace()
+//                }
 
 
             }

@@ -26,6 +26,7 @@
         <entry key="app/src/main/res/drawable/general_background.xml" value="0.167" />
         <entry key="app/src/main/res/drawable/ic____04.xml" value="0.1655" />
         <entry key="app/src/main/res/drawable/ic_ad_block.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/ic_allow_walk.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_angle_circle_left.xml" value="0.1465" />
         <entry key="app/src/main/res/drawable/ic_angle_circle_right.xml" value="0.1465" />
         <entry key="app/src/main/res/drawable/ic_angry.xml" value="0.1655" />
@@ -179,6 +180,8 @@
         <entry key="app/src/main/res/layout/activity_block_user_list.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.2539993286132813" />
         <entry key="app/src/main/res/layout/activity_community_register.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/activity_default_cancel_warning.xml" value="0.275" />
+        <entry key="app/src/main/res/layout/activity_default_diary_warning.xml" value="0.275" />
         <entry key="app/src/main/res/layout/activity_default_warning.xml" value="0.2763424518743668" />
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
         <entry key="app/src/main/res/layout/activity_diary_two.xml" value="0.16156616210937508" />
@@ -222,7 +225,7 @@
         <entry key="app/src/main/res/layout/fragment_all_diary_two.xml" value="0.2033514492753623" />
         <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.1637649536132812" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
-        <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.24132029215494782" />
+        <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.3094828287760416" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.24512023925781265" />
         <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.24391174316406244" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />

@@ -128,18 +128,18 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                 .get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        var document = task.result
+                        val document = task.result
                         if (document != null) {
-                            if (!document.exists()) {
-                                likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, false)
-                            } else {
-                                AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, true)
+                            if (document.exists()) {
+                                likeToggleCheckForMyData.put(position, true)
                                 likeIcon.setImageResource(R.drawable.ic_filledheart)
+                            } else {
+                                likeToggleCheckForMyData.put(position, false)
+                                likeIcon.setImageResource(R.drawable.ic_emptyheart)
                             }
                         } else {
+                            likeToggleCheckForMyData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                            AllDiaryCardAdapter.likeToggleCheckForAllData.put(position, false)
                         }
                     }
                 }
@@ -183,22 +183,23 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                                 if(likeDocument.exists()) {
                                     // 문서가 존재하는 경우
                                     DiaryRef.update("numLikes", FieldValue.increment(-1))
+                                        .addOnSuccessListener {
+                                            likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() - 1
+                                            diaryDB.document(items[position].diaryId).collection("likes")
+                                                .document("$userId")
+                                                .delete()
 
-                                    likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() - 1
-                                    diaryDB.document(items[position].diaryId).collection("likes")
-                                        .document("$userId")
-                                        .delete()
+                                            holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
+                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                                            likeToggleCheckForMyData[position] = false
 
-                                    holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                    likeToggleCheckForMyData[position] = false
-
-                                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                    intent.setAction("LIKE_TOGGLE_ACTION")
-                                    intent.putExtra("newDiaryId", items[position].diaryId)
-                                    intent.putExtra("newLikeToggle", false)
-                                    intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                                            intent.setAction("LIKE_TOGGLE_ACTION")
+                                            intent.putExtra("newDiaryId", items[position].diaryId)
+                                            intent.putExtra("newLikeToggle", false)
+                                            intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
+                                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                        }
                                 }
                             }
                         }
@@ -214,42 +215,44 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                                 if(!likeDocument.exists()) {
                                     // 문서가 존재하지 않는 경우
                                     DiaryRef.update("numLikes", FieldValue.increment(1))
+                                        .addOnSuccessListener {
+                                            likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
+                                            diaryDB.document(items[position].diaryId).collection("likes")
+                                                .document("$userId")
+                                                .set(likeUserSet, SetOptions.merge())
 
-                                    likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
-                                    diaryDB.document(items[position].diaryId).collection("likes")
-                                        .document("$userId")
-                                        .set(likeUserSet, SetOptions.merge())
+                                            holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
+                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                                            likeToggleCheckForMyData[position] = true
 
-                                    holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                    likeToggleCheckForMyData[position] = true
-
-                                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                    intent.setAction("LIKE_TOGGLE_ACTION")
-                                    intent.putExtra("newDiaryId", items[position].diaryId)
-                                    intent.putExtra("newLikeToggle", true)
-                                    intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                                            intent.setAction("LIKE_TOGGLE_ACTION")
+                                            intent.putExtra("newDiaryId", items[position].diaryId)
+                                            intent.putExtra("newLikeToggle", true)
+                                            intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
+                                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                        }
                                 }
                             } else {
                                 // 문서가 존재하지 않는 경우
                                 DiaryRef.update("numLikes", FieldValue.increment(1))
+                                    .addOnSuccessListener {
+                                        likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
+                                        diaryDB.document(items[position].diaryId).collection("likes")
+                                            .document("$userId")
+                                            .set(likeUserSet, SetOptions.merge())
 
-                                likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
-                                diaryDB.document(items[position].diaryId).collection("likes")
-                                    .document("$userId")
-                                    .set(likeUserSet, SetOptions.merge())
+                                        holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
+                                        holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                                        likeToggleCheckForMyData[position] = true
 
-                                holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                likeToggleCheckForMyData[position] = true
-
-                                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                intent.setAction("LIKE_TOGGLE_ACTION")
-                                intent.putExtra("newDiaryId", items[position].diaryId)
-                                intent.putExtra("newLikeToggle", true)
-                                intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                        val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                                        intent.setAction("LIKE_TOGGLE_ACTION")
+                                        intent.putExtra("newDiaryId", items[position].diaryId)
+                                        intent.putExtra("newLikeToggle", true)
+                                        intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
+                                        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                                    }
                             }
                         }
                     }
