@@ -96,9 +96,12 @@ class MyService : Service(), SensorEventListener {
                 .addOnSuccessListener { userSteps ->
                     if (userSteps.contains(today)) {
                         // 리부팅: 오늘 걸음수 있는 경우
+                        Log.d("걸음", "리부팅: 오늘 걸음수 있는 경우")
                         val todayIngStep = (userSteps.data?.getValue(today) as Long).toInt()
                         if (todayIngStep != 0) {
                             // 리부팅: 누적 걸음수 0이 아닌 경우 -> *일반적 리부팅
+                            Log.d("걸음", "리부팅: 누적 걸음수 0이 아닌 경우 -> *일반적 리부팅")
+
                             val newTodayIngStepSet = hashMapOf(
                                 "dummy" to -todayIngStep
                             )
@@ -141,6 +144,8 @@ class MyService : Service(), SensorEventListener {
                                 .sendBroadcast(intentToMyDiary)
                         } else {
                             // 리부팅: 누적 걸음수 0인 경우
+                            Log.d("걸음", "리부팅: 누적 걸음수 0인 경우")
+
                             val newTodayIngStepSet = hashMapOf(
                                 "dummy" to 0
                             )
@@ -184,6 +189,8 @@ class MyService : Service(), SensorEventListener {
                         }
                     } else {
                         // 리부팅: 오늘 걸음수 없는 경우 -> 새로운 날 (DateChange보다 먼저 작동)
+                        Log.d("걸음", "리부팅: 오늘 걸음수 없는 경우 -> 새로운 날 (DateChange보다 먼저 작동)")
+
                         val newTodayIngStepSet = hashMapOf(
                             "dummy" to 0
                         )
@@ -228,6 +235,8 @@ class MyService : Service(), SensorEventListener {
                 }
         } else {
             // 리부팅 x
+            Log.d("걸음", "리부팅 x")
+
             db.collection("user_step_count").document("$userId").get()
                 .addOnSuccessListener { userStepCount ->
                     if (userStepCount.contains("dummy")) {
@@ -236,7 +245,7 @@ class MyService : Service(), SensorEventListener {
 
                         if (userStepCount.contains(today)) {
                             // 리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중
-                            Log.d("걸음수체크", "리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중")
+                            Log.d("걸음", "리부팅 x: 오늘 값이 있는 경우 -> *잘 작동 중")
 
                             todayTotalStepCount = stepCount - dummyStepCount
 
@@ -275,7 +284,7 @@ class MyService : Service(), SensorEventListener {
                                 .sendBroadcast(intentToMyDiary)
                         } else {
                             // 리부팅 x: 오늘 값이 없는 경우 -> 잘 작동 x
-                            Log.d("걸음수체크", "리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날")
+                            Log.d("걸음", "리부팅 x: 오늘 값이 없는 경우 -> DateChange보다 먼저 새로운 날")
 
                             val newDummySet = hashMapOf(
                                 "dummy" to stepCount
@@ -320,7 +329,7 @@ class MyService : Service(), SensorEventListener {
                         }
                     } else {
                         // 리부팅 x: 더미 값이 없는 경우 -> 처음 시작
-                        Log.d("걸음수체크", "리부팅 x: 더미 값이 없는 경우 -> 처음 시작")
+                        Log.d("걸음", "리부팅 x: 더미 값이 없는 경우 -> 처음 시작")
 
                         val newDummySet = hashMapOf(
                             "dummy" to stepCount

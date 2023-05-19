@@ -188,6 +188,10 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                             likeToggleCheckForRegionData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
                         }
+                    } else {
+                        // userId 없음
+                        likeToggleCheckForRegionData.put(position, false)
+                        likeIcon.setImageResource(R.drawable.ic_emptyheart)
                     }
                 }
         }
@@ -211,124 +215,35 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
         // 좋아요 토글
         holder.itemView.likeIcon.setOnClickListener { view ->
 
-            val DiaryRef = diaryDB.document(items[position].diaryId)
-
-            val likeUserSet = hashMapOf(
-                "id" to userId,
-                "timestamp" to FieldValue.serverTimestamp(),
-            )
-
-            if (likeToggleCheckForRegionData[position]!!) {
+            if(likeToggleCheckForRegionData[position]!!) {
                 // 좋아요를 이미 누른 상태
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() - 1
+                holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                likeNumLikesForRegionData[position] = newLikeNum
+                likeToggleCheckForRegionData[position] = false
 
-                DiaryRef.collection("likes").document("$userId")
-                    .get()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val likeDocument = task.result
-                            if (likeDocument != null) {
-                                if (likeDocument.exists()) {
-                                    // 문서가 존재하는 경우
-                                    DiaryRef.update("numLikes", FieldValue.increment(-1))
-                                        .addOnSuccessListener {
-                                            likeNumLikesForRegionData[position] =
-                                                likeNumLikesForRegionData[position]!!.toInt() - 1
-                                            diaryDB.document(items[position].diaryId)
-                                                .collection("likes")
-                                                .document("$userId")
-                                                .delete()
-
-                                            holder.itemView.likeText.text =
-                                                "좋아요 ${likeNumLikesForRegionData[position]}"
-                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                            likeToggleCheckForRegionData[position] = false
-
-                                            val intent =
-                                                Intent(context, AllDiaryFragmentTwo::class.java)
-                                            intent.setAction("LIKE_TOGGLE_ACTION")
-                                            intent.putExtra("newDiaryId", items[position].diaryId)
-                                            intent.putExtra("newLikeToggle", false)
-                                            intent.putExtra(
-                                                "newNumLikes",
-                                                likeNumLikesForRegionData[position]!!.toInt()
-                                            )
-                                            LocalBroadcastManager.getInstance(context!!)
-                                                .sendBroadcast(intent)
-                                        }
-                                }
-                            }
-                        }
-                    }
+                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                intent.setAction("LIKE_TOGGLE_ACTION")
+                intent.putExtra("newDiaryId", items[position].diaryId)
+                intent.putExtra("newLikeToggle", false)
+                intent.putExtra("newNumLikes", newLikeNum)
+                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
             } else {
                 // 좋아요를 누르지 않은 상태
-                DiaryRef.collection("likes").document("$userId")
-                    .get()
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val likeDocument = task.result
-                            if (likeDocument != null) {
-                                if (!likeDocument.exists()) {
-                                    // 문서가 존재하지 않는 경우
-                                    DiaryRef.update("numLikes", FieldValue.increment(1))
-                                        .addOnSuccessListener {
-                                            likeNumLikesForRegionData[position] =
-                                                likeNumLikesForRegionData[position]!!.toInt() + 1
-                                            diaryDB.document(items[position].diaryId)
-                                                .collection("likes")
-                                                .document("$userId")
-                                                .set(likeUserSet, SetOptions.merge())
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() + 1
+                holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                likeNumLikesForRegionData[position] = newLikeNum
+                likeToggleCheckForRegionData[position] = true
 
-                                            holder.itemView.likeText.text =
-                                                "좋아요 ${likeNumLikesForRegionData[position]}"
-                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                            likeToggleCheckForRegionData[position] = true
-
-                                            val intent =
-                                                Intent(context, AllDiaryFragmentTwo::class.java)
-                                            intent.setAction("LIKE_TOGGLE_ACTION")
-                                            intent.putExtra("newDiaryId", items[position].diaryId)
-                                            intent.putExtra("newLikeToggle", true)
-                                            intent.putExtra(
-                                                "newNumLikes",
-                                                likeNumLikesForRegionData[position]!!.toInt()
-                                            )
-                                            LocalBroadcastManager.getInstance(context!!)
-                                                .sendBroadcast(intent)
-                                        }
-                                }
-                            } else {
-                                // 문서가 존재하지 않는 경우
-                                DiaryRef.update("numLikes", FieldValue.increment(1))
-                                    .addOnSuccessListener {
-                                        likeNumLikesForRegionData[position] =
-                                            likeNumLikesForRegionData[position]!!.toInt() + 1
-                                        diaryDB.document(items[position].diaryId)
-                                            .collection("likes")
-                                            .document("$userId")
-                                            .set(likeUserSet, SetOptions.merge())
-
-                                        holder.itemView.likeText.text =
-                                            "좋아요 ${likeNumLikesForRegionData[position]}"
-                                        holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                        likeToggleCheckForRegionData[position] = true
-
-                                        val intent =
-                                            Intent(context, AllDiaryFragmentTwo::class.java)
-                                        intent.setAction("LIKE_TOGGLE_ACTION")
-                                        intent.putExtra("newDiaryId", items[position].diaryId)
-                                        intent.putExtra("newLikeToggle", true)
-                                        intent.putExtra(
-                                            "newNumLikes",
-                                            likeNumLikesForRegionData[position]!!.toInt()
-                                        )
-                                        LocalBroadcastManager.getInstance(context!!)
-                                            .sendBroadcast(intent)
-                                    }
-                            }
-                        }
-                    }
+                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                intent.setAction("LIKE_TOGGLE_ACTION")
+                intent.putExtra("newDiaryId", items[position].diaryId)
+                intent.putExtra("newLikeToggle", true)
+                intent.putExtra("newNumLikes", newLikeNum)
+                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
             }
-
         }
 
         // 댓글버튼 클릭

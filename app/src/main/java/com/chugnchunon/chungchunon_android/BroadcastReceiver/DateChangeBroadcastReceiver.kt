@@ -90,6 +90,18 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
                                    userDB.document("$userId")
                                        .set(todayStepCountSet, SetOptions.merge())
 
+                                    // noti & UI 걸음수 0로 초기화
+                                    var goDiary =
+                                        Intent(context, MyDiaryFragment::class.java)
+                                    goDiary.setAction("NEW_DATE_STEP_ZERO")
+                                    LocalBroadcastManager.getInstance(context!!)
+                                        .sendBroadcast(goDiary);
+
+                                    var goService = Intent(context, MyService::class.java)
+                                    goService.setAction("NEW_DATE_STEP_ZERO")
+                                    LocalBroadcastManager.getInstance(context!!)
+                                        .sendBroadcast(goService);
+
                                } else {
                                    // 어제 값 없음 -> dummy 0 세팅
                                    Log.d("걸음수체크", "어제 값 없음 -> dummy 0 세팅")
@@ -126,18 +138,6 @@ open class DateChangeBroadcastReceiver : BroadcastReceiver() {
 //                                       .set(todayStepCountSet, SetOptions.merge())
 
                                }
-
-                                // noti & UI 걸음수 0로 초기화
-                                var goDiary =
-                                    Intent(context, MyDiaryFragment::class.java)
-                                goDiary.setAction("NEW_DATE_STEP_ZERO")
-                                LocalBroadcastManager.getInstance(context!!)
-                                    .sendBroadcast(goDiary);
-
-                                var goService = Intent(context, MyService::class.java)
-                                goService.setAction("NEW_DATE_STEP_ZERO")
-                                LocalBroadcastManager.getInstance(context!!)
-                                    .sendBroadcast(goService);
 
                             }
                         }

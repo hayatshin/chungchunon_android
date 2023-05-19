@@ -1,20 +1,21 @@
-package com.chugnchunon.chungchunon_android
+package com.chugnchunon.chungchunon_android.MissionDetail
 
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.icu.text.DecimalFormat
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import com.chugnchunon.chungchunon_android.DataClass.RankingLine
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
+import com.chugnchunon.chungchunon_android.DefaultDiaryWarningActivity
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo
-import com.chugnchunon.chungchunon_android.Fragment.MissionFragment
-import com.chugnchunon.chungchunon_android.Fragment.MyDiaryFragment
-import com.chugnchunon.chungchunon_android.databinding.ActivityCommentBinding
+import com.chugnchunon.chungchunon_android.MissionResultActivity
+import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.ActivityMissionDetailBinding
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
@@ -26,10 +27,8 @@ import me.moallemi.tools.daterange.localdate.rangeTo
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.concurrent.timer
 
-class MissionDetailActivity : Activity() {
+class MissionDetailActivityManwon : Activity() {
 
     private val binding by lazy {
         ActivityMissionDetailBinding.inflate(layoutInflater)
@@ -49,6 +48,8 @@ class MissionDetailActivity : Activity() {
     private var mdStartPeriod = ""
     private var mdEndPeriod = ""
     private var mdPeriod = ""
+
+    lateinit var mdParticipateDate: Date
 
     private var formatStartDate = ""
     private var formatEndDate = ""
@@ -314,12 +315,12 @@ class MissionDetailActivity : Activity() {
             }
         }
 
-        val pattern = "yyyy-MM-dd"
-        formatStartDate = mdStartPeriod.replace(".", "-")
-        formatEndDate = mdEndPeriod.replace(".", "-")
+//        val pattern = "yyyy-MM-dd"
+//        formatStartDate = mdStartPeriod.replace(".", "-")
+//        formatEndDate = mdEndPeriod.replace(".", "-")
 
-        mdDateFormatStartPeriod = SimpleDateFormat(pattern).parse(formatStartDate)
-        mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
+//        mdDateFormatStartPeriod = SimpleDateFormat(pattern).parse(formatStartDate)
+//        mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
 
 
     }
@@ -328,17 +329,13 @@ class MissionDetailActivity : Activity() {
         // 점수 계산
         uiScope.launch(Dispatchers.IO)
         {
-            listOf(
-                launch { stepCountToArrayFun() },
-                launch { diaryToArrayFun() },
-                launch { commentToArrayFun() },
-                launch { likeToArrayFun() }
-            ).joinAll()
+            launch { eventParticiapteDate() }.join()
+            launch { diaryToArrayFun() }.join()
             withContext(Dispatchers.Main) {
                 launch {
-
                     if (userPoint <= 10000) {
-                        binding.mdPointText.text = "$userPoint / 10,000"
+                        val decimal = DecimalFormat("#,###")
+                        binding.mdPointText.text = "${decimal.format(userPoint)}원 / 만원"
                         val targetProgress = (userPoint.toFloat() / 10000f * 100f).toInt()
                         val animator = ObjectAnimator.ofInt(
                             binding.mdPointProgress,
@@ -351,7 +348,7 @@ class MissionDetailActivity : Activity() {
 
                         binding.mdPointProgress.progress = userPoint / 10000 * 100
                     } else {
-                        binding.mdPointText.text = "$userPoint / 10,000"
+                        binding.mdPointText.text = "만원 달성!"
                         binding.mdPointProgress.progress = 100
 
                         val animator =
@@ -369,74 +366,31 @@ class MissionDetailActivity : Activity() {
         }
     }
 
-    suspend fun stepCountToArrayFun() {
-        var userStepCount: Int = 0
-
-        val startDate = LocalDate.of(
-            formatStartDate.substring(0, 4).toInt(),
-            formatStartDate.substring(5, 7).toInt(),
-            formatStartDate.substring(8, 10).toInt()
-        )
-        val endDate = LocalDate.of(
-            formatEndDate.substring(0, 4).toInt(),
-            formatEndDate.substring(5, 7).toInt(),
-            formatEndDate.substring(8, 10).toInt()
-        )
-
-
-        var dataSteps = db.collection("user_step_count")
-            .document("$userId")
+    suspend fun eventParticiapteDate() {
+        var eventDocument = db.collection("mission")
+            .document(mdDocId)
+            .collection("participants")
+            .whereEqualTo("userId", userId)
             .get()
             .await()
 
-        dataSteps.data?.forEach { (period, dateStepCount) ->
-            for (stepDate in startDate..endDate) {
-                if (period == stepDate.toString()) {
-                    userStepCount += (dateStepCount as Long).toInt()
-                }
-            }
+        for(document in eventDocument) {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+            val getTimestamp = document.data.getValue("timestamp") as Timestamp
+            val getString = DateFormat().convertTimeStampToDate(getTimestamp)
+            mdParticipateDate = dateFormat.parse(getString)
         }
-
-        userPoint += ((Math.floor(userStepCount / 1000.0)) * 10).toInt()
     }
-
 
     suspend fun diaryToArrayFun() {
         var diaryDocuments = db.collection("diary")
-            .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
-            .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
+            .whereGreaterThanOrEqualTo("timestamp", mdParticipateDate)
             .whereEqualTo("userId", userId)
             .get()
             .await()
 
         for (diaryDocument in diaryDocuments) {
-            userPoint += 100
-        }
-    }
-
-    suspend fun commentToArrayFun() {
-        var commentDocuments = db.collectionGroup("comments")
-            .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
-            .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
-            .whereEqualTo("userId", userId)
-            .get()
-            .await()
-
-        for (commentDocument in commentDocuments) {
-            userPoint += 20
-        }
-    }
-
-    suspend fun likeToArrayFun() {
-        var likeDocuments = db.collectionGroup("likes")
-            .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
-            .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
-            .whereEqualTo("userId", userId)
-            .get()
-            .await()
-
-        for (likeDocument in likeDocuments) {
-            userPoint += 10
+            userPoint * 100
         }
     }
 

@@ -268,7 +268,8 @@
                         android:indeterminateOnly="true"
                         android:indeterminateTint="@color/main_color"
                         android:keepScreenOn="true"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
+
                 </LinearLayout>
 
             </LinearLayout>

@@ -27,48 +27,46 @@
         android:background="@drawable/mindbox_update"
         android:orientation="vertical"
         android:padding="20dp"
-        android:weightSum="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ScrollView
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
         <LinearLayout
-            android:padding="15dp"
+            android:layout_marginBottom="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
+                android:layout_marginBottom="5dp"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_marginBottom="20dp"
                 android:src="@drawable/ic_illustimage" />
 
+            <ScrollView
+                android:layout_gravity="center_vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
             <TextView
+                android:gravity="center"
+                android:layout_weight="1"
                 android:id="@+id/edWarningText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineHeight="30dp"
                 tools:text="@string/edit_diary_warning_text"
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="17dp" />
+            </ScrollView>
 
         </LinearLayout>
 
-        </ScrollView>
 
         <LinearLayout
-            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/mindbox_main"

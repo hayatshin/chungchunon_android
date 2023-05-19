@@ -102,7 +102,7 @@
                                     android:layout_weight="1"
                                     android:gravity="bottom"
                                     android:scrollbars="horizontal"
-                                    android:text="프로필 이미지 및 일기 이미지 저장"
+                                    android:text="프로필 이미지 및 글 이미지 저장"
                                     android:textColor="@color/light_gray"
                                     android:textSize="14dp" />
 
@@ -252,13 +252,13 @@
 
         <LinearLayout
             android:id="@+id/authNotificationBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="420dp"
             android:layout_centerInParent="true"
-            android:layout_marginHorizontal="40dp"
+            android:layout_marginHorizontal="80dp"
+            android:layout_marginVertical="120dp"
             android:background="@drawable/mindbox_update"
             android:orientation="vertical"
-            android:weightSum="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -340,7 +340,7 @@
                                         android:layout_weight="1"
                                         android:gravity="bottom"
                                         android:scrollbars="horizontal"
-                                        android:text="프로필 이미지 및 일기 이미지 저장"
+                                        android:text="프로필 이미지 및 글 이미지 저장"
                                         android:textColor="@color/light_gray"
                                         android:textSize="14dp" />
 

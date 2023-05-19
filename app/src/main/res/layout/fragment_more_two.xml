@@ -62,7 +62,7 @@
                     android:gravity="center"
                     android:padding="15dp"
                     android:textColor="@color/black"
-                    android:textSize="18dp"
+                    android:textSize="15dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toLeftOf="@id/profileRegion"

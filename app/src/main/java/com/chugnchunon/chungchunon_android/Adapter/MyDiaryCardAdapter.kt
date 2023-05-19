@@ -141,6 +141,10 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                             likeToggleCheckForMyData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
                         }
+                    } else {
+                        // userId 없음
+                        likeToggleCheckForMyData.put(position, false)
+                        likeIcon.setImageResource(R.drawable.ic_emptyheart)
                     }
                 }
         }
@@ -164,100 +168,35 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         // 좋아요 토글
         holder.itemView.likeIcon.setOnClickListener { view ->
 
-            val DiaryRef = diaryDB.document(items[position].diaryId)
-
-            val likeUserSet = hashMapOf(
-                "id" to userId,
-                "timestamp" to FieldValue.serverTimestamp(),
-            )
-
-            if (likeToggleCheckForMyData[position]!!) {
+            if(likeToggleCheckForMyData[position]!!) {
                 // 좋아요를 이미 누른 상태
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                val newLikeNum = likeNumLikesForMyData[position]!!.toInt() - 1
+                holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                likeNumLikesForMyData[position] = newLikeNum
+                likeToggleCheckForMyData[position] = false
 
-                DiaryRef.collection("likes").document("$userId")
-                    .get()
-                    .addOnCompleteListener { task ->
-                        if(task.isSuccessful) {
-                            val likeDocument = task.result
-                            if(likeDocument != null) {
-                                if(likeDocument.exists()) {
-                                    // 문서가 존재하는 경우
-                                    DiaryRef.update("numLikes", FieldValue.increment(-1))
-                                        .addOnSuccessListener {
-                                            likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() - 1
-                                            diaryDB.document(items[position].diaryId).collection("likes")
-                                                .document("$userId")
-                                                .delete()
-
-                                            holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                                            likeToggleCheckForMyData[position] = false
-
-                                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                            intent.setAction("LIKE_TOGGLE_ACTION")
-                                            intent.putExtra("newDiaryId", items[position].diaryId)
-                                            intent.putExtra("newLikeToggle", false)
-                                            intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-                                        }
-                                }
-                            }
-                        }
-                    }
+                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                intent.setAction("LIKE_TOGGLE_ACTION")
+                intent.putExtra("newDiaryId", items[position].diaryId)
+                intent.putExtra("newLikeToggle", false)
+                intent.putExtra("newNumLikes", newLikeNum)
+                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
             } else {
                 // 좋아요를 누르지 않은 상태
-                DiaryRef.collection("likes").document("$userId")
-                    .get()
-                    .addOnCompleteListener { task ->
-                        if(task.isSuccessful) {
-                            val likeDocument = task.result
-                            if(likeDocument != null) {
-                                if(!likeDocument.exists()) {
-                                    // 문서가 존재하지 않는 경우
-                                    DiaryRef.update("numLikes", FieldValue.increment(1))
-                                        .addOnSuccessListener {
-                                            likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
-                                            diaryDB.document(items[position].diaryId).collection("likes")
-                                                .document("$userId")
-                                                .set(likeUserSet, SetOptions.merge())
+                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                val newLikeNum = likeNumLikesForMyData[position]!!.toInt() + 1
+                holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                likeNumLikesForMyData[position] = newLikeNum
+                likeToggleCheckForMyData[position] = true
 
-                                            holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                            holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                            likeToggleCheckForMyData[position] = true
-
-                                            val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                            intent.setAction("LIKE_TOGGLE_ACTION")
-                                            intent.putExtra("newDiaryId", items[position].diaryId)
-                                            intent.putExtra("newLikeToggle", true)
-                                            intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-                                        }
-                                }
-                            } else {
-                                // 문서가 존재하지 않는 경우
-                                DiaryRef.update("numLikes", FieldValue.increment(1))
-                                    .addOnSuccessListener {
-                                        likeNumLikesForMyData[position] = likeNumLikesForMyData[position]!!.toInt() + 1
-                                        diaryDB.document(items[position].diaryId).collection("likes")
-                                            .document("$userId")
-                                            .set(likeUserSet, SetOptions.merge())
-
-                                        holder.itemView.likeText.text = "좋아요 ${likeNumLikesForMyData[position]}"
-                                        holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                                        likeToggleCheckForMyData[position] = true
-
-                                        val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                                        intent.setAction("LIKE_TOGGLE_ACTION")
-                                        intent.putExtra("newDiaryId", items[position].diaryId)
-                                        intent.putExtra("newLikeToggle", true)
-                                        intent.putExtra("newNumLikes", likeNumLikesForMyData[position]!!.toInt())
-                                        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-                                    }
-                            }
-                        }
-                    }
+                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                intent.setAction("LIKE_TOGGLE_ACTION")
+                intent.putExtra("newDiaryId", items[position].diaryId)
+                intent.putExtra("newLikeToggle", true)
+                intent.putExtra("newNumLikes", newLikeNum)
+                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
             }
-
         }
 
         // 댓글버튼 클릭

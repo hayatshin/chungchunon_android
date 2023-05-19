@@ -1410,7 +1410,7 @@ class MyDiaryFragment : Fragment() {
 
             if (!recognitionBoolean!!) binding.recognitionHeader.setText(spanTextFn("인지"))
             if (!moodBoolean!!) binding.moodHeader.setText(spanTextFn("마음"))
-            if (!diaryBoolean!!) binding.diaryHeader.setText(spanTextFn("일기"))
+            if (!diaryBoolean!!) binding.diaryHeader.setText(spanTextFn("쓰기"))
         }
     }
 

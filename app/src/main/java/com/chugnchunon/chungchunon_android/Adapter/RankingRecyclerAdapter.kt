@@ -72,7 +72,11 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
                 rankingCrown.visibility = View.GONE
             }
 
-            rankingName.text = rankingLine.username.toString()
+            if(rankingLine.username.length > 10) {
+                rankingName.text = "${rankingLine.username.substring(0, 10)}.."
+            } else {
+                rankingName.text = rankingLine.username
+            }
 
             Glide.with(context)
                 .load(rankingLine.userAvatar)

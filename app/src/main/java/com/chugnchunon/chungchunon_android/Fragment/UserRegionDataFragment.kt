@@ -24,6 +24,8 @@ import com.chugnchunon.chungchunon_android.DataClass.DiaryCard
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_region_data.view.*
@@ -51,11 +53,6 @@ class UserRegionDataFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mcontext = context
-    }
-
-    override fun onResume() {
-        super.onResume()
-        resumePause = false
     }
 
     override fun onCreateView(
@@ -122,6 +119,11 @@ class UserRegionDataFragment : Fragment() {
         return binding
     }
 
+    override fun onResume() {
+        super.onResume()
+        resumePause = false
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -142,7 +144,33 @@ class UserRegionDataFragment : Fragment() {
         @SuppressLint("NotifyDataSetChanged")
         override fun onReceive(context: Context?, intent: Intent?) {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
+            val newLikeToggle = intent?.getBooleanExtra("newLikeToggle", true) as Boolean
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
+            val DiaryRef = diaryDB.document("$toggleDiaryId")
+
+            val newLikeNum = hashMapOf(
+                "numLikes" to newNumLikes
+            )
+            DiaryRef.set(newLikeNum, SetOptions.merge())
+
+            val likeUserSet = hashMapOf(
+                "id" to userId,
+                "timestamp" to FieldValue.serverTimestamp(),
+                "diaryId" to toggleDiaryId,
+            )
+
+            if(newLikeToggle) {
+                // 좋아요 누른 경우
+                diaryDB.document("$toggleDiaryId")
+                    .collection("likes").document("$userId")
+                    .set(likeUserSet, SetOptions.merge())
+
+            } else {
+                // 좋아요 해제한 경우
+                diaryDB.document("$toggleDiaryId").collection("likes")
+                    .document("$userId")
+                    .delete()
+            }
 
             userRegionDiaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {

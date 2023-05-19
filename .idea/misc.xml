@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/agreement_sub_box.xml" value="0.182" />
         <entry key="app/src/main/res/drawable/app_update_box.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/avatar_background.xml" value="0.1135" />
+        <entry key="app/src/main/res/drawable/avatar_background_white.xml" value="0.1075" />
         <entry key="app/src/main/res/drawable/block_box.xml" value="0.147" />
         <entry key="app/src/main/res/drawable/bottom_elevation.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/comment_box.xml" value="0.106" />
@@ -19,6 +20,7 @@
         <entry key="app/src/main/res/drawable/default_button_two.xml" value="0.1135" />
         <entry key="app/src/main/res/drawable/diarybox.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/diarybox_bold.xml" value="0.1175" />
+        <entry key="app/src/main/res/drawable/diarybox_notification.xml" value="0.1075" />
         <entry key="app/src/main/res/drawable/diarycard_infobox.xml" value="0.1135" />
         <entry key="app/src/main/res/drawable/diarycard_totalbox.xml" value="0.1003072509765625" />
         <entry key="app/src/main/res/drawable/empty_tall_devider.xml" value="0.1" />
@@ -66,7 +68,9 @@
         <entry key="app/src/main/res/drawable/ic_emotion_1.xml" value="0.1145" />
         <entry key="app/src/main/res/drawable/ic_emotion_2.xml" value="0.1145" />
         <entry key="app/src/main/res/drawable/ic_emptychat.xml" value="0.1565" />
+        <entry key="app/src/main/res/drawable/ic_emptychat_white.xml" value="0.1075" />
         <entry key="app/src/main/res/drawable/ic_emptyheart.xml" value="0.1165" />
+        <entry key="app/src/main/res/drawable/ic_emptyheart_white.xml" value="0.1075" />
         <entry key="app/src/main/res/drawable/ic_envelope.xml" value="0.1175" />
         <entry key="app/src/main/res/drawable/ic_exit.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_filledchat.xml" value="0.1165" />
@@ -175,7 +179,7 @@
         <entry key="app/src/main/res/layout/activity_attraction_detail.xml" value="0.24591503046687008" />
         <entry key="app/src/main/res/layout/activity_avatar_enlarge.xml" value="0.1375" />
         <entry key="app/src/main/res/layout/activity_big_region.xml" value="0.22780797101449277" />
-        <entry key="app/src/main/res/layout/activity_block.xml" value="0.24951782226562502" />
+        <entry key="app/src/main/res/layout/activity_block.xml" value="0.17256011962890627" />
         <entry key="app/src/main/res/layout/activity_block_user.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_block_user_list.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.2539993286132813" />
@@ -184,7 +188,7 @@
         <entry key="app/src/main/res/layout/activity_default_diary_warning.xml" value="0.275" />
         <entry key="app/src/main/res/layout/activity_default_warning.xml" value="0.2763424518743668" />
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
-        <entry key="app/src/main/res/layout/activity_diary_two.xml" value="0.16156616210937508" />
+        <entry key="app/src/main/res/layout/activity_diary_two.xml" value="0.33087310791015634" />
         <entry key="app/src/main/res/layout/activity_edit_diary.xml" value="0.22672424316406256" />
         <entry key="app/src/main/res/layout/activity_edit_diary_warning.xml" value="0.31574074074074077" />
         <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.19738820393880213" />
@@ -218,12 +222,13 @@
         <entry key="app/src/main/res/layout/comment_list_re.xml" value="0.27608915906788245" />
         <entry key="app/src/main/res/layout/custom_marker_view.xml" value="0.153125" />
         <entry key="app/src/main/res/layout/diary_card.xml" value="0.22361450195312496" />
+        <entry key="app/src/main/res/layout/diary_card_notification.xml" value="0.2280498825428816" />
         <entry key="app/src/main/res/layout/diary_card_two.xml" value="0.2810038248697917" />
         <entry key="app/src/main/res/layout/display_image_card.xml" value="0.14947916666666666" />
         <entry key="app/src/main/res/layout/enlarge_image_card.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.22742619168931155" />
         <entry key="app/src/main/res/layout/fragment_all_diary_two.xml" value="0.2033514492753623" />
-        <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.1637649536132812" />
+        <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.2341262817382812" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
         <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.3094828287760416" />
         <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.24512023925781265" />

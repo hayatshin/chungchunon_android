@@ -98,6 +98,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
     companion object {
         var questionClick = false
         var thisStepCheck = true
+        var mondayOrNot = false
     }
 
     lateinit var rankingBarChartView: BarChart

@@ -27,7 +27,10 @@
 
     <string name="read_contact_auth">
 "휴대폰 연락처를 읽을 수 있도록
-권한을 허용해야 친구 보기가 가능합니다."
+권한을 허용해야 친구 보기가 가능합니다.
+
+설정 > 애플리케이션 > 오늘도청춘 > 권한에서
+'연락처'를 허용해주세요."
     </string>
 
     <string name="exit_notification">

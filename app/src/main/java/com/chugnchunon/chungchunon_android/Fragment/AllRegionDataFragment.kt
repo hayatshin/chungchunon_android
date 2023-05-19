@@ -32,6 +32,8 @@ import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companio
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.diary_card_two.view.*
@@ -65,12 +67,6 @@ class AllRegionDataFragment : Fragment() {
         super.onAttach(context)
         mcontext = context
     }
-
-    override fun onResume() {
-        super.onResume()
-        resumePause = false
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -129,7 +125,6 @@ class AllRegionDataFragment : Fragment() {
             false
         )
 
-        // 로컬 브로드캐스트
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             blockReloadFragment,
             IntentFilter("BLOCK_DIARY_INTENT")
@@ -155,8 +150,13 @@ class AllRegionDataFragment : Fragment() {
         return binding
     }
 
-    override fun onDestroy() {
+    override fun onResume() {
+        super.onResume()
+        resumePause = false
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
         LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(
             blockReloadFragment
         );
@@ -168,16 +168,39 @@ class AllRegionDataFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(
             newLikeToggleReceiver
         );
-
-        super.onDestroy()
     }
 
     private var newLikeToggleReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("NotifyDataSetChanged")
         override fun onReceive(context: Context?, intent: Intent?) {
             val toggleDiaryId = intent?.getStringExtra("newDiaryId")
+            val newLikeToggle = intent?.getBooleanExtra("newLikeToggle", true) as Boolean
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
+            val DiaryRef = diaryDB.document("$toggleDiaryId")
 
+            val newLikeNum = hashMapOf(
+                "numLikes" to newNumLikes
+            )
+            DiaryRef.set(newLikeNum, SetOptions.merge())
+
+            val likeUserSet = hashMapOf(
+                "id" to userId,
+                "timestamp" to FieldValue.serverTimestamp(),
+                "diaryId" to toggleDiaryId,
+            )
+
+            if(newLikeToggle) {
+                // 좋아요 누른 경우
+                diaryDB.document("$toggleDiaryId")
+                    .collection("likes").document("$userId")
+                    .set(likeUserSet, SetOptions.merge())
+
+            } else {
+                // 좋아요 해제한 경우
+                diaryDB.document("$toggleDiaryId").collection("likes")
+                    .document("$userId")
+                    .delete()
+            }
 
             diaryItems.forEachIndexed { index, diaryItem ->
                 if (diaryItem.diaryId == toggleDiaryId) {
@@ -199,7 +222,6 @@ class AllRegionDataFragment : Fragment() {
 
     var newNumChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-
             val createDiaryId = intent?.getStringExtra("newDiaryId")
             val createNumComments = intent?.getIntExtra("newNumComments", 0)
 

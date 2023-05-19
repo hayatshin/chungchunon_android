@@ -175,7 +175,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="일기 차단하기"
+                android:text="이 일기를 안 볼래요."
                 android:textColor="@color/black"
                 android:textSize="20dp" />
 
@@ -190,7 +190,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="사람 차단하기"
+                android:text="이 사람 일기를 안 볼래요."
                 android:textColor="@color/black"
                 android:textSize="20dp" />
 

@@ -212,11 +212,9 @@ class BlockActivity : Activity() {
 
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
-            resultView.text = "일기를 차단했습니다."
+            resultView.text = "해당 일기를 차단했습니다."
             resultView.setTextSize(dpTextSize(10f))
             binding.blockBox.addView(resultView)
-
-
 
             diaryDB.document("$diaryId").update("blockedBy", (FieldValue.arrayUnion("$userId")))
                 .addOnSuccessListener {
@@ -233,10 +231,9 @@ class BlockActivity : Activity() {
 
             binding.blockBox.removeAllViews()
             binding.blockBox.addView(blockCheckIcon)
-            resultView.text = "이 사람을 차단했습니다."
+            resultView.text = "이 사람의 일기를 모두 차단했습니다."
             resultView.setTextSize(dpTextSize(10f))
             binding.blockBox.addView(resultView)
-
 
             // userDB에 차단 목록
             userDB.document("${userId}")

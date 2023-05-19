@@ -27,10 +27,9 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_centerInParent="true"
-        app:layout_constraintDimensionRatio="H,1:1"
         android:layout_marginHorizontal="40dp"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/mindbox_update"
         android:orientation="vertical"
         android:weightSum="1">
@@ -39,12 +38,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/rule_header"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="10dp"
                 android:src="@drawable/ic_illustimage"
                 android:layout_width="60dp"
                 android:layout_height="60dp"/>
@@ -62,6 +60,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_marginTop="30dp"
             android:background="@drawable/mindbox_main"
             android:layout_width="match_parent"
             android:layout_height="50dp"

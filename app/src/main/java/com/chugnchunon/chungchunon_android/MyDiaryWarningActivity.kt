@@ -37,7 +37,7 @@ class MyDiaryWarningActivity: Activity() {
 
         if(!recognitionBoolean) unfilledArray.add("인지")
         if(!moodBoolean) unfilledArray.add("마음")
-        if(!diaryBoolean) unfilledArray.add("일기")
+        if(!diaryBoolean) unfilledArray.add("쓰기")
 
         unfilledText = unfilledArray.joinToString(", ")
 
