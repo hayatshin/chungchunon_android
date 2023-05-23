@@ -189,7 +189,7 @@ class AllRegionDataFragment : Fragment() {
                 "diaryId" to toggleDiaryId,
             )
 
-            if(newLikeToggle) {
+            if (newLikeToggle) {
                 // 좋아요 누른 경우
                 diaryDB.document("$toggleDiaryId")
                     .collection("likes").document("$userId")
@@ -508,7 +508,7 @@ class AllRegionDataFragment : Fragment() {
     }
 }
 
-@Keep
-class AllRegionDataLoadingState : ViewModel() {
-    val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
-}
+    @Keep
+    class AllRegionDataLoadingState : ViewModel() {
+        val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
+    }

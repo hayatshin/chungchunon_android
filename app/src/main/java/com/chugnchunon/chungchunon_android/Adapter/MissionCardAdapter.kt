@@ -74,6 +74,7 @@ class MissionCardAdapter(val context: Context, private val missionList: ArrayLis
                     goMissionDetail.putExtra("mdEndPeriod", missionList[position].endPeriod)
                     context.startActivity(goMissionDetail)
                 } else if (missionList[position].documentId == "fourthEvent") {
+
                     val goMissionDetail = Intent(context, MissionDetailActivityManwon::class.java)
                     goMissionDetail.putExtra("mdDocID", missionList[position].documentId)
                     goMissionDetail.putExtra("mdTitle", missionList[position].title)

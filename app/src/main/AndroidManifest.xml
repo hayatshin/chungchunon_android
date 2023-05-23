@@ -188,6 +188,16 @@
             android:name=".LockDiaryActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MoneyActivity.MoneyDetailActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MoneyActivity.MoneyAchieveActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MoneyActivity.MoneyFullActivity"
+            android:windowSoftInputMode="adjustPan" />
         <receiver
             android:name=".BroadcastReceiver.DateChangeBroadcastReceiver"
             android:enabled="true"

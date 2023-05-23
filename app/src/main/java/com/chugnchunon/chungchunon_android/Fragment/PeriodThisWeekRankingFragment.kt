@@ -376,7 +376,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 launch { stepCountToArrayFun() },
                 launch { diaryToArrayFun() },
                 launch { commentToArrayFun() },
-                launch { likeToArrayFun() }
+//                launch { likeToArrayFun() }
             ).joinAll()
 
         } catch (e: Throwable) {
@@ -439,13 +439,17 @@ class PeriodThisWeekRankingFragment : Fragment() {
             dataSteps.data?.forEach { (stepUserId, dateStepCount) ->
                 userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
                     if (keyUserId == stepUserId) {
-                        userStepCountHashMap[keyUserId] =
-                            valueStepCount + (dateStepCount as Long).toInt()
+                        if(dateStepCount.toString().toInt() < 10000) {
+                            userStepCountHashMap[keyUserId] =
+                                valueStepCount + (dateStepCount as Long).toInt()
+                        } else {
+                            userStepCountHashMap[keyUserId] =
+                                valueStepCount + 10000
+                        }
                     }
                 }
             }
         }
-
         userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
             userStepCountHashMap[keyUserId] = ((Math.floor(valueStepCount / 1000.0)) * 10).toInt()
         }

@@ -125,8 +125,8 @@ class LikePersonActivity: Activity() {
                             likePersonAdapter = LikePersonAdapter(this, likePersonList)
                             binding.likePersonRecyclerView.adapter = likePersonAdapter
                             likePersonAdapter.notifyDataSetChanged()
-                            binding.dataLoadingProgressBar.visibility = View.GONE
-                            binding.likePersonRecyclerView.visibility = View.VISIBLE
+//                            binding.dataLoadingProgressBar.visibility = View.GONE
+//                            binding.likePersonRecyclerView.visibility = View.VISIBLE
 
                         }
                 }

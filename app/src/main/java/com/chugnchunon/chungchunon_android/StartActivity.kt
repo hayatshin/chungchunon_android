@@ -62,7 +62,9 @@ class StartActivity : AppCompatActivity() {
 
         val currentUser = auth.currentUser
         val userId = Firebase.auth.currentUser?.uid
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+        val timeZone = java.util.TimeZone.getTimeZone("Asia/Seoul")
+        val currentYear = Calendar.getInstance(timeZone).get(Calendar.YEAR)
 
         if (userId != null) {
             userDB.document("$userId").get()

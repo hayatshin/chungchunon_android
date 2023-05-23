@@ -125,7 +125,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="bottom"
@@ -134,15 +134,16 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
                 android:padding="5dp">
 
                 <ImageView
                     android:id="@+id/womanIcon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginRight="5dp"
                     android:layout_marginBottom="5dp"
                     android:src="@drawable/ic_womanimage" />
 
@@ -150,9 +151,35 @@
                     android:id="@+id/manIcon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginRight="20dp"
                     android:layout_marginBottom="8dp"
                     android:src="@drawable/ic_manimage" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent">
+
+                    <TextView
+                        android:layout_marginRight="10dp"
+                        android:id="@+id/thisMonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/custom_gray"
+                        android:textSize="16dp"
+                        android:textStyle="bold"
+                        tools:text="12월 작성일" />
+
+                    <TextView
+                        android:id="@+id/diaryCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/light_gray"
+                        android:textSize="16dp"
+                        tools:text="15일 / 31일" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -165,36 +192,47 @@
                 android:textStyle="bold"
                 tools:text="1월 1일" />
 
-
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/coinLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="vertical"
-            android:paddingHorizontal="20dp"
+            android:background="@drawable/mindbox_gray"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent">
 
-            <TextView
-                android:id="@+id/thisMonth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:textColor="@color/custom_gray"
-                android:textSize="17dp"
-                android:textStyle="bold"
-                tools:text="12월 작성일" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_coin" />
 
             <TextView
-                android:id="@+id/diaryCount"
+                android:id="@+id/coinTextMoney"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/light_gray"
-                android:textSize="16dp"
-                tools:text="15일 / 31일" />
+                android:layout_marginRight="5dp"
+                android:textColor="@color/main_color"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                tools:text="0원" />
+
+            <TextView
+                android:id="@+id/coinTextExplanation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/custom_gray"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                tools:text="적립" />
+
         </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -603,11 +641,11 @@
                             android:fitsSystemWindows="true"
                             android:gravity="top"
                             android:hint="일기, 생각, 시, 추억 등을 자유롭게 적어주세요."
-                            android:textColorHint="@color/light_gray"
                             android:minHeight="150dp"
                             android:paddingHorizontal="20dp"
                             android:paddingTop="20dp"
                             android:paddingBottom="50dp"
+                            android:textColorHint="@color/light_gray"
                             android:textSize="20dp" />
 
                     </LinearLayout>

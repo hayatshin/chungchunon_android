@@ -19,6 +19,7 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
 import android.text.style.BackgroundColorSpan
+import android.util.Log
 import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
@@ -54,15 +55,21 @@ import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
+import com.chugnchunon.chungchunon_android.MoneyActivity.MoneyDetailActivity
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.Timestamp
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_diary_two.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
+import me.moallemi.tools.daterange.localdate.rangeTo
 import org.apache.commons.lang3.StringUtils
+import java.time.LocalDate
 import kotlin.collections.ArrayList
 import kotlin.random.Random
 
@@ -102,6 +109,18 @@ class MyDiaryFragment : Fragment() {
     private var secondNumber = 2
     private var operator = ""
     private var itemListItems: ArrayList<Any> = ArrayList()
+
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+
+    lateinit var appParticipateDate: Date
+    private var nowDate: Date = Date()
+    private var formatAppParticipateDate: String = ""
+    private var formatNowDate: String = ""
+
+    private var userPoint: Int = 0
+    private var userStepPoint: Int = 0
+//    private var userStepCountHashMap = hashMapOf<String, Int>()
 
     companion object {
         private var secretStatus: Boolean = false
@@ -156,6 +175,38 @@ class MyDiaryFragment : Fragment() {
             myDiaryWarningFeedbackFunction,
             IntentFilter("MY_DIARY_WARNING_FEEDBACK")
         );
+
+        // 데이터 불러오기
+        uiScope.launch(Dispatchers.IO) {
+            launch { appParticipateDate() }.join()
+            launch { stepCountToArrayFun() }.join()
+            launch { diaryToArrayFun() }.join()
+            launch { commentToArrayFun() }.join()
+            withContext(Dispatchers.Main) {
+                launch {
+                    val spanText: SpannableStringBuilder
+                    val decimal = DecimalFormat("#,###")
+
+                    if(userPoint < 10000) {
+                        binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
+                        binding.coinTextExplanation.text = "적립"
+                    } else {
+                        binding.coinTextMoney.text = "10,000원"
+                        binding.coinTextExplanation.text = "달성"
+                    }
+
+                    val userPointSet = hashMapOf(
+                        "userPoint" to userPoint
+                    )
+                    userDB.document("$userId").set(userPointSet, SetOptions.merge())
+                }
+            }
+        }
+
+        binding.coinLayout.setOnClickListener {
+            val goMoneyDetail = Intent(requireActivity(), MoneyDetailActivity::class.java)
+            startActivity(goMoneyDetail)
+        }
 
         // 파트너 체크
         userDB.document("$userId")
@@ -431,48 +482,93 @@ class MyDiaryFragment : Fragment() {
                         .set(recognitionSet, SetOptions.merge())
                 }
 
-                userDB.document("$userId").get()
-                    .addOnSuccessListener { document ->
-                        val username = document.data?.getValue("name")
-                        val stepCount = document.data?.getValue("todayStepCount")
-                        val region = document.data?.getValue("region")
-                        val smallRegion = document.data?.getValue("smallRegion")
-                        val regionGroup = "${region} ${smallRegion}"
+                if(!editDiary) {
+                    userDB.document("$userId").get()
+                        .addOnSuccessListener { document ->
+                            val username = document.data?.getValue("name")
+                            val stepCount = document.data?.getValue("todayStepCount")
+                            val region = document.data?.getValue("region")
+                            val smallRegion = document.data?.getValue("smallRegion")
+                            val regionGroup = "${region} ${smallRegion}"
 
-                        val diarySet = hashMapOf(
-                            "regionGroup" to regionGroup,
-                            "diaryId" to diaryId,
-                            "userId" to userId.toString(),
-                            "monthDate" to writeMonthDate,
-                            "timestamp" to FieldValue.serverTimestamp(),
-                            "todayMood" to binding.todayMood.selectedItem,
-                            "todayDiary" to (binding.todayDiary.text.toString()),
-                            "images" to newImageViewModel.newImageList.value,
-                            "numLikes" to 0,
-                            "numComments" to 0,
-                            "blockedBy" to ArrayList<String>(),
-                            "secret" to secretStatus,
-                        )
+                            val diarySet = hashMapOf(
+                                "regionGroup" to regionGroup,
+                                "diaryId" to diaryId,
+                                "userId" to userId.toString(),
+                                "monthDate" to writeMonthDate,
+                                "timestamp" to FieldValue.serverTimestamp(),
+                                "todayMood" to binding.todayMood.selectedItem,
+                                "todayDiary" to (binding.todayDiary.text.toString()),
+                                "images" to newImageViewModel.newImageList.value,
+                                "numLikes" to 0,
+                                "numComments" to 0,
+                                "blockedBy" to ArrayList<String>(),
+                                "secret" to secretStatus,
+                            )
 
-                        diaryDB
-                            .document(diaryId)
-                            .set(diarySet, SetOptions.merge())
-                            .addOnSuccessListener {
-                                val fragment = requireActivity().supportFragmentManager
+                            diaryDB
+                                .document(diaryId)
+                                .set(diarySet, SetOptions.merge())
+                                .addOnSuccessListener {
+                                    val fragment = requireActivity().supportFragmentManager
 //                                fragment.beginTransaction()
 //                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
 //                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
 
-                                val allFragment = AllDiaryFragmentTwo()
-                                val bundle = Bundle()
-                                bundle.putString("diaryType", "my")
-                                allFragment.arguments = bundle
-                                fragment.beginTransaction()
-                                    .replace(R.id.enterFrameLayout, allFragment).commit()
+                                    val allFragment = AllDiaryFragmentTwo()
+                                    val bundle = Bundle()
+                                    bundle.putString("diaryType", "my")
+                                    allFragment.arguments = bundle
+                                    fragment.beginTransaction()
+                                        .replace(R.id.enterFrameLayout, allFragment).commit()
 
-                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
-                            }
-                    }
+                                    requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+                                }
+                        }
+                } else {
+                    userDB.document("$userId").get()
+                        .addOnSuccessListener { document ->
+                            val username = document.data?.getValue("name")
+                            val stepCount = document.data?.getValue("todayStepCount")
+                            val region = document.data?.getValue("region")
+                            val smallRegion = document.data?.getValue("smallRegion")
+                            val regionGroup = "${region} ${smallRegion}"
+
+                            val diarySet = hashMapOf(
+                                "regionGroup" to regionGroup,
+                                "diaryId" to diaryId,
+                                "userId" to userId.toString(),
+                                "monthDate" to writeMonthDate,
+                                "lastUpdate" to FieldValue.serverTimestamp(),
+                                "todayMood" to binding.todayMood.selectedItem,
+                                "todayDiary" to (binding.todayDiary.text.toString()),
+                                "images" to newImageViewModel.newImageList.value,
+                                "numLikes" to 0,
+                                "numComments" to 0,
+                                "blockedBy" to ArrayList<String>(),
+                                "secret" to secretStatus,
+                            )
+
+                            diaryDB
+                                .document(diaryId)
+                                .set(diarySet, SetOptions.merge())
+                                .addOnSuccessListener {
+                                    val fragment = requireActivity().supportFragmentManager
+//                                fragment.beginTransaction()
+//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+
+                                    val allFragment = AllDiaryFragmentTwo()
+                                    val bundle = Bundle()
+                                    bundle.putString("diaryType", "my")
+                                    allFragment.arguments = bundle
+                                    fragment.beginTransaction()
+                                        .replace(R.id.enterFrameLayout, allFragment).commit()
+
+                                    requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+                                }
+                        }
+                }
             }
         })
 
@@ -850,13 +946,13 @@ class MyDiaryFragment : Fragment() {
                         color(
                             ContextCompat.getColor(
                                 mcontext,
-                                R.color.main_color
+                                R.color.light_gray
                             )
                         ) { append(calendarThisMonthCount) }
                     }
                     .append(" / ${currentMonthDate}일")
 
-                binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일"
+                binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일:"
                 binding.diaryCount.text = spanText
             }
         }
@@ -1116,51 +1212,95 @@ class MyDiaryFragment : Fragment() {
                         }
 
                         // 일기 업로드
-                        userDB.document("$userId").get()
-                            .addOnSuccessListener { document ->
-                                var username = document.data?.getValue("name")
-                                var stepCount = document.data?.getValue("todayStepCount")
-                                val region = document.data?.getValue("region")
-                                val smallRegion = document.data?.getValue("smallRegion")
-                                val regionGroup = "${region} ${smallRegion}"
+                        if(!editDiary) {
+                            userDB.document("$userId").get()
+                                .addOnSuccessListener { document ->
+                                    var username = document.data?.getValue("name")
+                                    var stepCount = document.data?.getValue("todayStepCount")
+                                    val region = document.data?.getValue("region")
+                                    val smallRegion = document.data?.getValue("smallRegion")
+                                    val regionGroup = "${region} ${smallRegion}"
 
-                                val diarySet = hashMapOf(
-                                    "regionGroup" to regionGroup,
-                                    "diaryId" to diaryId,
-                                    "userId" to userId.toString(),
-                                    "monthDate" to writeMonthDate,
-                                    "timestamp" to FieldValue.serverTimestamp(),
-                                    "todayMood" to binding.todayMood.selectedItem,
-                                    "todayDiary" to (binding.todayDiary.text.toString()),
-                                    "images" to newImageViewModel.newImageList.value,
-                                    "numLikes" to 0,
-                                    "numComments" to 0,
-                                    "blockedBy" to ArrayList<String>(),
-                                    "secret" to secretStatus
-                                )
+                                    val diarySet = hashMapOf(
+                                        "regionGroup" to regionGroup,
+                                        "diaryId" to diaryId,
+                                        "userId" to userId.toString(),
+                                        "monthDate" to writeMonthDate,
+                                        "timestamp" to FieldValue.serverTimestamp(),
+                                        "todayMood" to binding.todayMood.selectedItem,
+                                        "todayDiary" to (binding.todayDiary.text.toString()),
+                                        "images" to newImageViewModel.newImageList.value,
+                                        "numLikes" to 0,
+                                        "numComments" to 0,
+                                        "blockedBy" to ArrayList<String>(),
+                                        "secret" to secretStatus
+                                    )
 
-                                diaryDB
-                                    .document(diaryId)
-                                    .set(diarySet, SetOptions.merge())
-                                    .addOnSuccessListener {
-                                        val fragment = requireActivity().supportFragmentManager
+                                    diaryDB
+                                        .document(diaryId)
+                                        .set(diarySet, SetOptions.merge())
+                                        .addOnSuccessListener {
+                                            val fragment = requireActivity().supportFragmentManager
 //                                fragment.beginTransaction()
 //                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
 //                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
 
-                                        val allFragment = AllDiaryFragmentTwo()
-                                        val bundle = Bundle()
-                                        bundle.putString("diaryType", "my")
-                                        allFragment.arguments = bundle
-                                        fragment.beginTransaction()
-                                            .replace(R.id.enterFrameLayout, allFragment).commit()
+                                            val allFragment = AllDiaryFragmentTwo()
+                                            val bundle = Bundle()
+                                            bundle.putString("diaryType", "my")
+                                            allFragment.arguments = bundle
+                                            fragment.beginTransaction()
+                                                .replace(R.id.enterFrameLayout, allFragment).commit()
 
-                                        requireActivity().bottomNav.selectedItemId =
-                                            R.id.ourTodayMenu
-                                    }
+                                            requireActivity().bottomNav.selectedItemId =
+                                                R.id.ourTodayMenu
+                                        }
+                                }
+                        } else {
+                            userDB.document("$userId").get()
+                                .addOnSuccessListener { document ->
+                                    var username = document.data?.getValue("name")
+                                    var stepCount = document.data?.getValue("todayStepCount")
+                                    val region = document.data?.getValue("region")
+                                    val smallRegion = document.data?.getValue("smallRegion")
+                                    val regionGroup = "${region} ${smallRegion}"
 
+                                    val diarySet = hashMapOf(
+                                        "regionGroup" to regionGroup,
+                                        "diaryId" to diaryId,
+                                        "userId" to userId.toString(),
+                                        "monthDate" to writeMonthDate,
+                                        "lastUpdate" to FieldValue.serverTimestamp(),
+                                        "todayMood" to binding.todayMood.selectedItem,
+                                        "todayDiary" to (binding.todayDiary.text.toString()),
+                                        "images" to newImageViewModel.newImageList.value,
+                                        "numLikes" to 0,
+                                        "numComments" to 0,
+                                        "blockedBy" to ArrayList<String>(),
+                                        "secret" to secretStatus
+                                    )
 
-                            }
+                                    diaryDB
+                                        .document(diaryId)
+                                        .set(diarySet, SetOptions.merge())
+                                        .addOnSuccessListener {
+                                            val fragment = requireActivity().supportFragmentManager
+//                                fragment.beginTransaction()
+//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+
+                                            val allFragment = AllDiaryFragmentTwo()
+                                            val bundle = Bundle()
+                                            bundle.putString("diaryType", "my")
+                                            allFragment.arguments = bundle
+                                            fragment.beginTransaction()
+                                                .replace(R.id.enterFrameLayout, allFragment).commit()
+
+                                            requireActivity().bottomNav.selectedItemId =
+                                                R.id.ourTodayMenu
+                                        }
+                                }
+                        }
                     }
                 }
             } else {
@@ -1424,6 +1564,86 @@ class MyDiaryFragment : Fragment() {
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         return spanText
+    }
+
+
+    // 점수 계산
+    suspend fun appParticipateDate() {
+        val currentDate = Calendar.getInstance()
+        val userData = userDB.document("$userId").get().await()
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
+        val timeZone = TimeZone.getTimeZone("Asia/Seoul")
+        val now = Calendar.getInstance(timeZone).time
+
+        val appTimestamp = userData.data?.getValue("timestamp") as Timestamp
+        val getString = DateFormat().convertTimeStampToDate(appTimestamp)
+        appParticipateDate = dateFormat.parse(getString)
+
+        formatAppParticipateDate = dateFormat.format(appParticipateDate)
+        formatNowDate = dateFormat.format(now)
+
+        Log.d("날짜", "${formatAppParticipateDate} / ${formatNowDate}")
+
+    }
+
+    suspend fun stepCountToArrayFun() {
+        val startDate = LocalDate.of(
+            formatAppParticipateDate.substring(0, 4).toInt(),
+            formatAppParticipateDate.substring(5, 7).toInt(),
+            formatAppParticipateDate.substring(8, 10).toInt()
+        )
+        val endDate = LocalDate.of(
+            formatNowDate.substring(0, 4).toInt(),
+            formatNowDate.substring(5, 7).toInt(),
+            formatNowDate.substring(8, 10).toInt()
+        )
+
+        for (stepDate in startDate..endDate) {
+            val dataSteps = db.collection("user_step_count")
+                .document("$userId")
+                .get()
+                .await()
+
+            dataSteps.data?.forEach { (stepPeriod, dateStepCount) ->
+
+                if(stepPeriod == stepDate.toString()) {
+                    if(dateStepCount.toString().toInt() < 10000) {
+                        userStepPoint += dateStepCount.toString().toInt()
+                    } else {
+                        userStepPoint += 10000
+                    }
+                }
+            }
+        }
+        userPoint = ((Math.floor(userStepPoint / 1000.0)) * 10).toInt()
+    }
+
+
+    suspend fun diaryToArrayFun() {
+
+        val diaryDocuments = db.collection("diary")
+            .whereGreaterThanOrEqualTo("timestamp", appParticipateDate)
+            .whereEqualTo("userId", userId)
+            .get()
+            .await()
+
+        for (diaryDocument in diaryDocuments) {
+            userPoint += 100
+        }
+    }
+
+    suspend fun commentToArrayFun() {
+        val commentDocuments = db.collectionGroup("comments")
+            .whereGreaterThanOrEqualTo("timestamp", appParticipateDate)
+            .whereEqualTo("userId", userId)
+            .get()
+            .await()
+
+        for (commentDocument in commentDocuments) {
+            userPoint += 20
+        }
     }
 
 

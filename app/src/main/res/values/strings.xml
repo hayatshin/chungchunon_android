@@ -6,6 +6,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="how_to_make_money">
+"만원 적립을 달성하신 후 아래 '환전하기' 버튼을 클릭해주세요.
+전화번호를 입력하시면 해당 번호로 상품권을 보내드립니다."
+    </string>
+
     <string name="edit_diary_warning_text">
 "수정하신 내용이 없습니다.
 수정 후 확인을 눌러주세요!"
@@ -60,10 +65,10 @@
     </string>
 
     <string name="point_introduction">
-"일기 1회 → 100점
-걸음수 1000보 → 10점
-댓글 1회 → 20점
-좋아요 1회 → 10점"
+"일기 1회 → 100원
+댓글 1회 → 20원
+걸음수 1,000보 → 10원
+(하루 걸음수 최대 10,000보)"
     </string>
 
     <string name="agreement_header">

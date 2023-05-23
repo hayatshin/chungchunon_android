@@ -163,8 +163,9 @@ class PeriodLastWeekRankingFragment : Fragment() {
 
         val startOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
+//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            add(Calendar.DAY_OF_MONTH, -7)
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
@@ -173,8 +174,9 @@ class PeriodLastWeekRankingFragment : Fragment() {
 
         val endOfLastWeek = Calendar.getInstance(timeZone).apply {
             firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
+//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR))
             set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            add(Calendar.DAY_OF_MONTH, -7)
             set(Calendar.HOUR_OF_DAY, 23)
             set(Calendar.MINUTE, 59)
             set(Calendar.SECOND, 59)
@@ -368,7 +370,7 @@ class PeriodLastWeekRankingFragment : Fragment() {
                 launch { stepCountToArrayFun() },
                 launch { diaryToArrayFun() },
                 launch { commentToArrayFun() },
-                launch { likeToArrayFun() }
+//                launch { likeToArrayFun() }
             ).joinAll()
 
         } catch (e: Throwable) {
@@ -431,13 +433,17 @@ class PeriodLastWeekRankingFragment : Fragment() {
             dataSteps.data?.forEach { (stepUserId, dateStepCount) ->
                 userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
                     if (keyUserId == stepUserId) {
-                        userStepCountHashMap[keyUserId] =
-                            valueStepCount + (dateStepCount as Long).toInt()
+                        if(dateStepCount.toString().toInt() < 10000) {
+                            userStepCountHashMap[keyUserId] =
+                                valueStepCount + (dateStepCount as Long).toInt()
+                        } else {
+                            userStepCountHashMap[keyUserId] =
+                                valueStepCount + 10000
+                        }
                     }
                 }
             }
         }
-
         userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
             userStepCountHashMap[keyUserId] = (Math.floor(valueStepCount / 1000.0) * 10).toInt()
         }

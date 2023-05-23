@@ -159,13 +159,13 @@ class CommentActivity : FragmentActivity() {
         commentDataLoading = ViewModelProvider(this).get(CommentDataLoading::class.java)
         commentDataLoading.loadingCompleteData.observe(this, Observer { value ->
 
-            if (!commentDataLoading.loadingCompleteData.value!!) {
-                binding.commentRecyclerView.visibility = View.GONE
-                binding.dataLoadingProgressBar.visibility = View.VISIBLE
-            } else {
-                binding.commentRecyclerView.visibility = View.VISIBLE
-                binding.dataLoadingProgressBar.visibility = View.GONE
-            }
+//            if (!commentDataLoading.loadingCompleteData.value!!) {
+//                binding.commentRecyclerView.visibility = View.GONE
+//                binding.dataLoadingProgressBar.visibility = View.VISIBLE
+//            } else {
+//                binding.commentRecyclerView.visibility = View.VISIBLE
+//                binding.dataLoadingProgressBar.visibility = View.GONE
+//            }
         })
 
         // 배경 뒤로가기

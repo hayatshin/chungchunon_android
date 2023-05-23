@@ -160,7 +160,7 @@ class MyDataFragment : Fragment() {
                 "diaryId" to toggleDiaryId,
             )
 
-            if(newLikeToggle) {
+            if (newLikeToggle) {
                 // 좋아요 누른 경우
                 diaryDB.document("$toggleDiaryId")
                     .collection("likes").document("$userId")
@@ -470,6 +470,7 @@ class MyDataFragment : Fragment() {
             }
     }
 }
+
 
 @Keep
 class MyDataLoadingState : ViewModel() {

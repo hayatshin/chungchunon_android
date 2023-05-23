@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="main_color">#FF2D78</color>
+    <color name="very_light_main_color">#FFDEEA</color>
     <color name="light_main_color">#F3B4C9</color>
     <color name="dark_main_color">#440816</color>
     <color name="kakao_yellow">#FFFFE812</color>

@@ -85,7 +85,7 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
             var decimal = DecimalFormat("#,###")
             var pointResult = decimal.format(rankingLine.point)
 
-            rankingPoint.text = "${pointResult}점"
+            rankingPoint.text = "${pointResult}원"
 
         }
     }
