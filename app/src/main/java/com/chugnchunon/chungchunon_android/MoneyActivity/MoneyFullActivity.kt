@@ -1,7 +1,10 @@
 package com.chugnchunon.chungchunon_android.MoneyActivity
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
+import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.PhoneFillClass
 import com.chugnchunon.chungchunon_android.databinding.ActivityMoneyFullBinding
 import com.google.firebase.auth.ktx.auth
@@ -32,7 +35,10 @@ class MoneyFullActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
+        Handler().postDelayed({
+            val goDiaryTwo = Intent(this, DiaryTwoActivity::class.java)
+            startActivity(goDiaryTwo)
+        }, 2000)
     }
 }
 

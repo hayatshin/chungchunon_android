@@ -229,6 +229,45 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/communityContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="45dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/communityLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1">
+
+                        <TextView
+                            android:id="@+id/communityLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".4"
+                            android:text="소속기관"
+                            android:textSize="20dp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/editCommunity"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".6"
+                            android:background="@null"
+                            android:gravity="right"
+                            android:inputType="textMultiLine"
+                            android:singleLine="false"
+                            android:textColor="@color/black"
+                            android:textSize="21dp"
+                            tools:text="서귀포친구들" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </ScrollView>

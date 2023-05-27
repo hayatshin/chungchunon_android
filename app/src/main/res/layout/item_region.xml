@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <TextView
+        android:textColor="@color/custom_gray"
         android:background="@drawable/recycler_default_item"
         android:textSize="18dp"
         android:id="@+id/regionSelectText"

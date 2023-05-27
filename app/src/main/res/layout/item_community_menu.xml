@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/communityBackBox"
+    android:layout_width="wrap_content"
+    android:layout_marginRight="20dp"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="15dp"
+    android:paddingVertical="10dp"
+    android:layout_marginVertical="10dp"
+    android:background="@drawable/mindbox_radius_border_20">
+
+    <ImageView
+        android:clipToOutline="true"
+        android:scaleType="centerCrop"
+        android:id="@+id/communityImage"
+        android:layout_width="40dp"
+        android:layout_height="25dp"
+        android:background="@drawable/mindbox_gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/communityTitle"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/communityTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/custom_gray"
+        android:textSize="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/communityImage"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="서울특별시" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

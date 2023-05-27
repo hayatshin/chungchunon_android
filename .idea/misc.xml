@@ -146,6 +146,8 @@
         <entry key="app/src/main/res/drawable/mindbox_light_main.xml" value="0.1015" />
         <entry key="app/src/main/res/drawable/mindbox_main.xml" value="0.154" />
         <entry key="app/src/main/res/drawable/mindbox_radius_border.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/mindbox_radius_border_10.xml" value="0.1015" />
+        <entry key="app/src/main/res/drawable/mindbox_radius_main_20.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_transparent_gray.xml" value="0.164" />
         <entry key="app/src/main/res/drawable/mindbox_update.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_yellow.xml" value="0.1015" />
@@ -184,6 +186,7 @@
         <entry key="app/src/main/res/layout/activity_block_user.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_block_user_list.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/layout/activity_comment.xml" value="0.2539993286132813" />
+        <entry key="app/src/main/res/layout/activity_community.xml" value="0.19387450041594328" />
         <entry key="app/src/main/res/layout/activity_community_register.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_default_cancel_warning.xml" value="0.275" />
         <entry key="app/src/main/res/layout/activity_default_diary_warning.xml" value="0.275" />
@@ -245,6 +248,9 @@
         <entry key="app/src/main/res/layout/gender_item_spinner.xml" value="0.14945652173913043" />
         <entry key="app/src/main/res/layout/gender_spinner_item.xml" value="0.15520833333333334" />
         <entry key="app/src/main/res/layout/image_card.xml" value="0.26791277258566976" />
+        <entry key="app/src/main/res/layout/item_community.xml" value="0.27037037037037037" />
+        <entry key="app/src/main/res/layout/item_community_menu.xml" value="0.48145435474537035" />
+        <entry key="app/src/main/res/layout/item_community_result.xml" value="0.27037037037037037" />
         <entry key="app/src/main/res/layout/item_region.xml" value="0.28688449583191805" />
         <entry key="app/src/main/res/layout/item_spinner.xml" value="0.15729166666666666" />
         <entry key="app/src/main/res/layout/item_spinner_gender.xml" value="0.2427536231884058" />

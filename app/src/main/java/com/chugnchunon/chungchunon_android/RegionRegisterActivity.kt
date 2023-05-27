@@ -29,10 +29,7 @@ class RegionRegisterActivity : AppCompatActivity() {
         ActivityRegionBinding.inflate(layoutInflater)
     }
 
-    companion object {
-        var editRegionCheck: Boolean = false
-    }
-
+    var db = Firebase.firestore
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
     var selectedRegion: String = ""
@@ -51,7 +48,7 @@ class RegionRegisterActivity : AppCompatActivity() {
         binding.backBtn.visibility = View.GONE
 
         binding.backBtn.setOnClickListener {
-            if (!RegionRegisterFragment.smallRegionCheck) {
+            if (!smallRegionCheck) {
                 // 첫번째 화면
                 binding.regionResult.setText(null)
                 finish()
@@ -91,11 +88,37 @@ class RegionRegisterActivity : AppCompatActivity() {
                 "region" to selectedRegion,
                 "smallRegion" to selectedSmallRegion
             )
+            // 다음 페이지
             userDB.document("$userId")
                 .set(regionSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
-                    startActivity(goDiary)
+                    val selectedFullRegion = "${selectedRegion} ${selectedSmallRegion}"
+
+                    db.collection("community")
+                        .whereEqualTo("fullRegion", selectedFullRegion)
+                        .get()
+                        .addOnCompleteListener { task ->
+                            if(task.isSuccessful) {
+                                val document = task.result
+                                if(document != null) {
+                                    if(!document.isEmpty) {
+                                        // 소속기관 있음
+                                        val goCommunity = Intent(applicationContext, CommunityRegisterActivity::class.java)
+                                        goCommunity.putExtra("fullRegion", selectedFullRegion)
+                                        startActivity(goCommunity)
+                                    } else {
+                                        // 소속기관 없음
+                                        val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
+                                        startActivity(goDiary)
+                                    }
+                                } else {
+                                    // 소속기관 없음
+                                    val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
+                                    startActivity(goDiary)
+                                }
+                            }
+                        }
+
                 }
         }
     }
@@ -133,7 +156,7 @@ class RegionRegisterActivity : AppCompatActivity() {
 
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
             binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
-            binding.regionDescription.text = "앱 시작하기 버튼을 눌러주세요"
+            binding.regionDescription.text = "확인 버튼을 눌러주세요"
         }
     }
 

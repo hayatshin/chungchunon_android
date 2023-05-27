@@ -84,6 +84,9 @@ class FriendDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
+        binding.communitySelectRecycler.visibility = View.GONE
+
+
         binding.recyclerDiary.itemAnimator = null
         swipeRefreshLayout = binding.swipeRecyclerDiary
         binding.swipeRecyclerDiary.setOnRefreshListener {
@@ -124,7 +127,18 @@ class FriendDataFragment : Fragment() {
 
                 uiScope.launch {
                     getData()
+
+                    Handler().postDelayed({
+                        friendDataLoadingState.loadingCompleteData.value =
+                            true
+
+                        if (friendDiaryItems.size == 0) {
+                            binding.friendNoItemText.visibility =
+                                View.VISIBLE
+                        }
+                    }, 1500)
                 }
+
             }
         }
 
@@ -165,6 +179,10 @@ class FriendDataFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         resumePause = false
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
 
@@ -331,7 +349,6 @@ class FriendDataFragment : Fragment() {
     }
 
     private suspend fun getData() {
-
 
         val myContactList = getRefinedAllContactNumbers()
 
@@ -603,12 +620,11 @@ class FriendDataFragment : Fragment() {
                                     }
                                 }
                             } catch (e: Exception) {
-                                // null
+                                Log.d("친구", "$e")
                             }
                         }
                 }
             }
-
     }
 }
 

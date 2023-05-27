@@ -63,6 +63,8 @@ class MyDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
+        binding.communitySelectRecycler.visibility = View.GONE
+
         binding.recyclerDiary.itemAnimator = null
         swipeRefreshLayout = binding.swipeRecyclerDiary
         binding.swipeRecyclerDiary.setOnRefreshListener {
@@ -124,6 +126,10 @@ class MyDataFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         resumePause = false
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     override fun onDestroy() {

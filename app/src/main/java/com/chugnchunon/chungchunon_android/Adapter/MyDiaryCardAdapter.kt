@@ -141,10 +141,6 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                             likeToggleCheckForMyData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
                         }
-                    } else {
-                        // userId 없음
-                        likeToggleCheckForMyData.put(position, false)
-                        likeIcon.setImageResource(R.drawable.ic_emptyheart)
                     }
                 }
         }
@@ -167,7 +163,6 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
 
         // 좋아요 토글
         holder.itemView.likeIcon.setOnClickListener { view ->
-
             if(likeToggleCheckForMyData[position]!!) {
                 // 좋아요를 이미 누른 상태
                 holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)

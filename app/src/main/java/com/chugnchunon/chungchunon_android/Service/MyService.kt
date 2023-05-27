@@ -256,7 +256,7 @@ class MyService : Service(), SensorEventListener {
                             todayTotalStepCount = stepCount - dummyStepCount
                             val valueGap = todayTotalStepCount!! - originalTodayTotalStepCount
 
-                            if(valueGap < 10) {
+                            if(valueGap < 100) {
                                 // 정상 작동
                                 StepCountNotification(this, todayTotalStepCount)
 

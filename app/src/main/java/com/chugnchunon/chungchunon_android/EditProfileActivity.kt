@@ -38,15 +38,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.Fragment.MoreFragment
+import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
 import com.chugnchunon.chungchunon_android.databinding.ActivityEditProfileTwoBinding
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import kotlinx.android.synthetic.main.activity_edit_profile_two.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -72,6 +76,10 @@ class EditProfileActivity : AppCompatActivity() {
     private var newBirthDay = ""
     private var newRegion = ""
     private var newSmallRegion = ""
+    private var newCommunity = ""
+    private var dbCommunities: ArrayList<String> = ArrayList()
+    private var newCommunityList: ArrayList<String> = ArrayList()
+
     private var intentRegion = ""
     private var intentSmallRegion = ""
 
@@ -80,18 +88,22 @@ class EditProfileActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition (0, R.anim.slide_down_enter)
+        overridePendingTransition(0, R.anim.slide_down_enter)
     }
 
     companion object {
         const val REQ_GALLERY: Int = 100
         const val REQ_MULTI_PHOTO: Int = 2000
+        const val EDIT_REGION_REQ = 1
+        const val EDIT_COMMUNITY_REQ = 2
     }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        smallRegionCheck = false
 
         binding.editProfileScrollView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
@@ -124,26 +136,37 @@ class EditProfileActivity : AppCompatActivity() {
 
         editFillClass.avatarFill.observe(this, Observer { value ->
             if (value) {
+                Log.d("수정", "아바타")
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.nameFill.observe(this, Observer { value ->
             if (value) {
+                Log.d("수정", "이름")
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.genderFill.observe(this, Observer { value ->
             if (value) {
+                Log.d("수정", "성별")
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.birthFill.observe(this, Observer { value ->
             if (value) {
+                Log.d("수정", "생년")
                 binding.profileEditBtn.isEnabled = true
             }
         })
         editFillClass.regionFill.observe(this, Observer { value ->
             if (value) {
+                Log.d("수정", "지역")
+                binding.profileEditBtn.isEnabled = true
+            }
+        })
+        editFillClass.communityFill.observe(this, Observer { value ->
+            if (value) {
+                Log.d("수정", "소속")
                 binding.profileEditBtn.isEnabled = true
             }
         })
@@ -158,33 +181,55 @@ class EditProfileActivity : AppCompatActivity() {
         // 초기 셋업
         userDB.document("$userId").get()
             .addOnSuccessListener { document ->
-                newAvatar = document.data?.getValue("avatar").toString()
-                newName = document.data?.getValue("name").toString()
-                newGender = document.data?.getValue("gender").toString()
-                val genderIndex : Int = if(newGender == "여성") 0 else 1
-                newBirthYear = document.data?.getValue("birthYear").toString()
-                newBirthDay = document.data?.getValue("birthDay").toString()
-                val showBirth =
-                    "${newBirthYear}-${newBirthDay.substring(0, 2)}-${newBirthDay.substring(2, 4)}"
-                birthMonth = newBirthDay.substring(0, 2)
-                birthDate = newBirthDay.substring(2, 4)
-                newRegion = document.data?.getValue("region").toString()
-                newSmallRegion = document.data?.getValue("smallRegion").toString()
+                try {
+                    newAvatar = document.data?.getValue("avatar").toString()
+                    newName = document.data?.getValue("name").toString()
+                    newGender = document.data?.getValue("gender").toString()
+                    val genderIndex: Int = if (newGender == "여성") 0 else 1
+                    newBirthYear = document.data?.getValue("birthYear").toString()
+                    newBirthDay = document.data?.getValue("birthDay").toString()
+                    val showBirth =
+                        "${newBirthYear}-${newBirthDay.substring(0, 2)}-${
+                            newBirthDay.substring(
+                                2,
+                                4
+                            )
+                        }"
+                    birthMonth = newBirthDay.substring(0, 2)
+                    birthDate = newBirthDay.substring(2, 4)
+                    newRegion = document.data?.getValue("region").toString()
+                    newSmallRegion = document.data?.getValue("smallRegion").toString()
 
-                Glide.with(this)
-                    .load(newAvatar)
-                    .into(binding.avatarImage)
+                    if (document.contains("community")) {
+                        dbCommunities = document.data?.getValue("community") as ArrayList<String>
 
-                binding.editName.setText(newName)
-                binding.editGender.setSelection(genderIndex)
-                binding.editBirth.setText(showBirth)
-                binding.editRegion.setText("${newRegion} ${newSmallRegion}")
+                        if (dbCommunities.size == 0) {
+                            newCommunity = "없음"
+                        } else {
+                            newCommunity = dbCommunities.joinToString(", ")
+                        }
+                    } else {
+                        newCommunity = "없음"
+                    }
+                    binding.editCommunity.setText(newCommunity)
+
+                    Glide.with(this)
+                        .load(newAvatar)
+                        .into(binding.avatarImage)
+
+                    binding.editName.setText(newName)
+                    binding.editGender.setSelection(genderIndex)
+                    binding.editBirth.setText(showBirth)
+                    binding.editRegion.setText("${newRegion} ${newSmallRegion}")
+
+                } catch (e: Exception) {
+                    // null
+                }
 
             }
 
         binding.editGender.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                editFillClass.genderFill.value = true
                 newGender = binding.editGender.selectedItem.toString()
             }
 
@@ -193,6 +238,12 @@ class EditProfileActivity : AppCompatActivity() {
             }
         })
 
+        binding.editGender.setOnTouchListener { _, event ->
+            if(event.action == MotionEvent.ACTION_DOWN) {
+                editFillClass.genderFill.value = true
+            }
+            false
+        }
 
 
         // 이미지 수정
@@ -211,7 +262,8 @@ class EditProfileActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (readMediaImagesPermission == PackageManager.PERMISSION_DENIED) {
                     // 권한 요청
-                    requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                    requestPermissions(
+                        arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
                         REQ_GALLERY
                     )
                 } else {
@@ -317,29 +369,69 @@ class EditProfileActivity : AppCompatActivity() {
             }
 
         // 지역 수정
-        binding.editRegion.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        binding.editRegion.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                val editRegionLine =  binding.editRegion.lineCount
+                val editRegionLine = binding.editRegion.lineCount
 
-                if(editRegionLine == 1) {
+                if (editRegionLine == 1) {
                     binding.editRegion.gravity = Gravity.END
                 } else {
                     binding.editRegion.gravity = Gravity.START
                 }
                 binding.editRegion.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
-        } )
+        })
 
 
         binding.editRegion.setOnClickListener {
-            var goEditRegion = Intent(this, EditRegionRegisterActivity::class.java)
-            startActivityForResult(goEditRegion, 1)
+            val goEditRegion = Intent(this, EditRegionRegisterActivity::class.java)
+            goEditRegion.putExtra("userCommunities", newCommunity)
+            startActivityForResult(goEditRegion, EDIT_REGION_REQ)
+        }
+
+        // 커뮤니티 수정
+        binding.editCommunity.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val editRegionLine = binding.editCommunity.lineCount
+
+                if (editRegionLine == 1) {
+                    binding.editCommunity.gravity = Gravity.END
+                } else {
+                    binding.editCommunity.gravity = Gravity.START
+                }
+                binding.editCommunity.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
+
+        binding.editCommunity.setOnClickListener {
+            val goEditCommunity = Intent(this, EditCommunityRegisterActivity::class.java)
+            goEditCommunity.putExtra("fullRegion", "${newRegion} ${newSmallRegion}")
+            goEditCommunity.putExtra("userCommunities", dbCommunities)
+            startActivityForResult(goEditCommunity, EDIT_COMMUNITY_REQ)
         }
 
         // 수정 버튼 클릭
         binding.profileEditBtn.setOnClickListener {
             binding.profileEditBtn.text = ""
             binding.profileProgressBtn.visibility = View.VISIBLE
+
+            for (newCommunity in newCommunityList) {
+                if (!dbCommunities.contains(newCommunity)) {
+                    // 더해짐
+                    db.collection("community").document(newCommunity)
+                        .update("users", (FieldValue.arrayUnion("$userId")))
+                }
+            }
+
+            for (dbCommunity in dbCommunities) {
+                if (!newCommunityList.contains(dbCommunity)) {
+                    // 지워짐
+                    db.collection("community").document(dbCommunity)
+                        .update("users", (FieldValue.arrayRemove("$userId")))
+                }
+            }
 
             if (editFillClass.avatarFill.value == false) {
                 // 이미지 없는 경우
@@ -351,6 +443,7 @@ class EditProfileActivity : AppCompatActivity() {
                     "birthDay" to newBirthDay,
                     "region" to newRegion,
                     "smallRegion" to newSmallRegion,
+                    "community" to newCommunityList
                 )
 
                 userDB.document("$userId").set(newPersonalInfoSet, SetOptions.merge())
@@ -389,6 +482,7 @@ class EditProfileActivity : AppCompatActivity() {
                                     "birthDay" to newBirthDay,
                                     "region" to newRegion,
                                     "smallRegion" to newSmallRegion,
+                                    "community" to newCommunityList
                                 )
 
                                 userDB.document("$userId")
@@ -448,20 +542,36 @@ class EditProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            1 -> {
+            EDIT_REGION_REQ -> {
                 // 지역
                 if (resultCode == RESULT_OK) {
-                    var region = data!!.getStringExtra("region")
-                    var smallRegion = data!!.getStringExtra("smallRegion")
+                    val region = data!!.getStringExtra("region")
+                    val smallRegion = data!!.getStringExtra("smallRegion")
                     binding.editRegion.text = "$region $smallRegion"
                     newRegion = region.toString()
                     newSmallRegion = smallRegion.toString()
                     editFillClass.regionFill.value = true
                 }
             }
+            EDIT_COMMUNITY_REQ -> {
+                if (resultCode == RESULT_OK) {
+                    newCommunityList =
+                        data!!.getStringArrayListExtra("newCommunityList") as ArrayList<String>
+
+                    editFillClass.communityFill.value = true
+
+                    if (newCommunityList.size == 0) {
+                        binding.editCommunity.setText("없음")
+
+                    } else {
+                        val showNewCommunity = newCommunityList.joinToString(", ")
+                        binding.editCommunity.setText(showNewCommunity)
+                    }
+                }
+            }
             REQ_MULTI_PHOTO -> {
                 // 사진 가져오기
-                if(data?.data != null) {
+                if (data?.data != null) {
                     selectedAvatarURI = data?.data!!
 
                     Glide.with(this)
@@ -490,4 +600,5 @@ class EditCheckClass : ViewModel() {
     val genderFill by lazy { MutableLiveData<Boolean>(false) }
     val birthFill by lazy { MutableLiveData<Boolean>(false) }
     val regionFill by lazy { MutableLiveData<Boolean>(false) }
+    val communityFill by lazy { MutableLiveData<Boolean>(false) }
 }

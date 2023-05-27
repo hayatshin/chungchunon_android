@@ -487,12 +487,8 @@ class MyDiaryFragment : Fragment() {
                         .addOnSuccessListener { document ->
                             val username = document.data?.getValue("name")
                             val stepCount = document.data?.getValue("todayStepCount")
-                            val region = document.data?.getValue("region")
-                            val smallRegion = document.data?.getValue("smallRegion")
-                            val regionGroup = "${region} ${smallRegion}"
 
                             val diarySet = hashMapOf(
-                                "regionGroup" to regionGroup,
                                 "diaryId" to diaryId,
                                 "userId" to userId.toString(),
                                 "monthDate" to writeMonthDate,
@@ -530,12 +526,8 @@ class MyDiaryFragment : Fragment() {
                         .addOnSuccessListener { document ->
                             val username = document.data?.getValue("name")
                             val stepCount = document.data?.getValue("todayStepCount")
-                            val region = document.data?.getValue("region")
-                            val smallRegion = document.data?.getValue("smallRegion")
-                            val regionGroup = "${region} ${smallRegion}"
 
                             val diarySet = hashMapOf(
-                                "regionGroup" to regionGroup,
                                 "diaryId" to diaryId,
                                 "userId" to userId.toString(),
                                 "monthDate" to writeMonthDate,
@@ -1217,12 +1209,8 @@ class MyDiaryFragment : Fragment() {
                                 .addOnSuccessListener { document ->
                                     var username = document.data?.getValue("name")
                                     var stepCount = document.data?.getValue("todayStepCount")
-                                    val region = document.data?.getValue("region")
-                                    val smallRegion = document.data?.getValue("smallRegion")
-                                    val regionGroup = "${region} ${smallRegion}"
 
                                     val diarySet = hashMapOf(
-                                        "regionGroup" to regionGroup,
                                         "diaryId" to diaryId,
                                         "userId" to userId.toString(),
                                         "monthDate" to writeMonthDate,
@@ -1261,12 +1249,8 @@ class MyDiaryFragment : Fragment() {
                                 .addOnSuccessListener { document ->
                                     var username = document.data?.getValue("name")
                                     var stepCount = document.data?.getValue("todayStepCount")
-                                    val region = document.data?.getValue("region")
-                                    val smallRegion = document.data?.getValue("smallRegion")
-                                    val regionGroup = "${region} ${smallRegion}"
 
                                     val diarySet = hashMapOf(
-                                        "regionGroup" to regionGroup,
                                         "diaryId" to diaryId,
                                         "userId" to userId.toString(),
                                         "monthDate" to writeMonthDate,

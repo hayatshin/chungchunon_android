@@ -76,6 +76,8 @@ class AllRegionDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
+        binding.communitySelectRecycler.visibility = View.GONE
+
         // 코멘트 노티피케이션
         notificationDiaryId =
             activity?.intent?.getStringExtra("notificationDiaryId").toString()
@@ -153,6 +155,10 @@ class AllRegionDataFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         resumePause = false
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     override fun onDestroy() {

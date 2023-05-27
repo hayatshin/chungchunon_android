@@ -48,7 +48,7 @@
                     android:id="@+id/subAchieveText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="40dp"
                     android:lineHeight="28dp"
                     android:text="더 좋은 이벤트를 준비하겠습니다.\n조금만 더 기다려주세요!"
                     android:textAlignment="center"

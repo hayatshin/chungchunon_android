@@ -207,10 +207,6 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                             likeToggleCheckForFriendNotification.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
                         }
-                    } else {
-                        // userId 없음
-                        likeToggleCheckForFriendNotification.put(position, false)
-                        likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
                     }
                 }
         }
@@ -253,7 +249,6 @@ class FriendDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
             // 좋아요 토글
             holder.itemView.likeIcon.setOnClickListener { view ->
-
                 if(likeToggleCheckForFriendData[position]!!) {
                     // 좋아요를 이미 누른 상태
                     holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)

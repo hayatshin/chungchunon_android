@@ -188,10 +188,6 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
                             likeToggleCheckForRegionData.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart)
                         }
-                    } else {
-                        // userId 없음
-                        likeToggleCheckForRegionData.put(position, false)
-                        likeIcon.setImageResource(R.drawable.ic_emptyheart)
                     }
                 }
         }
@@ -214,7 +210,6 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
         // 좋아요 토글
         holder.itemView.likeIcon.setOnClickListener { view ->
-
             if(likeToggleCheckForRegionData[position]!!) {
                 // 좋아요를 이미 누른 상태
                 holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)

@@ -229,7 +229,7 @@
                 android:textColor="@color/custom_gray"
                 android:textSize="20dp"
                 android:textStyle="bold"
-                tools:text="적립" />
+                android:text="적립" />
 
         </LinearLayout>
 

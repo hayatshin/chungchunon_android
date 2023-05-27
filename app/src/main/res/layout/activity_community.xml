@@ -7,14 +7,14 @@
     android:paddingTop="25dp">
 
     <LinearLayout
-        android:id="@+id/regionResultLayout"
+        android:id="@+id/communityResultLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/region_box"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingBottom="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/regionViewPager"
+        app:layout_constraintBottom_toTopOf="@+id/communityRecycler"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -42,61 +42,60 @@
 
         <TextView
             android:textColor="@color/black"
-            android:id="@+id/regionDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:text="거주지역을 목록에서 선택하세요."
+            android:layout_marginBottom="5dp"
+            android:text="아래 목록 중 소속된 기관이 있다면,"
             android:textSize="16dp"
             android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:text="소속 기관을 선택해주세요. (중복 가능)"
+            android:textSize="16dp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:textColor="@color/black"
-                android:id="@+id/regionResult"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:textSize="23dp"
-                android:textStyle="bold"
-                tools:text="서울특별시" />
+        <TextView
+            android:textColor="@color/main_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="없으시면 비운 채로 '앱 시작하기'를 눌러주세요."
+            android:textSize="16dp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:textColor="@color/black"
-                android:id="@+id/smallRegionResult"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="23dp"
-                android:textStyle="bold"
-                tools:text="광진구" />
-        </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                android:id="@+id/communityResultRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"/>
 
     </LinearLayout>
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/regionViewPager"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/communityRecycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/regionRegisterBtn"
-        app:layout_constraintTop_toBottomOf="@+id/regionResultLayout" />
+        app:layout_constraintBottom_toTopOf="@id/communityRegisterBtn"
+        app:layout_constraintTop_toBottomOf="@+id/communityResultLayout"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:textColor="@color/white"
         android:textSize="20dp"
         android:textStyle="bold"
         android:layout_marginTop="20dp"
-        android:id="@+id/regionRegisterBtn"
+        android:id="@+id/communityRegisterBtn"
         android:background="@drawable/default_button"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="확인"
+        android:text="앱 시작하기"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/regionViewPager" />
+        app:layout_constraintTop_toBottomOf="@+id/communityRecycler" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

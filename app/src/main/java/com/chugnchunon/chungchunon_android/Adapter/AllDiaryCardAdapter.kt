@@ -248,26 +248,25 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                         val document = task.result
                         if (document != null) {
                             if (document.exists()) {
+                                // 좋아요 누름
                                 likeToggleCheckForAllNotification.put(position, true)
                                 likeIcon.setImageResource(R.drawable.ic_filledheart)
                             } else {
+                                // 좋아요 안 누름
                                 likeToggleCheckForAllNotification.put(position, false)
                                 likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
                             }
                         } else {
+                            // 좋아요 안 누름
                             likeToggleCheckForAllNotification.put(position, false)
                             likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
                         }
-                    } else {
-                        // userId 없음
-                        likeToggleCheckForAllNotification.put(position, false)
-                        likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
                     }
                 }
         }
     }
 
-        override fun getItemViewType(position: Int): Int {
+    override fun getItemViewType(position: Int): Int {
 //        return super.getItemViewType(position)
         return if (items[position].userId == "kakao:2358828971") {
             VIEW_NOTIFICATION
@@ -293,7 +292,7 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-        if(holder is CardViewHolder) {
+        if (holder is CardViewHolder) {
             holder.bind(position)
 
             holder.itemView.userAvatar.setOnClickListener { view ->
@@ -315,7 +314,6 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
 
             // 좋아요 토글
             holder.itemView.likeIcon.setOnClickListener { view ->
-
                 if (likeToggleCheckForAllData[position]!!) {
                     // 좋아요를 이미 누른 상태
                     holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
@@ -432,7 +430,6 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
 
 
     }
-
 
 
     override fun getItemCount(): Int = items.size

@@ -121,6 +121,9 @@
             android:name=".RegionRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".CommunityRegisterActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
             android:name=".CommentActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
@@ -135,6 +138,9 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".EditRegionRegisterActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".EditCommunityRegisterActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".AgreementActivity"
