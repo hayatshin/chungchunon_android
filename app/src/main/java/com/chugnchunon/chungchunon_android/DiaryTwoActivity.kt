@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +29,7 @@ import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryTwoBinding
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -41,6 +43,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import java.lang.NumberFormatException
 import java.time.LocalDateTime
+import java.util.*
 
 class DiaryTwoActivity : AppCompatActivity() {
 
@@ -95,6 +98,8 @@ class DiaryTwoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        userTrackGoogleAnalytics()
 
         val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
 
@@ -625,5 +630,24 @@ class DiaryTwoActivity : AppCompatActivity() {
 
             }
         }
+    }
+    private fun userTrackGoogleAnalytics() {
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(applicationContext)
+        val currentDate = Date()
+
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+//        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+//        val startDate = calendar.time
+//        calendar.add(Calendar.DATE, 6)
+//        val endDate = calendar.time
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDateString = dateFormat.format(currentDate)
+
+        val bundle = Bundle().apply {
+            putString("access_date", currentDateString)
+        }
+        firebaseAnalytics.logEvent("user_access_date", bundle)
     }
 }

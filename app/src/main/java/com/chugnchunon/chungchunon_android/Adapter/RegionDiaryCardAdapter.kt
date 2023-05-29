@@ -32,15 +32,20 @@ import kotlinx.android.synthetic.main.diary_card_two.view.*
 
 
 class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) :
-    RecyclerView.Adapter<RegionDiaryCardAdapter.CardViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var userDB = Firebase.firestore.collection("users")
     var userId = Firebase.auth.currentUser?.uid
     var diaryDB = Firebase.firestore.collection("diary")
 
+    private val VIEW_GENERAL = 1
+    private val VIEW_NOTIFICATION = 2
+
     companion object {
         var likeToggleCheckForRegionData: MutableMap<Int, Boolean> = mutableMapOf()
         var likeNumLikesForRegionData: MutableMap<Int, Int> = mutableMapOf()
+        var likeToggleCheckForRegionNotification: MutableMap<Int, Boolean> = mutableMapOf()
+        var likeNumLikesForRegionNotification: MutableMap<Int, Int> = mutableMapOf()
     }
 
     inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -193,87 +198,220 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
+    inner class CardViewHolderForNotification(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
+        var userDiaryView: TextView = itemView.findViewById<TextView>(R.id.userDiary)
+        var userLikeView: TextView = itemView.findViewById<TextView>(R.id.likeText)
+        var userCommentView: TextView = itemView.findViewById<TextView>(R.id.commentText)
+        var likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
+        var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
+        var imageDisplayRecyclerView: RecyclerView =
+            itemView.findViewById(R.id.imageDisplayRecyclerView)
+
+        @SuppressLint("SetTextI18n")
+        fun bind(position: Int) {
+            userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
+            userDiaryView.text = items[position].diary
+            userLikeView.text = "좋아요 ${items[position].numLikes}"
+            userCommentView.text = "댓글 ${items[position].numComments}"
+
+            // 이미지 작업
+            if (items[position].images == null || items[position].images?.size == 0) {
+                imageDisplayRecyclerView.visibility = View.GONE
+            } else {
+                imageDisplayRecyclerView.visibility = View.VISIBLE
+                imageDisplayRecyclerView.adapter =
+                    DisplayPhotosAdapter(context, items[position].images!!)
+            }
+
+            // 좋아요 토글 작업
+            likeNumLikesForRegionNotification.put(position, items[position].numLikes!!.toInt())
+
+            diaryDB.document(items[position].diaryId).collection("likes").document("$userId")
+                .get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val document = task.result
+                        if (document != null) {
+                            if (document.exists()) {
+                                likeToggleCheckForRegionNotification.put(position, true)
+                                likeIcon.setImageResource(R.drawable.ic_filledheart)
+                            } else {
+                                likeToggleCheckForRegionNotification.put(position, false)
+                                likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
+                            }
+                        } else {
+                            likeToggleCheckForRegionNotification.put(position, false)
+                            likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
+                        }
+                    }
+                }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+//        return super.getItemViewType(position)
+        return if (items[position].userId == "kakao:2358828971") {
+            VIEW_NOTIFICATION
+        } else {
+            VIEW_GENERAL
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.diary_card_two, parent, false)
-        return CardViewHolder(v)
+        return if (viewType == VIEW_GENERAL) {
+            val v =
+                LayoutInflater.from(parent.context).inflate(R.layout.diary_card_two, parent, false)
+            CardViewHolder(v)
+        } else {
+            val v = LayoutInflater.from(parent.context)
+                .inflate(R.layout.diary_card_notification, parent, false)
+            CardViewHolderForNotification(v)
+        }
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        holder.bind(position)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-        holder.itemView.userAvatar.setOnClickListener { view ->
-            val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
-            goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
-            context.startActivity(goEnlargeAvatar)
-        }
+        if(holder is CardViewHolder) {
+            holder.bind(position)
 
-        // 좋아요 토글
-        holder.itemView.likeIcon.setOnClickListener { view ->
-            if(likeToggleCheckForRegionData[position]!!) {
-                // 좋아요를 이미 누른 상태
-                holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
-                val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() - 1
-                holder.itemView.likeText.text = "좋아요 $newLikeNum"
-                likeNumLikesForRegionData[position] = newLikeNum
-                likeToggleCheckForRegionData[position] = false
-
-                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                intent.setAction("LIKE_TOGGLE_ACTION")
-                intent.putExtra("newDiaryId", items[position].diaryId)
-                intent.putExtra("newLikeToggle", false)
-                intent.putExtra("newNumLikes", newLikeNum)
-                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-            } else {
-                // 좋아요를 누르지 않은 상태
-                holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
-                val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() + 1
-                holder.itemView.likeText.text = "좋아요 $newLikeNum"
-                likeNumLikesForRegionData[position] = newLikeNum
-                likeToggleCheckForRegionData[position] = true
-
-                val intent = Intent(context, AllDiaryFragmentTwo::class.java)
-                intent.setAction("LIKE_TOGGLE_ACTION")
-                intent.putExtra("newDiaryId", items[position].diaryId)
-                intent.putExtra("newLikeToggle", true)
-                intent.putExtra("newNumLikes", newLikeNum)
-                LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+            holder.itemView.userAvatar.setOnClickListener { view ->
+                val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
+                goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
+                context.startActivity(goEnlargeAvatar)
             }
-        }
 
-        // 댓글버튼 클릭
-        holder.itemView.commentBox.setOnClickListener { view ->
-            resumePause = true
+            // 좋아요 토글
+            holder.itemView.likeIcon.setOnClickListener { view ->
+                if(likeToggleCheckForRegionData[position]!!) {
+                    // 좋아요를 이미 누른 상태
+                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart)
+                    val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() - 1
+                    holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                    likeNumLikesForRegionData[position] = newLikeNum
+                    likeToggleCheckForRegionData[position] = false
 
-            val openComment = Intent(context, CommentActivity::class.java)
-            openComment.putExtra("diaryId", items[position].diaryId)
-            openComment.putExtra("diaryPosition", position)
-            context.startActivity(openComment)
-        }
+                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                    intent.setAction("LIKE_TOGGLE_ACTION")
+                    intent.putExtra("newDiaryId", items[position].diaryId)
+                    intent.putExtra("newLikeToggle", false)
+                    intent.putExtra("newNumLikes", newLikeNum)
+                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                } else {
+                    // 좋아요를 누르지 않은 상태
+                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                    val newLikeNum = likeNumLikesForRegionData[position]!!.toInt() + 1
+                    holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                    likeNumLikesForRegionData[position] = newLikeNum
+                    likeToggleCheckForRegionData[position] = true
 
-        // 차단 아이콘 클릭
-        holder.itemView.moreIcon.setOnClickListener { view ->
-            resumePause = true
+                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                    intent.setAction("LIKE_TOGGLE_ACTION")
+                    intent.putExtra("newDiaryId", items[position].diaryId)
+                    intent.putExtra("newLikeToggle", true)
+                    intent.putExtra("newNumLikes", newLikeNum)
+                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                }
+            }
 
-            val openBlockActivity = Intent(context, BlockActivity::class.java)
-            openBlockActivity.putExtra("diaryId", items[position].diaryId)
-            openBlockActivity.putExtra("diaryUserId", items[position].userId)
-            openBlockActivity.putExtra("diaryType", "region")
-            context.startActivity(openBlockActivity)
-        }
-
-        holder.itemView.likeText.setOnClickListener {
-
-            if (likeNumLikesForRegionData[position] != 0) {
+            // 댓글버튼 클릭
+            holder.itemView.commentBox.setOnClickListener { view ->
                 resumePause = true
 
-                val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
-                openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
-                openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
-                context.startActivity(openLikePersonActivity)
+                val openComment = Intent(context, CommentActivity::class.java)
+                openComment.putExtra("diaryId", items[position].diaryId)
+                openComment.putExtra("diaryPosition", position)
+                context.startActivity(openComment)
             }
 
+            // 차단 아이콘 클릭
+            holder.itemView.moreIcon.setOnClickListener { view ->
+                resumePause = true
+
+                val openBlockActivity = Intent(context, BlockActivity::class.java)
+                openBlockActivity.putExtra("diaryId", items[position].diaryId)
+                openBlockActivity.putExtra("diaryUserId", items[position].userId)
+                openBlockActivity.putExtra("diaryType", "region")
+                context.startActivity(openBlockActivity)
+            }
+
+            holder.itemView.likeText.setOnClickListener {
+
+                if (likeNumLikesForRegionData[position] != 0) {
+                    resumePause = true
+
+                    val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
+                    openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
+                    openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
+                    context.startActivity(openLikePersonActivity)
+                }
+
+            }
+        } else if (holder is CardViewHolderForNotification) {
+            holder.bind(position)
+
+            // 좋아요 토글
+            holder.itemView.likeIcon.setOnClickListener { view ->
+
+                if (likeToggleCheckForRegionNotification[position]!!) {
+                    // 좋아요를 이미 누른 상태
+                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_emptyheart_white)
+                    val newLikeNum = likeNumLikesForRegionNotification[position]!!.toInt() - 1
+                    holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                    likeNumLikesForRegionNotification[position] = newLikeNum
+                    likeToggleCheckForRegionNotification[position] = false
+
+                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                    intent.setAction("LIKE_TOGGLE_ACTION")
+                    intent.putExtra("newDiaryId", items[position].diaryId)
+                    intent.putExtra("newLikeToggle", false)
+                    intent.putExtra("newNumLikes", newLikeNum)
+                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                } else {
+                    // 좋아요를 누르지 않은 상태
+                    holder.itemView.likeIcon.setImageResource(R.drawable.ic_filledheart)
+                    val newLikeNum = likeNumLikesForRegionNotification[position]!!.toInt() + 1
+                    holder.itemView.likeText.text = "좋아요 $newLikeNum"
+                    likeNumLikesForRegionNotification[position] = newLikeNum
+                    likeToggleCheckForRegionNotification[position] = true
+
+                    val intent = Intent(context, AllDiaryFragmentTwo::class.java)
+                    intent.setAction("LIKE_TOGGLE_ACTION")
+                    intent.putExtra("newDiaryId", items[position].diaryId)
+                    intent.putExtra("newLikeToggle", true)
+                    intent.putExtra("newNumLikes", newLikeNum)
+                    LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                }
+            }
+
+            // 댓글버튼 클릭
+            holder.itemView.commentBox.setOnClickListener { view ->
+                resumePause = true
+
+                val openComment = Intent(context, CommentActivity::class.java)
+                openComment.putExtra("diaryId", items[position].diaryId)
+                openComment.putExtra("diaryPosition", position)
+                context.startActivity(openComment)
+            }
+
+            holder.itemView.likeText.setOnClickListener {
+
+                if (likeNumLikesForRegionNotification[position] != 0) {
+                    resumePause = true
+
+                    val openLikePersonActivity = Intent(context, LikePersonActivity::class.java)
+                    openLikePersonActivity.putExtra("diaryId", items[position].diaryId)
+                    openLikePersonActivity.putExtra("diaryUserId", items[position].userId)
+                    context.startActivity(openLikePersonActivity)
+                }
+
+            }
         }
+
+
     }
 
     override fun getItemCount(): Int = items.size

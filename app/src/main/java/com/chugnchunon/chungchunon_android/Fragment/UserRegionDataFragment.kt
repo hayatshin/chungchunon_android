@@ -284,6 +284,8 @@ class UserRegionDataFragment : Fragment() {
             .addOnSuccessListener { originUserData ->
                 val originUserRegion = originUserData.data?.getValue("region").toString()
                 val originUserSmallRegion = originUserData.data?.getValue("smallRegion").toString()
+                val userSmallRegionParts = originUserSmallRegion.split(" ")
+                val userRegionLastPart = userSmallRegionParts.last()
                 val originUserFullRegion = "${originUserRegion} ${originUserSmallRegion}"
 
                 db.collection("region_image")
@@ -298,12 +300,12 @@ class UserRegionDataFragment : Fragment() {
                                     val regionImage =
                                         regionImageDocument.data?.getValue("regionImage").toString()
                                     regionCommunitySet = Community(
-                                        originUserSmallRegion,
+                                        userRegionLastPart,
                                         regionImage
                                     )
                                 } else {
                                     regionCommunitySet = Community(
-                                        originUserSmallRegion,
+                                        userRegionLastPart,
                                         null
                                     )
                                 }
@@ -311,7 +313,7 @@ class UserRegionDataFragment : Fragment() {
                                 communityMenuAdapter.notifyDataSetChanged()
                             } else {
                                 regionCommunitySet = Community(
-                                    originUserSmallRegion,
+                                    userRegionLastPart,
                                     null
                                 )
                                 regionCommunityItems.add(regionCommunitySet)

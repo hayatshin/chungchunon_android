@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -42,7 +43,7 @@ class CommunityMenuAdapter(private var context: Context, private var regionCommu
 
     inner class CommunityViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
 
-        val communityBackBoxView: ConstraintLayout = itemView.findViewById(R.id.communityBackBox)
+        val communityBackBoxView: LinearLayout = itemView.findViewById(R.id.communityBackBox)
         val communityTitleView: TextView = itemView.findViewById(R.id.communityTitle)
         val communityImageView: ImageView = itemView.findViewById(R.id.communityImage)
 
@@ -63,11 +64,13 @@ class CommunityMenuAdapter(private var context: Context, private var regionCommu
             communityTitleView.text = regionCommunityItems!!.get(position).communityTitle
 
             if(regionCommunityItems!!.get(position).communityImage != null) {
+                communityImageView.visibility = View.VISIBLE
+
                 Glide.with(context)
                     .load(regionCommunityItems!!.get(position).communityImage)
                     .into(communityImageView)
             } else {
-                communityImageView.setImageResource(R.drawable.mindbox_gray)
+                communityImageView.visibility = View.GONE
             }
         }
     }
