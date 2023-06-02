@@ -288,7 +288,7 @@ class UserRegionDataFragment : Fragment() {
                 val userRegionLastPart = userSmallRegionParts.last()
                 val originUserFullRegion = "${originUserRegion} ${originUserSmallRegion}"
 
-                db.collection("region_image")
+                db.collection("contract_region")
                     .document(originUserFullRegion)
                     .get()
                     .addOnCompleteListener { task ->
@@ -321,7 +321,6 @@ class UserRegionDataFragment : Fragment() {
                             }
 
                             db.collection("community")
-                                .whereEqualTo("fullRegion", originUserFullRegion)
                                 .get()
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
@@ -336,9 +335,10 @@ class UserRegionDataFragment : Fragment() {
                                                     val communityImage =
                                                         communityData.data.getValue("communityImage")
                                                             .toString()
-                                                    val communityUsers = communityData.data.getValue("users") as ArrayList<String>
+                                                    val communityUsers =
+                                                        communityData.data.getValue("users") as ArrayList<String>
 
-                                                    if(communityUsers.contains(userId)) {
+                                                    if (communityUsers.contains(userId)) {
                                                         regionCommunitySet = Community(
                                                             communityTitle,
                                                             communityImage
@@ -346,8 +346,6 @@ class UserRegionDataFragment : Fragment() {
                                                         regionCommunityItems.add(regionCommunitySet)
                                                         communityMenuAdapter.notifyDataSetChanged()
                                                     }
-
-
                                                 }
                                             } else {
                                                 // 소속기관 없음
@@ -398,160 +396,161 @@ class UserRegionDataFragment : Fragment() {
                             db.collection("community").document(selectCommunity)
                                 .get()
                                 .addOnSuccessListener { communityData ->
-                                    val communityUsers = communityData.data?.getValue("users") as ArrayList<String>
+                                    val communityUsers =
+                                        communityData.data?.getValue("users") as ArrayList<String>
 
-                                        if(communityUsers.contains(diaryUserId)) {
-                                            // 유저 정보
-                                            userDB.document(diaryUserId)
-                                                .get()
-                                                .addOnCompleteListener { userTask ->
-                                                    val userData = userTask.result
-                                                    if (userData != null) {
-                                                        val userCommunity =
-                                                            userData.data?.getValue("community") as ArrayList<String>
+                                    if (communityUsers.contains(diaryUserId)) {
+                                        // 유저 정보
+                                        userDB.document(diaryUserId)
+                                            .get()
+                                            .addOnCompleteListener { userTask ->
+                                                val userData = userTask.result
+                                                if (userData != null) {
+                                                    val userCommunity =
+                                                        userData.data?.getValue("community") as ArrayList<String>
 
-                                                        // 유저 정보 o
-                                                        userFinalId = diaryUserId
-                                                        userFinalName =
-                                                            userData.data?.getValue("name").toString()
-                                                        userFinalAvatar =
-                                                            userData.data?.getValue("avatar") as String
+                                                    // 유저 정보 o
+                                                    userFinalId = diaryUserId
+                                                    userFinalName =
+                                                        userData.data?.getValue("name").toString()
+                                                    userFinalAvatar =
+                                                        userData.data?.getValue("avatar") as String
 
-                                                        db.collection("user_step_count")
-                                                            .document(diaryUserId)
-                                                            .get()
-                                                            .addOnCompleteListener { task ->
-                                                                var stepDocuments = task.result
-                                                                if (stepDocuments.contains(timeDate)) {
-                                                                    // 해당 기간 걸음수 데이터 o
-                                                                    val stepDoc =
-                                                                        stepDocuments.getLong(timeDate)
-                                                                    userFinalStep = stepDoc as Long
+                                                    db.collection("user_step_count")
+                                                        .document(diaryUserId)
+                                                        .get()
+                                                        .addOnCompleteListener { task ->
+                                                            var stepDocuments = task.result
+                                                            if (stepDocuments.contains(timeDate)) {
+                                                                // 해당 기간 걸음수 데이터 o
+                                                                val stepDoc =
+                                                                    stepDocuments.getLong(timeDate)
+                                                                userFinalStep = stepDoc as Long
 
-                                                                    // 이미지 여부
-                                                                    if (document.data.contains("images")) {
-                                                                        // 이미지 o
-                                                                        val diaryImages =
-                                                                            document.data?.getValue("images") as ArrayList<String>
+                                                                // 이미지 여부
+                                                                if (document.data.contains("images")) {
+                                                                    // 이미지 o
+                                                                    val diaryImages =
+                                                                        document.data?.getValue("images") as ArrayList<String>
 
-                                                                        diarySet = DiaryCard(
-                                                                            userId = userFinalId,
-                                                                            username = userFinalName,
-                                                                            userAvatar = userFinalAvatar,
-                                                                            diaryId = diaryId,
-                                                                            writeTime = DateFormat().convertMillis(
-                                                                                timefromdb
-                                                                            ),
-                                                                            stepCount = userFinalStep,
-                                                                            mood = diaryMood,
-                                                                            diary = diaryDiary,
-                                                                            numLikes = numLikes,
-                                                                            numComments = numComments,
-                                                                            images = diaryImages,
-                                                                            secret = false
-                                                                        )
-
-                                                                    } else {
-                                                                        // 이미지 x
-                                                                        diarySet = DiaryCard(
-                                                                            userId = userFinalId,
-                                                                            username = userFinalName,
-                                                                            userAvatar = userFinalAvatar,
-                                                                            diaryId = diaryId,
-                                                                            writeTime = DateFormat().convertMillis(
-                                                                                timefromdb
-                                                                            ),
-                                                                            stepCount = userFinalStep,
-                                                                            mood = diaryMood,
-                                                                            diary = diaryDiary,
-                                                                            numLikes = numLikes,
-                                                                            numComments = numComments,
-                                                                            secret = false
-                                                                        )
-                                                                    }
-                                                                    userRegionDiaryItems.add(diarySet)
-                                                                    userRegionDiaryItems.sortWith(
-                                                                        compareBy({ it.writeTime })
+                                                                    diarySet = DiaryCard(
+                                                                        userId = userFinalId,
+                                                                        username = userFinalName,
+                                                                        userAvatar = userFinalAvatar,
+                                                                        diaryId = diaryId,
+                                                                        writeTime = DateFormat().convertMillis(
+                                                                            timefromdb
+                                                                        ),
+                                                                        stepCount = userFinalStep,
+                                                                        mood = diaryMood,
+                                                                        diary = diaryDiary,
+                                                                        numLikes = numLikes,
+                                                                        numComments = numComments,
+                                                                        images = diaryImages,
+                                                                        secret = false
                                                                     )
-                                                                    userRegionDiaryItems.reverse()
-                                                                    adapter.notifyDataSetChanged()
 
-                                                                    if (userRegionDiaryItems.size == 0) {
-                                                                        binding.noItemText.visibility =
-                                                                            View.VISIBLE
-                                                                    } else {
-                                                                        binding.noItemText.visibility =
-                                                                            View.GONE
-                                                                        binding.recyclerDiary.visibility =
-                                                                            View.VISIBLE
-                                                                    }
-                                                                    userDataLoadingState.loadingCompleteData.value =
-                                                                        true
                                                                 } else {
-                                                                    // 해당 기간 걸음수 데이터 x
-                                                                    if (document.data.contains("images")) {
-                                                                        // 이미지 o
-                                                                        val diaryImages =
-                                                                            document.data?.getValue("images") as ArrayList<String>
-
-                                                                        diarySet = DiaryCard(
-                                                                            userId = userFinalId,
-                                                                            username = userFinalName,
-                                                                            userAvatar = userFinalAvatar,
-                                                                            diaryId = diaryId,
-                                                                            writeTime = DateFormat().convertMillis(
-                                                                                timefromdb
-                                                                            ),
-                                                                            stepCount = userFinalStep,
-                                                                            mood = diaryMood,
-                                                                            diary = diaryDiary,
-                                                                            numLikes = numLikes,
-                                                                            numComments = numComments,
-                                                                            images = diaryImages,
-                                                                            secret = false
-                                                                        )
-
-                                                                    } else {
-                                                                        // 이미지 x
-                                                                        diarySet = DiaryCard(
-                                                                            userId = userFinalId,
-                                                                            username = userFinalName,
-                                                                            userAvatar = userFinalAvatar,
-                                                                            diaryId = diaryId,
-                                                                            writeTime = DateFormat().convertMillis(
-                                                                                timefromdb
-                                                                            ),
-                                                                            stepCount = userFinalStep,
-                                                                            mood = diaryMood,
-                                                                            diary = diaryDiary,
-                                                                            numLikes = numLikes,
-                                                                            numComments = numComments,
-                                                                            secret = false
-                                                                        )
-                                                                    }
-                                                                    userRegionDiaryItems.add(diarySet)
-                                                                    userRegionDiaryItems.sortWith(
-                                                                        compareBy({ it.writeTime })
+                                                                    // 이미지 x
+                                                                    diarySet = DiaryCard(
+                                                                        userId = userFinalId,
+                                                                        username = userFinalName,
+                                                                        userAvatar = userFinalAvatar,
+                                                                        diaryId = diaryId,
+                                                                        writeTime = DateFormat().convertMillis(
+                                                                            timefromdb
+                                                                        ),
+                                                                        stepCount = userFinalStep,
+                                                                        mood = diaryMood,
+                                                                        diary = diaryDiary,
+                                                                        numLikes = numLikes,
+                                                                        numComments = numComments,
+                                                                        secret = false
                                                                     )
-                                                                    userRegionDiaryItems.reverse()
-                                                                    adapter.notifyDataSetChanged()
-
-                                                                    if (userRegionDiaryItems.size == 0) {
-                                                                        binding.noItemText.visibility =
-                                                                            View.VISIBLE
-                                                                    } else {
-                                                                        binding.noItemText.visibility =
-                                                                            View.GONE
-                                                                        binding.recyclerDiary.visibility =
-                                                                            View.VISIBLE
-                                                                    }
-                                                                    userDataLoadingState.loadingCompleteData.value =
-                                                                        true
                                                                 }
+                                                                userRegionDiaryItems.add(diarySet)
+                                                                userRegionDiaryItems.sortWith(
+                                                                    compareBy({ it.writeTime })
+                                                                )
+                                                                userRegionDiaryItems.reverse()
+                                                                adapter.notifyDataSetChanged()
 
+                                                                if (userRegionDiaryItems.size == 0) {
+                                                                    binding.noItemText.visibility =
+                                                                        View.VISIBLE
+                                                                } else {
+                                                                    binding.noItemText.visibility =
+                                                                        View.GONE
+                                                                    binding.recyclerDiary.visibility =
+                                                                        View.VISIBLE
+                                                                }
+                                                                userDataLoadingState.loadingCompleteData.value =
+                                                                    true
+                                                            } else {
+                                                                // 해당 기간 걸음수 데이터 x
+                                                                if (document.data.contains("images")) {
+                                                                    // 이미지 o
+                                                                    val diaryImages =
+                                                                        document.data?.getValue("images") as ArrayList<String>
+
+                                                                    diarySet = DiaryCard(
+                                                                        userId = userFinalId,
+                                                                        username = userFinalName,
+                                                                        userAvatar = userFinalAvatar,
+                                                                        diaryId = diaryId,
+                                                                        writeTime = DateFormat().convertMillis(
+                                                                            timefromdb
+                                                                        ),
+                                                                        stepCount = userFinalStep,
+                                                                        mood = diaryMood,
+                                                                        diary = diaryDiary,
+                                                                        numLikes = numLikes,
+                                                                        numComments = numComments,
+                                                                        images = diaryImages,
+                                                                        secret = false
+                                                                    )
+
+                                                                } else {
+                                                                    // 이미지 x
+                                                                    diarySet = DiaryCard(
+                                                                        userId = userFinalId,
+                                                                        username = userFinalName,
+                                                                        userAvatar = userFinalAvatar,
+                                                                        diaryId = diaryId,
+                                                                        writeTime = DateFormat().convertMillis(
+                                                                            timefromdb
+                                                                        ),
+                                                                        stepCount = userFinalStep,
+                                                                        mood = diaryMood,
+                                                                        diary = diaryDiary,
+                                                                        numLikes = numLikes,
+                                                                        numComments = numComments,
+                                                                        secret = false
+                                                                    )
+                                                                }
+                                                                userRegionDiaryItems.add(diarySet)
+                                                                userRegionDiaryItems.sortWith(
+                                                                    compareBy({ it.writeTime })
+                                                                )
+                                                                userRegionDiaryItems.reverse()
+                                                                adapter.notifyDataSetChanged()
+
+                                                                if (userRegionDiaryItems.size == 0) {
+                                                                    binding.noItemText.visibility =
+                                                                        View.VISIBLE
+                                                                } else {
+                                                                    binding.noItemText.visibility =
+                                                                        View.GONE
+                                                                    binding.recyclerDiary.visibility =
+                                                                        View.VISIBLE
+                                                                }
+                                                                userDataLoadingState.loadingCompleteData.value =
+                                                                    true
                                                             }
-                                                    }
+
+                                                        }
                                                 }
+                                            }
                                     }
                                 }
 
@@ -621,7 +620,9 @@ class UserRegionDataFragment : Fragment() {
                                                 val diaryUserFullRegion =
                                                     "${diaryUserRegion} ${diaryUserSmallRegion}"
 
-                                                if (diaryUserFullRegion == originUserFullRegion) {
+                                                if ((diaryUserFullRegion == originUserFullRegion || diaryUserId == "kakao:2358828971")
+                                                    && !diaryUserId.startsWith("notice:community")
+                                                ) {
 
                                                     // 유저 정보 o
                                                     userFinalId = diaryUserId

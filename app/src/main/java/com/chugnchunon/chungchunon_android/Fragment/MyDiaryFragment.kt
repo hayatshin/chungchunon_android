@@ -3,10 +3,12 @@ package com.chugnchunon.chungchunon_android.Fragment
 import com.chugnchunon.chungchunon_android.Service.MyService
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
@@ -19,6 +21,7 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
 import android.text.style.BackgroundColorSpan
+import android.util.Base64
 import android.util.Log
 import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
@@ -28,6 +31,7 @@ import android.view.animation.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,6 +55,7 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.*
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
@@ -64,6 +69,7 @@ import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_diary_two.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -122,6 +128,13 @@ class MyDiaryFragment : Fragment() {
     private var userStepPoint: Int = 0
 //    private var userStepCountHashMap = hashMapOf<String, Int>()
 
+    private var contractOrNot: Boolean = false
+    private var contractRegionExist: Boolean = false
+    private var userSmallRegion: String = ""
+    private var userFullRegion: String = ""
+
+    private var removeZeroCurrentMonth = ""
+
     companion object {
         private var secretStatus: Boolean = false
 
@@ -156,7 +169,7 @@ class MyDiaryFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             stepAuthGrantedReceiver,
             IntentFilter("STEP_AUTH_UPDATE")
-        );
+        )
 
         // StepCount Notification Receiver: 변경된 걸음수 UI 반영
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
@@ -164,43 +177,128 @@ class MyDiaryFragment : Fragment() {
             IntentFilter(MyService.ACTION_STEP_COUNTER_NOTIFICATION)
         )
 
-
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             secretOrNotFunction,
             IntentFilter("SECRET_OR_NOT")
-        );
-
+        )
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             myDiaryWarningFeedbackFunction,
             IntentFilter("MY_DIARY_WARNING_FEEDBACK")
-        );
+        )
 
-        // 데이터 불러오기
+        // 로딩 코인
+        binding.loadingCoinLayout.visibility = View.VISIBLE
+        binding.writeCountLayout.visibility = View.GONE
+        binding.noContractIconLayout.visibility = View.GONE
+        binding.contractIconLayout.visibility = View.GONE
+
+        val scaleX = PropertyValuesHolder.ofFloat("scaleX", 1f, 0f)
+        val rotationY = PropertyValuesHolder.ofFloat("rotationY", 0f, 180f)
+        val scaleXBack = PropertyValuesHolder.ofFloat("scaleX", 0f, 1f)
+
+        val flipAnimator = ObjectAnimator.ofPropertyValuesHolder(binding.loadingCoinIcon, scaleX, rotationY, scaleXBack)
+        flipAnimator.duration = 500 // Adjust the duration as needed
+        flipAnimator.repeatCount = ObjectAnimator.INFINITE
+        flipAnimator.interpolator = AccelerateDecelerateInterpolator()
+        flipAnimator.start()
+
+        // 점수(원) 데이터 불러오기
         uiScope.launch(Dispatchers.IO) {
-            launch { appParticipateDate() }.join()
-            launch { stepCountToArrayFun() }.join()
-            launch { diaryToArrayFun() }.join()
-            launch { commentToArrayFun() }.join()
-            withContext(Dispatchers.Main) {
-                launch {
-                    val spanText: SpannableStringBuilder
-                    val decimal = DecimalFormat("#,###")
+            launch { contractOrNotCheck() }.join()
+            launch { thisMonthWriteCount() }.join()
 
-                    if(userPoint < 10000) {
-                        binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
-                        binding.coinTextExplanation.text = "적립"
-                    } else {
-                        binding.coinTextMoney.text = "10,000원"
-                        binding.coinTextExplanation.text = "달성"
+            if (contractOrNot) {
+                // 계약함 (지역 OR 기관)
+                launch { appParticipateDate() }.join()
+                listOf(
+                    launch { stepCountToArrayFun() },
+                    launch { diaryToArrayFun() },
+                    launch { commentToArrayFun() },
+                ).joinAll()
+                withContext(Dispatchers.Main) {
+                    launch {
+                        binding.loadingCoinLayout.visibility = View.GONE
+                        binding.coinLayout.visibility = View.VISIBLE
+                        binding.writeCountLayout.visibility = View.VISIBLE
+                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
+                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
+
+                        val spanText: SpannableStringBuilder
+                        val decimal = DecimalFormat("#,###")
+
+                        if (userPoint < 10000) {
+                            binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
+                            binding.coinTextExplanation.visibility = View.GONE
+                        } else {
+                            binding.coinTextMoney.text = "만원"
+                            binding.coinTextExplanation.text = "달성"
+                        }
+                        val userPointSet = hashMapOf(
+                            "userPoint" to userPoint
+                        )
+                        userDB.document("$userId").set(userPointSet, SetOptions.merge())
+
+                        binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일:"
+
+                        if (contractRegionExist) {
+                            // 지역 계약의 경우
+                            db.collection("contract_region")
+                                .document(userFullRegion)
+                                .get()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val cdDocument = task.result
+                                        if (cdDocument != null) {
+                                            if (cdDocument.exists()) {
+                                                val cdRegionImage =
+                                                    cdDocument.data?.getValue("regionImage").toString()
+
+                                                Glide.with(mcontext)
+                                                    .load(cdRegionImage)
+                                                    .into(binding.contractRegionImageView)
+                                                binding.contractRegionTextView.text = userSmallRegion
+
+                                                binding.noContractIconLayout.visibility = View.GONE
+                                                binding.contractIconLayout.visibility = View.VISIBLE
+
+                                            } else {
+
+                                                binding.noContractIconLayout.visibility = View.VISIBLE
+                                                binding.contractIconLayout.visibility = View.GONE
+                                            }
+                                        } else {
+                                            binding.noContractIconLayout.visibility = View.VISIBLE
+                                            binding.contractIconLayout.visibility = View.GONE
+                                        }
+                                    }
+                                }
+                        } else {
+                            // 커뮤니티 계약
+                            binding.noContractIconLayout.visibility = View.VISIBLE
+                            binding.contractIconLayout.visibility = View.GONE
+                        }
                     }
-
-                    val userPointSet = hashMapOf(
-                        "userPoint" to userPoint
-                    )
-                    userDB.document("$userId").set(userPointSet, SetOptions.merge())
                 }
+            } else {
+                // 계약 안한 일반
+                withContext(Dispatchers.Main) {
+                    launch {
+                        binding.loadingCoinLayout.visibility = View.GONE
+                        binding.coinLayout.visibility = View.GONE
+                        binding.writeCountLayout.visibility = View.VISIBLE
+                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
+                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
+
+                        binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일"
+
+                        binding.noContractIconLayout.visibility = View.VISIBLE
+                        binding.contractIconLayout.visibility = View.GONE
+                    }
+                }
+
             }
+
         }
 
         binding.coinLayout.setOnClickListener {
@@ -482,7 +580,7 @@ class MyDiaryFragment : Fragment() {
                         .set(recognitionSet, SetOptions.merge())
                 }
 
-                if(!editDiary) {
+                if (!editDiary) {
                     userDB.document("$userId").get()
                         .addOnSuccessListener { document ->
                             val username = document.data?.getValue("name")
@@ -727,6 +825,12 @@ class MyDiaryFragment : Fragment() {
                             val oldDiary = document.data?.getValue("todayDiary").toString()
                             binding.todayDiary.setText(oldDiary)
 
+                            val lineCount = binding.todayDiary.lineCount
+                            val lineHeight = binding.todayDiary.lineHeight
+                            val desiredHeight = lineCount * lineHeight
+
+                            binding.todayDiary.height = desiredHeight
+
                             // 마음 보여주기
                             var spinnerAdapter = binding.todayMood.adapter
                             val dbMoodPosition =
@@ -917,37 +1021,7 @@ class MyDiaryFragment : Fragment() {
         }
 
         // 매달 일기 작성 카운트
-        currentMonth = LocalDateTime.now().toString().substring(0, 7)
 
-        val currentdate = System.currentTimeMillis()
-        val currentYearMonth = yearMonthDateFormat.format(currentdate)
-        val currentMonth = SimpleDateFormat("MM").format(currentdate)
-        val removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
-        val currentMonthDate = MonthDate(currentMonth.toInt()).getDate
-
-        val thisMonthCount = diaryDB
-            .whereEqualTo("monthDate", currentYearMonth)
-            .whereEqualTo("userId", userId)
-            .count()
-
-        thisMonthCount.get(AggregateSource.SERVER).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val calendarThisMonthCount = "${task.result.count}일"
-                val spanText = SpannableStringBuilder()
-                    .bold {
-                        color(
-                            ContextCompat.getColor(
-                                mcontext,
-                                R.color.light_gray
-                            )
-                        ) { append(calendarThisMonthCount) }
-                    }
-                    .append(" / ${currentMonthDate}일")
-
-                binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일:"
-                binding.diaryCount.text = spanText
-            }
-        }
 
         // 인지
         val optOption1 = "+"
@@ -1204,7 +1278,7 @@ class MyDiaryFragment : Fragment() {
                         }
 
                         // 일기 업로드
-                        if(!editDiary) {
+                        if (!editDiary) {
                             userDB.document("$userId").get()
                                 .addOnSuccessListener { document ->
                                     var username = document.data?.getValue("name")
@@ -1238,7 +1312,8 @@ class MyDiaryFragment : Fragment() {
                                             bundle.putString("diaryType", "my")
                                             allFragment.arguments = bundle
                                             fragment.beginTransaction()
-                                                .replace(R.id.enterFrameLayout, allFragment).commit()
+                                                .replace(R.id.enterFrameLayout, allFragment)
+                                                .commit()
 
                                             requireActivity().bottomNav.selectedItemId =
                                                 R.id.ourTodayMenu
@@ -1278,7 +1353,8 @@ class MyDiaryFragment : Fragment() {
                                             bundle.putString("diaryType", "my")
                                             allFragment.arguments = bundle
                                             fragment.beginTransaction()
-                                                .replace(R.id.enterFrameLayout, allFragment).commit()
+                                                .replace(R.id.enterFrameLayout, allFragment)
+                                                .commit()
 
                                             requireActivity().bottomNav.selectedItemId =
                                                 R.id.ourTodayMenu
@@ -1550,8 +1626,58 @@ class MyDiaryFragment : Fragment() {
         return spanText
     }
 
+    suspend fun thisMonthWriteCount() {
+        currentMonth = LocalDateTime.now().toString().substring(0, 7)
+
+        val currentdate = System.currentTimeMillis()
+        val currentYearMonth = yearMonthDateFormat.format(currentdate)
+        val currentMonth = SimpleDateFormat("MM").format(currentdate)
+        removeZeroCurrentMonth = StringUtils.stripStart(currentMonth, "0");
+        val currentMonthDate = MonthDate(currentMonth.toInt()).getDate
+
+        val thisMonthCount = diaryDB
+            .whereEqualTo("monthDate", currentYearMonth)
+            .whereEqualTo("userId", userId)
+            .count()
+
+        thisMonthCount.get(AggregateSource.SERVER).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val calendarThisMonthCount = "${task.result.count}일"
+                val spanText = SpannableStringBuilder()
+                    .bold {
+                        color(
+                            ContextCompat.getColor(
+                                mcontext,
+                                R.color.light_gray
+                            )
+                        ) { append(calendarThisMonthCount) }
+                    }
+                    .append(" / ${currentMonthDate}일")
+
+//                binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일:"
+                binding.diaryCount.text = spanText
+            }
+        }
+    }
+
 
     // 점수 계산
+    suspend fun contractOrNotCheck() {
+        val userDocument = userDB.document("$userId").get().await()
+
+        val userRegion = userDocument.data?.getValue("region").toString()
+        userSmallRegion = userDocument.data?.getValue("smallRegion").toString()
+        userFullRegion = "${userRegion} ${userSmallRegion}"
+
+        val contractRegionDocument =
+            db.collection("contract_region").document(userFullRegion).get().await()
+        contractRegionExist = contractRegionDocument.exists()
+
+        val communityDocument =
+            db.collection("community").whereArrayContains("users", "$userId").get().await()
+        contractOrNot = contractRegionExist || communityDocument.size() != 0
+    }
+
     suspend fun appParticipateDate() {
         val currentDate = Calendar.getInstance()
         val userData = userDB.document("$userId").get().await()
@@ -1569,7 +1695,6 @@ class MyDiaryFragment : Fragment() {
         formatNowDate = dateFormat.format(now)
 
         Log.d("날짜", "${formatAppParticipateDate} / ${formatNowDate}")
-
     }
 
     suspend fun stepCountToArrayFun() {
@@ -1592,8 +1717,8 @@ class MyDiaryFragment : Fragment() {
 
             dataSteps.data?.forEach { (stepPeriod, dateStepCount) ->
 
-                if(stepPeriod == stepDate.toString()) {
-                    if(dateStepCount.toString().toInt() < 10000) {
+                if (stepPeriod == stepDate.toString()) {
+                    if (dateStepCount.toString().toInt() < 10000) {
                         userStepPoint += dateStepCount.toString().toInt()
                     } else {
                         userStepPoint += 10000
@@ -1601,7 +1726,8 @@ class MyDiaryFragment : Fragment() {
                 }
             }
         }
-        userPoint = ((Math.floor(userStepPoint / 1000.0)) * 10).toInt()
+        val userStepPoint = ((Math.floor(userStepPoint / 1000.0)) * 10).toInt()
+        userPoint += userStepPoint
     }
 
 

@@ -23,13 +23,12 @@
 
         <ImageView
             android:id="@+id/profileAvatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginBottom="25dp"
             android:background="@drawable/avatar_background"
             android:clipToOutline="true"
-            android:scaleType="centerCrop"
-            android:src="@mipmap/ic_new_icon" />
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:layout_width="match_parent"

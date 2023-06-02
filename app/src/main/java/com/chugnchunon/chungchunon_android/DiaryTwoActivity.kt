@@ -116,6 +116,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
 
+
         // 현재 버전값 저장
         val currentVersionSet = hashMapOf(
             "currentAppVersion" to currentAppVersion
@@ -237,7 +238,6 @@ class DiaryTwoActivity : AppCompatActivity() {
 
 
         // 권한 체크
-
         uiScope.launch(Dispatchers.IO) {
             launch { permissionAssign() }.join()
             withContext(Dispatchers.Main) {
@@ -295,7 +295,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                     )
                 }
             }
-
         }
 
         // 메뉴 이동
@@ -317,7 +316,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                     }
                     R.id.rankingMenu -> {
                         diaryType = null
-                        changeFragment(RankingFragment())
+                        changeFragment(RankingMenuFragment())
                     }
                     R.id.moreMenu -> {
                         diaryType = null
@@ -627,12 +626,13 @@ class DiaryTwoActivity : AppCompatActivity() {
                     "step_status" to false,
                 )
                 userDB.document("$userId").set(authSet, SetOptions.merge())
-
             }
         }
     }
+
     private fun userTrackGoogleAnalytics() {
         val firebaseAnalytics = FirebaseAnalytics.getInstance(applicationContext)
+        firebaseAnalytics.setUserId(userId)
         val currentDate = Date()
 
         val calendar = Calendar.getInstance()

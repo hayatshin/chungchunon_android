@@ -256,29 +256,38 @@ class MyService : Service(), SensorEventListener {
                             todayTotalStepCount = stepCount - dummyStepCount
                             val valueGap = todayTotalStepCount!! - originalTodayTotalStepCount
 
-                            if(valueGap < 100) {
-                                // 정상 작동
-                                StepCountNotification(this, todayTotalStepCount)
+                            if(todayTotalStepCount!! < 0) {
+                                // stepcount가 갑자기 줄어든 경우
+                                val updateDummy = hashMapOf<String, Any>(
+                                    "dummy" to -originalTodayTotalStepCount
+                                )
+
+                                db.collection("user_step_count")
+                                    .document("$userId")
+                                    .set(updateDummy, SetOptions.merge())
+
+                                StepCountNotification(this, originalTodayTotalStepCount)
 
                                 val userStepCountSet = hashMapOf(
-                                    today to todayTotalStepCount
+                                    today to originalTodayTotalStepCount
                                 )
+
                                 val periodStepCountSet = hashMapOf(
-                                    "$userId" to todayTotalStepCount
+                                    "$userId" to originalTodayTotalStepCount
                                 )
 
                                 // user_step_count
                                 db.collection("user_step_count")
                                     .document("$userId")
                                     .set(userStepCountSet, SetOptions.merge())
+
                                 // period_step_count
                                 db.collection("period_step_count")
                                     .document(today)
                                     .set(periodStepCountSet, SetOptions.merge())
 
-
                                 val todayStepCountSet = hashMapOf(
-                                    "todayStepCount" to todayTotalStepCount
+                                    "todayStepCount" to 0
                                 )
                                 userDB.document("$userId")
                                     .set(todayStepCountSet, SetOptions.merge())
@@ -286,55 +295,93 @@ class MyService : Service(), SensorEventListener {
                                 val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
                                     putExtra(
                                         "todayTotalStepCount",
-                                        todayTotalStepCount
+                                        0
                                     )
                                 }
                                 LocalBroadcastManager.getInstance(applicationContext!!)
                                     .sendBroadcast(intentToMyDiary)
+
                             } else {
-                                // 값이 갑자기 튄 경우
-                                val newDummy = (stepCount - originalTodayTotalStepCount) - 1
-                                val newTodayStepCount = originalTodayTotalStepCount + 1
+                                if(valueGap < 100) {
+                                    // 정상 작동
+                                    StepCountNotification(this, todayTotalStepCount)
 
-                                val newDummySet = hashMapOf(
-                                    "dummy" to newDummy
-                                )
-                                db.collection("user_step_count").document("$userId")
-                                    .set(newDummySet, SetOptions.merge())
-
-                                StepCountNotification(this, newTodayStepCount)
-
-                                val userStepCountSet = hashMapOf(
-                                    today to newTodayStepCount
-                                )
-                                val periodStepCountSet = hashMapOf(
-                                    "$userId" to newTodayStepCount
-                                )
-
-                                // user_step_count
-                                db.collection("user_step_count")
-                                    .document("$userId")
-                                    .set(userStepCountSet, SetOptions.merge())
-                                // period_step_count
-                                db.collection("period_step_count")
-                                    .document(today)
-                                    .set(periodStepCountSet, SetOptions.merge())
-
-
-                                val todayStepCountSet = hashMapOf(
-                                    "todayStepCount" to newTodayStepCount
-                                )
-                                userDB.document("$userId")
-                                    .set(todayStepCountSet, SetOptions.merge())
-
-                                val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
-                                    putExtra(
-                                        "todayTotalStepCount",
-                                        newTodayStepCount
+                                    val userStepCountSet = hashMapOf(
+                                        today to todayTotalStepCount
                                     )
+                                    val periodStepCountSet = hashMapOf(
+                                        "$userId" to todayTotalStepCount
+                                    )
+
+                                    // user_step_count
+                                    db.collection("user_step_count")
+                                        .document("$userId")
+                                        .set(userStepCountSet, SetOptions.merge())
+                                    // period_step_count
+                                    db.collection("period_step_count")
+                                        .document(today)
+                                        .set(periodStepCountSet, SetOptions.merge())
+
+
+                                    val todayStepCountSet = hashMapOf(
+                                        "todayStepCount" to todayTotalStepCount
+                                    )
+                                    userDB.document("$userId")
+                                        .set(todayStepCountSet, SetOptions.merge())
+
+                                    val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                                        putExtra(
+                                            "todayTotalStepCount",
+                                            todayTotalStepCount
+                                        )
+                                    }
+                                    LocalBroadcastManager.getInstance(applicationContext!!)
+                                        .sendBroadcast(intentToMyDiary)
+                                } else {
+                                    // 값이 갑자기 튄 경우 -> stepcount가 갑자기 많아진 경우
+                                    val newDummy = (stepCount - originalTodayTotalStepCount) - 1
+                                    val newTodayStepCount = originalTodayTotalStepCount + 1
+
+                                    val newDummySet = hashMapOf(
+                                        "dummy" to newDummy
+                                    )
+                                    db.collection("user_step_count").document("$userId")
+                                        .set(newDummySet, SetOptions.merge())
+
+                                    StepCountNotification(this, newTodayStepCount)
+
+                                    val userStepCountSet = hashMapOf(
+                                        today to newTodayStepCount
+                                    )
+                                    val periodStepCountSet = hashMapOf(
+                                        "$userId" to newTodayStepCount
+                                    )
+
+                                    // user_step_count
+                                    db.collection("user_step_count")
+                                        .document("$userId")
+                                        .set(userStepCountSet, SetOptions.merge())
+                                    // period_step_count
+                                    db.collection("period_step_count")
+                                        .document(today)
+                                        .set(periodStepCountSet, SetOptions.merge())
+
+
+                                    val todayStepCountSet = hashMapOf(
+                                        "todayStepCount" to newTodayStepCount
+                                    )
+                                    userDB.document("$userId")
+                                        .set(todayStepCountSet, SetOptions.merge())
+
+                                    val intentToMyDiary = Intent(ACTION_STEP_COUNTER_NOTIFICATION).apply {
+                                        putExtra(
+                                            "todayTotalStepCount",
+                                            newTodayStepCount
+                                        )
+                                    }
+                                    LocalBroadcastManager.getInstance(applicationContext!!)
+                                        .sendBroadcast(intentToMyDiary)
                                 }
-                                LocalBroadcastManager.getInstance(applicationContext!!)
-                                    .sendBroadcast(intentToMyDiary)
                             }
 
                         } else {

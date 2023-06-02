@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="18dp">
+
+    <RelativeLayout
+        android:id="@+id/youtubeLayout"
+        android:orientation="vertical"
+        android:layout_marginBottom="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="@drawable/mission_card_background"
+        android:clipToOutline="true">
+
+        <ImageView
+            android:translationZ="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/youtubeView"
+            android:scaleType="centerCrop" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/youtubeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/youtubeLayout"
+        android:layout_alignParentBottom="true"
+        android:gravity="top|center_horizontal"
+        android:textColor="@color/custom_gray"
+        android:textSize="18dp"
+        tools:text="안녕하세요" />
+
+</RelativeLayout>

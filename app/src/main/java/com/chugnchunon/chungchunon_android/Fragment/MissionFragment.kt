@@ -12,8 +12,10 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.chugnchunon.chungchunon_android.Adapter.AttractionAdapter
 import com.chugnchunon.chungchunon_android.Adapter.MissionCardAdapter
+import com.chugnchunon.chungchunon_android.Adapter.YoutubeAdapter
 import com.chugnchunon.chungchunon_android.DataClass.Attraction
 import com.chugnchunon.chungchunon_android.DataClass.Mission
+import com.chugnchunon.chungchunon_android.DataClass.Youtube
 import com.chugnchunon.chungchunon_android.Layout.CenterZoomLayoutManager
 import com.chugnchunon.chungchunon_android.databinding.FragmentMissionBinding
 import com.google.firebase.auth.ktx.auth
@@ -22,27 +24,22 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_mission.view.*
 
 
-class MissionFragment: Fragment() {
+class MissionFragment : Fragment() {
 
     private var _binding: FragmentMissionBinding? = null
     private val binding get() = _binding!!
 
     private val db = Firebase.firestore
-    private val userDB = db.collection("users")
-    private val missionDB = db.collection("mission")
-    private val booksDB = db.collection("books")
-    private val attractionDB = db.collection("attraction")
-
     private val userId = Firebase.auth.currentUser?.uid
 
     lateinit var missionSet: Mission
-    lateinit var attractionSet: Attraction
+    lateinit var youtubeSet: Youtube
 
     private var missionList: ArrayList<Mission> = ArrayList()
-    private var attractionList: ArrayList<Attraction> = ArrayList()
+    private var youtubeItems: ArrayList<Youtube> = ArrayList()
 
     lateinit var missionAdapter: MissionCardAdapter
-    lateinit var attractionAdapter: AttractionAdapter
+    lateinit var youtubeAdapter: YoutubeAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,9 +53,9 @@ class MissionFragment: Fragment() {
         binding.missionRecyclerView.adapter = missionAdapter
         binding.missionRecyclerView.orientation = ViewPager2.ORIENTATION_HORIZONTAL
 
-        attractionAdapter = AttractionAdapter(requireContext(), attractionList)
-        binding.attractionRecyclerView.adapter = attractionAdapter
-        binding.attractionRecyclerView.layoutManager = CenterZoomLayoutManager(requireContext())
+        youtubeAdapter = YoutubeAdapter(requireContext(), youtubeItems)
+        binding.youtubeRecyclerView.adapter = youtubeAdapter
+        binding.youtubeRecyclerView.layoutManager = CenterZoomLayoutManager(requireContext())
 
         binding.indicator.setViewPager(binding.missionRecyclerView)
         binding.indicator.createIndicators(missionList.size, 0)
@@ -73,7 +70,7 @@ class MissionFragment: Fragment() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 var spanText = SpannableStringBuilder()
-                    .color(Color.WHITE) { append("${position+1}") }
+                    .color(Color.WHITE) { append("${position + 1}") }
                     .append(" / ${missionList.size}")
                 binding.cardIndex.text = spanText
             }
@@ -91,9 +88,12 @@ class MissionFragment: Fragment() {
             }
         })
 
-        missionDB.get()
+        // 행사
+        db.collection("mission")
+            .get()
             .addOnSuccessListener { documents ->
-                for(document in documents) {
+                for (document in documents) {
+                    val allUser = document.data.getValue("allUser") as Boolean
                     val missionDocId = document.data.getValue("documentId").toString()
                     val community = document.data.getValue("community").toString()
                     val communityLogo = document.data.getValue("communityLogo").toString()
@@ -104,66 +104,227 @@ class MissionFragment: Fragment() {
                     val description = document.data.getValue("description").toString()
                     val state = document.data.getValue("state").toString()
 
-                    missionSet = Mission(
-                        missionDocId,
-                        community,
-                        communityLogo,
-                        missionImage,
-                        title,
-                        startPeriod,
-                        endPeriod,
-                        description,
-                        state
-                    )
+                    if (allUser) {
+                        missionSet = Mission(
+                            missionDocId,
+                            community,
+                            communityLogo,
+                            missionImage,
+                            title,
+                            startPeriod,
+                            endPeriod,
+                            description,
+                            state
+                        )
 
-                    missionList.add(missionSet)
-                    missionList.sortWith(compareBy({ it.state }))
-                    missionList.reverse()
+                        missionList.add(missionSet)
+                        missionList.sortWith(compareBy({ it.state }))
+                        missionList.reverse()
 
-                    missionAdapter.notifyDataSetChanged()
+                        missionAdapter.notifyDataSetChanged()
+                    } else {
+
+                        if (document.contains("fullRegion")) {
+                            // 지역 보기
+                            val missionFullRegion = document.data?.getValue("fullRegion").toString()
+
+                            db.collection("users")
+                                .document("$userId")
+                                .get()
+                                .addOnSuccessListener { userData ->
+                                    val userRegion = userData.data?.getValue("region").toString()
+                                    val userSmallRegion =
+                                        userData.data?.getValue("smallRegion").toString()
+                                    val userFullRegion = "${userRegion} ${userSmallRegion}"
+
+                                    if (userFullRegion == missionFullRegion) {
+
+                                        missionSet = Mission(
+                                            missionDocId,
+                                            community,
+                                            communityLogo,
+                                            missionImage,
+                                            title,
+                                            startPeriod,
+                                            endPeriod,
+                                            description,
+                                            state
+                                        )
+
+                                        missionList.add(missionSet)
+                                        missionList.sortWith(compareBy({ it.state }))
+                                        missionList.reverse()
+
+                                        missionAdapter.notifyDataSetChanged()
+                                    }
+
+                                }
+
+                        }
+
+                        if (document.contains("community")) {
+                            // 커뮤니티 보기
+                            val missionCommunity = document.data?.getValue("community").toString()
+
+                            db.collection("users")
+                                .document("$userId")
+                                .get()
+                                .addOnSuccessListener { userData ->
+                                    val userCommunity =
+                                        userData.data?.getValue("community") as ArrayList<String>
+
+                                    if (userCommunity.contains(missionCommunity)) {
+                                        missionSet = Mission(
+                                            missionDocId,
+                                            community,
+                                            communityLogo,
+                                            missionImage,
+                                            title,
+                                            startPeriod,
+                                            endPeriod,
+                                            description,
+                                            state
+                                        )
+
+                                        missionList.add(missionSet)
+                                        missionList.sortWith(compareBy({ it.state }))
+                                        missionList.reverse()
+
+                                        missionAdapter.notifyDataSetChanged()
+                                    }
+                                }
+                        }
+
+
+                    }
 
                 }
             }
 
 
-        // 명소
-        userDB
-            .document("$userId")
+        // 청춘테레비
+        db.collection("youtube")
             .get()
-            .addOnSuccessListener { userData ->
-                var bigRegion = userData.data?.getValue("region")
-                var smallRegion = userData.data?.getValue("smallRegion")
-                var userRegion = "${bigRegion} ${smallRegion}"
+            .addOnSuccessListener { youtubeDatas ->
+                for (youtubeData in youtubeDatas) {
+                    val allUser = youtubeData.data?.getValue("allUser") as Boolean
+                    val title = youtubeData.data?.getValue("title").toString()
+                    val link = youtubeData.data?.getValue("link").toString()
+                    val thumbnail = youtubeData.data?.getValue("thumbnail").toString()
+                    val videoId = youtubeData.data?.getValue("videoId").toString()
 
-                attractionDB
-                    .get()
-                    .addOnSuccessListener { attractions ->
-                        for(attraction in attractions) {
-                            var attractionRegion = attraction.data.getValue("region")
-                            if(attractionRegion == "전체" || attractionRegion == userRegion) {
-                                val attractionName = attraction.data.getValue("name").toString()
-                                val attractionDescription = attraction.data.getValue("description").toString()
-                                val attractionLocation = attraction.data.getValue("location").toString()
-                                val attractionMainImage = attraction.data.getValue("mainImage").toString()
-                                val attractionSubImage = attraction.data.getValue("subImage") as ArrayList<String>
+                    if (allUser) {
+                        val title = youtubeData.data?.getValue("title").toString()
+                        val link = youtubeData.data?.getValue("link").toString()
+                        val thumbnail = youtubeData.data?.getValue("thumbnail").toString()
+                        val videoId = youtubeData.data?.getValue("videoId").toString()
 
-                                binding.attractionTitle.text = "${userRegion} 명소"
+                        youtubeSet = Youtube(
+                            title,
+                            link,
+                            thumbnail,
+                            videoId
+                        )
 
-                                attractionSet = Attraction(
-                                    attractionName,
-                                    attractionDescription,
-                                    attractionLocation,
-                                    attractionMainImage,
-                                    attractionSubImage
-                                )
+                        youtubeItems.add(youtubeSet)
+                        youtubeAdapter.notifyDataSetChanged()
+                    } else {
+                        // 전체 공개 아닌 경우
 
-                                attractionList.add(attractionSet)
-                                attractionAdapter.notifyDataSetChanged()
+                        if (youtubeData.contains("fullRegion")) {
+                            // 지역 보기
+                            val tvFullRegion = youtubeData.data?.getValue("fullRegion").toString()
+                            db.collection("users")
+                                .document("$userId")
+                                .get()
+                                .addOnSuccessListener { userData ->
+                                    val userRegion = userData.data?.getValue("region").toString()
+                                    val userSmallRegion =
+                                        userData.data?.getValue("smallRegion").toString()
+                                    val userFullRegion = "${userRegion} ${userSmallRegion}"
 
-                            }
+                                    if (userFullRegion == tvFullRegion) {
+                                        youtubeSet = Youtube(
+                                            title,
+                                            link,
+                                            thumbnail,
+                                            videoId
+                                        )
+
+                                        youtubeItems.add(youtubeSet)
+                                        youtubeAdapter.notifyDataSetChanged()
+                                    }
+
+                                }
+
                         }
+
+                        if (youtubeData.contains("community")) {
+                            // 커뮤니티 보기
+                            val tvCommunity = youtubeData.data?.getValue("community").toString()
+
+                            db.collection("users")
+                                .document("$userId")
+                                .get()
+                                .addOnSuccessListener { userData ->
+                                    val userCommunity =
+                                        userData.data?.getValue("community") as ArrayList<String>
+
+                                    if (userCommunity.contains(tvCommunity)) {
+                                        youtubeSet = Youtube(
+                                            title,
+                                            link,
+                                            thumbnail,
+                                            videoId
+                                        )
+
+                                        youtubeItems.add(youtubeSet)
+                                        youtubeAdapter.notifyDataSetChanged()
+                                    }
+                                }
+                        }
+
                     }
+                }
             }
+
+//        userDB
+//            .document("$userId")
+//            .get()
+//            .addOnSuccessListener { userData ->
+//                var bigRegion = userData.data?.getValue("region")
+//                var smallRegion = userData.data?.getValue("smallRegion")
+//                var userRegion = "${bigRegion} ${smallRegion}"
+//
+//                attractionDB
+//                    .get()
+//                    .addOnSuccessListener { attractions ->
+//                        for(attraction in attractions) {
+//                            var attractionRegion = attraction.data.getValue("region")
+//                            if(attractionRegion == "전체" || attractionRegion == userRegion) {
+//                                val attractionName = attraction.data.getValue("name").toString()
+//                                val attractionDescription = attraction.data.getValue("description").toString()
+//                                val attractionLocation = attraction.data.getValue("location").toString()
+//                                val attractionMainImage = attraction.data.getValue("mainImage").toString()
+//                                val attractionSubImage = attraction.data.getValue("subImage") as ArrayList<String>
+//
+//                                binding.attractionTitle.text = "${userRegion} 명소"
+//
+//                                attractionSet = Attraction(
+//                                    attractionName,
+//                                    attractionDescription,
+//                                    attractionLocation,
+//                                    attractionMainImage,
+//                                    attractionSubImage
+//                                )
+//
+//                                attractionList.add(attractionSet)
+//                                attractionAdapter.notifyDataSetChanged()
+//
+//                            }
+//                        }
+//                    }
+//            }
         return binding
     }
 }

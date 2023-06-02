@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.PeriodRankingAdapter
+import com.chugnchunon.chungchunon_android.Adapter.RankingMenuAdapter
 import com.chugnchunon.chungchunon_android.Adapter.RegionDiaryAdapter
 import com.chugnchunon.chungchunon_android.Layout.CustomMarkerView
 import com.chugnchunon.chungchunon_android.R
@@ -79,8 +80,8 @@ class RankingFragment: Fragment() {
         binding.periodText.text = "$formatThisWeekStart ~ $formatThisWeekEnd"
 
 
-        val adapter = PeriodRankingAdapter(requireActivity())
-        binding.rankingViewPager.offscreenPageLimit = 2
+        val adapter = RankingMenuAdapter(requireActivity())
+        binding.rankingViewPager.offscreenPageLimit = 3
         binding.rankingViewPager.adapter = adapter
         binding.rankingViewPager.isUserInputEnabled = false
 

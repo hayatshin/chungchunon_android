@@ -17,6 +17,7 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -106,6 +107,24 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.backBtn.setOnClickListener {
             finish()
         }
+
+        // 스크롤뷰 키보드 터치다운
+        binding.myDiaryScrollView.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, ev: MotionEvent?): Boolean {
+                when (ev?.action) {
+                    MotionEvent.ACTION_MOVE -> {
+                        return false
+                    }
+                    KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP -> {
+                        val imm: InputMethodManager =
+                            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(v!!.windowToken, 0)
+                        return false
+                    }
+                }
+                return false
+            }
+        })
 
         newImageViewModel = ViewModelProvider(this).get(EditNewImageViewModel::class.java)
 
@@ -323,6 +342,13 @@ class EditDiaryActivity : AppCompatActivity() {
                 // 다이어리 작성
                 val oldDiary = document.data?.getValue("todayDiary").toString()
                 binding.todayDiary.setText(oldDiary)
+
+                val lineCount = binding.todayDiary.lineCount
+                val lineHeight = binding.todayDiary.lineHeight
+                val desiredHeight = lineCount * lineHeight
+
+                binding.todayDiary.height = desiredHeight
+
 
                 binding.todayDiary.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {

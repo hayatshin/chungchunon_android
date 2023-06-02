@@ -3,8 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/very_light_gray"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/authLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/layer_screen"
+        android:clickable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:translationZ="90dp"
+        android:visibility="gone">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="오늘도청춘"
+                android:textColor="@color/main_color"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineHeight="28dp"
+                android:text="@string/read_contact_auth"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="17dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -17,10 +58,21 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/communitySelectRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingLeft="20dp"
+                android:visibility="visible"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <RelativeLayout
                 android:id="@+id/rankingGraphTotal"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
+                android:layout_height="160dp"
                 android:layout_alignParentTop="true"
                 android:orientation="vertical">
 
@@ -78,7 +130,7 @@
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/rankingBarChart"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="140dp"
                     android:layout_below="@id/rankingHeader"
                     android:visibility="gone" />
 
@@ -95,10 +147,10 @@
             </RelativeLayout>
 
             <LinearLayout
-                android:layout_marginTop="-15dp"
                 android:id="@+id/rankingList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="-15dp"
                 android:background="@drawable/ranking_list_box"
                 android:orientation="vertical"
                 android:visibility="visible">
@@ -166,57 +218,131 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:background="@color/white"
                     android:layout_width="match_parent"
-                    android:layout_height="57dp"
-                    android:layout_marginTop="20dp"
-                    android:gravity="bottom"
-                    android:paddingHorizontal="30dp"
-                    android:paddingBottom="11dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="57dp"
+                        android:background="@color/white"
                         android:gravity="bottom"
-                        android:orientation="horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent">
+                        android:paddingHorizontal="30dp"
+                        android:paddingBottom="10dp">
 
-                    <ImageView
-                        android:layout_marginRight="10dp"
-                        android:src="@drawable/ic_crown_outlined"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="bottom"
+                            android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="순위 현황"
-                        android:textColor="@color/black"
-                        android:textSize="23dp"
-                        android:textStyle="bold" />
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_marginRight="10dp"
+                                android:src="@drawable/ic_crown_outlined" />
 
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="순위 현황"
+                                android:textColor="@color/black"
+                                android:textSize="23dp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/pointQuestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="10dp"
+                                android:text="점수 설명"
+                                android:textColor="@color/custom_gray"
+                                android:textSize="16dp" />
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_chevron_right_solid" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/pointQuestion"
-                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="5dp">
 
-                        <TextView
-                            android:layout_marginRight="10dp"
-                            android:textColor="@color/custom_gray"
-                            android:textSize="16dp"
-                            android:text="점수 설명"
+                        <LinearLayout
+                            android:id="@+id/thisWeekBox"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/mindbox_left_main_10"
+                            android:gravity="center"
+                            android:paddingHorizontal="5dp"
+                            android:paddingVertical="10dp">
 
-                        <ImageView
-                            android:src="@drawable/ic_chevron_right_solid"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"/>
+                            <TextView
+                                android:id="@+id/thisWeekText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="이번주"
+                                android:textColor="@color/white"
+                                android:textSize="16dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/lastWeekBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/mindbox_right_gray_10"
+                            android:gravity="center"
+                            android:paddingHorizontal="5dp"
+                            android:paddingVertical="10dp">
+
+                            <TextView
+                                android:id="@+id/lastWeekText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="지난주"
+                                android:textColor="@color/black"
+                                android:textSize="16dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/periodBox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:gravity="end|bottom"
+                            android:paddingLeft="15dp">
+
+                            <TextView
+
+                                android:id="@+id/periodText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:textColor="@color/custom_gray"
+                                android:textSize="16dp"
+                                android:text="YYYY/MM/DD" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -251,13 +377,13 @@
                     android:gravity="center"
                     android:orientation="horizontal">
 
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rankingRecyclerView"
-                        android:minHeight="300dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingVertical="20dp"
+                        android:minHeight="300dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="10dp"
                         android:visibility="gone" />
 
                     <ProgressBar

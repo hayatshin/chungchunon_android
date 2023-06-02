@@ -86,7 +86,13 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
-            userNameView.text = items[position].username
+
+            if(items[position].username.length > 10) {
+                userNameView.text = "${items[position].username.substring(0, 10)}.."
+            } else {
+                userNameView.text = items[position].username
+            }
+
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
 
@@ -200,6 +206,8 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
     inner class CardViewHolderForNotification(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+        var userNameView: TextView = itemView.findViewById<TextView>(R.id.userName)
+        var userAvatarView: ImageView = itemView.findViewById<ImageView>(R.id.userAvatar)
         var userWriteTime: TextView = itemView.findViewById(R.id.userWriteTime)
         var userDiaryView: TextView = itemView.findViewById<TextView>(R.id.userDiary)
         var userLikeView: TextView = itemView.findViewById<TextView>(R.id.likeText)
@@ -215,6 +223,12 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
             userDiaryView.text = items[position].diary
             userLikeView.text = "좋아요 ${items[position].numLikes}"
             userCommentView.text = "댓글 ${items[position].numComments}"
+
+            userNameView.text = items[position].username
+
+            Glide.with(context)
+                .load(items[position].userAvatar)
+                .into(userAvatarView)
 
             // 이미지 작업
             if (items[position].images == null || items[position].images?.size == 0) {
@@ -252,7 +266,7 @@ class RegionDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCar
 
     override fun getItemViewType(position: Int): Int {
 //        return super.getItemViewType(position)
-        return if (items[position].userId == "kakao:2358828971") {
+        return if (items[position].userId == "kakao:2358828971" || items[position].userId.startsWith("notice")) {
             VIEW_NOTIFICATION
         } else {
             VIEW_GENERAL

@@ -83,7 +83,7 @@ class RegionRegisterActivity : AppCompatActivity() {
         setupViewPager()
 
         binding.regionRegisterBtn.setOnClickListener {
-            var regionSet = hashMapOf(
+            val regionSet = hashMapOf(
                 "userId" to userId,
                 "region" to selectedRegion,
                 "smallRegion" to selectedSmallRegion
@@ -92,30 +92,36 @@ class RegionRegisterActivity : AppCompatActivity() {
             userDB.document("$userId")
                 .set(regionSet, SetOptions.merge())
                 .addOnSuccessListener {
-                    val selectedFullRegion = "${selectedRegion} ${selectedSmallRegion}"
 
-                    db.collection("community")
-                        .whereEqualTo("fullRegion", selectedFullRegion)
+                    userDB.document("$userId")
                         .get()
-                        .addOnCompleteListener { task ->
-                            if(task.isSuccessful) {
-                                val document = task.result
-                                if(document != null) {
-                                    if(!document.isEmpty) {
-                                        // 소속기관 있음
-                                        val goCommunity = Intent(applicationContext, CommunityRegisterActivity::class.java)
-                                        goCommunity.putExtra("fullRegion", selectedFullRegion)
-                                        startActivity(goCommunity)
-                                    } else {
-                                        // 소속기관 없음
-                                        val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
-                                        startActivity(goDiary)
+                        .addOnSuccessListener { userData ->
+                            if(!userData.contains("community")) {
+                                db.collection("community")
+                                    .get()
+                                    .addOnCompleteListener { task ->
+                                        if(task.isSuccessful) {
+                                            val document = task.result
+                                            if(document != null) {
+                                                if(!document.isEmpty) {
+                                                    // 소속기관 있음
+                                                    val goCommunity = Intent(applicationContext, CommunityRegisterActivity::class.java)
+                                                    startActivity(goCommunity)
+                                                } else {
+                                                    // 소속기관 없음
+                                                    val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
+                                                    startActivity(goDiary)
+                                                }
+                                            } else {
+                                                // 소속기관 없음
+                                                val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
+                                                startActivity(goDiary)
+                                            }
+                                        }
                                     }
-                                } else {
-                                    // 소속기관 없음
-                                    val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
-                                    startActivity(goDiary)
-                                }
+                            } else {
+                                val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
+                                startActivity(goDiary)
                             }
                         }
 
@@ -156,7 +162,7 @@ class RegionRegisterActivity : AppCompatActivity() {
 
             selectedSmallRegion = intent?.getStringExtra("selectedSmallRegion").toString()
             binding.smallRegionResult.text = spanTextFn(selectedSmallRegion)
-            binding.regionDescription.text = "확인 버튼을 눌러주세요"
+            binding.regionDescription.text = "다음 버튼을 눌러주세요"
         }
     }
 

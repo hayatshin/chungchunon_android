@@ -119,7 +119,6 @@ class AllDiaryFragmentTwo : Fragment() {
             }
         }, 0)
     }
-
 }
 
 @Keep

@@ -120,6 +120,7 @@
         <entry key="app/src/main/res/drawable/ic_throb.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_trash.xml" value="0.192" />
         <entry key="app/src/main/res/drawable/ic_trophy_filled.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_tv_retro_solid.xml" value="0.169" />
         <entry key="app/src/main/res/drawable/ic_unlock.xml" value="0.126" />
         <entry key="app/src/main/res/drawable/ic_user.xml" value="0.1215" />
         <entry key="app/src/main/res/drawable/ic_womanimage.xml" value="0.1255" />
@@ -143,11 +144,15 @@
         <entry key="app/src/main/res/drawable/mindbox_custom_gray.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_gray.xml" value="0.176" />
         <entry key="app/src/main/res/drawable/mindbox_gray_graph.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/mindbox_left_gray_10.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/mindbox_left_main_10.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_light_main.xml" value="0.1015" />
         <entry key="app/src/main/res/drawable/mindbox_main.xml" value="0.154" />
         <entry key="app/src/main/res/drawable/mindbox_radius_border.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_radius_border_10.xml" value="0.1015" />
         <entry key="app/src/main/res/drawable/mindbox_radius_main_20.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/mindbox_right_gray_10.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/mindbox_right_main_10.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_transparent_gray.xml" value="0.164" />
         <entry key="app/src/main/res/drawable/mindbox_update.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/mindbox_yellow.xml" value="0.1015" />
@@ -220,6 +225,7 @@
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.20737581114838088" />
         <entry key="app/src/main/res/layout/activity_test.xml" value="0.26570415400202635" />
+        <entry key="app/src/main/res/layout/activity_youtube_enlarge.xml" value="0.2814814814814815" />
         <entry key="app/src/main/res/layout/attraction_card.xml" value="0.2512664640324215" />
         <entry key="app/src/main/res/layout/attraction_image_card.xml" value="0.1975416173809326" />
         <entry key="app/src/main/res/layout/big_image_card.xml" value="0.13058494285300926" />
@@ -235,11 +241,12 @@
         <entry key="app/src/main/res/layout/enlarge_image_card.xml" value="0.13541666666666666" />
         <entry key="app/src/main/res/layout/fragment_all_diary.xml" value="0.22742619168931155" />
         <entry key="app/src/main/res/layout/fragment_all_diary_two.xml" value="0.2033514492753623" />
-        <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.2341262817382812" />
+        <entry key="app/src/main/res/layout/fragment_mission.xml" value="0.2226732343156761" />
         <entry key="app/src/main/res/layout/fragment_more.xml" value="0.26051177978515627" />
         <entry key="app/src/main/res/layout/fragment_more_two.xml" value="0.3094828287760416" />
-        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.3000900268554689" />
+        <entry key="app/src/main/res/layout/fragment_my_diary.xml" value="0.2517166137695314" />
         <entry key="app/src/main/res/layout/fragment_ranking.xml" value="0.24391174316406244" />
+        <entry key="app/src/main/res/layout/fragment_ranking_menu.xml" value="0.2722222222222222" />
         <entry key="app/src/main/res/layout/fragment_ranking_thisweek.xml" value="0.1671875" />
         <entry key="app/src/main/res/layout/fragment_ranking_week.xml" value="0.27500569168671607" />
         <entry key="app/src/main/res/layout/fragment_region_data.xml" value="0.26448262532552075" />
@@ -254,6 +261,7 @@
         <entry key="app/src/main/res/layout/item_region.xml" value="0.28688449583191805" />
         <entry key="app/src/main/res/layout/item_spinner.xml" value="0.15729166666666666" />
         <entry key="app/src/main/res/layout/item_spinner_gender.xml" value="0.2427536231884058" />
+        <entry key="app/src/main/res/layout/item_youtube.xml" value="0.2722222222222222" />
         <entry key="app/src/main/res/layout/like_person_line.xml" value="0.3585362752278645" />
         <entry key="app/src/main/res/layout/mission_card.xml" value="0.2776580810546875" />
         <entry key="app/src/main/res/layout/mission_card_two.xml" value="0.10018463134765615" />

@@ -73,7 +73,7 @@
                         android:layout_height="70dp"
                         android:background="@drawable/avatar_background"
                         android:clipToOutline="true"
-                        android:scaleType="centerInside"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/ic_user" />
 
                     <TextView

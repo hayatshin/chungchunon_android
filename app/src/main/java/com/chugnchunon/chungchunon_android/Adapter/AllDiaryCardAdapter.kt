@@ -95,7 +95,13 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
             }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)
-            userNameView.text = items[position].username
+
+            if(items[position].username.length > 10) {
+                userNameView.text = "${items[position].username.substring(0, 10)}.."
+            } else {
+                userNameView.text = items[position].username
+            }
+
             userStepCountView.text = "${step}보"
             userMoodView.setImageResource(EmoticonInteger().IntToEmoticon(items[position].mood!!.toInt()))
 

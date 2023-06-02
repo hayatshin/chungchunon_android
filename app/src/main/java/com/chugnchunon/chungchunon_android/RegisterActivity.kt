@@ -402,9 +402,9 @@ class RegisterActivity : AppCompatActivity() {
             TimerFun()
 
 
-            var veriProgress = ProgressBar(applicationContext)
+            val veriProgress = ProgressBar(applicationContext)
             veriProgress.layoutParams = layoutParams
-            var colorResouce = ContextCompat.getColor(this, R.color.main_color)
+            val colorResouce = ContextCompat.getColor(this, R.color.main_color)
             veriProgress.getIndeterminateDrawable()
                 .setColorFilter(colorResouce, PorterDuff.Mode.MULTIPLY)
 
@@ -579,6 +579,8 @@ class RegisterActivity : AppCompatActivity() {
                 goWarning.putExtra("phone", totalTxtCheck.phoneFill.value)
                 startActivity(goWarning)
             } else {
+                // 모두 완벽하게 기입
+
                 binding.registerBtn.visibility = View.GONE
                 binding.registerProgressBar.visibility = View.VISIBLE
 
@@ -592,10 +594,10 @@ class RegisterActivity : AppCompatActivity() {
                             OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
                                 taskSnapshot.storage.downloadUrl.addOnSuccessListener {
                                     val imageUrl = it.toString()
-                                    val phoneNumber =
-                                        "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
 
                                     val userId = Firebase.auth.currentUser?.uid
+                                    val phoneNumber =
+                                        "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
                                     val updateUserType = if (userType == "사용자" && userAge < 50) "파트너"
                                     else if (userType == "사용자" && userAge >= 50) "사용자"
                                     else "파트너"

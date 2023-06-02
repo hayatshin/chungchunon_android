@@ -14,7 +14,7 @@
     android:paddingVertical="10dp">
 
     <ImageView
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="10dp"
         android:id="@+id/communityImage"
         android:layout_width="40dp"
         android:layout_height="25dp"

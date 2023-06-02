@@ -1,13 +1,17 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
+import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.os.Handler
+import android.provider.ContactsContract
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,12 +23,13 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import androidx.annotation.Keep
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.chugnchunon.chungchunon_android.Adapter.RankingRecyclerAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.RankingLine
-import com.chugnchunon.chungchunon_android.Fragment.PeriodThisWeekRankingFragment.Companion.thisStepCheck
+import com.chugnchunon.chungchunon_android.Fragment.PeriodAllRankingFragment.Companion.thisStepCheck
 import com.chugnchunon.chungchunon_android.Layout.CustomBarChartRender
 import com.chugnchunon.chungchunon_android.R
 import com.chugnchunon.chungchunon_android.databinding.FragmentRankingWeekBinding
@@ -49,17 +54,19 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.protobuf.Value
 import com.kakao.auth.IApplicationConfig
+import kotlinx.android.synthetic.main.fragment_region_data.view.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.tasks.await
 import me.moallemi.tools.daterange.localdate.rangeTo
+import okhttp3.internal.toImmutableList
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-class PeriodThisWeekRankingFragment : Fragment() {
+class PeriodFriendRankingFragment : Fragment() {
 
     private var _binding: FragmentRankingWeekBinding? = null
     private val binding get() = _binding!!
@@ -75,13 +82,13 @@ class PeriodThisWeekRankingFragment : Fragment() {
     private var userPointArray = ArrayList<RankingLine>()
     private var userStepCountHashMap = hashMapOf<String, Int>()
 
-    private var formatThisWeekStart: String = ""
-    private var formatThisWeekEnd: String = ""
-    private var formatThisNow: String = ""
-
-    lateinit var thisWeekStart: Date
-    lateinit var thisWeekEnd: Date
+    lateinit var periodStart: Date
+    lateinit var periodEnd: Date
     lateinit var thisNow: Date
+
+    private var formatPeriodStart: String = ""
+    private var formatPeriodEnd: String = ""
+    private var formatThisNow: String = ""
 
     private var thisWeekMyStepCount: Int = 0
     private var thisWeekMyStepCountAvg: Int = 0
@@ -99,6 +106,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
         var questionClick = false
         var thisStepCheck = true
         var mondayOrNot = false
+        var friendLastWeekOrNot = false
     }
 
     lateinit var rankingBarChartView: BarChart
@@ -113,6 +121,80 @@ class PeriodThisWeekRankingFragment : Fragment() {
         val view = binding.root
 
         rankingBarChartView = view.findViewById<BarChart>(R.id.rankingBarChart)
+        binding.communitySelectRecycler.visibility = View.GONE
+
+        val mainLeftBox =
+            ResourcesCompat.getDrawable(resources, R.drawable.mindbox_left_main_10, null)
+        val grayLeftBox =
+            ResourcesCompat.getDrawable(resources, R.drawable.mindbox_left_gray_10, null)
+        val mainRightBox =
+            ResourcesCompat.getDrawable(resources, R.drawable.mindbox_right_main_10, null)
+        val grayRightBox =
+            ResourcesCompat.getDrawable(resources, R.drawable.mindbox_right_gray_10, null)
+
+        // 이번주 저번주 클릭
+        binding.thisWeekBox.setOnClickListener {
+
+            binding.rankingBarChart.visibility = View.GONE
+            binding.rankingBarChartProgressBar.visibility = View.VISIBLE
+            binding.rankingRecyclerView.visibility = View.GONE
+            binding.rankingRecyclerViewProgressBar.visibility = View.VISIBLE
+
+            binding.thisWeekBox.background = mainLeftBox
+            binding.lastWeekBox.background = grayRightBox
+            binding.thisWeekText.setTextColor(
+               Color.WHITE
+            )
+            binding.lastWeekText.setTextColor(
+              Color.BLACK
+            )
+
+            friendLastWeekOrNot = false
+
+            initialIndex = 1
+            userPointArray = ArrayList<RankingLine>()
+            userStepCountHashMap = hashMapOf<String, Int>()
+            thisWeekMyStepCount = 0
+            thisWeekMyStepCountAvg = 0
+
+            thisWeekMyStepPoint = 0f
+            thisWeekMyDiaryPoint = 0f
+
+            periodSet()
+            getGraph()
+            getRanking()
+        }
+
+        binding.lastWeekBox.setOnClickListener {
+
+            binding.rankingBarChart.visibility = View.GONE
+            binding.rankingBarChartProgressBar.visibility = View.VISIBLE
+            binding.rankingRecyclerView.visibility = View.GONE
+            binding.rankingRecyclerViewProgressBar.visibility = View.VISIBLE
+            binding.thisWeekBox.background = grayLeftBox
+            binding.lastWeekBox.background = mainRightBox
+            binding.thisWeekText.setTextColor(
+               Color.BLACK
+            )
+            binding.lastWeekText.setTextColor(
+               Color.WHITE
+            )
+
+            friendLastWeekOrNot = true
+
+            initialIndex = 1
+            userPointArray = ArrayList<RankingLine>()
+            userStepCountHashMap = hashMapOf<String, Int>()
+            thisWeekMyStepCount = 0
+            thisWeekMyStepCountAvg = 0
+
+            thisWeekMyStepPoint = 0f
+            thisWeekMyDiaryPoint = 0f
+
+            periodSet()
+            getGraph()
+            getRanking()
+        }
 
         binding.pointQuestion.setOnClickListener {
             if (!questionClick) {
@@ -155,57 +237,186 @@ class PeriodThisWeekRankingFragment : Fragment() {
             }
         }
 
-        // 이번주 시작
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
-        val today = Calendar.getInstance()
-        val timeZone = TimeZone.getTimeZone("Asia/Seoul")
+        // 초기화
+        initialIndex = 1
 
-        val startOfWeek = Calendar.getInstance(timeZone).apply {
-            firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time
+        val readContactPermissionCheck =
+            ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CONTACTS)
+        if (readContactPermissionCheck == PackageManager.PERMISSION_DENIED) {
+            // 권한 없음
+            binding.authLayout.visibility = View.VISIBLE
+        } else {
+            // 권한 있음
+            binding.authLayout.visibility = View.GONE
 
-        val endOfWeek = Calendar.getInstance(timeZone).apply {
-            firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 59)
-        }.time
-
-        val startOfLastWeek = Calendar.getInstance(timeZone).apply {
-            firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
-            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-        }.time
-
-        val endOfLastWeek = Calendar.getInstance(timeZone).apply {
-            firstDayOfWeek = Calendar.MONDAY
-            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
-            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-        }.time
-
-        val now = Calendar.getInstance(timeZone).time
-
-        formatThisWeekStart = dateFormat.format(startOfWeek)
-        formatThisWeekEnd = dateFormat.format(endOfWeek)
-        formatThisNow = dateFormat.format(now)
-
-        thisWeekStart = dateFormat.parse(formatThisWeekStart)
-        thisWeekEnd = dateFormat.parse(formatThisWeekEnd)
-        thisNow = dateFormat.parse(formatThisNow)
+            uiScope.launch {
+                periodSet()
+                getGraph()
+                getRanking()
+            }
+        }
 
         binding.rankingBarChart.visibility = View.GONE
         binding.rankingBarChartProgressBar.visibility = View.VISIBLE
         binding.rankingRecyclerView.visibility = View.GONE
         binding.rankingRecyclerViewProgressBar.visibility = View.VISIBLE
 
+
+        return view
+    }
+
+    // 전화번호
+
+    suspend fun getRefinedAllContactNumbers(): List<String> {
+        val numbersList = getAllContactNumbers(requireActivity())
+        var newNumberList = myContactNumber()
+
+        for (number in numbersList) {
+            val numberBuilder = StringBuilder(number)
+            if (number.contains("-")) {
+                // 있는 경우
+                newNumberList.add(number.toString())
+            } else {
+                // 없는 경우
+                when (number.length) {
+                    13 -> {
+                        newNumberList.add(number)
+                    }
+                    11 -> {
+                        numberBuilder.insert(3, "-")
+                        numberBuilder.insert(8, "-")
+                        newNumberList.add(numberBuilder.toString())
+                    }
+                    10 -> {
+                        numberBuilder.insert(3, "-")
+                        numberBuilder.insert(7, "-")
+                        newNumberList.add(numberBuilder.toString())
+                    }
+                }
+            }
+        }
+        return newNumberList.distinct().toImmutableList()
+    }
+
+    suspend fun myContactNumber(): ArrayList<String> {
+        var newNumberList = ArrayList<String>()
+
+        val userData = userDB.document("$userId").get().await()
+        val userPhone = userData.data?.getValue("phone").toString()
+        newNumberList.add(userPhone)
+        return newNumberList
+    }
+
+    @SuppressLint("Range")
+    private fun getAllContactNumbers(context: Context): List<String> {
+        val numbersList = mutableListOf<String>()
+        val cursor = context.contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            null,
+            null,
+            null,
+            null
+        )
+        while (cursor?.moveToNext() == true) {
+            if (cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER) != -1) {
+                val number =
+                    cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                numbersList.add(number)
+            }
+        }
+        cursor?.close()
+        return numbersList
+    }
+
+    // 데이터 기존
+
+    private fun periodSet() {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
+        val today = Calendar.getInstance()
+        val timeZone = TimeZone.getTimeZone("Asia/Seoul")
+
+        if (!friendLastWeekOrNot) {
+            // 이번주
+            periodStart = Calendar.getInstance(timeZone).apply {
+                firstDayOfWeek = Calendar.MONDAY
+                set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.time
+
+            periodEnd = Calendar.getInstance(timeZone).apply {
+                firstDayOfWeek = Calendar.MONDAY
+                set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+                set(Calendar.MILLISECOND, 59)
+            }.time
+        } else {
+            // 지난주
+            periodStart = Calendar.getInstance(timeZone).apply {
+                firstDayOfWeek = Calendar.MONDAY
+                set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+                set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            }.time
+
+            periodEnd = Calendar.getInstance(timeZone).apply {
+                firstDayOfWeek = Calendar.MONDAY
+                set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+                set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            }.time
+        }
+
+//        val startOfWeek = Calendar.getInstance(timeZone).apply {
+//            firstDayOfWeek = Calendar.MONDAY
+//            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+//            set(Calendar.HOUR_OF_DAY, 0)
+//            set(Calendar.MINUTE, 0)
+//            set(Calendar.SECOND, 0)
+//            set(Calendar.MILLISECOND, 0)
+//        }.time
+//
+//        val endOfWeek = Calendar.getInstance(timeZone).apply {
+//            firstDayOfWeek = Calendar.MONDAY
+//            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+//            set(Calendar.HOUR_OF_DAY, 23)
+//            set(Calendar.MINUTE, 59)
+//            set(Calendar.SECOND, 59)
+//            set(Calendar.MILLISECOND, 59)
+//        }.time
+//
+//        val startOfLastWeek = Calendar.getInstance(timeZone).apply {
+//            firstDayOfWeek = Calendar.MONDAY
+//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+//            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+//        }.time
+//
+//        val endOfLastWeek = Calendar.getInstance(timeZone).apply {
+//            firstDayOfWeek = Calendar.MONDAY
+//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
+//            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+//        }.time
+
+        val now = Calendar.getInstance(timeZone).time
+
+        formatPeriodStart = dateFormat.format(periodStart)
+        formatPeriodEnd = dateFormat.format(periodEnd)
+        formatThisNow = dateFormat.format(now)
+
+//        thisWeekStart = dateFormat.parse(formatThisWeekStart)
+//        thisWeekEnd = dateFormat.parse(formatThisWeekEnd)
+        thisNow = dateFormat.parse(formatThisNow)
+
+        val periodSubStringStart = formatPeriodStart.substring(5, 10)
+        val periodSubStringEnd = formatPeriodEnd.substring(5, 10)
+        val replacePeriodStart = periodSubStringStart.replace("-", "/")
+        val replacePeriodEnd = periodSubStringEnd.replace("-", "/")
+        binding.periodText.text = "${replacePeriodStart} ~ ${replacePeriodEnd}"    }
+
+    private fun getRanking() {
         // 데이터 불러오기
         uiScope.launch(Dispatchers.IO) {
             launch { userIdToArrayFun() }.join()
@@ -219,7 +430,9 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 }
             }
         }
+    }
 
+    private fun getGraph() {
         // graph
         uiScope.launch(Dispatchers.IO) {
             listOf(
@@ -235,8 +448,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 }
             }
         }
-
-        return view
     }
 
     private fun dpTextSize(dp: Float): Float {
@@ -248,7 +459,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        binding.rankingBarChart.animateY(1000, Easing.Linear)
+//        binding.rankingBarChart.animateY(1000, Easing.Linear)
     }
 
     override fun onDestroy() {
@@ -325,14 +536,14 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun graphStepFun() {
         val startDate = LocalDate.of(
-            formatThisWeekStart.substring(0, 4).toInt(),
-            formatThisWeekStart.substring(5, 7).toInt(),
-            formatThisWeekStart.substring(8, 10).toInt()
+            formatPeriodStart.substring(0, 4).toInt(),
+            formatPeriodStart.substring(5, 7).toInt(),
+            formatPeriodStart.substring(8, 10).toInt()
         )
         val endDate = LocalDate.of(
-            formatThisWeekEnd.substring(0, 4).toInt(),
-            formatThisWeekEnd.substring(5, 7).toInt(),
-            formatThisWeekEnd.substring(8, 10).toInt()
+            formatPeriodEnd.substring(0, 4).toInt(),
+            formatPeriodEnd.substring(5, 7).toInt(),
+            formatPeriodEnd.substring(8, 10).toInt()
         )
 
         for (stepDate in startDate..endDate) {
@@ -350,7 +561,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun graphStepCalculateFun() {
-        var daysDiffTime = thisNow.time - thisWeekStart.time
+        var daysDiffTime = thisNow.time - periodStart.time
         var daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
         thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate + 1).toDouble())).toInt()
         thisWeekMyStepPoint = (Math.round(thisWeekMyStepCountAvg / 1000.0)).toFloat()
@@ -358,8 +569,8 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun graphDiaryFun() {
         var thisWeekMyDiaryDB = diaryDB
-            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
-            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .whereGreaterThanOrEqualTo("timestamp", periodStart)
+            .whereLessThanOrEqualTo("timestamp", periodEnd)
             .whereEqualTo("userId", userId)
             .count()
 
@@ -385,7 +596,9 @@ class PeriodThisWeekRankingFragment : Fragment() {
     }
 
     suspend fun userIdToArrayFun() {
-        var userdocuments = userDB.get().await()
+
+        val myContactList = getRefinedAllContactNumbers()
+        val userdocuments = userDB.get().await()
 
         for (document in userdocuments) {
             if (document.data.containsKey("userType")) {
@@ -396,17 +609,22 @@ class PeriodThisWeekRankingFragment : Fragment() {
                         val userId = document.data?.getValue("userId").toString()
                         val username = document.data.getValue("name").toString()
                         val userAvatar = document.data.getValue("avatar").toString()
+                        val userPhone = document.data.getValue("phone").toString()
 
-                        val userEntry = RankingLine(
-                            0,
-                            userId,
-                            username,
-                            userAvatar,
-                            0,
-                        )
+                        myContactList.forEach { contact ->
+                            if (userPhone == contact) {
+                                val userEntry = RankingLine(
+                                    0,
+                                    userId,
+                                    username,
+                                    userAvatar,
+                                    0,
+                                )
 
-                        userPointArray.add(userEntry)
-                        userStepCountHashMap.put(userId, 0)
+                                userPointArray.add(userEntry)
+                                userStepCountHashMap.put(userId, 0)
+                            }
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -419,14 +637,14 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun stepCountToArrayFun() {
         val startDate = LocalDate.of(
-            formatThisWeekStart.substring(0, 4).toInt(),
-            formatThisWeekStart.substring(5, 7).toInt(),
-            formatThisWeekStart.substring(8, 10).toInt()
+            formatPeriodStart.substring(0, 4).toInt(),
+            formatPeriodStart.substring(5, 7).toInt(),
+            formatPeriodStart.substring(8, 10).toInt()
         )
         val endDate = LocalDate.of(
-            formatThisWeekEnd.substring(0, 4).toInt(),
-            formatThisWeekEnd.substring(5, 7).toInt(),
-            formatThisWeekEnd.substring(8, 10).toInt()
+            formatPeriodEnd.substring(0, 4).toInt(),
+            formatPeriodEnd.substring(5, 7).toInt(),
+            formatPeriodEnd.substring(8, 10).toInt()
         )
 
         for (stepDate in startDate..endDate) {
@@ -439,7 +657,7 @@ class PeriodThisWeekRankingFragment : Fragment() {
             dataSteps.data?.forEach { (stepUserId, dateStepCount) ->
                 userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
                     if (keyUserId == stepUserId) {
-                        if(dateStepCount.toString().toInt() < 10000) {
+                        if (dateStepCount.toString().toInt() < 10000) {
                             userStepCountHashMap[keyUserId] =
                                 valueStepCount + (dateStepCount as Long).toInt()
                         } else {
@@ -468,8 +686,8 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun diaryToArrayFun() {
         val diaryDocuments = db.collection("diary")
-            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
-            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .whereGreaterThanOrEqualTo("timestamp", periodStart)
+            .whereLessThanOrEqualTo("timestamp", periodEnd)
             .get()
             .await()
 
@@ -488,8 +706,8 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun commentToArrayFun() {
         val commentDocuments = db.collectionGroup("comments")
-            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
-            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .whereGreaterThanOrEqualTo("timestamp", periodStart)
+            .whereLessThanOrEqualTo("timestamp", periodEnd)
             .get()
             .await()
 
@@ -507,8 +725,8 @@ class PeriodThisWeekRankingFragment : Fragment() {
 
     suspend fun likeToArrayFun() {
         val likeDocuments = db.collectionGroup("likes")
-            .whereGreaterThanOrEqualTo("timestamp", thisWeekStart)
-            .whereLessThanOrEqualTo("timestamp", thisWeekEnd)
+            .whereGreaterThanOrEqualTo("timestamp", periodStart)
+            .whereLessThanOrEqualTo("timestamp", periodEnd)
             .get()
             .await()
 
@@ -556,28 +774,6 @@ class PeriodThisWeekRankingFragment : Fragment() {
                 RecyclerView.VERTICAL,
                 false
             )
-    }
-}
-
-@Keep
-class ThisMyValueFormatter(var position: String, var thisWeekMyStepCount: Int) : ValueFormatter() {
-    override fun getFormattedValue(value: Float): String {
-
-        if (position == "goal" && thisStepCheck) {
-            thisStepCheck = !thisStepCheck
-            return "3,000 보"
-        } else if (position == "goal" && !thisStepCheck) {
-            thisStepCheck = !thisStepCheck
-            return "4 회"
-        } else if (position != "goal" && thisStepCheck) {
-            val decimal = DecimalFormat("#,###")
-            val stepLabel = decimal.format(thisWeekMyStepCount)
-            thisStepCheck = !thisStepCheck
-            return "${stepLabel} 보"
-        } else {
-            thisStepCheck = !thisStepCheck
-            return "${value.toInt()} 회"
-        }
     }
 }
 

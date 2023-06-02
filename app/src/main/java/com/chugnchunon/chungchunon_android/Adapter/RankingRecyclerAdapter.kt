@@ -46,6 +46,9 @@ import java.time.LocalDate
 class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingLine>) :
     RecyclerView.Adapter<RankingRecyclerAdapter.RankingViewHolder>() {
 
+    var db = Firebase.firestore
+    var userId = Firebase.auth.currentUser?.uid
+
     inner class RankingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var rankingIndex: TextView = itemView.findViewById(R.id.rankingIndex)
@@ -82,11 +85,65 @@ class RankingRecyclerAdapter(val context: Context, var items: ArrayList<RankingL
                 .load(rankingLine.userAvatar)
                 .into(rankingAvatar)
 
-            var decimal = DecimalFormat("#,###")
-            var pointResult = decimal.format(rankingLine.point)
+            val decimal = DecimalFormat("#,###")
+            val pointResult = decimal.format(rankingLine.point)
 
-            rankingPoint.text = "${pointResult}원"
+            // 점 or 원
 
+            db.collection("users")
+                .document("$userId")
+                .get()
+                .addOnSuccessListener { userData ->
+                    val userRegion = userData.data?.getValue("region").toString()
+                    val userSmallRegion = userData.data?.getValue("smallRegion").toString()
+                    val userFullRegion = "${userRegion} ${userSmallRegion}"
+
+                    db.collection("contract_region")
+                        .document(userFullRegion)
+                        .get()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val cdDocument = task.result
+                                if (cdDocument != null) {
+                                    if (cdDocument.exists()) {
+                                        val regionUnit =
+                                            cdDocument.data?.getValue("unit").toString()
+
+                                        if(regionUnit == "원") {
+                                            rankingPoint.text = "${pointResult}원"
+                                        } else {
+                                            rankingPoint.text = "${pointResult}점"
+                                        }
+
+                                    } else {
+                                        // 지역 존재하지 않을 때
+
+                                        db.collection("community")
+                                            .whereArrayContains("users", "$userId").get()
+                                            .addOnSuccessListener { communityDocuments ->
+                                                if(communityDocuments.size() > 0) {
+                                                    // 소속기관 있음
+                                                    rankingPoint.text = "${pointResult}원"
+                                                } else {
+                                                    rankingPoint.text = "${pointResult}점"
+                                                }
+                                            }
+                                    }
+                                } else {
+                                    db.collection("community")
+                                        .whereArrayContains("users", "$userId").get()
+                                        .addOnSuccessListener { communityDocuments ->
+                                            if(communityDocuments.size() > 0) {
+                                                // 소속기관 있음
+                                                rankingPoint.text = "${pointResult}원"
+                                            } else {
+                                                rankingPoint.text = "${pointResult}점"
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                }
         }
     }
 

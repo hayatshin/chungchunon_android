@@ -545,6 +545,8 @@ class EditProfileActivity : AppCompatActivity() {
             EDIT_REGION_REQ -> {
                 // 지역
                 if (resultCode == RESULT_OK) {
+                    smallRegionCheck = false
+
                     val region = data!!.getStringExtra("region")
                     val smallRegion = data!!.getStringExtra("smallRegion")
                     binding.editRegion.text = "$region $smallRegion"

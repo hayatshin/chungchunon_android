@@ -66,7 +66,7 @@ class CommunityRegisterActivity : AppCompatActivity() {
             IntentFilter("COMMUNITY_DELETE")
         )
 
-        val selectedFullRegion = intent.getStringExtra("fullRegion").toString()
+//        val selectedFullRegion = intent.getStringExtra("fullRegion").toString()
 
         adapter = CommunityAdapter(this, communityItems)
         binding.communityRecycler.adapter = adapter
@@ -89,7 +89,6 @@ class CommunityRegisterActivity : AppCompatActivity() {
         }
 
         db.collection("community")
-            .whereEqualTo("fullRegion", selectedFullRegion)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

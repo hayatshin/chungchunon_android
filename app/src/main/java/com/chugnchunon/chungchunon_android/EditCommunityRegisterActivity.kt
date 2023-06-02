@@ -56,7 +56,7 @@ class EditCommunityRegisterActivity : AppCompatActivity() {
 
         binding.communityRegisterBtn.text = "소속기관 수정하기"
 
-        val selectedFullRegion = intent.getStringExtra("fullRegion").toString()
+//        val selectedFullRegion = intent.getStringExtra("fullRegion").toString()
         val userCommunities = intent.getStringArrayListExtra("userCommunities") as ArrayList<String>
         selectedCommunityItems = ArrayList<String>(userCommunities)
 
@@ -91,7 +91,6 @@ class EditCommunityRegisterActivity : AppCompatActivity() {
         }
 
         db.collection("community")
-            .whereEqualTo("fullRegion", selectedFullRegion)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -99,6 +98,9 @@ class EditCommunityRegisterActivity : AppCompatActivity() {
                     if (communities != null) {
                         if (!communities.isEmpty) {
                             // 소속기관 있음
+                            binding.noCommunity.visibility = View.GONE
+                            binding.communityRecycler.visibility = View.VISIBLE
+
                             for (communityData in communities) {
                                 val communityTitle =
                                     communityData.data.getValue("communityTitle").toString()
@@ -115,13 +117,14 @@ class EditCommunityRegisterActivity : AppCompatActivity() {
                             }
                         } else {
                             // 소속기관 없음
-                            val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
-                            startActivity(goDiary)
+                            binding.noCommunity.visibility = View.VISIBLE
+                            binding.communityRecycler.visibility = View.GONE
                         }
                     } else {
                         // 소속기관 없음
-                        val goDiary = Intent(applicationContext, DiaryTwoActivity::class.java)
-                        startActivity(goDiary)
+
+                        binding.noCommunity.visibility = View.VISIBLE
+                        binding.communityRecycler.visibility = View.GONE
                     }
                 }
             }

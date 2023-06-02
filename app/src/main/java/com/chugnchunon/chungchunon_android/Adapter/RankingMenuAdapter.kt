@@ -7,19 +7,22 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.chugnchunon.chungchunon_android.Fragment.*
 import com.google.android.material.tabs.TabLayout
 
-class PeriodRankingAdapter(activity: FragmentActivity) :
+class RankingMenuAdapter(activity: FragmentActivity) :
     FragmentStateAdapter(activity) {
 
     var fragmentList: MutableList<Fragment> = arrayListOf()
     var titleList: MutableList<String> = arrayListOf()
 
-    override fun getItemCount(): Int = 2
+    override fun getItemCount(): Int = 3
 
     override fun createFragment(position: Int): Fragment {
+
         when (position) {
-//            0 -> return PeriodThisWeekRankingFragment()
-//            1 -> return PeriodLastWeekRankingFragment()
-            else -> return PeriodAllRankingFragment()
+            0 -> return PeriodAllRankingFragment()
+            1 -> return PeriodFriendRankingFragment()
+            2 -> return PeriodRegionRankingFragment()
+//            3 -> return MyDataFragment()
         }
+        return PeriodAllRankingFragment()
     }
 }

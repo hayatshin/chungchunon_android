@@ -112,129 +112,195 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rule_header"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
+        android:paddingHorizontal="30dp"
         android:paddingTop="20dp"
-        android:paddingBottom="20dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="bottom"
-            android:orientation="vertical"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:padding="5dp">
-
-                <ImageView
-                    android:id="@+id/womanIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:src="@drawable/ic_womanimage" />
-
-                <ImageView
-                    android:id="@+id/manIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginBottom="8dp"
-                    android:src="@drawable/ic_manimage" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:orientation="horizontal"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-
-                    <TextView
-                        android:layout_marginRight="10dp"
-                        android:id="@+id/thisMonth"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/custom_gray"
-                        android:textSize="16dp"
-                        android:textStyle="bold"
-                        tools:text="12월 작성일" />
-
-                    <TextView
-                        android:id="@+id/diaryCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/light_gray"
-                        android:textSize="16dp"
-                        tools:text="15일 / 31일" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/todayDate"
+                android:id="@+id/imageMonthLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:textColor="@color/black"
-                android:textSize="25dp"
-                android:textStyle="bold"
-                tools:text="1월 1일" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/noContractIconLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/womanIcon"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginRight="5dp"
+                            android:src="@drawable/ic_womanimage" />
+
+                        <ImageView
+                            android:id="@+id/manIcon"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_manimage" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/contractIconLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/contractRegionImageView"
+                            android:layout_width="40dp"
+                            android:layout_height="30dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/mindbox_gray"
+                            android:scaleType="centerCrop" />
+
+                        <TextView
+                            android:id="@+id/contractRegionTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/custom_gray"
+                            android:textSize="20dp"
+                            tools:text="광진구" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/todayDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="25dp"
+                    android:textStyle="bold"
+                    tools:text="1월 1일" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/coinLayout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/mindbox_gray"
-            android:gravity="bottom"
-            android:orientation="horizontal"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="3dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
+            android:layout_height="match_parent"
+            android:gravity="end|bottom"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight="10dp"
-                android:src="@drawable/ic_coin" />
-
-            <TextView
-                android:id="@+id/coinTextMoney"
+            <LinearLayout
+                android:id="@+id/loadingCoinLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:textColor="@color/main_color"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                tools:text="0원" />
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="3dp"
+                android:visibility="visible">
 
-            <TextView
-                android:id="@+id/coinTextExplanation"
+                <ImageView
+                    android:id="@+id/loadingCoinIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_one_coin" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/writeCountLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/custom_gray"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:text="적립" />
+                android:layout_weight="1"
+                android:gravity="end|bottom"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/thisMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    tools:text="12월 작성일" />
+
+                <TextView
+                    android:id="@+id/diaryCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textColor="@color/light_gray"
+                    android:textSize="16dp"
+                    tools:text="15일 / 31일" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/coinLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/mindbox_gray"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="3dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/coinIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_coin" />
+
+                <TextView
+                    android:id="@+id/coinTextMoney"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:textColor="@color/main_color"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    tools:text="0원" />
+
+                <TextView
+                    android:id="@+id/coinTextExplanation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="적립"
+                    android:textColor="@color/custom_gray"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

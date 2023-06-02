@@ -44,7 +44,7 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_marginBottom="20dp"
-                    android:src="@drawable/ic_illustimage"/>
+                    android:src="@drawable/ic_illustimage" />
 
                 <TextView
                     android:id="@+id/bigResultText"
@@ -113,51 +113,51 @@
                 android:orientation="vertical">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_gravity="center"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center">
 
-                <RelativeLayout
-                    android:gravity="center"
-                    app:layout_constraintDimensionRatio="H,0.9:1"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp">
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:gravity="center"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="H,0.9:1"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/missionRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:clipToOutline="true"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                        <androidx.viewpager2.widget.ViewPager2
+                            android:id="@+id/missionRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:clipToOutline="true"
+                            android:orientation="horizontal"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:background="@drawable/mindbox_transparent_gray"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="5dp"
-                        android:translationZ="180dp">
-
-                        <TextView
-                            android:id="@+id/cardIndex"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/light_gray"
-                            android:textSize="12dp"
-                            tools:text="1 / 2" />
-                    </LinearLayout>
+                            android:layout_alignParentRight="true"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:background="@drawable/mindbox_transparent_gray"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:translationZ="180dp">
 
-                </RelativeLayout>
+                            <TextView
+                                android:id="@+id/cardIndex"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/light_gray"
+                                android:textSize="12dp"
+                                tools:text="1 / 2" />
+                        </LinearLayout>
+
+                    </RelativeLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -171,19 +171,33 @@
                     app:ci_drawable="@drawable/indicator_active"
                     app:ci_drawable_unselected="@drawable/indicator_inactive" />
 
-                <TextView
+                <LinearLayout
                     android:layout_marginStart="20dp"
-                    android:id="@+id/attractionTitle"
+                    android:layout_marginBottom="7dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="7dp"
-                    android:text="청춘시 명소"
-                    android:textColor="@color/black"
-                    android:textSize="21dp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_marginRight="10dp"
+                        android:layout_width="40dp"
+                        android:layout_height="35dp"
+                        android:src="@drawable/ic_tv_retro_solid" />
+
+                    <TextView
+                        android:layout_gravity="bottom"
+                        android:id="@+id/attractionTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="청춘테레비"
+                        android:textColor="@color/black"
+                        android:textSize="25dp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/attractionRecyclerView"
+                    android:id="@+id/youtubeRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"

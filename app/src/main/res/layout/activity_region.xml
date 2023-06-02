@@ -93,7 +93,7 @@
         android:background="@drawable/default_button"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:text="확인"
+        android:text="다음"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
