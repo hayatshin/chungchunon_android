@@ -649,7 +649,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:lineHeight="34dp"
-                        android:text="새로운 버전이 업데이트 되었습니다.\n지금 업데이트를 하시겠습니까?"
+                        android:text="새로운 버전이 업데이트 되었습니다.\n업데이트 후 사용해주세요."
                         android:textAlignment="center"
                         android:textColor="@color/black"
                         android:textSize="20dp"
@@ -666,23 +666,23 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="H,1:0.15">
 
-                <LinearLayout
-                    android:id="@+id/updateCancelBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.7"
-                    android:background="@color/white"
-                    android:gravity="center">
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/updateCancelBox"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_weight="0.7"-->
+<!--                    android:background="@color/white"-->
+<!--                    android:gravity="center">-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="취소"
-                        android:textColor="@color/graph_back"
-                        android:textSize="23dp"
-                        android:textStyle="bold" />
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="취소"-->
+<!--                        android:textColor="@color/graph_back"-->
+<!--                        android:textSize="23dp"-->
+<!--                        android:textStyle="bold" />-->
 
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
                 <LinearLayout
                     android:id="@+id/updateConfirmBox"

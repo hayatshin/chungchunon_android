@@ -1,9 +1,11 @@
 package com.chugnchunon.chungchunon_android
 
 import android.Manifest
+import android.app.Activity
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.icu.text.SimpleDateFormat
@@ -29,6 +31,10 @@ import com.chugnchunon.chungchunon_android.Fragment.*
 import com.chugnchunon.chungchunon_android.Service.MyService
 import com.chugnchunon.chungchunon_android.databinding.ActivityDiaryTwoBinding
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.ActivityResult
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
@@ -79,6 +85,8 @@ class DiaryTwoActivity : AppCompatActivity() {
 
         const val ALL_REQ_CODE: Int = 500
         const val PARTNER_REQ_CODE: Int = 600
+
+        const val APP_UPDATE_REQ_CODE: Int = 700
     }
 
     override fun onBackPressed() {
@@ -130,6 +138,9 @@ class DiaryTwoActivity : AppCompatActivity() {
         }
         remoteConfig.setConfigSettingsAsync(configSettings)
 
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val gson = GsonBuilder().create()
@@ -142,12 +153,9 @@ class DiaryTwoActivity : AppCompatActivity() {
                         val remoteAppVersion = resultJson.app_version?.toInt()
                         val remoteForceUpdate = resultJson.force_update
 
-//                        Toast.makeText(this, "$remoteAppVersion", Toast.LENGTH_LONG).show()
-
-                        // 현재 버전이 remote config 버전보다 낮을 경우
                         if (currentAppVersion < remoteAppVersion!! && remoteForceUpdate!!) {
+                            // 현재 버전이 remote config 버전보다 낮을 경우 & 강제
 
-                            // 즉시 업데이트할 것
                             val window = this.window
                             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                             window.setStatusBarColor(Color.parseColor("#B3000000"))
@@ -156,6 +164,57 @@ class DiaryTwoActivity : AppCompatActivity() {
                             val upAnimation =
                                 AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
                             binding.updateCardLayout.startAnimation(upAnimation)
+
+
+//                            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+//
+//                                if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+//                                    try {
+//                                        appUpdateManager.startUpdateFlowForResult(
+//                                            appUpdateInfo,
+//                                            AppUpdateType.IMMEDIATE,
+//                                            this,
+//                                            APP_UPDATE_REQ_CODE
+//                                        )
+//                                    } catch (e: IntentSender.SendIntentException) {
+//                                        e.printStackTrace()
+//
+//                                        val window = this.window
+//                                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                                        window.setStatusBarColor(Color.parseColor("#B3000000"))
+//
+//                                        binding.updateLayout.visibility = View.VISIBLE
+//                                        val upAnimation =
+//                                            AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+//                                        binding.updateCardLayout.startAnimation(upAnimation)
+//                                    }
+//
+//                                } else {
+//
+//                                    val window = this.window
+//                                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                                    window.setStatusBarColor(Color.parseColor("#B3000000"))
+//
+//                                    binding.updateLayout.visibility = View.VISIBLE
+//                                    val upAnimation =
+//                                        AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+//                                    binding.updateCardLayout.startAnimation(upAnimation)
+//
+//                                }
+//                            }
+//
+//                        } else if (currentAppVersion < remoteAppVersion!! && !remoteForceUpdate!!) {
+//                            // 현재 버전이 remote config 버전보다 낮을 경우 & 선택
+//
+//                            val window = this.window
+//                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                            window.setStatusBarColor(Color.parseColor("#B3000000"))
+//
+//                            binding.updateLayout.visibility = View.VISIBLE
+//                            val upAnimation =
+//                                AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+//                            binding.updateCardLayout.startAnimation(upAnimation)
+
                         } else {
                             // 현재 버전이 remote config 버전보다 낮지 않을 경우
                             binding.updateLayout.visibility = View.GONE
@@ -183,18 +242,18 @@ class DiaryTwoActivity : AppCompatActivity() {
         diaryType = intent.getStringExtra("diaryType").toString()
 
         // 인앱업데이트 취소 클릭
-        binding.updateCancelBox.setOnClickListener {
-            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
-            binding.updateCardLayout.startAnimation(downAnimation)
-
-            Handler().postDelayed({
-                binding.updateLayout.visibility = View.GONE
-
-                var window = this.window
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(Color.WHITE);
-            }, 500)
-        }
+//        binding.updateCancelBox.setOnClickListener {
+//            var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+//            binding.updateCardLayout.startAnimation(downAnimation)
+//
+//            Handler().postDelayed({
+//                binding.updateLayout.visibility = View.GONE
+//
+//                var window = this.window
+//                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                window.setStatusBarColor(Color.WHITE);
+//            }, 500)
+//        }
 
         // 인앱업데이트 확인 클릭
         binding.updateConfirmBox.setOnClickListener {
@@ -353,6 +412,33 @@ class DiaryTwoActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        AppUpdateType.IMMEDIATE,
+                        this,
+                        APP_UPDATE_REQ_CODE
+                    )
+                } catch (e: IntentSender.SendIntentException) {
+                    e.printStackTrace()
+
+                    val window = this.window
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    window.setStatusBarColor(Color.parseColor("#B3000000"))
+
+                    binding.updateLayout.visibility = View.VISIBLE
+                    val upAnimation =
+                        AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+                    binding.updateCardLayout.startAnimation(upAnimation)
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -362,6 +448,28 @@ class DiaryTwoActivity : AppCompatActivity() {
         sendCloseIntent.setAction("CLOSE_APP")
         LocalBroadcastManager.getInstance(this!!)
             .sendBroadcast(sendCloseIntent);
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+        if (requestCode == APP_UPDATE_REQ_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                Toast.makeText(this, "업데이트가 취소되었습니다.", Toast.LENGTH_SHORT).show()
+
+//                val window = this.window
+//                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                window.setStatusBarColor(Color.parseColor("#B3000000"))
+//
+//                binding.updateLayout.visibility = View.VISIBLE
+//                val upAnimation =
+//                    AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
+//                binding.updateCardLayout.startAnimation(upAnimation)
+            }
+        }
     }
 
     suspend fun permissionAssign() {

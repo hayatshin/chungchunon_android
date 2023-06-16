@@ -39,11 +39,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegisterBinding
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
@@ -55,6 +58,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import kotlinx.coroutines.tasks.await
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -66,6 +70,7 @@ class RegisterActivity : AppCompatActivity() {
         ActivityRegisterBinding.inflate(layoutInflater)
     }
 
+    private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private val auth = Firebase.auth
 
@@ -397,10 +402,12 @@ class RegisterActivity : AppCompatActivity() {
         // 휴대폰 인증번호 받기
         binding.phoneAuthBtn.setOnClickListener {
 
+            val authphone =
+                "+82 10${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
+
             binding.phoneAuthLayout.removeView(binding.phoneAuthBtn)
             binding.authProgressBar.visibility = View.VISIBLE
             TimerFun()
-
 
             val veriProgress = ProgressBar(applicationContext)
             veriProgress.layoutParams = layoutParams
@@ -533,18 +540,16 @@ class RegisterActivity : AppCompatActivity() {
                         binding.phoneAuthLayout.removeView(authBtn)
                         binding.phoneAuthLayout.addView(veriProgress)
 
+                        // user 확인
                         val credential = PhoneAuthProvider.getCredential(
                             verificationId,
                             authEditTextView.text.toString()
                         )
+
                         signInWithPhoneAuthCredential(credential)
                     }
                 }
             }
-
-            val authphone =
-                "+82 10${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
-
 
             val optionCompat = PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber(authphone)
@@ -713,6 +718,25 @@ class RegisterActivity : AppCompatActivity() {
                                         val goDiary =
                                             Intent(applicationContext, DiaryTwoActivity::class.java)
                                         startActivity(goDiary)
+                                    } else {
+                                        // 인증 성공
+                                        binding.phoneLayout.removeView(binding.phoneAuthLayout)
+                                        binding.authProgressBar.visibility = View.GONE
+
+                                        var successTextView = TextView(applicationContext)
+                                        successTextView.text = "인증에 성공했습니다."
+                                        successTextView.setTextSize(dpTextSize(12f))
+                                        successTextView.gravity = Gravity.END
+                                        successTextView.layoutParams = phoneResultparams
+                                        successTextView.setTextColor(
+                                            ContextCompat.getColor(
+                                                this,
+                                                R.color.main_color
+                                            )
+                                        )
+                                        successTextView.setTypeface(null, Typeface.BOLD)
+                                        binding.phoneLayout.addView(successTextView)
+                                        totalTxtCheck.phoneFill.value = true
                                     }
                                 } else {
                                     // 인증 성공

@@ -29,6 +29,7 @@ class RankingFragment: Fragment() {
     private var formatLastWeekStart: String = ""
     private var formatLastWeekEnd: String = ""
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

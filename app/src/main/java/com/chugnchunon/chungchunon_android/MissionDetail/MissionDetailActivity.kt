@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android.MissionDetail
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.icu.text.DecimalFormat
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -45,6 +46,7 @@ class MissionDetailActivity : Activity() {
     private var mdStartPeriod = ""
     private var mdEndPeriod = ""
     private var mdPeriod = ""
+    private var mdGoalScore: Int = 0
 
     private var formatStartDate = ""
     private var formatEndDate = ""
@@ -156,6 +158,7 @@ class MissionDetailActivity : Activity() {
         mdStartPeriod = intent.getStringExtra("mdStartPeriod").toString()
         mdEndPeriod = intent.getStringExtra("mdEndPeriod").toString()
         mdPeriod = "${mdStartPeriod} ~ ${mdEndPeriod}"
+        mdGoalScore = intent.getIntExtra("mdGoalScore", 0)
 
         binding.mdTitle.text = mdTitle
         binding.mdDescription.text = mdDescription
@@ -328,14 +331,16 @@ class MissionDetailActivity : Activity() {
                 launch { stepCountToArrayFun() },
                 launch { diaryToArrayFun() },
                 launch { commentToArrayFun() },
-                launch { likeToArrayFun() }
+//                launch { likeToArrayFun() }
             ).joinAll()
             withContext(Dispatchers.Main) {
                 launch {
+                    val decimal = DecimalFormat("#,###")
+                    val formatGoalScore = decimal.format(mdGoalScore)
 
-                    if (userPoint <= 10000) {
-                        binding.mdPointText.text = "$userPoint / 10,000"
-                        val targetProgress = (userPoint.toFloat() / 10000f * 100f).toInt()
+                    if (userPoint <= mdGoalScore) {
+                        binding.mdPointText.text = "$userPoint / ${formatGoalScore}"
+                        val targetProgress = (userPoint.toFloat() / mdGoalScore * 100f).toInt()
                         val animator = ObjectAnimator.ofInt(
                             binding.mdPointProgress,
                             "progress",
@@ -345,9 +350,9 @@ class MissionDetailActivity : Activity() {
                         animator.duration = 2000
                         animator.start()
 
-                        binding.mdPointProgress.progress = userPoint / 10000 * 100
+                        binding.mdPointProgress.progress = userPoint / mdGoalScore * 100
                     } else {
-                        binding.mdPointText.text = "$userPoint / 10,000"
+                        binding.mdPointText.text = "$userPoint / ${formatGoalScore}"
                         binding.mdPointProgress.progress = 100
 
                         val animator =

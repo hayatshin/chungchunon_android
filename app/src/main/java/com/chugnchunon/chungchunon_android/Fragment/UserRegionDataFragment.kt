@@ -476,8 +476,8 @@ class UserRegionDataFragment : Fragment() {
                                                                 adapter.notifyDataSetChanged()
 
                                                                 if (userRegionDiaryItems.size == 0) {
-                                                                    binding.noItemText.visibility =
-                                                                        View.VISIBLE
+//                                                                    binding.noItemText.visibility =
+//                                                                        View.VISIBLE
                                                                 } else {
                                                                     binding.noItemText.visibility =
                                                                         View.GONE
@@ -536,8 +536,8 @@ class UserRegionDataFragment : Fragment() {
                                                                 adapter.notifyDataSetChanged()
 
                                                                 if (userRegionDiaryItems.size == 0) {
-                                                                    binding.noItemText.visibility =
-                                                                        View.VISIBLE
+//                                                                    binding.noItemText.visibility =
+//                                                                        View.VISIBLE
                                                                 } else {
                                                                     binding.noItemText.visibility =
                                                                         View.GONE
@@ -691,8 +691,8 @@ class UserRegionDataFragment : Fragment() {
                                                                 adapter.notifyDataSetChanged()
 
                                                                 if (userRegionDiaryItems.size == 0) {
-                                                                    binding.noItemText.visibility =
-                                                                        View.VISIBLE
+//                                                                    binding.noItemText.visibility =
+//                                                                        View.VISIBLE
                                                                 } else {
                                                                     binding.noItemText.visibility =
                                                                         View.GONE
@@ -751,8 +751,8 @@ class UserRegionDataFragment : Fragment() {
                                                                 adapter.notifyDataSetChanged()
 
                                                                 if (userRegionDiaryItems.size == 0) {
-                                                                    binding.noItemText.visibility =
-                                                                        View.VISIBLE
+//                                                                    binding.noItemText.visibility =
+//                                                                        View.VISIBLE
                                                                 } else {
                                                                     binding.noItemText.visibility =
                                                                         View.GONE

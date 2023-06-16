@@ -136,7 +136,7 @@ class FriendDataFragment : Fragment() {
                             binding.friendNoItemText.visibility =
                                 View.VISIBLE
                         }
-                    }, 1500)
+                    }, 3000)
                 }
 
             }
@@ -476,15 +476,15 @@ class FriendDataFragment : Fragment() {
                                                                         friendDiaryItems.reverse()
                                                                         adapter.notifyDataSetChanged()
 
-                                                                        if (friendDiaryItems.size == 0) {
-                                                                            binding.friendNoItemText.visibility =
-                                                                                View.VISIBLE
-                                                                        } else {
-                                                                            binding.friendNoItemText.visibility =
-                                                                                View.GONE
-                                                                            binding.recyclerDiary.visibility =
-                                                                                View.VISIBLE
-                                                                        }
+//                                                                        if (friendDiaryItems.size == 0) {
+////                                                                            binding.friendNoItemText.visibility =
+////                                                                                View.VISIBLE
+//                                                                        } else {
+//                                                                            binding.friendNoItemText.visibility =
+//                                                                                View.GONE
+//                                                                            binding.recyclerDiary.visibility =
+//                                                                                View.VISIBLE
+//                                                                        }
                                                                         friendDataLoadingState.loadingCompleteData.value =
                                                                             true
                                                                     } else {
@@ -538,77 +538,77 @@ class FriendDataFragment : Fragment() {
                                                                         friendDiaryItems.reverse()
                                                                         adapter.notifyDataSetChanged()
 
-                                                                        if (friendDiaryItems.size == 0) {
-                                                                            binding.friendNoItemText.visibility =
-                                                                                View.VISIBLE
-                                                                        } else {
-                                                                            binding.friendNoItemText.visibility =
-                                                                                View.GONE
-                                                                            binding.recyclerDiary.visibility =
-                                                                                View.VISIBLE
-                                                                        }
+//                                                                        if (friendDiaryItems.size == 0) {
+////                                                                            binding.friendNoItemText.visibility =
+////                                                                                View.VISIBLE
+//                                                                        } else {
+////                                                                            binding.friendNoItemText.visibility =
+////                                                                                View.GONE
+//                                                                            binding.recyclerDiary.visibility =
+//                                                                                View.VISIBLE
+//                                                                        }
                                                                         friendDataLoadingState.loadingCompleteData.value =
                                                                             true
                                                                     }
                                                                 }
                                                         } else {
                                                             // 유저 정보 x
-                                                            if (document.data.contains("images")) {
-                                                                // 이미지 o
-                                                                val diaryImages =
-                                                                    document.data?.getValue("images") as ArrayList<String>
-
-                                                                diarySet = DiaryCard(
-                                                                    userId = userFinalId,
-                                                                    username = userFinalName,
-                                                                    userAvatar = userFinalAvatar,
-                                                                    diaryId = diaryId,
-                                                                    writeTime = DateFormat().convertMillis(
-                                                                        timefromdb
-                                                                    ),
-                                                                    stepCount = userFinalStep,
-                                                                    mood = diaryMood,
-                                                                    diary = diaryDiary,
-                                                                    numLikes = numLikes,
-                                                                    numComments = numComments,
-                                                                    images = diaryImages,
-                                                                    secret = false
-                                                                )
-
-                                                            } else {
-                                                                // 이미지 x
-                                                                diarySet = DiaryCard(
-                                                                    userId = userFinalId,
-                                                                    username = userFinalName,
-                                                                    userAvatar = userFinalAvatar,
-                                                                    diaryId = diaryId,
-                                                                    writeTime = DateFormat().convertMillis(
-                                                                        timefromdb
-                                                                    ),
-                                                                    stepCount = userFinalStep,
-                                                                    mood = diaryMood,
-                                                                    diary = diaryDiary,
-                                                                    numLikes = numLikes,
-                                                                    numComments = numComments,
-                                                                    secret = false
-                                                                )
-                                                            }
-                                                            friendDiaryItems.add(diarySet)
-                                                            friendDiaryItems.sortWith(compareBy({ it.writeTime }))
-                                                            friendDiaryItems.reverse()
-                                                            adapter.notifyDataSetChanged()
-
-                                                            if (friendDiaryItems.size == 0) {
-                                                                binding.friendNoItemText.visibility =
-                                                                    View.VISIBLE
-                                                            } else {
-                                                                binding.friendNoItemText.visibility =
-                                                                    View.GONE
-                                                                binding.recyclerDiary.visibility =
-                                                                    View.VISIBLE
-                                                            }
-                                                            friendDataLoadingState.loadingCompleteData.value =
-                                                                true
+//                                                            if (document.data.contains("images")) {
+//                                                                // 이미지 o
+//                                                                val diaryImages =
+//                                                                    document.data?.getValue("images") as ArrayList<String>
+//
+//                                                                diarySet = DiaryCard(
+//                                                                    userId = userFinalId,
+//                                                                    username = userFinalName,
+//                                                                    userAvatar = userFinalAvatar,
+//                                                                    diaryId = diaryId,
+//                                                                    writeTime = DateFormat().convertMillis(
+//                                                                        timefromdb
+//                                                                    ),
+//                                                                    stepCount = userFinalStep,
+//                                                                    mood = diaryMood,
+//                                                                    diary = diaryDiary,
+//                                                                    numLikes = numLikes,
+//                                                                    numComments = numComments,
+//                                                                    images = diaryImages,
+//                                                                    secret = false
+//                                                                )
+//
+//                                                            } else {
+//                                                                // 이미지 x
+//                                                                diarySet = DiaryCard(
+//                                                                    userId = userFinalId,
+//                                                                    username = userFinalName,
+//                                                                    userAvatar = userFinalAvatar,
+//                                                                    diaryId = diaryId,
+//                                                                    writeTime = DateFormat().convertMillis(
+//                                                                        timefromdb
+//                                                                    ),
+//                                                                    stepCount = userFinalStep,
+//                                                                    mood = diaryMood,
+//                                                                    diary = diaryDiary,
+//                                                                    numLikes = numLikes,
+//                                                                    numComments = numComments,
+//                                                                    secret = false
+//                                                                )
+//                                                            }
+//                                                            friendDiaryItems.add(diarySet)
+//                                                            friendDiaryItems.sortWith(compareBy({ it.writeTime }))
+//                                                            friendDiaryItems.reverse()
+//                                                            adapter.notifyDataSetChanged()
+//
+//                                                            if (friendDiaryItems.size == 0) {
+////                                                                binding.friendNoItemText.visibility =
+////                                                                    View.VISIBLE
+//                                                            } else {
+//                                                                binding.friendNoItemText.visibility =
+//                                                                    View.GONE
+//                                                                binding.recyclerDiary.visibility =
+//                                                                    View.VISIBLE
+//                                                            }
+//                                                            friendDataLoadingState.loadingCompleteData.value =
+//                                                                true
                                                         }
                                                     }
                                             } else {

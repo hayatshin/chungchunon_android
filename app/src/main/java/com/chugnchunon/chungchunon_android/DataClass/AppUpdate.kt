@@ -6,5 +6,5 @@ import androidx.annotation.Keep
 @Keep
 data class AppUpdate(
     var app_version: String?,
-    var force_update: Boolean?
-    )
+    var force_update: Boolean?,
+)

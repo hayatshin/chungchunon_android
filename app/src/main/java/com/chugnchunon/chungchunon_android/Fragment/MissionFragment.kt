@@ -61,7 +61,7 @@ class MissionFragment : Fragment() {
         binding.indicator.createIndicators(missionList.size, 0)
         missionAdapter.registerAdapterDataObserver(binding.indicator.getAdapterDataObserver());
 
-        var initialSpanText = SpannableStringBuilder()
+        val initialSpanText = SpannableStringBuilder()
             .color(Color.WHITE) { append("1") }
             .append(" / ${missionList.size}")
         binding.cardIndex.text = initialSpanText
@@ -103,6 +103,7 @@ class MissionFragment : Fragment() {
                     val endPeriod = document.data.getValue("endPeriod").toString()
                     val description = document.data.getValue("description").toString()
                     val state = document.data.getValue("state").toString()
+                    val goalScore = (document.data.getValue("goalScore") as Long).toInt()
 
                     if (allUser) {
                         missionSet = Mission(
@@ -114,7 +115,8 @@ class MissionFragment : Fragment() {
                             startPeriod,
                             endPeriod,
                             description,
-                            state
+                            state,
+                            goalScore
                         )
 
                         missionList.add(missionSet)
@@ -148,7 +150,8 @@ class MissionFragment : Fragment() {
                                             startPeriod,
                                             endPeriod,
                                             description,
-                                            state
+                                            state,
+                                            goalScore
                                         )
 
                                         missionList.add(missionSet)
@@ -183,7 +186,8 @@ class MissionFragment : Fragment() {
                                             startPeriod,
                                             endPeriod,
                                             description,
-                                            state
+                                            state,
+                                            goalScore
                                         )
 
                                         missionList.add(missionSet)
@@ -200,7 +204,6 @@ class MissionFragment : Fragment() {
 
                 }
             }
-
 
         // 청춘테레비
         db.collection("youtube")

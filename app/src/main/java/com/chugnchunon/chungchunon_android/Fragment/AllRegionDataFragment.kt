@@ -339,8 +339,8 @@ class AllRegionDataFragment : Fragment() {
                                                 adapter.notifyDataSetChanged()
 
                                                 if (diaryItems.size == 0) {
-                                                    binding.noItemText.visibility =
-                                                        View.VISIBLE
+//                                                    binding.noItemText.visibility =
+//                                                        View.VISIBLE
                                                 } else {
                                                     binding.noItemText.visibility =
                                                         View.GONE
@@ -408,8 +408,8 @@ class AllRegionDataFragment : Fragment() {
                                                 adapter.notifyDataSetChanged()
 
                                                 if (diaryItems.size == 0) {
-                                                    binding.noItemText.visibility =
-                                                        View.VISIBLE
+//                                                    binding.noItemText.visibility =
+//                                                        View.VISIBLE
                                                 } else {
                                                     binding.noItemText.visibility =
                                                         View.GONE
@@ -434,73 +434,74 @@ class AllRegionDataFragment : Fragment() {
                                         }
                                 } else {
                                     // 유저 정보 x
-                                    if (document.data.contains("images")) {
-                                        // 이미지 o
-                                        val diaryImages =
-                                            document.data?.getValue("images") as ArrayList<String>
 
-                                        diarySet = DiaryCard(
-                                            userId = userFinalId,
-                                            username = userFinalName,
-                                            userAvatar = userFinalAvatar,
-                                            diaryId = diaryId,
-                                            writeTime = DateFormat().convertMillis(
-                                                timefromdb
-                                            ),
-                                            stepCount = userFinalStep,
-                                            mood = diaryMood,
-                                            diary = diaryDiary,
-                                            numLikes = numLikes,
-                                            numComments = numComments,
-                                            images = diaryImages,
-                                            secret = false
-                                        )
-
-                                    } else {
-                                        // 이미지 x
-                                        diarySet = DiaryCard(
-                                            userId = userFinalId,
-                                            username = userFinalName,
-                                            userAvatar = userFinalAvatar,
-                                            diaryId = diaryId,
-                                            writeTime = DateFormat().convertMillis(
-                                                timefromdb
-                                            ),
-                                            stepCount = userFinalStep,
-                                            mood = diaryMood,
-                                            diary = diaryDiary,
-                                            numLikes = numLikes,
-                                            numComments = numComments,
-                                            secret = false
-                                        )
-                                    }
-                                    diaryItems.add(diarySet)
-                                    diaryItems.sortWith(compareBy({ it.writeTime }))
-                                    diaryItems.reverse()
-                                    adapter.notifyDataSetChanged()
-
-                                    if (diaryItems.size == 0) {
-                                        binding.noItemText.visibility =
-                                            View.VISIBLE
-                                    } else {
-                                        binding.noItemText.visibility =
-                                            View.GONE
-                                        binding.recyclerDiary.visibility = View.VISIBLE
-                                    }
-                                    allDataLoadingState.loadingCompleteData.value =
-                                        true
-
-                                    if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
-                                        if (diaryItems.size != 0) {
-                                            diaryItems.forEachIndexed { index, diaryItem ->
-                                                if (diaryItem.diaryId == notificationDiaryId) {
-                                                    binding.recyclerDiary.scrollToPosition(
-                                                        index
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
+//                                    if (document.data.contains("images")) {
+//                                        // 이미지 o
+//                                        val diaryImages =
+//                                            document.data?.getValue("images") as ArrayList<String>
+//
+//                                        diarySet = DiaryCard(
+//                                            userId = userFinalId,
+//                                            username = userFinalName,
+//                                            userAvatar = userFinalAvatar,
+//                                            diaryId = diaryId,
+//                                            writeTime = DateFormat().convertMillis(
+//                                                timefromdb
+//                                            ),
+//                                            stepCount = userFinalStep,
+//                                            mood = diaryMood,
+//                                            diary = diaryDiary,
+//                                            numLikes = numLikes,
+//                                            numComments = numComments,
+//                                            images = diaryImages,
+//                                            secret = false
+//                                        )
+//
+//                                    } else {
+//                                        // 이미지 x
+//                                        diarySet = DiaryCard(
+//                                            userId = userFinalId,
+//                                            username = userFinalName,
+//                                            userAvatar = userFinalAvatar,
+//                                            diaryId = diaryId,
+//                                            writeTime = DateFormat().convertMillis(
+//                                                timefromdb
+//                                            ),
+//                                            stepCount = userFinalStep,
+//                                            mood = diaryMood,
+//                                            diary = diaryDiary,
+//                                            numLikes = numLikes,
+//                                            numComments = numComments,
+//                                            secret = false
+//                                        )
+//                                    }
+//                                    diaryItems.add(diarySet)
+//                                    diaryItems.sortWith(compareBy({ it.writeTime }))
+//                                    diaryItems.reverse()
+//                                    adapter.notifyDataSetChanged()
+//
+//                                    if (diaryItems.size == 0) {
+////                                        binding.noItemText.visibility =
+////                                            View.VISIBLE
+//                                    } else {
+//                                        binding.noItemText.visibility =
+//                                            View.GONE
+//                                        binding.recyclerDiary.visibility = View.VISIBLE
+//                                    }
+//                                    allDataLoadingState.loadingCompleteData.value =
+//                                        true
+//
+//                                    if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
+//                                        if (diaryItems.size != 0) {
+//                                            diaryItems.forEachIndexed { index, diaryItem ->
+//                                                if (diaryItem.diaryId == notificationDiaryId) {
+//                                                    binding.recyclerDiary.scrollToPosition(
+//                                                        index
+//                                                    )
+//                                                }
+//                                            }
+//                                        }
+//                                    }
                                 }
                             }
                     } else {

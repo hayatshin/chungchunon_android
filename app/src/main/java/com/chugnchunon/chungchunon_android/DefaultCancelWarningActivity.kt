@@ -66,8 +66,6 @@ class DefaultCancelWarningActivity : Activity() {
                             val goMain = Intent(applicationContext, MainActivity::class.java)
                             goMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
                             startActivity(goMain)
-
-
                         }
                     }
                 }
@@ -129,7 +127,6 @@ class DefaultCancelWarningActivity : Activity() {
                             .set(userDataSet, SetOptions.merge())
                     }
                 }
-
         }
     }
 

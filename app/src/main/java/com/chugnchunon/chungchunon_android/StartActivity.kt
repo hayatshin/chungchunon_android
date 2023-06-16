@@ -10,6 +10,10 @@ import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDelegate
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,6 +30,9 @@ class StartActivity : AppCompatActivity() {
     private val db = Firebase.firestore
     private val userDB = Firebase.firestore.collection("users")
     private var lastBackPressTime: Long = 0L
+
+    companion object {
+    }
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -52,6 +59,7 @@ class StartActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
 
         // 상태바 화이트
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

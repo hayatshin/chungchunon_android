@@ -188,7 +188,7 @@ class MyDiaryFragment : Fragment() {
         )
 
         // 로딩 코인
-        binding.loadingCoinLayout.visibility = View.VISIBLE
+        binding.loadingCoinLayout.visibility = View.GONE
         binding.writeCountLayout.visibility = View.GONE
         binding.noContractIconLayout.visibility = View.GONE
         binding.contractIconLayout.visibility = View.GONE
@@ -209,6 +209,10 @@ class MyDiaryFragment : Fragment() {
             launch { thisMonthWriteCount() }.join()
 
             if (contractOrNot) {
+                withContext(Dispatchers.Main) {
+                    binding.loadingCoinLayout.visibility = View.VISIBLE
+                }
+
                 // 계약함 (지역 OR 기관)
                 launch { appParticipateDate() }.join()
                 listOf(
@@ -221,8 +225,8 @@ class MyDiaryFragment : Fragment() {
                         binding.loadingCoinLayout.visibility = View.GONE
                         binding.coinLayout.visibility = View.VISIBLE
                         binding.writeCountLayout.visibility = View.VISIBLE
-                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
-                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
+//                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
+//                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
 
                         val spanText: SpannableStringBuilder
                         val decimal = DecimalFormat("#,###")
@@ -239,7 +243,7 @@ class MyDiaryFragment : Fragment() {
                         )
                         userDB.document("$userId").set(userPointSet, SetOptions.merge())
 
-                        binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일:"
+//                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
 
                         if (contractRegionExist) {
                             // 지역 계약의 경우
@@ -287,10 +291,10 @@ class MyDiaryFragment : Fragment() {
                         binding.loadingCoinLayout.visibility = View.GONE
                         binding.coinLayout.visibility = View.GONE
                         binding.writeCountLayout.visibility = View.VISIBLE
-                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
-                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
+//                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
+//                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
 
-                        binding.thisMonth.text = "${removeZeroCurrentMonth}월 작성일"
+//                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
 
                         binding.noContractIconLayout.visibility = View.VISIBLE
                         binding.contractIconLayout.visibility = View.GONE
@@ -1675,6 +1679,7 @@ class MyDiaryFragment : Fragment() {
 
         val communityDocument =
             db.collection("community").whereArrayContains("users", "$userId").get().await()
+
         contractOrNot = contractRegionExist || communityDocument.size() != 0
     }
 

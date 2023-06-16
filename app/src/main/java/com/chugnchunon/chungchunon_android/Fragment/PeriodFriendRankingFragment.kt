@@ -80,7 +80,6 @@ class PeriodFriendRankingFragment : Fragment() {
     private val userId = Firebase.auth.currentUser?.uid
 
     private var userPointArray = ArrayList<RankingLine>()
-    private var userStepCountHashMap = hashMapOf<String, Int>()
 
     lateinit var periodStart: Date
     lateinit var periodEnd: Date
@@ -103,9 +102,7 @@ class PeriodFriendRankingFragment : Fragment() {
     lateinit var metrics: DisplayMetrics
 
     companion object {
-        var questionClick = false
-        var thisStepCheck = true
-        var mondayOrNot = false
+        var friendQuestionClick = false
         var friendLastWeekOrNot = false
     }
 
@@ -153,7 +150,6 @@ class PeriodFriendRankingFragment : Fragment() {
 
             initialIndex = 1
             userPointArray = ArrayList<RankingLine>()
-            userStepCountHashMap = hashMapOf<String, Int>()
             thisWeekMyStepCount = 0
             thisWeekMyStepCountAvg = 0
 
@@ -184,7 +180,6 @@ class PeriodFriendRankingFragment : Fragment() {
 
             initialIndex = 1
             userPointArray = ArrayList<RankingLine>()
-            userStepCountHashMap = hashMapOf<String, Int>()
             thisWeekMyStepCount = 0
             thisWeekMyStepCountAvg = 0
 
@@ -197,7 +192,7 @@ class PeriodFriendRankingFragment : Fragment() {
         }
 
         binding.pointQuestion.setOnClickListener {
-            if (!questionClick) {
+            if (!friendQuestionClick) {
 
                 binding.pointIntroduction.visibility = View.VISIBLE
 
@@ -215,7 +210,7 @@ class PeriodFriendRankingFragment : Fragment() {
                         start()
                     }
 
-                questionClick = true
+                friendQuestionClick = true
             } else {
                 binding.pointIntroduction.visibility = View.GONE
 
@@ -233,12 +228,14 @@ class PeriodFriendRankingFragment : Fragment() {
                         start()
                     }
 
-                questionClick = false
+                friendQuestionClick = false
             }
         }
 
         // 초기화
         initialIndex = 1
+        friendLastWeekOrNot = false
+        friendQuestionClick = false
 
         val readContactPermissionCheck =
             ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.READ_CONTACTS)
@@ -357,48 +354,26 @@ class PeriodFriendRankingFragment : Fragment() {
             }.time
         } else {
             // 지난주
-            periodStart = Calendar.getInstance(timeZone).apply {
+            periodStart =  Calendar.getInstance(timeZone).apply {
                 firstDayOfWeek = Calendar.MONDAY
-                set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
                 set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                add(Calendar.DAY_OF_MONTH, -7)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
             }.time
 
             periodEnd = Calendar.getInstance(timeZone).apply {
                 firstDayOfWeek = Calendar.MONDAY
-                set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
                 set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                add(Calendar.DAY_OF_MONTH, -7)
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+                set(Calendar.MILLISECOND, 59)
             }.time
         }
-
-//        val startOfWeek = Calendar.getInstance(timeZone).apply {
-//            firstDayOfWeek = Calendar.MONDAY
-//            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-//            set(Calendar.HOUR_OF_DAY, 0)
-//            set(Calendar.MINUTE, 0)
-//            set(Calendar.SECOND, 0)
-//            set(Calendar.MILLISECOND, 0)
-//        }.time
-//
-//        val endOfWeek = Calendar.getInstance(timeZone).apply {
-//            firstDayOfWeek = Calendar.MONDAY
-//            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-//            set(Calendar.HOUR_OF_DAY, 23)
-//            set(Calendar.MINUTE, 59)
-//            set(Calendar.SECOND, 59)
-//            set(Calendar.MILLISECOND, 59)
-//        }.time
-//
-//        val startOfLastWeek = Calendar.getInstance(timeZone).apply {
-//            firstDayOfWeek = Calendar.MONDAY
-//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
-//            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-//        }.time
-//
-//        val endOfLastWeek = Calendar.getInstance(timeZone).apply {
-//            firstDayOfWeek = Calendar.MONDAY
-//            set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) - 1)
-//            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-//        }.time
 
         val now = Calendar.getInstance(timeZone).time
 
@@ -554,7 +529,12 @@ class PeriodFriendRankingFragment : Fragment() {
 
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {
-                    thisWeekMyStepCount += (dateStepCount as Long).toInt()
+                    val dateStepCountToInt = (dateStepCount as Long).toInt()
+                    if(dateStepCountToInt > 0) {
+                        thisWeekMyStepCount += dateStepCountToInt
+                    } else {
+                        // null
+                    }
                 }
             }
         }
@@ -602,9 +582,10 @@ class PeriodFriendRankingFragment : Fragment() {
 
         for (document in userdocuments) {
             if (document.data.containsKey("userType")) {
+                val userName = document.data.getValue("name").toString()
                 val userType = document.data.getValue("userType").toString()
 
-                if (userType == "사용자") {
+                if (userType == "사용자" && userName != "탈퇴자") {
                     try {
                         val userId = document.data?.getValue("userId").toString()
                         val username = document.data.getValue("name").toString()
@@ -622,7 +603,6 @@ class PeriodFriendRankingFragment : Fragment() {
                                 )
 
                                 userPointArray.add(userEntry)
-                                userStepCountHashMap.put(userId, 0)
                             }
                         }
                     } catch (e: Exception) {
@@ -655,31 +635,33 @@ class PeriodFriendRankingFragment : Fragment() {
 
 
             dataSteps.data?.forEach { (stepUserId, dateStepCount) ->
-                userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
-                    if (keyUserId == stepUserId) {
-                        if (dateStepCount.toString().toInt() < 10000) {
-                            userStepCountHashMap[keyUserId] =
-                                valueStepCount + (dateStepCount as Long).toInt()
-                        } else {
-                            userStepCountHashMap[keyUserId] =
-                                valueStepCount + 10000
+                if (dateStepCount.toString().toInt() < 10000) {
+                    if (dateStepCount.toString().toInt() > 0) {
+                        // 걸음수 0~만보 사이 (일반)
+                        val dateStepInt = (dateStepCount as Long).toInt()
+                        val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
+
+                        userPointArray.forEach {
+                            if (it.userId == stepUserId) {
+                                val currentpoint = it.point as Int
+                                it.point = currentpoint + dateToPoint
+                            }
+                        }
+                    } else {
+                        // 걸음수 0 보다 적은 경우
+                    }
+                } else {
+                    // 걸음수 만보 보다 큰 경우
+
+                    userPointArray.forEach {
+                        if (it.userId == stepUserId) {
+                            val currentpoint = it.point as Int
+                            it.point = currentpoint + 100
                         }
                     }
                 }
             }
-        }
-        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
-            userStepCountHashMap[keyUserId] = ((Math.floor(valueStepCount / 1000.0)) * 10).toInt()
-        }
 
-        userStepCountHashMap.forEach { (keyUserId, valueStepCount) ->
-
-            userPointArray.forEach {
-                if (it.userId == keyUserId) {
-                    val currentpoint = it.point as Int
-                    it.point = currentpoint + valueStepCount
-                }
-            }
         }
     }
 

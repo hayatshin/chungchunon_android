@@ -9,5 +9,6 @@ data class Mission(
     var startPeriod: String,
     var endPeriod: String,
     var description: String,
-    var state: String
+    var state: String,
+    var goalScore: Int,
 )
