@@ -135,6 +135,9 @@ class FriendDataFragment : Fragment() {
                         if (friendDiaryItems.size == 0) {
                             binding.friendNoItemText.visibility =
                                 View.VISIBLE
+                        } else {
+                            binding.friendNoItemText.visibility =
+                                View.GONE
                         }
                     }, 3000)
                 }
