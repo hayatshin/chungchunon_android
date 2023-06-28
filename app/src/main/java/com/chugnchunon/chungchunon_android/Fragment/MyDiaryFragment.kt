@@ -197,7 +197,12 @@ class MyDiaryFragment : Fragment() {
         val rotationY = PropertyValuesHolder.ofFloat("rotationY", 0f, 180f)
         val scaleXBack = PropertyValuesHolder.ofFloat("scaleX", 0f, 1f)
 
-        val flipAnimator = ObjectAnimator.ofPropertyValuesHolder(binding.loadingCoinIcon, scaleX, rotationY, scaleXBack)
+        val flipAnimator = ObjectAnimator.ofPropertyValuesHolder(
+            binding.loadingCoinIcon,
+            scaleX,
+            rotationY,
+            scaleXBack
+        )
         flipAnimator.duration = 500 // Adjust the duration as needed
         flipAnimator.repeatCount = ObjectAnimator.INFINITE
         flipAnimator.interpolator = AccelerateDecelerateInterpolator()
@@ -209,8 +214,49 @@ class MyDiaryFragment : Fragment() {
             launch { thisMonthWriteCount() }.join()
 
             if (contractOrNot) {
+                // 계약 (지역 , 기관)
                 withContext(Dispatchers.Main) {
                     binding.loadingCoinLayout.visibility = View.VISIBLE
+
+                    if (contractRegionExist) {
+                        // 기관 계약
+                        db.collection("contract_region")
+                            .document(userFullRegion)
+                            .get()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val cdDocument = task.result
+                                    if (cdDocument != null) {
+                                        if (cdDocument.exists()) {
+                                            val cdRegionImage =
+                                                cdDocument.data?.getValue("regionImage").toString()
+                                            val coinShow =
+                                                cdDocument.data?.getValue("coinShow") as Boolean
+
+                                            // 안 보여줌 (원)
+                                            if (!coinShow) {
+                                                binding.loadingCoinLayout.visibility = View.GONE
+                                                binding.writeCountLayout.visibility = View.VISIBLE
+
+                                                Glide.with(mcontext)
+                                                    .load(cdRegionImage)
+                                                    .into(binding.contractRegionImageView)
+                                                binding.contractRegionTextView.text =
+                                                    userSmallRegion
+
+                                                binding.noContractIconLayout.visibility =
+                                                    View.GONE
+                                                binding.contractIconLayout.visibility =
+                                                    View.VISIBLE
+                                                binding.coinLayout.visibility = View.GONE
+                                            } else {
+                                                // 보여줌
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
                 }
 
                 // 계약함 (지역 OR 기관)
@@ -223,8 +269,8 @@ class MyDiaryFragment : Fragment() {
                 withContext(Dispatchers.Main) {
                     launch {
                         binding.loadingCoinLayout.visibility = View.GONE
-                        binding.coinLayout.visibility = View.VISIBLE
                         binding.writeCountLayout.visibility = View.VISIBLE
+//                        binding.coinLayout.visibility = View.GONE
 //                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
 //                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
 
@@ -256,24 +302,43 @@ class MyDiaryFragment : Fragment() {
                                         if (cdDocument != null) {
                                             if (cdDocument.exists()) {
                                                 val cdRegionImage =
-                                                    cdDocument.data?.getValue("regionImage").toString()
+                                                    cdDocument.data?.getValue("regionImage")
+                                                        .toString()
+                                                val coinShow =
+                                                    cdDocument.data?.getValue("coinShow") as Boolean
 
-                                                Glide.with(mcontext)
-                                                    .load(cdRegionImage)
-                                                    .into(binding.contractRegionImageView)
-                                                binding.contractRegionTextView.text = userSmallRegion
+                                                if (coinShow) {
+                                                    Glide.with(mcontext)
+                                                        .load(cdRegionImage)
+                                                        .into(binding.contractRegionImageView)
+                                                    binding.contractRegionTextView.text =
+                                                        userSmallRegion
 
-                                                binding.noContractIconLayout.visibility = View.GONE
-                                                binding.contractIconLayout.visibility = View.VISIBLE
+                                                    binding.noContractIconLayout.visibility =
+                                                        View.GONE
+                                                    binding.contractIconLayout.visibility =
+                                                        View.VISIBLE
+                                                    binding.coinLayout.visibility = View.VISIBLE
 
-                                            } else {
+                                                } else {
+//                                                    Glide.with(mcontext)
+//                                                        .load(cdRegionImage)
+//                                                        .into(binding.contractRegionImageView)
+//                                                    binding.contractRegionTextView.text =
+//                                                        userSmallRegion
+//
+//                                                    binding.noContractIconLayout.visibility =
+//                                                        View.GONE
+//                                                    binding.contractIconLayout.visibility =
+//                                                        View.VISIBLE
+//                                                    binding.coinLayout.visibility = View.GONE
+                                                }
 
-                                                binding.noContractIconLayout.visibility = View.VISIBLE
-                                                binding.contractIconLayout.visibility = View.GONE
                                             }
                                         } else {
                                             binding.noContractIconLayout.visibility = View.VISIBLE
                                             binding.contractIconLayout.visibility = View.GONE
+                                            binding.coinLayout.visibility = View.GONE
                                         }
                                     }
                                 }
@@ -281,6 +346,7 @@ class MyDiaryFragment : Fragment() {
                             // 커뮤니티 계약
                             binding.noContractIconLayout.visibility = View.VISIBLE
                             binding.contractIconLayout.visibility = View.GONE
+                            binding.coinLayout.visibility = View.VISIBLE
                         }
                     }
                 }

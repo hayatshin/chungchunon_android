@@ -19,8 +19,8 @@ class RankingMenuAdapter(activity: FragmentActivity) :
 
         when (position) {
             0 -> return PeriodAllRankingFragment()
-            1 -> return PeriodFriendRankingFragment()
-            2 -> return PeriodRegionRankingFragment()
+            1 -> return PeriodRegionRankingFragment()
+            2 -> return PeriodFriendRankingFragment()
 //            3 -> return MyDataFragment()
         }
         return PeriodAllRankingFragment()

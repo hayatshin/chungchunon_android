@@ -585,12 +585,12 @@ class PeriodRegionRankingFragment : Fragment() {
             formatPeriodEnd.substring(8, 10).toInt()
         )
 
-        for (stepDate in startDate..endDate) {
-            val userSteps = db.collection("user_step_count")
-                .document("$userId")
-                .get()
-                .await()
+        val userSteps = db.collection("user_step_count")
+            .document("$userId")
+            .get()
+            .await()
 
+        for (stepDate in startDate..endDate) {
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {
                     val dateStepCountToInt = (dateStepCount as Long).toInt()

@@ -19,8 +19,8 @@ class RegionDiaryAdapter(activity: FragmentActivity) :
 
         when (position) {
             0 -> return AllRegionDataFragment()
-            1 -> return FriendDataFragment()
-            2 -> return UserRegionDataFragment()
+            1 -> return UserRegionDataFragment()
+            2 -> return FriendDataFragment()
             3 -> return MyDataFragment()
         }
         return AllRegionDataFragment()

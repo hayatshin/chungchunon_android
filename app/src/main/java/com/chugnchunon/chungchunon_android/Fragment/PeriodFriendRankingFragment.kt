@@ -521,11 +521,12 @@ class PeriodFriendRankingFragment : Fragment() {
             formatPeriodEnd.substring(8, 10).toInt()
         )
 
+        val userSteps = db.collection("user_step_count")
+            .document("$userId")
+            .get()
+            .await()
+
         for (stepDate in startDate..endDate) {
-            var userSteps = db.collection("user_step_count")
-                .document("$userId")
-                .get()
-                .await()
 
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {

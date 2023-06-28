@@ -217,7 +217,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".MissionDetail.MissionDetailActivityManwon"
+            android:name=".MissionDetail.MissionDetailActivityAutoProgress"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="adjustResize" />

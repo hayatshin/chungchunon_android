@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.DataClass.Mission
 import com.chugnchunon.chungchunon_android.MissionDetail.MissionDetailActivity
-import com.chugnchunon.chungchunon_android.MissionDetail.MissionDetailActivityManwon
+import com.chugnchunon.chungchunon_android.MissionDetail.MissionDetailActivityAutoProgress
 import com.chugnchunon.chungchunon_android.R
 import kotlinx.android.synthetic.main.mission_card_two.view.*
 
@@ -63,8 +63,9 @@ class MissionCardAdapter(val context: Context, private val missionList: ArrayLis
 
         if(missionList[position].state == "진행") {
             holder.itemView.missionImage.setOnClickListener {
-                if (missionList[position].documentId == "fourthEvent") {
-                    val goMissionDetail = Intent(context, MissionDetailActivityManwon::class.java)
+                if (missionList[position].autoProgress) {
+                    // 자동 진행 o
+                    val goMissionDetail = Intent(context, MissionDetailActivityAutoProgress::class.java)
                     goMissionDetail.putExtra("mdDocID", missionList[position].documentId)
                     goMissionDetail.putExtra("mdTitle", missionList[position].title)
                     goMissionDetail.putExtra("mdDescription", missionList[position].description)
@@ -74,6 +75,7 @@ class MissionCardAdapter(val context: Context, private val missionList: ArrayLis
                     goMissionDetail.putExtra("mdEndPeriod", missionList[position].endPeriod)
                     context.startActivity(goMissionDetail)
                 } else {
+                    // 자동 진행 x
                     val goMissionDetail = Intent(context, MissionDetailActivity::class.java)
                     goMissionDetail.putExtra("mdDocID", missionList[position].documentId)
                     goMissionDetail.putExtra("mdTitle", missionList[position].title)
@@ -83,6 +85,7 @@ class MissionCardAdapter(val context: Context, private val missionList: ArrayLis
                     goMissionDetail.putExtra("mdStartPeriod", missionList[position].startPeriod)
                     goMissionDetail.putExtra("mdEndPeriod", missionList[position].endPeriod)
                     goMissionDetail.putExtra("mdGoalScore", missionList[position].goalScore)
+                    goMissionDetail.putExtra("mdPrizeWinners", missionList[position].prizeWinners)
                     context.startActivity(goMissionDetail)
                 }
             }

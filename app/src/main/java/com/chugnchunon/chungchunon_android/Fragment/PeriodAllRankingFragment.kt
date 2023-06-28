@@ -436,12 +436,12 @@ class PeriodAllRankingFragment : Fragment() {
             formatPeriodEnd.substring(8, 10).toInt()
         )
 
-        for (stepDate in startDate..endDate) {
-            var userSteps = db.collection("user_step_count")
-                .document("$userId")
-                .get()
-                .await()
+        val userSteps = db.collection("user_step_count")
+            .document("$userId")
+            .get()
+            .await()
 
+        for (stepDate in startDate..endDate) {
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {
                     val dateStepCountToInt = (dateStepCount as Long).toInt()
@@ -456,8 +456,8 @@ class PeriodAllRankingFragment : Fragment() {
     }
 
     suspend fun graphStepCalculateFun() {
-        var daysDiffTime = thisNow.time - periodStart.time
-        var daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
+        val daysDiffTime = thisNow.time - periodStart.time
+        val daysDiffDate = TimeUnit.DAYS.convert(daysDiffTime, TimeUnit.MILLISECONDS)
         thisWeekMyStepCountAvg = ((thisWeekMyStepCount / (daysDiffDate + 1).toDouble())).toInt()
         thisWeekMyStepPoint = (Math.round(thisWeekMyStepCountAvg / 1000.0)).toFloat()
     }

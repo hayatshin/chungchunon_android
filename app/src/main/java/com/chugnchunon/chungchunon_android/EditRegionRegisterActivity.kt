@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.Adapter.RegionPagerAdapter
 import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment
+import com.chugnchunon.chungchunon_android.Fragment.RegionRegisterFragment.Companion.smallRegionCheck
 import com.chugnchunon.chungchunon_android.databinding.ActivityRegionBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -34,6 +35,11 @@ class EditRegionRegisterActivity : AppCompatActivity() {
 
     companion object {
         var editRegionCheck: Boolean = true
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        smallRegionCheck = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

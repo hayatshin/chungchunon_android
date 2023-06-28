@@ -6,6 +6,7 @@ import android.content.Intent
 import android.icu.text.DecimalFormat
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -24,6 +25,7 @@ import kotlinx.coroutines.tasks.await
 import me.moallemi.tools.daterange.localdate.rangeTo
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class MissionDetailActivity : Activity() {
@@ -47,6 +49,7 @@ class MissionDetailActivity : Activity() {
     private var mdEndPeriod = ""
     private var mdPeriod = ""
     private var mdGoalScore: Int = 0
+    private var mdPrizeWinners: Int = 0
 
     private var formatStartDate = ""
     private var formatEndDate = ""
@@ -90,14 +93,6 @@ class MissionDetailActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-
-        // 파트너 체크
-//        userDB.document("$userId")
-//            .get()
-//            .addOnSuccessListener { userData ->
-//                val userType = userData.data?.getValue("userType")
-//                partnerOrNotForMission = userType == "파트너"
-//            }
 
         db.collection("mission")
             .document(mdDocId)
@@ -159,6 +154,7 @@ class MissionDetailActivity : Activity() {
         mdEndPeriod = intent.getStringExtra("mdEndPeriod").toString()
         mdPeriod = "${mdStartPeriod} ~ ${mdEndPeriod}"
         mdGoalScore = intent.getIntExtra("mdGoalScore", 0)
+        mdPrizeWinners = intent.getIntExtra("mdPrizeWinners", 0)
 
         binding.mdTitle.text = mdTitle
         binding.mdDescription.text = mdDescription
@@ -178,7 +174,7 @@ class MissionDetailActivity : Activity() {
                         .get()
                         .addOnSuccessListener { userData ->
                             val userType = userData.data?.getValue("userType")
-                            if(userType == "파트너") {
+                            if (userType == "파트너") {
                                 binding.mdParticipationBtn.alpha = 0.4f
                                 binding.mProgressTextBox.visibility = View.GONE
                             } else {
@@ -248,7 +244,7 @@ class MissionDetailActivity : Activity() {
                         .get()
                         .addOnSuccessListener { missionSnapShot ->
                             val missionCount = missionSnapShot.size()
-                            if (missionCount < 100) {
+                            if (mdPrizeWinners == 0 || missionCount < mdPrizeWinners) {
                                 // 참여 가능
                                 val userParticipateSet = hashMapOf<String, Any>(
                                     "dummy" to FieldValue.serverTimestamp()
@@ -315,11 +311,16 @@ class MissionDetailActivity : Activity() {
 
         val pattern = "yyyy-MM-dd"
         formatStartDate = mdStartPeriod.replace(".", "-")
-        formatEndDate = mdEndPeriod.replace(".", "-")
-
         mdDateFormatStartPeriod = SimpleDateFormat(pattern).parse(formatStartDate)
-        mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
 
+        if (!mdEndPeriod.contains("-")) {
+            val currentDateTime = LocalDate.now().toString()
+            formatEndDate = currentDateTime
+            mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(currentDateTime)
+        } else {
+            formatEndDate = mdEndPeriod.replace(".", "-")
+            mdDateFormatEndPeriod = SimpleDateFormat(pattern).parse(formatEndDate)
+        }
 
     }
 
@@ -337,9 +338,10 @@ class MissionDetailActivity : Activity() {
                 launch {
                     val decimal = DecimalFormat("#,###")
                     val formatGoalScore = decimal.format(mdGoalScore)
+                    val formatUserPoint = decimal.format(userPoint)
 
                     if (userPoint <= mdGoalScore) {
-                        binding.mdPointText.text = "$userPoint / ${formatGoalScore}"
+                        binding.mdPointText.text = "${formatUserPoint} / ${formatGoalScore}"
                         val targetProgress = (userPoint.toFloat() / mdGoalScore * 100f).toInt()
                         val animator = ObjectAnimator.ofInt(
                             binding.mdPointProgress,
@@ -352,7 +354,7 @@ class MissionDetailActivity : Activity() {
 
                         binding.mdPointProgress.progress = userPoint / mdGoalScore * 100
                     } else {
-                        binding.mdPointText.text = "$userPoint / ${formatGoalScore}"
+                        binding.mdPointText.text = "$formatUserPoint / ${formatGoalScore}"
                         binding.mdPointProgress.progress = 100
 
                         val animator =
@@ -384,26 +386,55 @@ class MissionDetailActivity : Activity() {
             formatEndDate.substring(8, 10).toInt()
         )
 
+//        var dataSteps = db.collection("user_step_count")
+//            .document("$userId")
+//            .get()
+//            .await()
+//
+//        dataSteps.data?.forEach { (period, dateStepCount) ->
+//            for (stepDate in startDate..endDate) {
+//                if (period == stepDate.toString()) {
+//                    userStepCount += (dateStepCount as Long).toInt()
+//                }
+//            }
+//        }
 
-        var dataSteps = db.collection("user_step_count")
+//        userPoint += ((Math.floor(userStepCount / 1000.0)) * 10).toInt()
+
+        val dataSteps = db.collection("user_step_count")
             .document("$userId")
             .get()
             .await()
 
         dataSteps.data?.forEach { (period, dateStepCount) ->
             for (stepDate in startDate..endDate) {
+
                 if (period == stepDate.toString()) {
-                    userStepCount += (dateStepCount as Long).toInt()
+                    if (dateStepCount.toString().toInt() < 10000) {
+                        if (dateStepCount.toString().toInt() > 0) {
+                            // 걸음수 0~만보 사이 (일반)
+                            val dateStepInt = (dateStepCount as Long).toInt()
+                            val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
+
+                            userPoint += dateToPoint
+
+                        } else {
+                            // 걸음수 0 보다 적은 경우
+                        }
+                    } else {
+                        // 걸음수 만보 보다 큰 경우
+                        userPoint += userPoint + 100
+
+                    }
                 }
+
             }
         }
-
-        userPoint += ((Math.floor(userStepCount / 1000.0)) * 10).toInt()
     }
 
 
     suspend fun diaryToArrayFun() {
-        var diaryDocuments = db.collection("diary")
+        val diaryDocuments = db.collection("diary")
             .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
             .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
             .whereEqualTo("userId", userId)
@@ -416,7 +447,7 @@ class MissionDetailActivity : Activity() {
     }
 
     suspend fun commentToArrayFun() {
-        var commentDocuments = db.collectionGroup("comments")
+        val commentDocuments = db.collectionGroup("comments")
             .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
             .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
             .whereEqualTo("userId", userId)
@@ -429,7 +460,7 @@ class MissionDetailActivity : Activity() {
     }
 
     suspend fun likeToArrayFun() {
-        var likeDocuments = db.collectionGroup("likes")
+        val likeDocuments = db.collectionGroup("likes")
             .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
             .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
             .whereEqualTo("userId", userId)

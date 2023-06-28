@@ -8,19 +8,34 @@
 
     <RelativeLayout
         android:id="@+id/youtubeLayout"
-        android:orientation="vertical"
-        android:layout_marginBottom="25dp"
         android:layout_width="match_parent"
         android:layout_height="220dp"
+        android:layout_marginBottom="25dp"
         android:background="@drawable/mission_card_background"
-        android:clipToOutline="true">
+        android:clipToOutline="true"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
-            android:translationZ="0dp"
+            android:translationZ="90dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/avatar_background_white" />
+
+        <ImageView
+            android:translationZ="90dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_circle_play_solid" />
+
+        <ImageView
+            android:id="@+id/youtubeView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/youtubeView"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:translationZ="0dp" />
 
     </RelativeLayout>
 

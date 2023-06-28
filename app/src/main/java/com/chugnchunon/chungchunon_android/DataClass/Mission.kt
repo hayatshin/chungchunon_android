@@ -11,4 +11,6 @@ data class Mission(
     var description: String,
     var state: String,
     var goalScore: Int,
+    var autoProgress: Boolean,
+    var prizeWinners: Int,
 )

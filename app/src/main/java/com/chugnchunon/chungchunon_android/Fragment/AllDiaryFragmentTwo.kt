@@ -61,9 +61,9 @@ class AllDiaryFragmentTwo : Fragment() {
 
         if(diaryType == "all") {
             binding.regionViewPager.currentItem = 0
-        } else if (diaryType == "friend") {
-            binding.regionViewPager.currentItem = 1
         } else if (diaryType == "region") {
+            binding.regionViewPager.currentItem = 1
+        } else if (diaryType == "friend") {
             binding.regionViewPager.currentItem = 2
         } else if (diaryType == "my") {
             binding.regionViewPager.currentItem = 3
@@ -106,10 +106,10 @@ class AllDiaryFragmentTwo : Fragment() {
                 if(diaryType == "all") {
                     binding.regionViewPager.setCurrentItem(0, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
-                } else if (diaryType == "friend") {
+                } else if (diaryType == "region") {
                     binding.regionViewPager.setCurrentItem(1, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
-                } else if (diaryType == "region") {
+                } else if (diaryType == "friend") {
                     binding.regionViewPager.setCurrentItem(2, false)
                     binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(2))
                 } else if (diaryType == "my") {

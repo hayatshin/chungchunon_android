@@ -94,6 +94,7 @@ class MissionFragment : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val allUser = document.data.getValue("allUser") as Boolean
+                    val autoProgress = document.data.getValue("autoProgress") as Boolean
                     val missionDocId = document.data.getValue("documentId").toString()
                     val community = document.data.getValue("community").toString()
                     val communityLogo = document.data.getValue("communityLogo").toString()
@@ -104,6 +105,7 @@ class MissionFragment : Fragment() {
                     val description = document.data.getValue("description").toString()
                     val state = document.data.getValue("state").toString()
                     val goalScore = (document.data.getValue("goalScore") as Long).toInt()
+                    val prizeWinners = (document.data.getValue("prizeWinners") as Long).toInt()
 
                     if (allUser) {
                         missionSet = Mission(
@@ -116,7 +118,9 @@ class MissionFragment : Fragment() {
                             endPeriod,
                             description,
                             state,
-                            goalScore
+                            goalScore,
+                            autoProgress,
+                            prizeWinners
                         )
 
                         missionList.add(missionSet)
@@ -151,7 +155,9 @@ class MissionFragment : Fragment() {
                                             endPeriod,
                                             description,
                                             state,
-                                            goalScore
+                                            goalScore,
+                                            autoProgress,
+                                            prizeWinners
                                         )
 
                                         missionList.add(missionSet)
@@ -187,7 +193,9 @@ class MissionFragment : Fragment() {
                                             endPeriod,
                                             description,
                                             state,
-                                            goalScore
+                                            goalScore,
+                                            autoProgress,
+                                            prizeWinners
                                         )
 
                                         missionList.add(missionSet)
