@@ -125,7 +125,7 @@ class MissionFragment : Fragment() {
 
                         missionList.add(missionSet)
                         missionList.sortWith(compareBy({ it.state }))
-                        missionList.reverse()
+//                        missionList.reverse()
 
                         missionAdapter.notifyDataSetChanged()
                     } else {
@@ -162,7 +162,7 @@ class MissionFragment : Fragment() {
 
                                         missionList.add(missionSet)
                                         missionList.sortWith(compareBy({ it.state }))
-                                        missionList.reverse()
+//                                        missionList.reverse()
 
                                         missionAdapter.notifyDataSetChanged()
                                     }
@@ -200,7 +200,7 @@ class MissionFragment : Fragment() {
 
                                         missionList.add(missionSet)
                                         missionList.sortWith(compareBy({ it.state }))
-                                        missionList.reverse()
+//                                        missionList.reverse()
 
                                         missionAdapter.notifyDataSetChanged()
                                     }

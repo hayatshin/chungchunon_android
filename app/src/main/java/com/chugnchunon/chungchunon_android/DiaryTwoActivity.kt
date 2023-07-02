@@ -164,57 +164,6 @@ class DiaryTwoActivity : AppCompatActivity() {
                             val upAnimation =
                                 AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
                             binding.updateCardLayout.startAnimation(upAnimation)
-
-
-//                            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-//
-//                                if(appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-//                                    try {
-//                                        appUpdateManager.startUpdateFlowForResult(
-//                                            appUpdateInfo,
-//                                            AppUpdateType.IMMEDIATE,
-//                                            this,
-//                                            APP_UPDATE_REQ_CODE
-//                                        )
-//                                    } catch (e: IntentSender.SendIntentException) {
-//                                        e.printStackTrace()
-//
-//                                        val window = this.window
-//                                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//                                        window.setStatusBarColor(Color.parseColor("#B3000000"))
-//
-//                                        binding.updateLayout.visibility = View.VISIBLE
-//                                        val upAnimation =
-//                                            AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-//                                        binding.updateCardLayout.startAnimation(upAnimation)
-//                                    }
-//
-//                                } else {
-//
-//                                    val window = this.window
-//                                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//                                    window.setStatusBarColor(Color.parseColor("#B3000000"))
-//
-//                                    binding.updateLayout.visibility = View.VISIBLE
-//                                    val upAnimation =
-//                                        AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-//                                    binding.updateCardLayout.startAnimation(upAnimation)
-//
-//                                }
-//                            }
-//
-//                        } else if (currentAppVersion < remoteAppVersion!! && !remoteForceUpdate!!) {
-//                            // 현재 버전이 remote config 버전보다 낮을 경우 & 선택
-//
-//                            val window = this.window
-//                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//                            window.setStatusBarColor(Color.parseColor("#B3000000"))
-//
-//                            binding.updateLayout.visibility = View.VISIBLE
-//                            val upAnimation =
-//                                AnimationUtils.loadAnimation(this, R.anim.slide_up_enter)
-//                            binding.updateCardLayout.startAnimation(upAnimation)
-
                         } else {
                             // 현재 버전이 remote config 버전보다 낮지 않을 경우
                             binding.updateLayout.visibility = View.GONE

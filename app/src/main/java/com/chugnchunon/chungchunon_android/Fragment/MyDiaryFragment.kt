@@ -130,6 +130,9 @@ class MyDiaryFragment : Fragment() {
 
     private var contractOrNot: Boolean = false
     private var contractRegionExist: Boolean = false
+    private var contractRegionCoinShow: Boolean = false
+    private var cdRegionImage: String = ""
+
     private var userSmallRegion: String = ""
     private var userFullRegion: String = ""
 
@@ -209,118 +212,201 @@ class MyDiaryFragment : Fragment() {
         flipAnimator.start()
 
         // 점수(원) 데이터 불러오기
-        uiScope.launch(Dispatchers.IO) {
-            launch { contractOrNotCheck() }.join()
-            launch { thisMonthWriteCount() }.join()
 
-            if (contractOrNot) {
-                // 계약 (지역 , 기관)
-                withContext(Dispatchers.Main) {
+        uiScope.launch(Dispatchers.IO) {
+            listOf(
+                launch { contractOrNotCheck() },
+                launch { thisMonthWriteCount() }
+            ).joinAll()
+            withContext(Dispatchers.Main) {
+                if (contractOrNot) {
+                    // 계약 (지역, 기관)
                     binding.loadingCoinLayout.visibility = View.VISIBLE
 
-                    if (contractRegionExist) {
-                        // 기관 계약
-                        db.collection("contract_region")
-                            .document(userFullRegion)
-                            .get()
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val cdDocument = task.result
-                                    if (cdDocument != null) {
-                                        if (cdDocument.exists()) {
-                                            val cdRegionImage =
-                                                cdDocument.data?.getValue("regionImage").toString()
-                                            val coinShow =
-                                                cdDocument.data?.getValue("coinShow") as Boolean
+                    if (contractRegionExist && !contractRegionCoinShow) {
+                        // 지역 계약 coinShow = false
+                        binding.loadingCoinLayout.visibility = View.GONE
+                        binding.writeCountLayout.visibility = View.VISIBLE
 
-                                            // 안 보여줌 (원)
-                                            if (!coinShow) {
-                                                binding.loadingCoinLayout.visibility = View.GONE
-                                                binding.writeCountLayout.visibility = View.VISIBLE
+                        Glide.with(mcontext)
+                            .load(cdRegionImage)
+                            .into(binding.contractRegionImageView)
+                        binding.contractRegionTextView.text =
+                            userSmallRegion
 
-                                                Glide.with(mcontext)
-                                                    .load(cdRegionImage)
-                                                    .into(binding.contractRegionImageView)
-                                                binding.contractRegionTextView.text =
-                                                    userSmallRegion
+                        binding.noContractIconLayout.visibility =
+                            View.GONE
+                        binding.contractIconLayout.visibility =
+                            View.VISIBLE
+                        binding.coinLayout.visibility = View.GONE
 
-                                                binding.noContractIconLayout.visibility =
-                                                    View.GONE
-                                                binding.contractIconLayout.visibility =
-                                                    View.VISIBLE
-                                                binding.coinLayout.visibility = View.GONE
-                                            } else {
-                                                // 보여줌
-                                            }
-                                        }
+                    } else {
+                        // 지역 coinShow = true & 기관 계약
+                        withContext(Dispatchers.IO) {
+                            launch { appParticipateDate() }.join()
+                            listOf(
+                                launch { stepCountToArrayFun() },
+                                launch { diaryToArrayFun() },
+                                launch { commentToArrayFun() },
+                            ).joinAll()
+
+                            withContext(Dispatchers.Main) {
+                                launch {
+                                    binding.loadingCoinLayout.visibility = View.GONE
+                                    binding.writeCountLayout.visibility = View.VISIBLE
+                                    val spanText: SpannableStringBuilder
+                                    val decimal = DecimalFormat("#,###")
+
+                                    if (userPoint < 10000) {
+                                        binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
+                                        binding.coinTextExplanation.visibility = View.GONE
+
+                                    } else {
+                                        binding.coinTextMoney.text = "만원"
+                                        binding.coinTextExplanation.text = "달성"
+                                    }
+                                    val userPointSet = hashMapOf(
+                                        "userPoint" to userPoint
+                                    )
+                                    userDB.document("$userId").set(userPointSet, SetOptions.merge())
+
+                                    if (contractRegionExist) {
+                                        // 지역 계약
+                                        Glide.with(mcontext)
+                                            .load(cdRegionImage)
+                                            .into(binding.contractRegionImageView)
+                                        binding.contractRegionTextView.text =
+                                            userSmallRegion
+
+                                        binding.noContractIconLayout.visibility =
+                                            View.GONE
+                                        binding.contractIconLayout.visibility =
+                                            View.VISIBLE
+                                        binding.coinLayout.visibility = View.VISIBLE
+                                    } else {
+                                        // 커뮤니티 계약
+                                        binding.noContractIconLayout.visibility = View.VISIBLE
+                                        binding.contractIconLayout.visibility = View.GONE
+                                        binding.coinLayout.visibility = View.VISIBLE
                                     }
                                 }
                             }
-                    }
-                }
-
-                // 계약함 (지역 OR 기관)
-                launch { appParticipateDate() }.join()
-                listOf(
-                    launch { stepCountToArrayFun() },
-                    launch { diaryToArrayFun() },
-                    launch { commentToArrayFun() },
-                ).joinAll()
-                withContext(Dispatchers.Main) {
-                    launch {
-                        binding.loadingCoinLayout.visibility = View.GONE
-                        binding.writeCountLayout.visibility = View.VISIBLE
-//                        binding.coinLayout.visibility = View.GONE
-//                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
-//                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
-
-                        val spanText: SpannableStringBuilder
-                        val decimal = DecimalFormat("#,###")
-
-                        if (userPoint < 10000) {
-                            binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
-                            binding.coinTextExplanation.visibility = View.GONE
-                        } else {
-                            binding.coinTextMoney.text = "만원"
-                            binding.coinTextExplanation.text = "달성"
                         }
-                        val userPointSet = hashMapOf(
-                            "userPoint" to userPoint
-                        )
-                        userDB.document("$userId").set(userPointSet, SetOptions.merge())
+                    }
 
-//                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
+                } else {
+                    // 계약 안 함
+                    binding.loadingCoinLayout.visibility = View.GONE
+                    binding.coinLayout.visibility = View.GONE
+                    binding.writeCountLayout.visibility = View.VISIBLE
+                    binding.noContractIconLayout.visibility = View.VISIBLE
+                    binding.contractIconLayout.visibility = View.GONE
+                }
+            }
+        }
 
-                        if (contractRegionExist) {
-                            // 지역 계약의 경우
-                            db.collection("contract_region")
-                                .document(userFullRegion)
-                                .get()
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val cdDocument = task.result
-                                        if (cdDocument != null) {
-                                            if (cdDocument.exists()) {
-                                                val cdRegionImage =
-                                                    cdDocument.data?.getValue("regionImage")
-                                                        .toString()
-                                                val coinShow =
-                                                    cdDocument.data?.getValue("coinShow") as Boolean
 
-                                                if (coinShow) {
-                                                    Glide.with(mcontext)
-                                                        .load(cdRegionImage)
-                                                        .into(binding.contractRegionImageView)
-                                                    binding.contractRegionTextView.text =
-                                                        userSmallRegion
-
-                                                    binding.noContractIconLayout.visibility =
-                                                        View.GONE
-                                                    binding.contractIconLayout.visibility =
-                                                        View.VISIBLE
-                                                    binding.coinLayout.visibility = View.VISIBLE
-
-                                                } else {
+//        uiScope.launch(Dispatchers.IO) {
+//            launch { contractOrNotCheck() }.join()
+//            launch { thisMonthWriteCount() }.join()
+//
+//
+//
+//            if (contractOrNot) {
+//                // 계약 (지역 , 기관)
+//                withContext(Dispatchers.Main) {
+//                    binding.loadingCoinLayout.visibility = View.VISIBLE
+//
+//                    if (contractRegionExist) {
+//                        // 기관 계약
+//                        db.collection("contract_region")
+//                            .document(userFullRegion)
+//                            .get()
+//                            .addOnCompleteListener { task ->
+//                                if (task.isSuccessful) {
+//                                    val cdDocument = task.result
+//                                    if (cdDocument != null) {
+//                                        if (cdDocument.exists()) {
+//                                            val cdRegionImage =
+//                                                cdDocument.data?.getValue("regionImage").toString()
+//                                            val coinShow =
+//                                                cdDocument.data?.getValue("coinShow") as Boolean
+//
+//                                            // 안 보여줌 (원)
+//                                            if (!coinShow) {
+//                                                binding.loadingCoinLayout.visibility = View.GONE
+//                                                binding.writeCountLayout.visibility = View.VISIBLE
+//
+//                                                Glide.with(mcontext)
+//                                                    .load(cdRegionImage)
+//                                                    .into(binding.contractRegionImageView)
+//                                                binding.contractRegionTextView.text =
+//                                                    userSmallRegion
+//
+//                                                binding.noContractIconLayout.visibility =
+//                                                    View.GONE
+//                                                binding.contractIconLayout.visibility =
+//                                                    View.VISIBLE
+//                                                binding.coinLayout.visibility = View.GONE
+//                                            } else {
+//                                                // 보여줌
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                    }
+//                }
+//
+//                // 계약함 (지역 OR 기관)
+//                launch { appParticipateDate() }.join()
+//                listOf(
+//                    launch { stepCountToArrayFun() },
+//                    launch { diaryToArrayFun() },
+//                    launch { commentToArrayFun() },
+//                ).joinAll()
+//                withContext(Dispatchers.Main) {
+//                    launch {
+//                        binding.loadingCoinLayout.visibility = View.GONE
+//                        binding.writeCountLayout.visibility = View.VISIBLE
+////                        binding.coinLayout.visibility = View.GONE
+////                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
+////                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
+//
+//                        val spanText: SpannableStringBuilder
+//                        val decimal = DecimalFormat("#,###")
+//
+//                        if (userPoint < 10000) {
+//                            binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
+//                            binding.coinTextExplanation.visibility = View.GONE
+//                        } else {
+//                            binding.coinTextMoney.text = "만원"
+//                            binding.coinTextExplanation.text = "달성"
+//                        }
+//                        val userPointSet = hashMapOf(
+//                            "userPoint" to userPoint
+//                        )
+//                        userDB.document("$userId").set(userPointSet, SetOptions.merge())
+//
+////                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
+//
+//                        if (contractRegionExist) {
+//                            // 지역 계약의 경우
+//                            db.collection("contract_region")
+//                                .document(userFullRegion)
+//                                .get()
+//                                .addOnCompleteListener { task ->
+//                                    if (task.isSuccessful) {
+//                                        val cdDocument = task.result
+//                                        if (cdDocument != null) {
+//                                            if (cdDocument.exists()) {
+//                                                val cdRegionImage =
+//                                                    cdDocument.data?.getValue("regionImage")
+//                                                        .toString()
+//                                                val coinShow =
+//                                                    cdDocument.data?.getValue("coinShow") as Boolean
+//
+//                                                if (coinShow) {
 //                                                    Glide.with(mcontext)
 //                                                        .load(cdRegionImage)
 //                                                        .into(binding.contractRegionImageView)
@@ -331,45 +417,58 @@ class MyDiaryFragment : Fragment() {
 //                                                        View.GONE
 //                                                    binding.contractIconLayout.visibility =
 //                                                        View.VISIBLE
-//                                                    binding.coinLayout.visibility = View.GONE
-                                                }
-
-                                            }
-                                        } else {
-                                            binding.noContractIconLayout.visibility = View.VISIBLE
-                                            binding.contractIconLayout.visibility = View.GONE
-                                            binding.coinLayout.visibility = View.GONE
-                                        }
-                                    }
-                                }
-                        } else {
-                            // 커뮤니티 계약
-                            binding.noContractIconLayout.visibility = View.VISIBLE
-                            binding.contractIconLayout.visibility = View.GONE
-                            binding.coinLayout.visibility = View.VISIBLE
-                        }
-                    }
-                }
-            } else {
-                // 계약 안한 일반
-                withContext(Dispatchers.Main) {
-                    launch {
-                        binding.loadingCoinLayout.visibility = View.GONE
-                        binding.coinLayout.visibility = View.GONE
-                        binding.writeCountLayout.visibility = View.VISIBLE
-//                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
-//                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
-
-//                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
-
-                        binding.noContractIconLayout.visibility = View.VISIBLE
-                        binding.contractIconLayout.visibility = View.GONE
-                    }
-                }
-
-            }
-
-        }
+//                                                    binding.coinLayout.visibility = View.VISIBLE
+//
+//                                                } else {
+////                                                    Glide.with(mcontext)
+////                                                        .load(cdRegionImage)
+////                                                        .into(binding.contractRegionImageView)
+////                                                    binding.contractRegionTextView.text =
+////                                                        userSmallRegion
+////
+////                                                    binding.noContractIconLayout.visibility =
+////                                                        View.GONE
+////                                                    binding.contractIconLayout.visibility =
+////                                                        View.VISIBLE
+////                                                    binding.coinLayout.visibility = View.GONE
+//                                                }
+//
+//                                            }
+//                                        } else {
+//                                            binding.noContractIconLayout.visibility = View.VISIBLE
+//                                            binding.contractIconLayout.visibility = View.GONE
+//                                            binding.coinLayout.visibility = View.GONE
+//                                        }
+//                                    }
+//                                }
+//                        } else {
+//                            // 커뮤니티 계약
+//                            binding.noContractIconLayout.visibility = View.VISIBLE
+//                            binding.contractIconLayout.visibility = View.GONE
+//                            binding.coinLayout.visibility = View.VISIBLE
+//                        }
+//                    }
+//                }
+//            } else {
+//                // 계약 안한 일반
+//                withContext(Dispatchers.Main) {
+//                    launch {
+//                        binding.loadingCoinLayout.visibility = View.GONE
+//                        binding.coinLayout.visibility = View.GONE
+//                        binding.writeCountLayout.visibility = View.VISIBLE
+////                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
+////                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
+//
+////                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
+//
+//                        binding.noContractIconLayout.visibility = View.VISIBLE
+//                        binding.contractIconLayout.visibility = View.GONE
+//                    }
+//                }
+//
+//            }
+//
+//        }
 
         binding.coinLayout.setOnClickListener {
             val goMoneyDetail = Intent(requireActivity(), MoneyDetailActivity::class.java)
@@ -1747,11 +1846,19 @@ class MyDiaryFragment : Fragment() {
             db.collection("community").whereArrayContains("users", "$userId").get().await()
 
         contractOrNot = contractRegionExist || communityDocument.size() != 0
+
+        if (contractRegionExist) {
+            contractRegionCoinShow = contractRegionDocument.data?.getValue("coinShow") as Boolean
+            cdRegionImage = contractRegionDocument.data?.getValue("regionImage").toString()
+        }
+
     }
 
     suspend fun appParticipateDate() {
         val currentDate = Calendar.getInstance()
-        val userData = userDB.document("$userId").get().await()
+
+        val userData = userDB.document("kakao:2657588327").get().await()
+//        val userData = userDB.document("$userId").get().await()
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
@@ -1780,30 +1887,37 @@ class MyDiaryFragment : Fragment() {
             formatNowDate.substring(8, 10).toInt()
         )
 
-        for (stepDate in startDate..endDate) {
-            val dataSteps = db.collection("user_step_count")
-                .document("$userId")
-                .get()
-                .await()
+        val dataSteps = db.collection("user_step_count")
+            .document("$userId")
+            .get()
+            .await()
 
-            dataSteps.data?.forEach { (stepPeriod, dateStepCount) ->
-
-                if (stepPeriod == stepDate.toString()) {
+        dataSteps.data?.forEach { (period, dateStepCount) ->
+            for (stepDate in startDate..endDate) {
+                if (period == stepDate.toString()) {
                     if (dateStepCount.toString().toInt() < 10000) {
-                        userStepPoint += dateStepCount.toString().toInt()
+                        if (dateStepCount.toString().toInt() > 0) {
+                            // 걸음수 0~만보 사이 (일반)
+                            val dateStepInt = (dateStepCount as Long).toInt()
+                            val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
+
+                            userPoint += dateToPoint
+
+                        } else {
+                            // 걸음수 0 보다 적은 경우
+                        }
                     } else {
-                        userStepPoint += 10000
+                        // 걸음수 만보 보다 큰 경우
+                        userPoint += 100
                     }
                 }
+
             }
         }
-        val userStepPoint = ((Math.floor(userStepPoint / 1000.0)) * 10).toInt()
-        userPoint += userStepPoint
     }
 
 
     suspend fun diaryToArrayFun() {
-
         val diaryDocuments = db.collection("diary")
             .whereGreaterThanOrEqualTo("timestamp", appParticipateDate)
             .whereEqualTo("userId", userId)

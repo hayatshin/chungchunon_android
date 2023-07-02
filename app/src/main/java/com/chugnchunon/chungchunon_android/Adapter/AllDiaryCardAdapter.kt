@@ -305,17 +305,6 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                 val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
                 goEnlargeAvatar.putExtra("userAvatar", items[position].userAvatar)
                 context.startActivity(goEnlargeAvatar)
-
-                // 차단 아이콘 클릭
-                holder.itemView.moreIcon.setOnClickListener { view ->
-                    resumePause = true
-
-                    val openBlockActivity = Intent(context, BlockActivity::class.java)
-                    openBlockActivity.putExtra("diaryId", items[position].diaryId)
-                    openBlockActivity.putExtra("diaryUserId", items[position].userId)
-                    openBlockActivity.putExtra("diaryType", "all")
-                    context.startActivity(openBlockActivity)
-                }
             }
 
             // 좋아요 토글
@@ -373,6 +362,18 @@ class AllDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>)
                 }
 
             }
+
+            // 차단 아이콘 클릭
+            holder.itemView.moreIcon.setOnClickListener { view ->
+                resumePause = true
+
+                val openBlockActivity = Intent(context, BlockActivity::class.java)
+                openBlockActivity.putExtra("diaryId", items[position].diaryId)
+                openBlockActivity.putExtra("diaryUserId", items[position].userId)
+                openBlockActivity.putExtra("diaryType", "all")
+                context.startActivity(openBlockActivity)
+            }
+
         } else if (holder is CardViewHolderForNotification) {
             holder.bind(position)
 
