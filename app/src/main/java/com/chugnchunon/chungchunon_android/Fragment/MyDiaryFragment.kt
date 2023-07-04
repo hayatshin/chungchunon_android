@@ -119,22 +119,18 @@ class MyDiaryFragment : Fragment() {
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
-    lateinit var appParticipateDate: Date
-    private var nowDate: Date = Date()
-    private var formatAppParticipateDate: String = ""
-    private var formatNowDate: String = ""
-
     private var userPoint: Int = 0
     private var userStepPoint: Int = 0
 //    private var userStepCountHashMap = hashMapOf<String, Int>()
 
-    private var contractOrNot: Boolean = false
-    private var contractRegionExist: Boolean = false
-    private var contractRegionCoinShow: Boolean = false
-    private var cdRegionImage: String = ""
+    private var participateMissionExists: Boolean = false
+    private var participateCommunityLogo: String = ""
+    private var participateCommunityName: String = ""
 
-    private var userSmallRegion: String = ""
-    private var userFullRegion: String = ""
+    private var formatPeriodStart: String = ""
+    private var formatPeriodEnd: String = ""
+    lateinit var mdDateFormatStartPeriod: Date
+    lateinit var mdDateFormatEndPeriod: Date
 
     private var removeZeroCurrentMonth = ""
 
@@ -215,87 +211,57 @@ class MyDiaryFragment : Fragment() {
 
         uiScope.launch(Dispatchers.IO) {
             listOf(
-                launch { contractOrNotCheck() },
+                launch { missionParticipateDate() },
                 launch { thisMonthWriteCount() }
             ).joinAll()
             withContext(Dispatchers.Main) {
-                if (contractOrNot) {
-                    // 계약 (지역, 기관)
-                    binding.loadingCoinLayout.visibility = View.VISIBLE
 
-                    if (contractRegionExist && !contractRegionCoinShow) {
-                        // 지역 계약 coinShow = false
-                        binding.loadingCoinLayout.visibility = View.GONE
-                        binding.writeCountLayout.visibility = View.VISIBLE
+                if (participateMissionExists) {
+                    // 참여 이벤트 존재
+                    withContext(Dispatchers.IO) {
+//                        launch { appParticipateDate() }.join()
+                        listOf(
+                            launch { stepCountToArrayFun() },
+                            launch { diaryToArrayFun() },
+                            launch { commentToArrayFun() },
+                        ).joinAll()
 
-                        Glide.with(mcontext)
-                            .load(cdRegionImage)
-                            .into(binding.contractRegionImageView)
-                        binding.contractRegionTextView.text =
-                            userSmallRegion
+                        withContext(Dispatchers.Main) {
+                            launch {
+                                binding.loadingCoinLayout.visibility = View.GONE
+                                binding.writeCountLayout.visibility = View.VISIBLE
+                                val spanText: SpannableStringBuilder
+                                val decimal = DecimalFormat("#,###")
 
-                        binding.noContractIconLayout.visibility =
-                            View.GONE
-                        binding.contractIconLayout.visibility =
-                            View.VISIBLE
-                        binding.coinLayout.visibility = View.GONE
+                                if (userPoint < 10000) {
+                                    binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
+                                    binding.coinTextExplanation.visibility = View.GONE
 
-                    } else {
-                        // 지역 coinShow = true & 기관 계약
-                        withContext(Dispatchers.IO) {
-                            launch { appParticipateDate() }.join()
-                            listOf(
-                                launch { stepCountToArrayFun() },
-                                launch { diaryToArrayFun() },
-                                launch { commentToArrayFun() },
-                            ).joinAll()
-
-                            withContext(Dispatchers.Main) {
-                                launch {
-                                    binding.loadingCoinLayout.visibility = View.GONE
-                                    binding.writeCountLayout.visibility = View.VISIBLE
-                                    val spanText: SpannableStringBuilder
-                                    val decimal = DecimalFormat("#,###")
-
-                                    if (userPoint < 10000) {
-                                        binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
-                                        binding.coinTextExplanation.visibility = View.GONE
-
-                                    } else {
-                                        binding.coinTextMoney.text = "만원"
-                                        binding.coinTextExplanation.text = "달성"
-                                    }
-                                    val userPointSet = hashMapOf(
-                                        "userPoint" to userPoint
-                                    )
-                                    userDB.document("$userId").set(userPointSet, SetOptions.merge())
-
-                                    if (contractRegionExist) {
-                                        // 지역 계약
-                                        Glide.with(mcontext)
-                                            .load(cdRegionImage)
-                                            .into(binding.contractRegionImageView)
-                                        binding.contractRegionTextView.text =
-                                            userSmallRegion
-
-                                        binding.noContractIconLayout.visibility =
-                                            View.GONE
-                                        binding.contractIconLayout.visibility =
-                                            View.VISIBLE
-                                        binding.coinLayout.visibility = View.VISIBLE
-                                    } else {
-                                        // 커뮤니티 계약
-                                        binding.noContractIconLayout.visibility = View.VISIBLE
-                                        binding.contractIconLayout.visibility = View.GONE
-                                        binding.coinLayout.visibility = View.VISIBLE
-                                    }
+                                } else {
+                                    binding.coinTextMoney.text = "만원"
+                                    binding.coinTextExplanation.text = "달성"
                                 }
+                                val userPointSet = hashMapOf(
+                                    "userPoint" to userPoint
+                                )
+                                userDB.document("$userId").set(userPointSet, SetOptions.merge())
+
+                                Glide.with(mcontext)
+                                    .load(participateCommunityLogo)
+                                    .into(binding.contractRegionImageView)
+                                binding.contractRegionTextView.text =
+                                    participateCommunityName
+
+                                binding.noContractIconLayout.visibility =
+                                    View.GONE
+                                binding.contractIconLayout.visibility =
+                                    View.VISIBLE
+                                binding.coinLayout.visibility = View.VISIBLE
                             }
                         }
                     }
-
                 } else {
-                    // 계약 안 함
+                    // 참여 이벤트 존재 x
                     binding.loadingCoinLayout.visibility = View.GONE
                     binding.coinLayout.visibility = View.GONE
                     binding.writeCountLayout.visibility = View.VISIBLE
@@ -304,171 +270,6 @@ class MyDiaryFragment : Fragment() {
                 }
             }
         }
-
-
-//        uiScope.launch(Dispatchers.IO) {
-//            launch { contractOrNotCheck() }.join()
-//            launch { thisMonthWriteCount() }.join()
-//
-//
-//
-//            if (contractOrNot) {
-//                // 계약 (지역 , 기관)
-//                withContext(Dispatchers.Main) {
-//                    binding.loadingCoinLayout.visibility = View.VISIBLE
-//
-//                    if (contractRegionExist) {
-//                        // 기관 계약
-//                        db.collection("contract_region")
-//                            .document(userFullRegion)
-//                            .get()
-//                            .addOnCompleteListener { task ->
-//                                if (task.isSuccessful) {
-//                                    val cdDocument = task.result
-//                                    if (cdDocument != null) {
-//                                        if (cdDocument.exists()) {
-//                                            val cdRegionImage =
-//                                                cdDocument.data?.getValue("regionImage").toString()
-//                                            val coinShow =
-//                                                cdDocument.data?.getValue("coinShow") as Boolean
-//
-//                                            // 안 보여줌 (원)
-//                                            if (!coinShow) {
-//                                                binding.loadingCoinLayout.visibility = View.GONE
-//                                                binding.writeCountLayout.visibility = View.VISIBLE
-//
-//                                                Glide.with(mcontext)
-//                                                    .load(cdRegionImage)
-//                                                    .into(binding.contractRegionImageView)
-//                                                binding.contractRegionTextView.text =
-//                                                    userSmallRegion
-//
-//                                                binding.noContractIconLayout.visibility =
-//                                                    View.GONE
-//                                                binding.contractIconLayout.visibility =
-//                                                    View.VISIBLE
-//                                                binding.coinLayout.visibility = View.GONE
-//                                            } else {
-//                                                // 보여줌
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                    }
-//                }
-//
-//                // 계약함 (지역 OR 기관)
-//                launch { appParticipateDate() }.join()
-//                listOf(
-//                    launch { stepCountToArrayFun() },
-//                    launch { diaryToArrayFun() },
-//                    launch { commentToArrayFun() },
-//                ).joinAll()
-//                withContext(Dispatchers.Main) {
-//                    launch {
-//                        binding.loadingCoinLayout.visibility = View.GONE
-//                        binding.writeCountLayout.visibility = View.VISIBLE
-////                        binding.coinLayout.visibility = View.GONE
-////                        binding.writeCountLayout.orientation = LinearLayout.HORIZONTAL
-////                        binding.writeCountLayout.gravity = Gravity.TOP or Gravity.END
-//
-//                        val spanText: SpannableStringBuilder
-//                        val decimal = DecimalFormat("#,###")
-//
-//                        if (userPoint < 10000) {
-//                            binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
-//                            binding.coinTextExplanation.visibility = View.GONE
-//                        } else {
-//                            binding.coinTextMoney.text = "만원"
-//                            binding.coinTextExplanation.text = "달성"
-//                        }
-//                        val userPointSet = hashMapOf(
-//                            "userPoint" to userPoint
-//                        )
-//                        userDB.document("$userId").set(userPointSet, SetOptions.merge())
-//
-////                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
-//
-//                        if (contractRegionExist) {
-//                            // 지역 계약의 경우
-//                            db.collection("contract_region")
-//                                .document(userFullRegion)
-//                                .get()
-//                                .addOnCompleteListener { task ->
-//                                    if (task.isSuccessful) {
-//                                        val cdDocument = task.result
-//                                        if (cdDocument != null) {
-//                                            if (cdDocument.exists()) {
-//                                                val cdRegionImage =
-//                                                    cdDocument.data?.getValue("regionImage")
-//                                                        .toString()
-//                                                val coinShow =
-//                                                    cdDocument.data?.getValue("coinShow") as Boolean
-//
-//                                                if (coinShow) {
-//                                                    Glide.with(mcontext)
-//                                                        .load(cdRegionImage)
-//                                                        .into(binding.contractRegionImageView)
-//                                                    binding.contractRegionTextView.text =
-//                                                        userSmallRegion
-//
-//                                                    binding.noContractIconLayout.visibility =
-//                                                        View.GONE
-//                                                    binding.contractIconLayout.visibility =
-//                                                        View.VISIBLE
-//                                                    binding.coinLayout.visibility = View.VISIBLE
-//
-//                                                } else {
-////                                                    Glide.with(mcontext)
-////                                                        .load(cdRegionImage)
-////                                                        .into(binding.contractRegionImageView)
-////                                                    binding.contractRegionTextView.text =
-////                                                        userSmallRegion
-////
-////                                                    binding.noContractIconLayout.visibility =
-////                                                        View.GONE
-////                                                    binding.contractIconLayout.visibility =
-////                                                        View.VISIBLE
-////                                                    binding.coinLayout.visibility = View.GONE
-//                                                }
-//
-//                                            }
-//                                        } else {
-//                                            binding.noContractIconLayout.visibility = View.VISIBLE
-//                                            binding.contractIconLayout.visibility = View.GONE
-//                                            binding.coinLayout.visibility = View.GONE
-//                                        }
-//                                    }
-//                                }
-//                        } else {
-//                            // 커뮤니티 계약
-//                            binding.noContractIconLayout.visibility = View.VISIBLE
-//                            binding.contractIconLayout.visibility = View.GONE
-//                            binding.coinLayout.visibility = View.VISIBLE
-//                        }
-//                    }
-//                }
-//            } else {
-//                // 계약 안한 일반
-//                withContext(Dispatchers.Main) {
-//                    launch {
-//                        binding.loadingCoinLayout.visibility = View.GONE
-//                        binding.coinLayout.visibility = View.GONE
-//                        binding.writeCountLayout.visibility = View.VISIBLE
-////                        binding.writeCountLayout.orientation = LinearLayout.VERTICAL
-////                        binding.writeCountLayout.gravity = Gravity.BOTTOM or Gravity.END
-//
-////                        binding.thisMonth.text = "${removeZeroCurrentMonth}월: "
-//
-//                        binding.noContractIconLayout.visibility = View.VISIBLE
-//                        binding.contractIconLayout.visibility = View.GONE
-//                    }
-//                }
-//
-//            }
-//
-//        }
 
         binding.coinLayout.setOnClickListener {
             val goMoneyDetail = Intent(requireActivity(), MoneyDetailActivity::class.java)
@@ -1299,16 +1100,6 @@ class MyDiaryFragment : Fragment() {
         binding.todayMood.adapter = activity?.applicationContext?.let {
             MoodArrayAdapter(
                 it,
-//                listOf(
-//                    Mood(R.drawable.ic_joy, "기뻐요", 0),
-//                    Mood(R.drawable.ic_shalom, "평온해요", 1),
-//                    Mood(R.drawable.ic_throb, "설레요", 2),
-//                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
-//                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
-//                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
-//                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
-//                    Mood(R.drawable.ic_angry, "화나요", 7),
-//                )
                 listOf(
                     Mood(R.drawable.ic_joy, "기뻐요", 0),
                     Mood(R.drawable.ic_throb, "설레요", 1),
@@ -1635,10 +1426,17 @@ class MyDiaryFragment : Fragment() {
             IntentFilter("DELETE_IMAGE")
         );
 
-
         // 이미지 애니메이션
         val womanIcon = view?.findViewById<ImageView>(R.id.womanIcon)
         val manIcon = view?.findViewById<ImageView>(R.id.manIcon)
+        womanIcon?.scaleType = ImageView.ScaleType.CENTER_INSIDE
+        manIcon?.scaleType = ImageView.ScaleType.CENTER_INSIDE
+        val womanLayoutParams = womanIcon?.layoutParams
+        val manLayoutParams = manIcon?.layoutParams
+        womanLayoutParams?.width = 100
+        womanLayoutParams?.height = 150
+        manLayoutParams?.width = 100
+        manLayoutParams?.height = 150
 
         val womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 0f, 20f, 0f)
         womananimation.setDuration(500)
@@ -1672,7 +1470,6 @@ class MyDiaryFragment : Fragment() {
 
         photoResume = false
         recordResume = false
-
 
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(secretOrNotFunction)
         LocalBroadcastManager.getInstance(requireContext())
@@ -1829,62 +1626,75 @@ class MyDiaryFragment : Fragment() {
         }
     }
 
-
-    // 점수 계산
-    suspend fun contractOrNotCheck() {
+    suspend fun missionParticipateDate() {
         val userDocument = userDB.document("$userId").get().await()
 
-        val userRegion = userDocument.data?.getValue("region").toString()
-        userSmallRegion = userDocument.data?.getValue("smallRegion").toString()
-        userFullRegion = "${userRegion} ${userSmallRegion}"
+        try {
+            // 참여 이벤트 존재
+            val participateMissionCheck = userDocument.contains("participateEventId")
+            val participateMissionDocId =
+                userDocument.data?.getValue("participateEventId").toString()
+            val missionRef =
+                db.collection("mission").document("$participateMissionDocId").get().await()
 
-        val contractRegionDocument =
-            db.collection("contract_region").document(userFullRegion).get().await()
-        contractRegionExist = contractRegionDocument.exists()
+            if (participateMissionCheck) {
+                participateCommunityLogo = missionRef.data?.getValue("communityLogo").toString()
+                participateCommunityName = missionRef.data?.getValue("community").toString()
 
-        val communityDocument =
-            db.collection("community").whereArrayContains("users", "$userId").get().await()
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+                dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
+                val missionStartDate = missionRef.data?.getValue("startPeriod").toString()
+                val missionEndDate = missionRef.data?.getValue("endPeriod").toString()
+                val missionState = missionRef.data?.getValue("state").toString()
+                val now = Date()
 
-        contractOrNot = contractRegionExist || communityDocument.size() != 0
+                val pattern = "yyyy-MM-dd"
+                formatPeriodStart = missionStartDate.replace(".", "-")
+                mdDateFormatStartPeriod =
+                    java.text.SimpleDateFormat(pattern).parse(formatPeriodStart)
 
-        if (contractRegionExist) {
-            contractRegionCoinShow = contractRegionDocument.data?.getValue("coinShow") as Boolean
-            cdRegionImage = contractRegionDocument.data?.getValue("regionImage").toString()
+                if (missionState == "진행") {
+
+                    if (!missionEndDate.contains(".")) {
+                        // 무제한 진행
+                        val currentDateTime = LocalDate.now().toString()
+                        formatPeriodEnd = currentDateTime
+                        mdDateFormatEndPeriod =
+                            java.text.SimpleDateFormat(pattern).parse(currentDateTime)
+
+                        participateMissionExists = mdDateFormatStartPeriod.before(now)
+                    } else {
+                        // 종료일 존재
+                        formatPeriodEnd = missionEndDate.replace(".", "-")
+                        mdDateFormatEndPeriod =
+                            java.text.SimpleDateFormat(pattern).parse(formatPeriodEnd)
+
+                        participateMissionExists =
+                            mdDateFormatStartPeriod.before(now) && mdDateFormatEndPeriod.after(now)
+                    }
+                } else {
+                    participateMissionExists = false
+                }
+            } else {
+                participateMissionExists = false
+            }
+
+        } catch (e: Exception) {
+            // 참여 이벤트 없음
+            participateMissionExists = false
         }
-
-    }
-
-    suspend fun appParticipateDate() {
-        val currentDate = Calendar.getInstance()
-
-        val userData = userDB.document("kakao:2657588327").get().await()
-//        val userData = userDB.document("$userId").get().await()
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")
-        val timeZone = TimeZone.getTimeZone("Asia/Seoul")
-        val now = Calendar.getInstance(timeZone).time
-
-        val appTimestamp = userData.data?.getValue("timestamp") as Timestamp
-        val getString = DateFormat().convertTimeStampToDate(appTimestamp)
-        appParticipateDate = dateFormat.parse(getString)
-
-        formatAppParticipateDate = dateFormat.format(appParticipateDate)
-        formatNowDate = dateFormat.format(now)
-
-        Log.d("날짜", "${formatAppParticipateDate} / ${formatNowDate}")
     }
 
     suspend fun stepCountToArrayFun() {
         val startDate = LocalDate.of(
-            formatAppParticipateDate.substring(0, 4).toInt(),
-            formatAppParticipateDate.substring(5, 7).toInt(),
-            formatAppParticipateDate.substring(8, 10).toInt()
+            formatPeriodStart.substring(0, 4).toInt(),
+            formatPeriodStart.substring(5, 7).toInt(),
+            formatPeriodStart.substring(8, 10).toInt()
         )
         val endDate = LocalDate.of(
-            formatNowDate.substring(0, 4).toInt(),
-            formatNowDate.substring(5, 7).toInt(),
-            formatNowDate.substring(8, 10).toInt()
+            formatPeriodEnd.substring(0, 4).toInt(),
+            formatPeriodEnd.substring(5, 7).toInt(),
+            formatPeriodEnd.substring(8, 10).toInt()
         )
 
         val dataSteps = db.collection("user_step_count")
@@ -1919,7 +1729,8 @@ class MyDiaryFragment : Fragment() {
 
     suspend fun diaryToArrayFun() {
         val diaryDocuments = db.collection("diary")
-            .whereGreaterThanOrEqualTo("timestamp", appParticipateDate)
+            .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
+            .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
             .whereEqualTo("userId", userId)
             .get()
             .await()
@@ -1931,7 +1742,8 @@ class MyDiaryFragment : Fragment() {
 
     suspend fun commentToArrayFun() {
         val commentDocuments = db.collectionGroup("comments")
-            .whereGreaterThanOrEqualTo("timestamp", appParticipateDate)
+            .whereGreaterThanOrEqualTo("timestamp", mdDateFormatStartPeriod)
+            .whereLessThanOrEqualTo("timestamp", mdDateFormatEndPeriod)
             .whereEqualTo("userId", userId)
             .get()
             .await()

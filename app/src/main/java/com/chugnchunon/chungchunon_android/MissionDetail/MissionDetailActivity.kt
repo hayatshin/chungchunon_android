@@ -246,6 +246,8 @@ class MissionDetailActivity : Activity() {
                             val missionCount = missionSnapShot.size()
                             if (mdPrizeWinners == 0 || missionCount < mdPrizeWinners) {
                                 // 참여 가능
+                                // mdPrizeWinners = 0 -> 무제한으로 받아준다.
+
                                 val userParticipateSet = hashMapOf<String, Any>(
                                     "dummy" to FieldValue.serverTimestamp()
                                 )
@@ -264,10 +266,18 @@ class MissionDetailActivity : Activity() {
                                             goMissionResult,
                                             REFRESH_RESULT_MISSION_CODE
                                         )
-
                                     }
                                     .addOnFailureListener {
                                         // 존재 안함
+
+                                        // user 기록
+                                        val userMissionSet = hashMapOf(
+                                            "participateEventId" to mdDocId
+                                        )
+                                        userDB.document("$userId")
+                                            .set(userMissionSet, SetOptions.merge())
+
+                                        // mission -> participants 기록
                                         val userParticipateTimestamp = hashMapOf(
                                             "documentId" to mdDocId,
                                             "userId" to userId,

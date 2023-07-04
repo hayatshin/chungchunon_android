@@ -16,26 +16,49 @@
     <!--        android:layout_height="200dp"/>-->
 
     <LinearLayout
-        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45">
+        app:layout_constraintVertical_bias="0.38">
+
+        <TextView
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="세상에서 가장 쉬운"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="치매 예방 플랫폼"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <ImageView
-            android:id="@+id/womanIcon"
-            android:layout_marginRight="20dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_womanimage" />
+            android:layout_height="40dp"
+            android:src="@drawable/ic_titleimage2"
+            />
 
-        <ImageView
-            android:id="@+id/manIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_manimage" />
+<!--        <ImageView-->
+<!--            android:id="@+id/womanIcon"-->
+<!--            android:layout_marginRight="20dp"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/ic_womanimage" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/manIcon"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/ic_manimage" />-->
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
