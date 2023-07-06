@@ -3,8 +3,10 @@ package com.chugnchunon.chungchunon_android
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
 import com.chugnchunon.chungchunon_android.Service.MyService
@@ -53,6 +55,15 @@ class DefaultCancelWarningActivity : Activity() {
             binding.warningText.text = "정말로 탈퇴하시겠습니까?"
             binding.confirmBox.setOnClickListener {
 
+                Toast.makeText(this, "잠시만 기다려주세요..", Toast.LENGTH_LONG).show()
+
+                binding.confirmBox.isFocusable = false
+                binding.confirmBox.isClickable = false
+                binding.confirmBox.isFocusableInTouchMode = false
+                binding.cancelBox.isFocusable = false
+                binding.cancelBox.isClickable = false
+                binding.cancelBox.isFocusableInTouchMode = false
+
                 uiScope.launch(Dispatchers.IO) {
                     launch { recordExitCollection() }.join()
                     launch { recordUserCollection() }.join()
@@ -70,18 +81,6 @@ class DefaultCancelWarningActivity : Activity() {
                     }
                 }
 
-//                val exitSet = hashMapOf(
-//                    "userId" to userId,
-//                    "timestamp" to FieldValue.serverTimestamp(),
-//                    "deleted" to false,
-//                )
-//                db.collection("exit").add(exitSet)
-//                    .addOnSuccessListener {
-//                        // userDB에서 수정
-//                        val goMain = Intent(this, MainActivity::class.java)
-//                        goMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-//                        startActivity(goMain)
-//                    }
             }
         } else if (warningType == "banStep") {
             binding.warningText.text = "걸음수 측정을 끄면\n걸음수 점수가 더해지지 않습니다.\n\n정말로 걸음수 측정을 끄시겠습니까?"
@@ -107,6 +106,7 @@ class DefaultCancelWarningActivity : Activity() {
     }
 
     suspend fun recordExitCollection() {
+
         val userDataReference =
             FirebaseFirestore.getInstance().collection("users").document("$userId")
         val userDataReferenceResult = userDataReference.get().await()
@@ -132,12 +132,8 @@ class DefaultCancelWarningActivity : Activity() {
 
     suspend fun recordUserCollection() {
 
-        // https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png
-        var userFinalId = "default_user"
-        var userFinalName = "탈퇴자"
         val exitUserAvatar =
             "https://postfiles.pstatic.net/MjAyMzA1MTdfNTEg/MDAxNjg0MzAwMTE1NTg4.Ut_2NzdCmpjurruKjSwqWSH-c0_ONiJZM2Mn-ib-uSQg.qX8hjpYrVpE6Nlnnmcs1J780Ycwnl4WIuMLX-tpgVT8g.PNG.hayat_shin/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2023-05-17_%EC%98%A4%ED%9B%84_2.08.31.png?type=w773"
-        var userFinalStep = 0L
 
         val exitUserSet = hashMapOf(
             "name" to "탈퇴자",

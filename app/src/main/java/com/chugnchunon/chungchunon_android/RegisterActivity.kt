@@ -271,8 +271,6 @@ class RegisterActivity : AppCompatActivity() {
         // 생년월일 설정
         var editBirth: Boolean = false
 
-
-
         calendar.apply {
             set(1960, 0, 1)
         }
@@ -294,9 +292,10 @@ class RegisterActivity : AppCompatActivity() {
                 var birthScreenInput = ""
                 birthScreenInput = "${year}년 ${monthOfYear + 1}월 ${dayOfMonth}일"
                 birthYear = "$year"
-                userAge = currentYear - birthYear.toInt() + 1
                 birthDay =
                     "${String.format("%02d", monthOfYear + 1)}${String.format("%02d", dayOfMonth)}"
+                //                userAge = currentYear - birthYear.toInt() + 1
+                userAge = DateFormat().calculateAge(birthYear.toInt(), birthDay.toInt())
                 birthTextView.text = birthScreenInput
 
                 val birthTextViewLayoutParams = RelativeLayout.LayoutParams(

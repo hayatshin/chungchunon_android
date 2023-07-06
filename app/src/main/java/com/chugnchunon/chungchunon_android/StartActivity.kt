@@ -10,6 +10,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDelegate
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -61,6 +62,8 @@ class StartActivity : AppCompatActivity() {
         super.onResume()
 
 
+
+
         // 상태바 화이트
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val window = window
@@ -91,7 +94,6 @@ class StartActivity : AppCompatActivity() {
                                                     // 탈퇴 기록 있음
                                                     if (task.result.exists()) {
                                                         // 탈퇴 기록 있음
-                                                        Log.d("탈퇴", "기록 있음")
                                                         val dbUserName =
                                                             userData.data?.getValue("name")
                                                                 .toString()
@@ -113,8 +115,10 @@ class StartActivity : AppCompatActivity() {
                                                             val userBirthYear =
                                                                 userData.data?.getValue("birthYear")!!
                                                                     .toString().toInt()
-                                                            val newUserAge =
-                                                                currentYear - userBirthYear + 1
+                                                            val userBirthDay =
+                                                                userData.data?.getValue("birthday")!!
+                                                                    .toString().toInt()
+                                                            val newUserAge = DateFormat().calculateAge(userBirthYear, userBirthDay)
 
                                                             if (newUserAge != dbUserAge) {
                                                                 var newUserType = ""
@@ -150,6 +154,8 @@ class StartActivity : AppCompatActivity() {
                                                                         )
                                                                     }
                                                             } else {
+                                                                // 정상 이동
+
                                                                 val goDiaryTwoActivity =
                                                                     Intent(
                                                                         this,
@@ -158,13 +164,12 @@ class StartActivity : AppCompatActivity() {
                                                                 startActivity(
                                                                     goDiaryTwoActivity
                                                                 )
+
                                                             }
                                                         }
 
                                                     } else {
                                                         // 탈퇴 기록 없음
-                                                        Log.d("탈퇴", "기록 없음1")
-
                                                         val dbUserAge =
                                                             (userData.data?.getValue("userAge")!! as Long).toInt()
                                                         val dbUserType =
@@ -174,8 +179,10 @@ class StartActivity : AppCompatActivity() {
                                                         val userBirthYear =
                                                             userData.data?.getValue("birthYear")!!
                                                                 .toString().toInt()
-                                                        val newUserAge =
-                                                            currentYear - userBirthYear + 1
+                                                        val userBirthDay=
+                                                            userData.data?.getValue("birthDay")!!
+                                                                .toString().toInt()
+                                                        val newUserAge = DateFormat().calculateAge(userBirthYear, userBirthDay)
 
                                                         if (newUserAge != dbUserAge) {
                                                             var newUserType = ""
@@ -223,7 +230,6 @@ class StartActivity : AppCompatActivity() {
                                                     }
                                                 } else {
                                                     // 탈퇴 기록 없음
-                                                    Log.d("탈퇴", "기록 없음2")
                                                     val dbUserAge =
                                                         (userData.data?.getValue("userAge")!! as Long).toInt()
                                                     val dbUserType =
@@ -233,8 +239,10 @@ class StartActivity : AppCompatActivity() {
                                                     val userBirthYear =
                                                         userData.data?.getValue("birthYear")!!
                                                             .toString().toInt()
-                                                    val newUserAge =
-                                                        currentYear - userBirthYear + 1
+                                                    val userBirthDay=
+                                                        userData.data?.getValue("birthDay")!!
+                                                            .toString().toInt()
+                                                    val newUserAge = DateFormat().calculateAge(userBirthYear, userBirthDay)
 
                                                     if (newUserAge != dbUserAge) {
                                                         var newUserType = ""
@@ -291,8 +299,11 @@ class StartActivity : AppCompatActivity() {
                                                 val userBirthYear =
                                                     userData.data?.getValue("birthYear")!!
                                                         .toString().toInt()
-                                                val newUserAge =
-                                                    currentYear - userBirthYear + 1
+                                                val userBirthDay=
+                                                    userData.data?.getValue("birthDay")!!
+                                                        .toString().toInt()
+                                                val newUserAge = DateFormat().calculateAge(userBirthYear, userBirthDay)
+
 
                                                 if (newUserAge != dbUserAge) {
                                                     var newUserType = ""

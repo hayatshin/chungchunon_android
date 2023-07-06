@@ -3,6 +3,7 @@ package com.chugnchunon.chungchunon_android.Fragment
 import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableStringBuilder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

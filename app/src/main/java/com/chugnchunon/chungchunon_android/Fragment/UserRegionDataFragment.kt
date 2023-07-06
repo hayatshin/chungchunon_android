@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.annotation.Keep
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -18,6 +19,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.chugnchunon.chungchunon_android.Adapter.CommunityMenuAdapter
@@ -29,6 +31,7 @@ import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.databinding.FragmentRegionDataBinding
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -79,9 +82,14 @@ class UserRegionDataFragment : Fragment() {
         _binding = FragmentRegionDataBinding.inflate(inflater, container, false)
         val binding = binding.root
 
+        binding.noItemText.visibility = View.GONE
         binding.communitySelectRecycler.visibility = View.VISIBLE
 
         binding.recyclerDiary.itemAnimator = null
+
+        val layoutManager = LinearLayoutManager(mcontext)
+        binding.recyclerDiary.layoutManager = layoutManager
+
         swipeRefreshLayout = binding.swipeRecyclerDiary
         binding.swipeRecyclerDiary.setOnRefreshListener {
             swipeRefreshLayout.isRefreshing = false
@@ -145,23 +153,26 @@ class UserRegionDataFragment : Fragment() {
         );
 
         userRegionDiaryItems.clear()
+
+
         getMenuData()
         getRegionData()
 
-        Handler().postDelayed({
-            userDataLoadingState.loadingCompleteData.value = true
 
-            if (userRegionDiaryItems.size == 0) {
-                binding.noItemText.visibility =
-                    View.VISIBLE
-            } else {
-                binding.noItemText.visibility =
-                    View.GONE
-                binding.recyclerDiary.visibility =
-                    View.VISIBLE
-            }
-
-        }, 1500)
+//        Handler().postDelayed({
+//            userDataLoadingState.loadingCompleteData.value = true
+//
+//            if (userRegionDiaryItems.size == 0) {
+//                binding.noItemText.visibility =
+//                    View.VISIBLE
+//            } else {
+//                binding.noItemText.visibility =
+//                    View.GONE
+//                binding.recyclerDiary.visibility =
+//                    View.VISIBLE
+//            }
+//
+//        }, 1500)
 
         return binding
     }
@@ -361,9 +372,14 @@ class UserRegionDataFragment : Fragment() {
     }
 
     private fun getCommunityData(selectCommunity: String) {
+
         diaryDB.get()
             .addOnSuccessListener { documents ->
-                for (document in documents) {
+                val lastIndex = documents.size() - 1
+
+                for ((index, document) in documents.withIndex()) {
+                    val isLastItem = index == lastIndex
+
                     val blockedList =
                         document.data.getValue("blockedBy") as ArrayList<*>
 
@@ -475,17 +491,26 @@ class UserRegionDataFragment : Fragment() {
                                                                 userRegionDiaryItems.reverse()
                                                                 adapter.notifyDataSetChanged()
 
-                                                                if (userRegionDiaryItems.size == 0) {
-//                                                                    binding.noItemText.visibility =
-//                                                                        View.VISIBLE
-                                                                } else {
-                                                                    binding.noItemText.visibility =
-                                                                        View.GONE
-                                                                    binding.recyclerDiary.visibility =
-                                                                        View.VISIBLE
-                                                                }
                                                                 userDataLoadingState.loadingCompleteData.value =
                                                                     true
+                                                                binding.noItemText.visibility =
+                                                                    View.GONE
+                                                                binding.recyclerDiary.visibility =
+                                                                    View.VISIBLE
+
+                                                                if (isLastItem) {
+                                                                    Handler().postDelayed({
+                                                                        if (userRegionDiaryItems.size == 0) {
+                                                                            userDataLoadingState.loadingCompleteData.value =
+                                                                                true
+                                                                            binding.noItemText.visibility =
+                                                                                View.VISIBLE
+                                                                            binding.recyclerDiary.visibility =
+                                                                                View.GONE
+                                                                        }
+                                                                    }, 2000)
+                                                                }
+
                                                             } else {
                                                                 // 해당 기간 걸음수 데이터 x
                                                                 if (document.data.contains("images")) {
@@ -535,31 +560,86 @@ class UserRegionDataFragment : Fragment() {
                                                                 userRegionDiaryItems.reverse()
                                                                 adapter.notifyDataSetChanged()
 
-                                                                if (userRegionDiaryItems.size == 0) {
-//                                                                    binding.noItemText.visibility =
-//                                                                        View.VISIBLE
-                                                                } else {
-                                                                    binding.noItemText.visibility =
-                                                                        View.GONE
-                                                                    binding.recyclerDiary.visibility =
-                                                                        View.VISIBLE
-                                                                }
                                                                 userDataLoadingState.loadingCompleteData.value =
                                                                     true
-                                                            }
+                                                                binding.noItemText.visibility =
+                                                                    View.GONE
+                                                                binding.recyclerDiary.visibility =
+                                                                    View.VISIBLE
 
+                                                                if (isLastItem) {
+                                                                    Handler().postDelayed({
+                                                                        if (userRegionDiaryItems.size == 0) {
+                                                                            userDataLoadingState.loadingCompleteData.value =
+                                                                                true
+                                                                            binding.noItemText.visibility =
+                                                                                View.VISIBLE
+                                                                            binding.recyclerDiary.visibility =
+                                                                                View.GONE
+                                                                        }
+                                                                    }, 2000)
+                                                                }
+
+                                                            }
                                                         }
                                                 }
                                             }
+                                    } else {
+                                        // 포함 x
+
+                                        if (isLastItem) {
+                                            Handler().postDelayed({
+                                                if (userRegionDiaryItems.size == 0) {
+                                                    userDataLoadingState.loadingCompleteData.value =
+                                                        true
+                                                    binding.noItemText.visibility =
+                                                        View.VISIBLE
+                                                    binding.recyclerDiary.visibility =
+                                                        View.GONE
+                                                }
+                                            }, 2000)
+                                        }
+
                                     }
                                 }
 
                         } else {
                             // 비밀 글
+
+                            if (isLastItem) {
+                                Handler().postDelayed({
+                                    if (userRegionDiaryItems.size == 0) {
+                                        userDataLoadingState.loadingCompleteData.value =
+                                            true
+                                        binding.noItemText.visibility =
+                                            View.VISIBLE
+                                        binding.recyclerDiary.visibility =
+                                            View.GONE
+                                    }
+                                }, 2000)
+                            }
+
                         }
                     } else {
                         // 내가 차단한 글
+
+                        if (isLastItem) {
+                            Handler().postDelayed({
+                                if (userRegionDiaryItems.size == 0) {
+                                    userDataLoadingState.loadingCompleteData.value =
+                                        true
+                                    binding.noItemText.visibility =
+                                        View.VISIBLE
+                                    binding.recyclerDiary.visibility =
+                                        View.GONE
+                                }
+                            }, 2000)
+                        }
+
                     }
+
+
+
                 }
 
             }
@@ -575,7 +655,10 @@ class UserRegionDataFragment : Fragment() {
 
                 diaryDB.get()
                     .addOnSuccessListener { documents ->
-                        for (document in documents) {
+                        val lastIndex = documents.size() - 1
+                        for ((index, document) in documents.withIndex()) {
+                            val isLastItem = index == lastIndex
+
                             val blockedList =
                                 document.data.getValue("blockedBy") as ArrayList<*>
 
@@ -690,17 +773,26 @@ class UserRegionDataFragment : Fragment() {
                                                                 userRegionDiaryItems.reverse()
                                                                 adapter.notifyDataSetChanged()
 
-                                                                if (userRegionDiaryItems.size == 0) {
-//                                                                    binding.noItemText.visibility =
-//                                                                        View.VISIBLE
-                                                                } else {
-                                                                    binding.noItemText.visibility =
-                                                                        View.GONE
-                                                                    binding.recyclerDiary.visibility =
-                                                                        View.VISIBLE
-                                                                }
                                                                 userDataLoadingState.loadingCompleteData.value =
                                                                     true
+                                                                binding.noItemText.visibility =
+                                                                    View.GONE
+                                                                binding.recyclerDiary.visibility =
+                                                                    View.VISIBLE
+
+                                                                if (isLastItem) {
+                                                                    Handler().postDelayed({
+                                                                        if (userRegionDiaryItems.size == 0) {
+                                                                            userDataLoadingState.loadingCompleteData.value =
+                                                                                true
+                                                                            binding.noItemText.visibility =
+                                                                                View.VISIBLE
+                                                                            binding.recyclerDiary.visibility =
+                                                                                View.GONE
+                                                                        }
+                                                                    }, 2000)
+                                                                }
+
                                                             } else {
                                                                 // 해당 기간 걸음수 데이터 x
                                                                 if (document.data.contains("images")) {
@@ -750,35 +842,81 @@ class UserRegionDataFragment : Fragment() {
                                                                 userRegionDiaryItems.reverse()
                                                                 adapter.notifyDataSetChanged()
 
-                                                                if (userRegionDiaryItems.size == 0) {
-//                                                                    binding.noItemText.visibility =
-//                                                                        View.VISIBLE
-                                                                } else {
-                                                                    binding.noItemText.visibility =
-                                                                        View.GONE
-                                                                    binding.recyclerDiary.visibility =
-                                                                        View.VISIBLE
-                                                                }
                                                                 userDataLoadingState.loadingCompleteData.value =
                                                                     true
-                                                            }
+                                                                binding.noItemText.visibility =
+                                                                    View.GONE
+                                                                binding.recyclerDiary.visibility =
+                                                                    View.VISIBLE
 
+                                                                if (isLastItem) {
+                                                                    Handler().postDelayed({
+                                                                        if (userRegionDiaryItems.size == 0) {
+                                                                            userDataLoadingState.loadingCompleteData.value =
+                                                                                true
+                                                                            binding.noItemText.visibility =
+                                                                                View.VISIBLE
+                                                                            binding.recyclerDiary.visibility =
+                                                                                View.GONE
+                                                                        }
+                                                                    }, 2000)
+                                                                }
+
+                                                            }
                                                         }
+                                                } else {
+                                                    // 포함 x
+                                                    if (isLastItem) {
+                                                        Handler().postDelayed({
+                                                            if (userRegionDiaryItems.size == 0) {
+                                                                userDataLoadingState.loadingCompleteData.value =
+                                                                    true
+                                                                binding.noItemText.visibility =
+                                                                    View.VISIBLE
+                                                                binding.recyclerDiary.visibility =
+                                                                    View.GONE
+                                                            }
+                                                        }, 2000)
+                                                    }
+
                                                 }
                                             }
                                         }
                                 } else {
                                     // 비밀 글
+                                    if (isLastItem) {
+                                        Handler().postDelayed({
+                                            if (userRegionDiaryItems.size == 0) {
+                                                userDataLoadingState.loadingCompleteData.value =
+                                                    true
+                                                binding.noItemText.visibility =
+                                                    View.VISIBLE
+                                                binding.recyclerDiary.visibility =
+                                                    View.GONE
+                                            }
+                                        }, 2000)
+                                    }
                                 }
                             } else {
                                 // 내가 차단한 글
+                                if (isLastItem) {
+                                    Handler().postDelayed({
+                                        if (userRegionDiaryItems.size == 0) {
+                                            userDataLoadingState.loadingCompleteData.value =
+                                                true
+                                            binding.noItemText.visibility =
+                                                View.VISIBLE
+                                            binding.recyclerDiary.visibility =
+                                                View.GONE
+                                        }
+                                    }, 2000)
+                                }
                             }
                         }
 
                     }
             }
     }
-
 }
 
 

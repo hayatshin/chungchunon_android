@@ -303,7 +303,7 @@ class MissionDetailActivity : Activity() {
                                             }
                                     }
                             } else {
-                                // 100명 초과
+                                // 선착순 초과
                                 val goMissionResult =
                                     Intent(this, MissionResultActivity::class.java)
                                 goMissionResult.putExtra("participateState", "Excess")

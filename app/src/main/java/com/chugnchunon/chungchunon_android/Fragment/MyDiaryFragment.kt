@@ -69,8 +69,10 @@ import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_diary_two.*
+import kotlinx.android.synthetic.main.fragment_more_two.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import me.moallemi.tools.daterange.localdate.rangeTo
@@ -115,15 +117,25 @@ class MyDiaryFragment : Fragment() {
     private var secondNumber = 2
     private var operator = ""
     private var itemListItems: ArrayList<Any> = ArrayList()
+    private var itemListItemsString: ArrayList<String> = ArrayList()
 
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     private var userPoint: Int = 0
     private var userStepPoint: Int = 0
-//    private var userStepCountHashMap = hashMapOf<String, Int>()
 
+    private var contractRegionExists: Boolean = false
     private var participateMissionExists: Boolean = false
+
+    private var userSmallRegion: String = ""
+    private var userFullRegion: String = ""
+
+    private var participateMissionGoalScore: Int = 0
+    private var participatePrizeWinners: Int = 0
+    private var participateSmallDescription: String = ""
+
+    private var contractRegionLogo: String = ""
     private var participateCommunityLogo: String = ""
     private var participateCommunityName: String = ""
 
@@ -154,6 +166,7 @@ class MyDiaryFragment : Fragment() {
         mcontext = context
     }
 
+
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -162,6 +175,11 @@ class MyDiaryFragment : Fragment() {
 
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
+
+//        val currentDateTime = LocalDate.now().toString()
+//        val userPref = requireActivity().getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+//        val userPrefEdit = userPref.edit()
+//        userPrefEdit.clear().apply()
 
         binding.diaryBtn.alpha = 0.4f
 
@@ -211,13 +229,14 @@ class MyDiaryFragment : Fragment() {
 
         uiScope.launch(Dispatchers.IO) {
             listOf(
+                launch { contractOrNotCheck() },
                 launch { missionParticipateDate() },
                 launch { thisMonthWriteCount() }
             ).joinAll()
             withContext(Dispatchers.Main) {
 
                 if (participateMissionExists) {
-                    // 참여 이벤트 존재
+                    // 지역 계약 & 참여 이벤트 존재
                     withContext(Dispatchers.IO) {
 //                        launch { appParticipateDate() }.join()
                         listOf(
@@ -233,12 +252,12 @@ class MyDiaryFragment : Fragment() {
                                 val spanText: SpannableStringBuilder
                                 val decimal = DecimalFormat("#,###")
 
-                                if (userPoint < 10000) {
+                                if (userPoint < participateMissionGoalScore) {
                                     binding.coinTextMoney.text = "${decimal.format(userPoint)}원"
                                     binding.coinTextExplanation.visibility = View.GONE
-
                                 } else {
-                                    binding.coinTextMoney.text = "만원"
+                                    binding.coinTextMoney.text =
+                                        "${decimal.format(participateMissionGoalScore)}"
                                     binding.coinTextExplanation.text = "달성"
                                 }
                                 val userPointSet = hashMapOf(
@@ -262,17 +281,44 @@ class MyDiaryFragment : Fragment() {
                     }
                 } else {
                     // 참여 이벤트 존재 x
-                    binding.loadingCoinLayout.visibility = View.GONE
-                    binding.coinLayout.visibility = View.GONE
-                    binding.writeCountLayout.visibility = View.VISIBLE
-                    binding.noContractIconLayout.visibility = View.VISIBLE
-                    binding.contractIconLayout.visibility = View.GONE
+
+                    if (contractRegionExists) {
+                        // 지역 계약 O
+                        Glide.with(mcontext)
+                            .load(contractRegionLogo)
+                            .into(binding.contractRegionImageView)
+                        binding.contractRegionTextView.text =
+                            userSmallRegion
+
+                        binding.contractRegionImageView.scaleType =
+                            ImageView.ScaleType.CENTER_CROP
+                        val contractImageLayoutParams = binding.contractRegionImageView.layoutParams
+                        contractImageLayoutParams.width = 140
+                        contractImageLayoutParams.height = 120
+
+                        binding.noContractIconLayout.visibility =
+                            View.GONE
+                        binding.contractIconLayout.visibility =
+                            View.VISIBLE
+                        binding.coinLayout.visibility = View.GONE
+                    } else {
+                        // 지역 계약 X
+                        binding.loadingCoinLayout.visibility = View.GONE
+                        binding.coinLayout.visibility = View.GONE
+                        binding.writeCountLayout.visibility = View.VISIBLE
+                        binding.noContractIconLayout.visibility = View.VISIBLE
+                        binding.contractIconLayout.visibility = View.GONE
+                    }
+
                 }
             }
         }
 
         binding.coinLayout.setOnClickListener {
             val goMoneyDetail = Intent(requireActivity(), MoneyDetailActivity::class.java)
+            goMoneyDetail.putExtra("missionGoalScore", participateMissionGoalScore)
+            goMoneyDetail.putExtra("missionPrizeWinners", participatePrizeWinners)
+            goMoneyDetail.putExtra("missionSmallDescription", participateSmallDescription)
             startActivity(goMoneyDetail)
         }
 
@@ -319,22 +365,6 @@ class MyDiaryFragment : Fragment() {
             }
         })
 
-        // 이미지 애니메이션
-        val womanIcon = binding.womanIcon
-        val manIcon = binding.manIcon
-
-        val womananimation = ObjectAnimator.ofFloat(womanIcon, "rotation", 10F)
-        womananimation.setDuration(300)
-        womananimation.repeatCount = 2
-        womananimation.interpolator = LinearInterpolator()
-        womananimation.start()
-
-        val manAnimation = ObjectAnimator.ofFloat(manIcon, "rotation", -10F)
-        manAnimation.setDuration(300)
-        manAnimation.repeatCount = 2
-        manAnimation.interpolator = LinearInterpolator()
-        manAnimation.start()
-
         diaryFillCheck = ViewModelProvider(requireActivity()).get(
             DiaryFillClass::
             class.java
@@ -364,7 +394,13 @@ class MyDiaryFragment : Fragment() {
         // 필드별 작성 시 변화
         diaryFillCheck.secretFill.observe(requireActivity(), Observer
         { value ->
-            if (secretStatus) {
+
+            val currentDateTime = LocalDate.now().toString()
+            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPrefEdit = userPref.edit()
+            val secretStatusPref = userPref.getBoolean("secretStatus", false)
+
+            if (secretStatusPref) {
                 binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_unlock,
@@ -373,6 +409,7 @@ class MyDiaryFragment : Fragment() {
                     0
                 )
                 binding.secretInfoText.visibility = View.VISIBLE
+                userPrefEdit.putBoolean("secretStatus", true).apply()
 
             } else {
                 binding.secretButton.text = "나만 보기"
@@ -383,12 +420,15 @@ class MyDiaryFragment : Fragment() {
                     0
                 )
                 binding.secretInfoText.visibility = View.GONE
+                userPrefEdit.putBoolean("secretStatus", false).apply()
+
             }
         })
 
         diaryFillCheck.moodFill.observe(requireActivity(), Observer { value ->
             if (diaryFillCheck.moodFill.value!!) {
                 binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
             } else if (!diaryFillCheck.moodFill.value!!) {
                 binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
@@ -403,9 +443,14 @@ class MyDiaryFragment : Fragment() {
         })
 
         diaryFillCheck.recognitionFill.observe(requireActivity(), Observer { value ->
-
             if (diaryFillCheck.recognitionFill.value!!) {
                 binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+//                val currentDateTime = LocalDate.now().toString()
+//                val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+//                val userPrefEdit = userPref.edit()
+//                userPrefEdit.putBoolean("recognitionDone", true).apply()
+
             } else if (!diaryFillCheck.recognitionFill.value!!) {
                 binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
@@ -422,6 +467,12 @@ class MyDiaryFragment : Fragment() {
         { value ->
             if (diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+
+//                val currentDateTime = LocalDate.now().toString()
+//                val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+//                val userPrefEdit = userPref.edit()
+//                userPrefEdit.putBoolean("diaryDone", true).apply()
+
             } else if (!diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
@@ -471,6 +522,7 @@ class MyDiaryFragment : Fragment() {
                     0
                 )
                 binding.secretInfoText.visibility = View.VISIBLE
+
             } else {
                 binding.secretButton.text = "나만 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
@@ -489,30 +541,31 @@ class MyDiaryFragment : Fragment() {
         })
 
         // 화면 변경
-        if (!photoResume && !recordResume) {
-            binding.diaryBtn.alpha = 0.4f
-            editOrNot = false
-            fulfilledOrNot = false
-
-            if (!editDiary) {
-                diaryFillCheck.recognitionFill.value = false
-                diaryFillCheck.diaryFill.value = false
-                diaryFillCheck.moodFill.value = false
-                diaryFillCheck.photoFill.value = false
-                diaryFillCheck.secretFill.value = false
-            } else {
-                diaryEditCheck.diaryEdit.value = false
-                diaryEditCheck.moodEdit.value = false
-                diaryEditCheck.photoEdit.value = false
-                diaryEditCheck.secretEdit.value = false
-            }
-        }
+//        if (submitResume) {
+//            // 초기화
+//            binding.diaryBtn.alpha = 0.4f
+//            editOrNot = false
+//            fulfilledOrNot = false
+//
+//            if (!editDiary) {
+//                diaryFillCheck.recognitionFill.value = false
+//                diaryFillCheck.diaryFill.value = false
+//                diaryFillCheck.moodFill.value = false
+//                diaryFillCheck.photoFill.value = false
+//                diaryFillCheck.secretFill.value = false
+//            } else {
+//                diaryEditCheck.diaryEdit.value = false
+//                diaryEditCheck.moodEdit.value = false
+//                diaryEditCheck.photoEdit.value = false
+//                diaryEditCheck.secretEdit.value = false
+//            }
+//        }
 
         // 이미지
         newImageViewModel.newImageList.observe(requireActivity(), Observer
         { value ->
             if (newImageViewModel.newImageList.value!!.size == 0) {
-                binding.photoRecyclerView.visibility = View.GONE
+//                binding.photoRecyclerView.visibility = View.GONE
 
                 if (!editDiary) {
                     diaryFillCheck.photoFill.value = false
@@ -658,156 +711,86 @@ class MyDiaryFragment : Fragment() {
                         if (document.exists()) {
                             // 일기 작성을 한 상태
 
-//                            binding.diaryBtn.isEnabled = true
-                            binding.diaryBtn.alpha = 0.4f
-                            editDiary = true
-                            binding.diaryBtn.text = "일기 수정"
+                            binding.userRecognitionText.setOnClickListener {
+                                if (editDiary) {
+                                    binding.recognitionResultLayout.visibility =
+                                        View.VISIBLE
+                                    val biggerAnimation =
+                                        AnimationUtils.loadAnimation(
+                                            mcontext,
+                                            R.anim.scale_big
+                                        )
+                                    binding.recognitionResultBox.startAnimation(
+                                        biggerAnimation
+                                    )
 
-                            binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-                            binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-                            binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+                                    binding.resultEmoji.setImageResource(R.drawable.ic_soso)
+                                    binding.bigResultText.setText(null)
+                                    binding.smallResultText.text =
+                                        "문제는 한번만 풀 수 있어요.\n내일 또 도전해보아요!"
 
-                            // 인지 보여주기
-                            db.collection("recognition")
-                                .document(requestId)
-                                .get()
-                                .addOnSuccessListener { recogDocument ->
-                                    if (recogDocument.exists()) {
-                                        // 있을 경우
-                                        binding.mathLayout.visibility = View.VISIBLE
-                                        binding.noRecognitionLayout.visibility = View.GONE
+                                    Handler().postDelayed({
+                                        val downAnimation =
+                                            AnimationUtils.loadAnimation(
+                                                mcontext,
+                                                R.anim.scale_small
+                                            )
+                                        binding.recognitionResultBox.startAnimation(
+                                            downAnimation
+                                        )
 
-                                        val oldFirstNumber =
-                                            recogDocument.data?.getValue("firstNumber").toString()
-                                        val oldSecondNumber =
-                                            recogDocument.data?.getValue("secondNumber").toString()
-                                        val oldOperator =
-                                            recogDocument.data?.getValue("operator").toString()
-                                        val oldUserAnswer =
-                                            recogDocument.data?.getValue("userAnswer").toString()
-
-                                        binding.firstNumber.text = oldFirstNumber
-                                        binding.secondNumber.text = oldSecondNumber
-                                        binding.operatorNumber.text = oldOperator
-                                        binding.userRecognitionText.setText(oldUserAnswer)
-                                        binding.userRecognitionText.isFocusable = false
-                                        binding.userRecognitionText.isClickable = true
-
-                                        binding.userRecognitionText.setOnClickListener {
-                                            if (editDiary) {
-                                                binding.recognitionResultLayout.visibility =
-                                                    View.VISIBLE
-                                                val biggerAnimation =
-                                                    AnimationUtils.loadAnimation(
-                                                        mcontext,
-                                                        R.anim.scale_big
-                                                    )
-                                                binding.recognitionResultBox.startAnimation(
-                                                    biggerAnimation
-                                                )
-
-                                                binding.resultEmoji.setImageResource(R.drawable.ic_soso)
-                                                binding.bigResultText.setText(null)
-                                                binding.smallResultText.text =
-                                                    "문제는 한번만 풀 수 있어요.\n내일 또 도전해보아요!"
-
-                                                Handler().postDelayed({
-                                                    val downAnimation =
-                                                        AnimationUtils.loadAnimation(
-                                                            mcontext,
-                                                            R.anim.scale_small
-                                                        )
-                                                    binding.recognitionResultBox.startAnimation(
-                                                        downAnimation
-                                                    )
-
-                                                    Handler().postDelayed({
-                                                        binding.recognitionResultLayout.visibility =
-                                                            View.GONE
-                                                        binding.userRecognitionText.isEnabled =
-                                                            false
-                                                    }, 300)
-                                                }, 1500)
-                                            }
-                                        }
-
-
-                                    } else {
-                                        // 없을 경우
-                                        binding.mathLayout.visibility = View.GONE
-                                        binding.noRecognitionLayout.visibility = View.VISIBLE
-                                    }
+                                        Handler().postDelayed({
+                                            binding.recognitionResultLayout.visibility =
+                                                View.GONE
+                                            binding.userRecognitionText.isEnabled =
+                                                false
+                                        }, 300)
+                                    }, 1500)
                                 }
-
-                            val originalDiary = document.data?.getValue("todayDiary").toString()
+                            }
 
                             // 이미지 보여주기
-                            if (document.data?.contains("images") == true) {
-                                oldImageList =
-                                    document.data?.getValue("images") as ArrayList<String>
-
-                                if (oldImageList.size != 0) {
-                                    binding.photoRecyclerView.visibility = View.VISIBLE
-//                                    binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
-
-                                    for (i in 0 until oldImageList.size) {
-                                        val uriParseImage = Uri.parse(oldImageList[i])
-                                        newImageViewModel.addImage(uriParseImage)
-                                        itemListItems.add(uriParseImage)
-                                        photoAdapter.notifyItemInserted(oldImageList.size - 1)
-                                    }
-//                                    photoAdapter = UploadPhotosAdapter(mcontext, oldImageList)
-//                                    binding.photoRecyclerView.adapter = photoAdapter
-//                                    photoAdapter.notifyDataSetChanged()
-                                }
-
-                            } else {
-                                // null
-                                binding.photoRecyclerView.visibility = View.GONE
-                            }
-
-                            // 숨기기 보여주기
-                            val secretStatusFromDB = document.data?.getValue("secret") as Boolean
-                            secretStatus = secretStatusFromDB
-
-                            if (secretStatus) {
-                                binding.secretButton.text = "함께 보기"
-                                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
-                                    R.drawable.ic_unlock,
-                                    0,
-                                    0,
-                                    0
-                                )
-                                binding.secretInfoText.visibility = View.VISIBLE
-                            } else {
-                                binding.secretButton.text = "나만 보기"
-                                binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
-                                    R.drawable.ic_lock,
-                                    0,
-                                    0,
-                                    0
-                                )
-                                binding.secretInfoText.visibility = View.GONE
-                            }
-
-                            // 일기 보여주기
-                            val oldDiary = document.data?.getValue("todayDiary").toString()
-                            binding.todayDiary.setText(oldDiary)
+//                            if (document.data?.contains("images") == true) {
+//                                binding.photoRecyclerView.visibility = View.VISI
+//
+//                                oldImageList =
+//                                    document.data?.getValue("images") as ArrayList<String>
+//
+//                                if (oldImageList.size != 0) {
+//                                    binding.photoRecyclerView.visibility = View.VISIBLE
+////                                    binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+//
+//
+//                                    for (i in 0 until oldImageList.size) {
+//                                        val uriParseImage = Uri.parse(oldImageList[i])
+//                                        newImageViewModel.addImage(uriParseImage)
+//                                        itemListItems.add(uriParseImage)
+//                                        photoAdapter.notifyItemInserted(oldImageList.size - 1)
+//                                    }
+////                                    photoAdapter = UploadPhotosAdapter(mcontext, oldImageList)
+////                                    binding.photoRecyclerView.adapter = photoAdapter
+////                                    photoAdapter.notifyDataSetChanged()
+//                                }
+//
+//                            } else {
+//                                // null
+//                                binding.photoRecyclerView.visibility = View.GONE
+//                            }
 
                             val lineCount = binding.todayDiary.lineCount
                             val lineHeight = binding.todayDiary.lineHeight
                             val desiredHeight = lineCount * lineHeight
 
                             binding.todayDiary.height = desiredHeight
+                            binding.todayDiary.setSelection(binding.todayDiary.text.length)
 
-                            // 마음 보여주기
-                            var spinnerAdapter = binding.todayMood.adapter
-                            val dbMoodPosition =
-                                (document.data?.getValue("todayMood") as Map<*, *>)["position"].toString()
-                                    .toInt()
+                            val currentDateTime = LocalDate.now().toString()
+                            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
 
-                            binding.todayMood.setSelection(dbMoodPosition)
+                            val writingMoodPref = userPref.getInt("writingMood", 0)
+                            val writingDiaryPref = userPref.getString("writingDiary", "")
+
+
                             binding.todayMood.setOnItemSelectedListener(object :
                                 AdapterView.OnItemSelectedListener {
                                 override fun onItemSelected(
@@ -817,7 +800,7 @@ class MyDiaryFragment : Fragment() {
                                     p3: Long
                                 ) {
                                     val nowMood = (binding.todayMood.selectedItem as Mood).position
-                                    if (nowMood != dbMoodPosition) {
+                                    if (nowMood != writingMoodPref) {
                                         diaryEditCheck.moodEdit.value = true
                                     }
                                 }
@@ -846,8 +829,9 @@ class MyDiaryFragment : Fragment() {
                                         before: Int,
                                         count: Int
                                     ) {
-                                        if (char != originalDiary) diaryEditCheck.diaryEdit.value =
+                                        if (char != writingDiaryPref) diaryEditCheck.diaryEdit.value =
                                             true
+
                                     }
 
                                     override fun afterTextChanged(p0: Editable?) {
@@ -857,8 +841,8 @@ class MyDiaryFragment : Fragment() {
 
                         } else {
                             // 일기 작성 x
-                            binding.diaryBtn.alpha = 0.4f
-                            binding.secretInfoText.visibility = View.GONE
+//                            binding.diaryBtn.alpha = 0.4f
+//                            binding.secretInfoText.visibility = View.GONE
 
                             if (!partnerOrNot) {
                                 editDiary = false
@@ -990,9 +974,6 @@ class MyDiaryFragment : Fragment() {
             }
         }
 
-        // 매달 일기 작성 카운트
-
-
         // 인지
         val optOption1 = "+"
         val optOption2 = "-"
@@ -1019,7 +1000,21 @@ class MyDiaryFragment : Fragment() {
                 }
 
                 override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    if (char?.length == 1 && !editDiary) {
+
+                    val currentDateTime = LocalDate.now().toString()
+                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPrefEdit = userPref.edit()
+                    val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
+
+                    if (char?.length == 1 && !editDiary && !recognitionDonePref) {
+
+                        val currentDateTime = LocalDate.now().toString()
+                        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                        val userPrefEdit = userPref.edit()
+                        userPrefEdit.putBoolean("recognitionDone", true).apply()
+
+                        diaryFillCheck.recognitionFill.value = true
+
                         val inputMethodManager =
                             context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
@@ -1027,12 +1022,15 @@ class MyDiaryFragment : Fragment() {
                         val realAnswer = calculationResult(firstNumber, secondNumber, operator)
                         val userAnswer = binding.userRecognitionText.text.trim()
 
-                        diaryFillCheck.recognitionFill.value = true
-
                         dbRealAnswer = realAnswer.toString()
                         dbUserAnswer = userAnswer.toString()
 
+                        userPrefEdit.putString("recognitionQuestion", recognitionQuestion).apply()
+                        userPrefEdit.putString("realAnswer", dbRealAnswer).apply()
+                        userPrefEdit.putString("writingRecognition", dbUserAnswer).apply()
+
                         if (realAnswer.toString() == userAnswer.toString()) {
+                            userPrefEdit.putBoolean("recognitionResult", true).apply()
                             recognitionResult = true
                             binding.recognitionResultLayout.visibility = View.VISIBLE
                             val biggerAnimation =
@@ -1054,6 +1052,7 @@ class MyDiaryFragment : Fragment() {
                             }, 1500)
 
                         } else {
+                            userPrefEdit.putBoolean("recognitionResult", false).apply()
                             recognitionResult = false
                             binding.recognitionResultLayout.visibility = View.VISIBLE
                             val biggerAnimation =
@@ -1118,6 +1117,12 @@ class MyDiaryFragment : Fragment() {
         binding.todayMood.setOnTouchListener(
             object : View.OnTouchListener {
                 override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
+
+                    val currentDateTime = LocalDate.now().toString()
+                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPrefEdit = userPref.edit()
+                    userPrefEdit.putBoolean("moodDone", true).apply()
+
                     if (!editDiary) {
                         diaryFillCheck.moodFill.value = true
                     } else {
@@ -1144,6 +1149,7 @@ class MyDiaryFragment : Fragment() {
         }
 
         // 다이어리 작성
+        binding.todayDiary.setSelection(binding.todayDiary.text.length)
         binding.todayDiary.addTextChangedListener(
             object : TextWatcher {
                 override fun beforeTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -1156,9 +1162,26 @@ class MyDiaryFragment : Fragment() {
                     before: Int,
                     count: Int
                 ) {
-                    if (!editDiary) {
-                        diaryFillCheck.diaryFill.value = char?.length != 0
+
+                    val currentDateTime = LocalDate.now().toString()
+                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPrefEdit = userPref.edit()
+
+                    if(char?.trim().toString().length != 0) {
+                        if(!editDiary) {
+                            diaryFillCheck.diaryFill.value = true
+                        }
+                        userPrefEdit.putBoolean("diaryDone", true).apply()
+                    } else {
+                        if(!editDiary) {
+                            diaryFillCheck.diaryFill.value = false
+                        }
+                        userPrefEdit.putBoolean("diaryDone", false).apply()
                     }
+
+//                    if (!editDiary) {
+//                        diaryFillCheck.diaryFill.value = char?.trim().toString().length != 0
+//                    }
                 }
 
                 override fun afterTextChanged(p0: Editable?) {
@@ -1169,6 +1192,12 @@ class MyDiaryFragment : Fragment() {
 
         // ** 종합 다이어리 작성 버튼
         binding.diaryBtn.setOnClickListener {
+
+//            val currentDateTime = LocalDate.now().toString()
+//            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+//            val userPrefEdit = userPref.edit()
+//            userPrefEdit.clear().apply()
+
             if (!partnerOrNot) {
                 if (!editDiary && !fulfilledOrNot) {
                     // 작성인데 빈칸이 있음
@@ -1200,7 +1229,6 @@ class MyDiaryFragment : Fragment() {
                         }
 
                         if (allStartsWithHttps) {
-
                             newImageViewModel.uploadFirebaseComplete.value = true
                         } else {
                             for (i in 0 until newImageViewModel.newImageList.value!!.size) {
@@ -1410,6 +1438,19 @@ class MyDiaryFragment : Fragment() {
 
                         if (!editDiary) diaryFillCheck.photoFill.value =
                             true else diaryEditCheck.photoEdit.value = true
+
+                        itemListItemsString.add(imageUri.toString())
+
+                        val currentDateTime = LocalDate.now().toString()
+                        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                        val userPrefEdit = userPref.edit()
+                        userPrefEdit.putBoolean("imageDone", true)
+
+                        val gson = Gson()
+                        val arrayString = gson.toJson(itemListItemsString)
+
+                        userPrefEdit.putString("imageArray", arrayString)
+                        userPrefEdit.apply()
                     }
                     binding.photoRecyclerView.visibility = View.VISIBLE
                 }
@@ -1449,6 +1490,99 @@ class MyDiaryFragment : Fragment() {
         manAnimation.repeatCount = 2
         manAnimation.interpolator = LinearInterpolator()
         manAnimation.start()
+
+        val currentDateTime = LocalDate.now().toString()
+        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+
+        val moodDonePref = userPref.getBoolean("moodDone", false)
+        val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
+        val diaryDonePref = userPref.getBoolean("diaryDone", false)
+        val secretStatusPref = userPref.getBoolean("secretStatus", false)
+        val imageDonePref = userPref.getBoolean("imageDone", false)
+
+        fulfilledOrNot = recognitionDonePref && moodDonePref && diaryDonePref
+
+        if (recognitionDonePref) {
+            val writingRecognitionPref = userPref.getString("writingRecognition", "")
+            val firstNumberPref = userPref.getString("firstNumber", "")
+            val secondNumberPref = userPref.getString("secondNumber", "")
+            val operatorNumberPref = userPref.getString("operatorNumber", "")
+            val recognitionQuestionPref = userPref.getString("recognitionQuestion", "")
+            val recognitionResultPref = userPref.getBoolean("recognitionResult", false)
+            val dbRealAnswerPref = userPref.getString("realAnswer", "")
+
+            binding.firstNumber.text = firstNumberPref
+            binding.secondNumber.text = secondNumberPref
+            binding.operatorNumber.text = operatorNumberPref
+            binding.userRecognitionText.setText(writingRecognitionPref)
+
+            binding.userRecognitionText.isFocusable = false
+            binding.userRecognitionText.isClickable = true
+
+            recognitionResult = recognitionResultPref
+            recognitionQuestion = recognitionQuestionPref!!
+            firstNumber = firstNumberPref!!.toInt()
+            secondNumber = secondNumberPref!!.toInt()
+            operator = operatorNumberPref!!
+            dbRealAnswer = dbRealAnswerPref!!
+            dbUserAnswer = writingRecognitionPref!!
+
+            if(!editDiary) {
+                diaryFillCheck.recognitionFill.value = true
+            } else {
+                // no
+            }
+        }
+
+        if(moodDonePref) {
+            val writingMood = userPref.getInt("writingMood", 0)
+            binding.todayMood.setSelection(writingMood)
+
+            if(!editDiary) {
+                diaryFillCheck.moodFill.value = true
+            } else {
+                diaryEditCheck.moodEdit.value = true
+            }
+        }
+
+        if(diaryDonePref) {
+            val writingDiary = userPref.getString("writingDiary", "")
+            binding.todayDiary.setText(writingDiary)
+            binding.todayDiary.setSelection(binding.todayDiary.text.length)
+
+            if(!editDiary) {
+                diaryFillCheck.diaryFill.value = true
+            } else {
+                diaryEditCheck.diaryEdit.value = true
+            }
+        }
+
+        // 비밀 업데이트
+        secretStatus = secretStatusPref
+
+        if(!editDiary) {
+            diaryFillCheck.secretFill.value = true
+        } else {
+            diaryEditCheck.secretEdit.value = true
+        }
+
+        if(imageDonePref && !photoResume && !recordResume) {
+            val writingImage = userPref.getString("imageArray", "")
+            val jsonString = """${writingImage}"""
+            val gson = Gson()
+            val array = gson.fromJson(jsonString, Array<String>::class.java)
+            itemListItemsString = ArrayList(array.toList())
+
+            for (item in array) {
+                val uriItem = Uri.parse(item)
+                newImageViewModel.addImage(uriItem)
+                itemListItems.add(uriItem)
+                photoAdapter.notifyItemInserted(itemListItems.size -1)
+            }
+
+            if (!editDiary) diaryFillCheck.photoFill.value =
+                true else diaryEditCheck.photoEdit.value = true
+        }
     }
 
     override fun onPause() {
@@ -1463,6 +1597,29 @@ class MyDiaryFragment : Fragment() {
 
         LocalBroadcastManager.getInstance(requireActivity())
             .unregisterReceiver(deleteImageFunction);
+
+        val currentDateTime = LocalDate.now().toString()
+        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+        val userPrefEdit = userPref.edit()
+
+        userPrefEdit.putString("writingDiary", binding.todayDiary.text.toString()).apply()
+
+        val nowMood = (binding.todayMood.selectedItem as Mood).position
+        userPrefEdit.putInt("writingMood", nowMood).apply()
+
+        // 인지
+        val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
+        userPrefEdit.putBoolean("recognitionDone", recognitionDonePref).apply()
+        val writingRecognitionPref = userPref.getString("writingRecognition", "")
+        userPrefEdit.putString("writingRecognition", writingRecognitionPref).apply()
+
+        val firstNumber = binding.firstNumber.text.toString()
+        val secondNumber = binding.secondNumber.text.toString()
+        val operatorNumber = binding.operatorNumber.text.toString()
+
+        userPrefEdit.putString("firstNumber", firstNumber).apply()
+        userPrefEdit.putString("secondNumber", secondNumber).apply()
+        userPrefEdit.putString("operatorNumber", operatorNumber).apply()
     }
 
     override fun onDestroy() {
@@ -1544,6 +1701,11 @@ class MyDiaryFragment : Fragment() {
             val newSecretStatus = intent?.getBooleanExtra("newSecretStatus", false) as Boolean
             secretStatus = newSecretStatus
 
+            val currentDateTime = LocalDate.now().toString()
+            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPrefEdit = userPref.edit()
+            userPrefEdit.putBoolean("secretStatus", newSecretStatus).apply()
+
             if (!editDiary) {
                 diaryFillCheck.secretFill.value = true
             } else {
@@ -1563,6 +1725,17 @@ class MyDiaryFragment : Fragment() {
 
             if (editDiary) diaryEditCheck.photoEdit.value = true
 
+            itemListItemsString.removeAt(deleteImagePosition)
+            val currentDateTime = LocalDate.now().toString()
+            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPrefEdit = userPref.edit()
+            userPrefEdit.putBoolean("imageDone", true)
+
+            val gson = Gson()
+            val arrayString = gson.toJson(itemListItemsString)
+
+            userPrefEdit.putString("imageArray", arrayString)
+            userPrefEdit.apply()
         }
     }
 
@@ -1626,6 +1799,20 @@ class MyDiaryFragment : Fragment() {
         }
     }
 
+    suspend fun contractOrNotCheck() {
+        val userDocument = userDB.document("$userId").get().await()
+
+        val userRegion = userDocument.data?.getValue("region").toString()
+        userSmallRegion = userDocument.data?.getValue("smallRegion").toString()
+        userFullRegion = "${userRegion} ${userSmallRegion}"
+
+        val contractRegionDocument =
+            db.collection("contract_region").document(userFullRegion).get().await()
+        contractRegionExists = contractRegionDocument.exists()
+
+        contractRegionLogo = contractRegionDocument.data?.getValue("regionImage").toString()
+    }
+
     suspend fun missionParticipateDate() {
         val userDocument = userDB.document("$userId").get().await()
 
@@ -1640,6 +1827,11 @@ class MyDiaryFragment : Fragment() {
             if (participateMissionCheck) {
                 participateCommunityLogo = missionRef.data?.getValue("communityLogo").toString()
                 participateCommunityName = missionRef.data?.getValue("community").toString()
+                participateMissionGoalScore =
+                    (missionRef.data?.getValue("goalScore") as Long).toInt()
+                participatePrizeWinners =
+                    (missionRef.data?.getValue("prizeWinners") as Long).toInt()
+                participateSmallDescription = missionRef.data?.getValue("description").toString()
 
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd")
                 dateFormat.timeZone = android.icu.util.TimeZone.getTimeZone("Asia/Seoul")

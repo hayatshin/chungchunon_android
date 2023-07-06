@@ -831,8 +831,6 @@ class MyService : Service(), SensorEventListener {
 
     var exitAppReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("탈퇴", "탈퇴했음")
-
             sensorManager.unregisterListener(this@MyService)
             alarmManager.cancel(pendingIntent)
 

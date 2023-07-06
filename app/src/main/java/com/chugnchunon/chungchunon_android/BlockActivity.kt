@@ -1,6 +1,7 @@
 package com.chugnchunon.chungchunon_android
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
@@ -28,6 +29,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.time.LocalDate
 
 
 class BlockActivity : Activity() {
@@ -167,6 +169,12 @@ class BlockActivity : Activity() {
             goMyFragment.putExtra("diaryType", diaryType)
             goMyFragment.putExtra("from", "delete")
             startActivity(goMyFragment)
+
+            // SharedPreference 삭제
+            val currentDateTime = LocalDate.now().toString()
+            val userPref = getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPrefEdit = userPref.edit()
+            userPrefEdit.clear().apply()
         }
 
 

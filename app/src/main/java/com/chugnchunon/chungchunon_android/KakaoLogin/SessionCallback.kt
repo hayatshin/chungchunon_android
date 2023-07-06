@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
 import com.chugnchunon.chungchunon_android.*
+import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
 import com.kakao.network.ErrorResult
@@ -49,7 +50,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                             result.kakaoAccount?.phoneNumber?.substring(7)
                         }"
                         val birthYear = (result.kakaoAccount?.birthyear)!!.toInt()
-                        val userAge = currentYear - birthYear + 1
+                        val birthDay = (result.kakaoAccount?.birthday)!!.toInt()
+                        val userAge = DateFormat().calculateAge(birthYear, birthDay)
                         val gender =
                             if (result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
@@ -64,8 +66,8 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                             "avatar" to result.profileImagePath,
                             "gender" to gender,
                             "phone" to phoneNumber,
-                            "birthYear" to result.kakaoAccount?.birthyear,
-                            "birthDay" to result.kakaoAccount?.birthday,
+                            "birthYear" to birthYear.toString(),
+                            "birthDay" to birthDay.toString(),
                             "todayStepCount" to 0,
                             "userAge" to userAge,
                             "blockUserList" to ArrayList<String>(),

@@ -198,7 +198,7 @@
         <entry key="app/src/main/res/layout/activity_default_diary_warning.xml" value="0.275" />
         <entry key="app/src/main/res/layout/activity_default_warning.xml" value="0.2763424518743668" />
         <entry key="app/src/main/res/layout/activity_diary.xml" value="0.18876495361328127" />
-        <entry key="app/src/main/res/layout/activity_diary_two.xml" value="0.33087310791015634" />
+        <entry key="app/src/main/res/layout/activity_diary_two.xml" value="0.17256011962890633" />
         <entry key="app/src/main/res/layout/activity_edit_diary.xml" value="0.22672424316406256" />
         <entry key="app/src/main/res/layout/activity_edit_diary_warning.xml" value="0.31574074074074077" />
         <entry key="app/src/main/res/layout/activity_edit_profile.xml" value="0.19738820393880213" />
@@ -224,7 +224,7 @@
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.2011444091796875" />
         <entry key="app/src/main/res/layout/activity_register_warning.xml" value="0.28818822790075227" />
         <entry key="app/src/main/res/layout/activity_rule.xml" value="0.17864583333333334" />
-        <entry key="app/src/main/res/layout/activity_start.xml" value="0.19638185362884963" />
+        <entry key="app/src/main/res/layout/activity_start.xml" value="0.21836976866791216" />
         <entry key="app/src/main/res/layout/activity_test.xml" value="0.26570415400202635" />
         <entry key="app/src/main/res/layout/activity_youtube_enlarge.xml" value="0.2814814814814815" />
         <entry key="app/src/main/res/layout/attraction_card.xml" value="0.2512664640324215" />

@@ -2,11 +2,38 @@ package com.chugnchunon.chungchunon_android.DataClass
 
 import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
+import android.util.Log
 import java.sql.Date
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.util.*
 
 class DateFormat {
+
+    fun isDatePassed(certainBirthday: Int): Boolean {
+        var passedOrNot : Boolean = false
+
+        val currentMonth = LocalDate.now().monthValue.toString().toInt()
+        val currentDate = LocalDate.now().dayOfMonth.toString().toInt()
+        val certainMonth = certainBirthday.toString().substring(0, 1).toInt()
+        val certainDate = certainBirthday.toString().substring(2, 3).toInt()
+
+        passedOrNot = if(currentMonth == certainMonth) {
+            currentDate > certainDate
+        } else {
+            currentMonth > certainMonth
+        }
+        return passedOrNot
+    }
+
+    fun calculateAge(birthYear: Int, birthDay: Int): Int {
+        var returnAge: Int = 0
+        val currentYear: Int = LocalDate.now().year
+        val initialAge = currentYear - birthYear
+
+        returnAge = if(isDatePassed(birthDay)) initialAge else initialAge -1
+        return returnAge
+    }
 
     fun convertMillis(timefromdb: com.google.firebase.Timestamp): Long {
         val timestamp = timefromdb as com.google.firebase.Timestamp
