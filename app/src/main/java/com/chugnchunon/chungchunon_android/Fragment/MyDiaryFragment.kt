@@ -123,6 +123,9 @@ class MyDiaryFragment : Fragment() {
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     private var userPoint: Int = 0
+    private var certainUserId: String = "kakao:2788585526"
+    private var certainUserPoint: Int = 0
+
     private var userStepPoint: Int = 0
 
     private var contractRegionExists: Boolean = false
@@ -224,6 +227,18 @@ class MyDiaryFragment : Fragment() {
         flipAnimator.repeatCount = ObjectAnimator.INFINITE
         flipAnimator.interpolator = AccelerateDecelerateInterpolator()
         flipAnimator.start()
+
+
+            // 특정 유저 점수
+
+//        uiScope.launch(Dispatchers.IO) {
+//            listOf(
+//                launch { certainUserStepCountToArrayFun() },
+//                launch { certainUserDiaryToArrayFun() },
+//                launch { certainUserCommentToArrayFun() },
+//            ).joinAll()
+//            Log.d("certainUserPoint" , "$certainUserId: ${certainUserPoint}")
+//        }
 
         // 점수(원) 데이터 불러오기
 
@@ -1877,6 +1892,58 @@ class MyDiaryFragment : Fragment() {
         }
     }
 
+    suspend fun certainUserStepCountToArrayFun() {
+
+        val dataSteps = db.collection("user_step_count")
+            .document(certainUserId)
+            .get()
+            .await()
+
+        dataSteps.data?.forEach {(period, dateStepCount) ->
+                    if (dateStepCount.toString().toInt() < 10000) {
+                        if (dateStepCount.toString().toInt() > 0) {
+                            // 걸음수 0~만보 사이 (일반)
+                            val dateStepInt = (dateStepCount as Long).toInt()
+                            val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
+
+                            certainUserPoint += dateToPoint
+
+                        } else {
+                            // 걸음수 0 보다 적은 경우
+                        }
+                    } else {
+                        // 걸음수 만보 보다 큰 경우
+                        certainUserPoint += 100
+                    }
+
+        }
+    }
+
+
+    suspend fun certainUserDiaryToArrayFun() {
+
+        val diaryDocuments = db.collection("diary")
+            .whereEqualTo("userId", certainUserId)
+            .get()
+            .await()
+
+        for (diaryDocument in diaryDocuments) {
+            certainUserPoint += 100
+        }
+    }
+
+    suspend fun certainUserCommentToArrayFun() {
+
+        val commentDocuments = db.collectionGroup("comments")
+            .whereEqualTo("userId", certainUserId)
+            .get()
+            .await()
+
+        for (commentDocument in commentDocuments) {
+            certainUserPoint += 20
+        }
+    }
+
     suspend fun stepCountToArrayFun() {
         val startDate = LocalDate.of(
             formatPeriodStart.substring(0, 4).toInt(),
@@ -1893,6 +1960,7 @@ class MyDiaryFragment : Fragment() {
             .document("$userId")
             .get()
             .await()
+
 
         dataSteps.data?.forEach { (period, dateStepCount) ->
             for (stepDate in startDate..endDate) {

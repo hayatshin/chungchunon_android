@@ -37,6 +37,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -124,12 +125,12 @@ class DiaryTwoActivity : AppCompatActivity() {
                 }
             }
 
-
-        // 현재 버전값 저장
-        val currentVersionSet = hashMapOf(
-            "currentAppVersion" to currentAppVersion
+        // 현재 버전값, 마지막 방문 기록 저장
+        val currentVersionLastvisitSet = hashMapOf(
+            "currentAppVersion" to currentAppVersion,
+            "lastVisit" to FieldValue.serverTimestamp(),
         )
-        userDB.document("$userId").set(currentVersionSet, SetOptions.merge())
+        userDB.document("$userId").set(currentVersionLastvisitSet, SetOptions.merge())
 
         // 인앱업데이트
         remoteConfig = Firebase.remoteConfig

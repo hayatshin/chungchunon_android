@@ -15,8 +15,8 @@ class DateFormat {
 
         val currentMonth = LocalDate.now().monthValue.toString().toInt()
         val currentDate = LocalDate.now().dayOfMonth.toString().toInt()
-        val certainMonth = certainBirthday.toString().substring(0, 1).toInt()
-        val certainDate = certainBirthday.toString().substring(2, 3).toInt()
+        val certainMonth = certainBirthday.toString().substring(0, 1).toInt() // 0, 2
+        val certainDate = certainBirthday.toString().substring(2, 3).toInt() // 2, 4
 
         passedOrNot = if(currentMonth == certainMonth) {
             currentDate > certainDate

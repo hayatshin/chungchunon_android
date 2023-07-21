@@ -92,8 +92,8 @@ class AllDiaryFragmentTwo : Fragment() {
             }
         })
 
-        binding.regionViewPager.setCurrentItem(1, false)
-        binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(1))
+        binding.regionViewPager.setCurrentItem(0, false)
+        binding.regionTabLayout.selectTab(binding.regionTabLayout.getTabAt(0))
 
         return view
     }

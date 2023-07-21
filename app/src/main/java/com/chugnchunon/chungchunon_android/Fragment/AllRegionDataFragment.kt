@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -242,8 +243,12 @@ class AllRegionDataFragment : Fragment() {
 
     fun getData() {
         diaryDB.get().addOnSuccessListener { diaryTotalDocuments ->
+            val lastIndex = diaryTotalDocuments.size() - 1
+
             // 다이어리 모두 가져오기
-            for (document in diaryTotalDocuments) {
+            for ((index, document) in diaryTotalDocuments.withIndex()) {
+                val isLastItem = index == lastIndex
+
                 val blockedList = document.data.getValue("blockedBy") as ArrayList<*>
                 if (!blockedList.contains((userId))) {
                     // 내가 차단하지 않은 글
@@ -338,16 +343,25 @@ class AllRegionDataFragment : Fragment() {
                                                 diaryItems.reverse()
                                                 adapter.notifyDataSetChanged()
 
-                                                if (diaryItems.size == 0) {
-//                                                    binding.noItemText.visibility =
-//                                                        View.VISIBLE
-                                                } else {
-                                                    binding.noItemText.visibility =
-                                                        View.GONE
-                                                    binding.recyclerDiary.visibility = View.VISIBLE
-                                                }
+                                                binding.noItemText.visibility =
+                                                    View.GONE
+                                                binding.recyclerDiary.visibility = View.VISIBLE
+
                                                 allDataLoadingState.loadingCompleteData.value =
                                                     true
+
+                                                if (isLastItem) {
+                                                    Handler().postDelayed({
+                                                        if (diaryItems.size == 0) {
+                                                            allDataLoadingState.loadingCompleteData.value =
+                                                                true
+                                                            binding.noItemText.visibility =
+                                                                View.VISIBLE
+                                                            binding.recyclerDiary.visibility =
+                                                                View.GONE
+                                                        }
+                                                    }, 2000)
+                                                }
 
                                                 if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
                                                     if (diaryItems.size != 0) {
@@ -407,16 +421,24 @@ class AllRegionDataFragment : Fragment() {
                                                 diaryItems.reverse()
                                                 adapter.notifyDataSetChanged()
 
-                                                if (diaryItems.size == 0) {
-//                                                    binding.noItemText.visibility =
-//                                                        View.VISIBLE
-                                                } else {
-                                                    binding.noItemText.visibility =
-                                                        View.GONE
-                                                    binding.recyclerDiary.visibility = View.VISIBLE
-                                                }
                                                 allDataLoadingState.loadingCompleteData.value =
                                                     true
+                                                binding.noItemText.visibility =
+                                                    View.GONE
+                                                binding.recyclerDiary.visibility = View.VISIBLE
+
+                                                if (isLastItem) {
+                                                    Handler().postDelayed({
+                                                        if (diaryItems.size == 0) {
+                                                            allDataLoadingState.loadingCompleteData.value =
+                                                                true
+                                                            binding.noItemText.visibility =
+                                                                View.VISIBLE
+                                                            binding.recyclerDiary.visibility =
+                                                                View.GONE
+                                                        }
+                                                    }, 2000)
+                                                }
 
                                                 if (activity?.intent?.hasExtra("notificationDiaryId") == true) {
                                                     if (diaryItems.size != 0) {
@@ -434,6 +456,19 @@ class AllRegionDataFragment : Fragment() {
                                         }
                                 } else {
                                     // 유저 정보 x
+
+                                    if (isLastItem) {
+                                        Handler().postDelayed({
+                                            if (diaryItems.size == 0) {
+                                                allDataLoadingState.loadingCompleteData.value =
+                                                    true
+                                                binding.noItemText.visibility =
+                                                    View.VISIBLE
+                                                binding.recyclerDiary.visibility =
+                                                    View.GONE
+                                            }
+                                        }, 2000)
+                                    }
 
 //                                    if (document.data.contains("images")) {
 //                                        // 이미지 o
@@ -506,16 +541,41 @@ class AllRegionDataFragment : Fragment() {
                             }
                     } else {
                         // 비밀 글
+                        if (isLastItem) {
+                            Handler().postDelayed({
+                                if (diaryItems.size == 0) {
+                                    allDataLoadingState.loadingCompleteData.value =
+                                        true
+                                    binding.noItemText.visibility =
+                                        View.VISIBLE
+                                    binding.recyclerDiary.visibility =
+                                        View.GONE
+                                }
+                            }, 2000)
+                        }
                     }
                 } else {
                     // 내가 차단한 글
+
+                    if (isLastItem) {
+                        Handler().postDelayed({
+                            if (diaryItems.size == 0) {
+                                allDataLoadingState.loadingCompleteData.value =
+                                    true
+                                binding.noItemText.visibility =
+                                    View.VISIBLE
+                                binding.recyclerDiary.visibility =
+                                    View.GONE
+                            }
+                        }, 2000)
+                    }
                 }
             }
         }
     }
 }
 
-    @Keep
-    class AllRegionDataLoadingState : ViewModel() {
-        val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
-    }
+@Keep
+class AllRegionDataLoadingState : ViewModel() {
+    val loadingCompleteData by lazy { MutableLiveData<Boolean>(false) }
+}

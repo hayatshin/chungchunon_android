@@ -64,8 +64,8 @@ class RankingMenuFragment: Fragment() {
             }
         })
 
-        binding.rankingViewPager.setCurrentItem(1, false)
-        binding.rankingTabLayout.selectTab(binding.rankingTabLayout.getTabAt(1))
+        binding.rankingViewPager.setCurrentItem(0, false)
+        binding.rankingTabLayout.selectTab(binding.rankingTabLayout.getTabAt(0))
 
         return binding
     }
