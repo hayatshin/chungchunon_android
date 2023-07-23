@@ -126,7 +126,7 @@ class StartActivity : AppCompatActivity() {
                                                                 if (dbUserType == "마스터") {
                                                                     newUserType = "마스터"
                                                                 } else {
-                                                                    if (newUserAge >= 50) {
+                                                                    if (newUserAge >= 40) {
                                                                         newUserType = "사용자"
                                                                     } else {
                                                                         newUserType = "파트너"
@@ -190,7 +190,7 @@ class StartActivity : AppCompatActivity() {
                                                             if (dbUserType == "마스터") {
                                                                 newUserType = "마스터"
                                                             } else {
-                                                                if (newUserAge >= 50) {
+                                                                if (newUserAge >= 40) {
                                                                     newUserType = "사용자"
                                                                 } else {
                                                                     newUserType = "파트너"
@@ -250,7 +250,7 @@ class StartActivity : AppCompatActivity() {
                                                         if (dbUserType == "마스터") {
                                                             newUserType = "마스터"
                                                         } else {
-                                                            if (newUserAge >= 50) {
+                                                            if (newUserAge >= 40) {
                                                                 newUserType = "사용자"
                                                             } else {
                                                                 newUserType = "파트너"
@@ -311,7 +311,7 @@ class StartActivity : AppCompatActivity() {
                                                     if (dbUserType == "마스터") {
                                                         newUserType = "마스터"
                                                     } else {
-                                                        if (newUserAge >= 50) {
+                                                        if (newUserAge >= 40) {
                                                             newUserType = "사용자"
                                                         } else {
                                                             newUserType = "파트너"

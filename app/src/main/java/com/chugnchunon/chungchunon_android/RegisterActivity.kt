@@ -310,15 +310,15 @@ class RegisterActivity : AppCompatActivity() {
                 birthTextView.setTextColor(ContextCompat.getColor(this, R.color.main_color))
                 binding.birthResultBox.addView(birthTextView)
 
-                // 나이 50세 이하
+                // 나이 40세 이하
                 var ageTextView = TextView(applicationContext)
                 ageTextView.layoutParams = birthTextViewLayoutParams
                 ageTextView.setTextColor(ContextCompat.getColor(this, R.color.light_gray))
-                ageTextView.text = "50세 미만은 일기 쓰기가 제한됩니다."
+                ageTextView.text = "40세 미만은 일기 쓰기가 제한됩니다."
                 ageTextView.setTextSize(dpTextSize(10f))
 
 
-                if (userAge < 50) {
+                if (userAge < 40) {
                     binding.birthResultBox.addView(ageTextView)
                 }
 
@@ -602,8 +602,8 @@ class RegisterActivity : AppCompatActivity() {
                                     val userId = Firebase.auth.currentUser?.uid
                                     val phoneNumber =
                                         "010-${binding.phoneInput1.text.toString()}-${binding.phoneInput2.text.toString()}"
-                                    val updateUserType = if (userType == "사용자" && userAge < 50) "파트너"
-                                    else if (userType == "사용자" && userAge >= 50) "사용자"
+                                    val updateUserType = if (userType == "사용자" && userAge < 40) "파트너"
+                                    else if (userType == "사용자" && userAge >= 40) "사용자"
                                     else "파트너"
 
                                     val userSet = hashMapOf(

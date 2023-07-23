@@ -103,13 +103,13 @@ class DefaultDiaryWarningActivity : FragmentActivity() {
             binding.edGobackArrow.setOnClickListener {
                 finish()
             }
-            binding.edWarningText.text = "50세 미만은 일기 쓰기가 제한됩니다.\n댓글과 좋아요로 응원해주세요!"
+            binding.edWarningText.text = "40세 미만은 일기 쓰기가 제한됩니다.\n댓글과 좋아요로 응원해주세요!"
 
             binding.edConfirmBox.setOnClickListener {
                 finish()
             }
         } else if (warningType == "partnerMission") {
-            binding.edWarningText.text = "50세 미만은 행사 참여가 제한됩니다."
+            binding.edWarningText.text = "40세 미만은 행사 참여가 제한됩니다."
 
             binding.edGobackArrow.setOnClickListener {
                 finish()

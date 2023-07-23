@@ -55,7 +55,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                         val gender =
                             if (result.kakaoAccount?.gender.toString() == "FEMALE") "여성" else "남성"
 
-                        val newUserType = if (userAge < 50) "파트너" else "사용자"
+                        val newUserType = if (userAge < 40) "파트너" else "사용자"
 
                         val userSet = hashMapOf(
                             "userType" to newUserType,

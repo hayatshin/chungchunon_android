@@ -283,7 +283,9 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="5dp">
+                        android:paddingVertical="5dp"
+                        android:layout_marginBottom="10dp"
+                        >
 
                         <LinearLayout
                             android:id="@+id/thisWeekBox"

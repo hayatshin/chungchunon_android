@@ -498,7 +498,7 @@ class PeriodAllRankingFragment : Fragment() {
                 val userName = document.data.getValue("name").toString()
                 val userType = document.data.getValue("userType").toString()
 
-                if (userType == "사용자" && userName != "탈퇴자") {
+                if (userType == "사용자"  && userName != "탈퇴자") {
                     try {
                         val userId = document.data?.getValue("userId").toString()
                         val username = document.data.getValue("name").toString()
