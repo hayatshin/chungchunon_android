@@ -66,11 +66,12 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                             "avatar" to result.profileImagePath,
                             "gender" to gender,
                             "phone" to phoneNumber,
-                            "birthYear" to birthYear.toString(),
-                            "birthDay" to birthDay.toString(),
+                            "birthYear" to result.kakaoAccount?.birthyear,
+                            "birthDay" to result.kakaoAccount?.birthday,
                             "todayStepCount" to 0,
                             "userAge" to userAge,
                             "blockUserList" to ArrayList<String>(),
+
                         )
 
                         context.getFirebaseJwt(accessToken)!!.continueWithTask { task ->

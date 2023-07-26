@@ -250,12 +250,14 @@ class AllRegionDataFragment : Fragment() {
                 val isLastItem = index == lastIndex
 
                 val blockedList = document.data.getValue("blockedBy") as ArrayList<*>
-                if (!blockedList.contains((userId))) {
+                val diaryUserId = document.data?.getValue("userId").toString()
+
+                if (!blockedList.contains((userId)) && !diaryUserId.startsWith("notice:")) {
+
                     // 내가 차단하지 않은 글
                     val secretStatus = document.data.getValue("secret") as Boolean
                     if (secretStatus == false) {
                         // 비밀이 아닌 글 -> 가져올 전체 일기
-                        val diaryUserId = document.data?.getValue("userId").toString()
                         val diaryId = document.data?.getValue("diaryId").toString()
                         val numLikes = document.data?.getValue("numLikes") as Long
                         val numComments =

@@ -180,31 +180,34 @@ class MissionFragment : Fragment() {
                                 .document("$userId")
                                 .get()
                                 .addOnSuccessListener { userData ->
-                                    val userCommunity =
-                                        userData.data?.getValue("community") as ArrayList<String>
+                                    if(userData.contains("community")) {
+                                        val userCommunity =
+                                            userData.data?.getValue("community") as ArrayList<String>
 
-                                    if (userCommunity.contains(missionCommunity)) {
-                                        missionSet = Mission(
-                                            missionDocId,
-                                            community,
-                                            communityLogo,
-                                            missionImage,
-                                            title,
-                                            startPeriod,
-                                            endPeriod,
-                                            description,
-                                            state,
-                                            goalScore,
-                                            autoProgress,
-                                            prizeWinners
-                                        )
+                                        if (userCommunity.contains(missionCommunity)) {
+                                            missionSet = Mission(
+                                                missionDocId,
+                                                community,
+                                                communityLogo,
+                                                missionImage,
+                                                title,
+                                                startPeriod,
+                                                endPeriod,
+                                                description,
+                                                state,
+                                                goalScore,
+                                                autoProgress,
+                                                prizeWinners
+                                            )
 
-                                        missionList.add(missionSet)
-                                        missionList.sortWith(compareBy({ it.state }))
-                                        missionList.reverse()
+                                            missionList.add(missionSet)
+                                            missionList.sortWith(compareBy({ it.state }))
+                                            missionList.reverse()
 
-                                        missionAdapter.notifyDataSetChanged()
+                                            missionAdapter.notifyDataSetChanged()
+                                        }
                                     }
+
                                 }
                         }
 

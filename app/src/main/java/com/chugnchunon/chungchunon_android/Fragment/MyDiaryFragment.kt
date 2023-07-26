@@ -228,9 +228,7 @@ class MyDiaryFragment : Fragment() {
         flipAnimator.interpolator = AccelerateDecelerateInterpolator()
         flipAnimator.start()
 
-
             // 특정 유저 점수
-
 //        uiScope.launch(Dispatchers.IO) {
 //            listOf(
 //                launch { certainUserStepCountToArrayFun() },
