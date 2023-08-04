@@ -95,10 +95,11 @@ class MissionFragment : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val allUser = document.data.getValue("allUser") as Boolean
+                    val contractType = document.data.getValue("contractType").toString()
+                    val contractName = document.data.getValue("contractName").toString()
+                    val contractLogo = document.data.getValue("contractLogo").toString()
                     val autoProgress = document.data.getValue("autoProgress") as Boolean
                     val missionDocId = document.data.getValue("documentId").toString()
-                    val community = document.data.getValue("community").toString()
-                    val communityLogo = document.data.getValue("communityLogo").toString()
                     val missionImage = document.data.getValue("missionImage").toString()
                     val title = document.data.getValue("title").toString()
                     val startPeriod = document.data.getValue("startPeriod").toString()
@@ -109,10 +110,11 @@ class MissionFragment : Fragment() {
                     val prizeWinners = (document.data.getValue("prizeWinners") as Long).toInt()
 
                     if (allUser) {
+
                         missionSet = Mission(
                             missionDocId,
-                            community,
-                            communityLogo,
+                            contractName,
+                            contractLogo,
                             missionImage,
                             title,
                             startPeriod,
@@ -131,9 +133,8 @@ class MissionFragment : Fragment() {
                         missionAdapter.notifyDataSetChanged()
                     } else {
 
-                        if (document.contains("fullRegion")) {
+                        if (contractType == "region") {
                             // 지역 보기
-                            val missionFullRegion = document.data?.getValue("fullRegion").toString()
 
                             db.collection("users")
                                 .document("$userId")
@@ -144,12 +145,12 @@ class MissionFragment : Fragment() {
                                         userData.data?.getValue("smallRegion").toString()
                                     val userFullRegion = "${userRegion} ${userSmallRegion}"
 
-                                    if (userFullRegion == missionFullRegion) {
+                                    if (userFullRegion == contractName) {
 
                                         missionSet = Mission(
                                             missionDocId,
-                                            community,
-                                            communityLogo,
+                                            contractName,
+                                            contractLogo,
                                             missionImage,
                                             title,
                                             startPeriod,
@@ -170,11 +171,9 @@ class MissionFragment : Fragment() {
 
                                 }
 
-                        }
-
-                        if (document.contains("community")) {
+                        } else if (contractType == "community") {
                             // 커뮤니티 보기
-                            val missionCommunity = document.data?.getValue("community").toString()
+//                            val missionCommunity = document.data?.getValue("community").toString()
 
                             db.collection("users")
                                 .document("$userId")
@@ -184,11 +183,11 @@ class MissionFragment : Fragment() {
                                         val userCommunity =
                                             userData.data?.getValue("community") as ArrayList<String>
 
-                                        if (userCommunity.contains(missionCommunity)) {
+                                        if (userCommunity.contains(contractName)) {
                                             missionSet = Mission(
                                                 missionDocId,
-                                                community,
-                                                communityLogo,
+                                                contractName,
+                                                contractLogo,
                                                 missionImage,
                                                 title,
                                                 startPeriod,
@@ -226,29 +225,31 @@ class MissionFragment : Fragment() {
                     val title = youtubeData.data?.getValue("title").toString()
                     val link = youtubeData.data?.getValue("link").toString()
                     val thumbnail = youtubeData.data?.getValue("thumbnail").toString()
-                    val videoId = youtubeData.data?.getValue("videoId").toString()
+                    val documentId = youtubeData.data?.getValue("documentId").toString()
 
                     if (allUser) {
                         val title = youtubeData.data?.getValue("title").toString()
                         val link = youtubeData.data?.getValue("link").toString()
                         val thumbnail = youtubeData.data?.getValue("thumbnail").toString()
-                        val videoId = youtubeData.data?.getValue("videoId").toString()
+                        val documentId = youtubeData.data?.getValue("documentId").toString()
 
                         youtubeSet = Youtube(
                             title,
                             link,
                             thumbnail,
-                            videoId
+                            documentId
                         )
 
                         youtubeItems.add(youtubeSet)
                         youtubeAdapter.notifyDataSetChanged()
                     } else {
                         // 전체 공개 아닌 경우
+                        val contractType = youtubeData.data?.getValue("contractType").toString()
+                        val contractName = youtubeData.data?.getValue("contractName").toString()
 
-                        if (youtubeData.contains("fullRegion")) {
+                        if (contractType == "region") {
                             // 지역 보기
-                            val tvFullRegion = youtubeData.data?.getValue("fullRegion").toString()
+//                            val tvFullRegion = youtubeData.data?.getValue("fullRegion").toString()
                             db.collection("users")
                                 .document("$userId")
                                 .get()
@@ -258,12 +259,12 @@ class MissionFragment : Fragment() {
                                         userData.data?.getValue("smallRegion").toString()
                                     val userFullRegion = "${userRegion} ${userSmallRegion}"
 
-                                    if (userFullRegion == tvFullRegion) {
+                                    if (userFullRegion == contractName) {
                                         youtubeSet = Youtube(
                                             title,
                                             link,
                                             thumbnail,
-                                            videoId
+                                            documentId
                                         )
 
                                         youtubeItems.add(youtubeSet)
@@ -272,11 +273,9 @@ class MissionFragment : Fragment() {
 
                                 }
 
-                        }
-
-                        if (youtubeData.contains("community")) {
+                        } else if (contractType == "community") {
                             // 커뮤니티 보기
-                            val tvCommunity = youtubeData.data?.getValue("community").toString()
+//                            val tvCommunity = youtubeData.data?.getValue("community").toString()
 
                             db.collection("users")
                                 .document("$userId")
@@ -285,12 +284,12 @@ class MissionFragment : Fragment() {
                                     val userCommunity =
                                         userData.data?.getValue("community") as ArrayList<String>
 
-                                    if (userCommunity.contains(tvCommunity)) {
+                                    if (userCommunity.contains(contractName)) {
                                         youtubeSet = Youtube(
                                             title,
                                             link,
                                             thumbnail,
-                                            videoId
+                                            documentId
                                         )
 
                                         youtubeItems.add(youtubeSet)

@@ -4,5 +4,5 @@ data class Youtube(
     var title: String,
     var link: String,
     var thumbnail: String,
-    var videoId: String
+    var documentId: String
 )

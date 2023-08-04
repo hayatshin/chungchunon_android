@@ -46,6 +46,45 @@ exports.commentPushNotification = functions.firestore.document("/diary/{diaryId}
             })
         })
     })
-
     return 0
 })
+
+exports.increaseLikeNum = functions.firestore.document("/diary/{diaryId}/likes/{diaryLikeUserId}").onCreate((snapShot, context) => {
+    const diaryId = snapShot.data().diaryId
+    const diaryLikeUserId = snapShot.data().diaryLikeUserId
+
+     db.collection("diary").doc(`${diaryId}`).update({
+        numLikes: admin.firestore.FieldValue.increment(1)
+    })
+    return 0
+})
+
+exports.decreaseLikeNum = functions.firestore.document("/diary/{diaryId}/likes/{diaryLikeUserId}").onDelete((snapShot, context) => {
+     const diaryId = snapShot.data().diaryId
+    const diaryLikeUserId = snapShot.data().diaryLikeUserId
+
+    db.collection("diary").doc(`${diaryId}`).update({
+        numLikes: admin.firestore.FieldValue.increment(-1)
+    })
+    return 0
+})
+
+exports.increaseCommentNum = functions.firestore.document("/diary/{diaryId}/comments/{diaryCommentUserId}").onCreate((snapShot, context) => {
+     const diaryId = snapShot.data().diaryId
+
+    db.collection("diary").doc(`${diaryId}`).update({
+        numComments: admin.firestore.FieldValue.increment(1)
+    })
+    return 0
+})
+
+exports.decreaseCommentNum = functions.firestore.document("/diary/{diaryId}/comments/{diaryCommentUserId}").onDelete((snapShot, context) => {
+     const diaryId = snapShot.data().diaryId
+
+    db.collection("diary").doc(`${diaryId}`).update({
+        numComments: admin.firestore.FieldValue.increment(-1)
+    })
+    return 0
+})
+
+

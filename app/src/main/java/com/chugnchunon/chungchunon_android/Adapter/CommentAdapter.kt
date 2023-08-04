@@ -242,32 +242,50 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
                 .get()
                 .addOnSuccessListener { commentData ->
                     if (commentData.exists()) {
+
                         DiaryRef
                             .collection("comments")
                             .document(items[position].commentId)
                             .delete()
                             .addOnSuccessListener {
                                 // diary DB 내 numComments -1
-                                DiaryRef.update("numComments", FieldValue.increment(-1))
-                                    .addOnCompleteListener { task ->
-                                        if (task.isSuccessful) {
 
-                                            val deleteIntent =
-                                                Intent(context, CommentActivity::class.java)
-                                            deleteIntent.setAction("DELETE_COMMENT_INTENT")
-                                            deleteIntent.putExtra(
-                                                "deleteDiaryId",
-                                                items[position].diaryId
-                                            )
-                                            deleteIntent.putExtra(
-                                                "deleteDiaryPosition",
-                                                items[position].diaryPosition
-                                            )
-                                            deleteIntent.putExtra("deleteCommentPosition", position)
-                                            LocalBroadcastManager.getInstance(context)
-                                                .sendBroadcast(deleteIntent);
-                                        }
-                                    }
+                                val deleteIntent =
+                                    Intent(context, CommentActivity::class.java)
+                                deleteIntent.setAction("DELETE_COMMENT_INTENT")
+                                deleteIntent.putExtra(
+                                    "deleteDiaryId",
+                                    items[position].diaryId
+                                )
+                                deleteIntent.putExtra(
+                                    "deleteDiaryPosition",
+                                    items[position].diaryPosition
+                                )
+
+                                deleteIntent.putExtra("deleteCommentPosition", position)
+                                LocalBroadcastManager.getInstance(context)
+                                    .sendBroadcast(deleteIntent);
+
+//                                DiaryRef.update("numComments", FieldValue.increment(-1))
+//                                    .addOnCompleteListener { task ->
+//                                        if (task.isSuccessful) {
+//
+//                                            val deleteIntent =
+//                                                Intent(context, CommentActivity::class.java)
+//                                            deleteIntent.setAction("DELETE_COMMENT_INTENT")
+//                                            deleteIntent.putExtra(
+//                                                "deleteDiaryId",
+//                                                items[position].diaryId
+//                                            )
+//                                            deleteIntent.putExtra(
+//                                                "deleteDiaryPosition",
+//                                                items[position].diaryPosition
+//                                            )
+//                                            deleteIntent.putExtra("deleteCommentPosition", position)
+//                                            LocalBroadcastManager.getInstance(context)
+//                                                .sendBroadcast(deleteIntent);
+//                                        }
+//                                    }
                             }
                     }
                 }

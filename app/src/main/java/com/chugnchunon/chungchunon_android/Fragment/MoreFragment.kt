@@ -235,10 +235,10 @@ class MoreFragment : Fragment() {
 
     var editProfileWithNewInfo: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            var newAvatar = intent?.getStringExtra("newAvatar")
-            var newName = intent?.getStringExtra("newName")
-            var newUserAge = intent?.getIntExtra("newUserAge", 0)
-            var newRegionSmallRegion = intent?.getStringExtra("newRegionSmallRegion")
+            val newAvatar = intent?.getStringExtra("newAvatar")
+            val newName = intent?.getStringExtra("newName")
+            val newUserAge = intent?.getIntExtra("newUserAge", 0)
+            val newRegionSmallRegion = intent?.getStringExtra("newRegionSmallRegion")
 
             Glide.with(context!!)
                 .load(newAvatar)
@@ -254,7 +254,7 @@ class MoreFragment : Fragment() {
         val defaultFeed = FeedTemplate(
             content = Content(
                 title = "오늘도청춘",
-                description = "세상에서 가장 쉬운 치매 예방 플랫폼",
+                description = "정신건강, 신체건강 관리앱",
                 imageUrl = "https://postfiles.pstatic.net/MjAyMzA1MTVfMTA0/MDAxNjg0MTU5OTgwNjI5.hETmcfk6juGW1EEqRkIcYHe6nmMxDYf_560hojOKiOog.z7obOXdYtZPP2K8jSwwjRGL2dF3BSJaE4IsdLbYaqrsg.PNG.hayat_shin/%EC%95%84%EC%9D%B4%EC%BD%98_%EC%9D%B4%EB%AF%B8%EC%A7%80_%ED%95%91%ED%81%AC2.png?type=w773",
                 link = Link(
                     webUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android",
@@ -264,12 +264,6 @@ class MoreFragment : Fragment() {
             buttons = listOf(
                 Button(
                     "앱 다운 받기",
-//                    Link(
-//                        androidExecutionParams = mapOf(
-//                            "key1" to "value1",
-//                            "key2" to "value2"
-//                        )
-//                    )
                     Link(
                         webUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android",
                         mobileWebUrl = "https://play.google.com/store/apps/details?id=com.chugnchunon.chungchunon_android"

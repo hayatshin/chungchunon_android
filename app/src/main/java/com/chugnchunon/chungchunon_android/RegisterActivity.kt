@@ -146,7 +146,6 @@ class RegisterActivity : AppCompatActivity() {
         })
 
         binding.authProgressBar.progress = 0
-
         binding.authProgressBar.visibility = View.GONE
         binding.phoneAuthBtn.isEnabled = false
 
@@ -311,17 +310,16 @@ class RegisterActivity : AppCompatActivity() {
                 binding.birthResultBox.addView(birthTextView)
 
                 // 나이 40세 이하
-                var ageTextView = TextView(applicationContext)
-                ageTextView.layoutParams = birthTextViewLayoutParams
-                ageTextView.setTextColor(ContextCompat.getColor(this, R.color.light_gray))
-                ageTextView.text = "40세 미만은 일기 쓰기가 제한됩니다."
-                ageTextView.setTextSize(dpTextSize(10f))
-
-
-                if (userAge < 40) {
-                    binding.birthResultBox.addView(ageTextView)
-                }
-
+//                var ageTextView = TextView(applicationContext)
+//                ageTextView.layoutParams = birthTextViewLayoutParams
+//                ageTextView.setTextColor(ContextCompat.getColor(this, R.color.light_gray))
+//                ageTextView.text = "40세 미만은 일기 쓰기가 제한됩니다."
+//                ageTextView.setTextSize(dpTextSize(10f))
+//
+//
+//                if (userAge < 40) {
+//                    binding.birthResultBox.addView(ageTextView)
+//                }
 
                 // 수정 버튼
                 editBirth = true
@@ -464,7 +462,6 @@ class RegisterActivity : AppCompatActivity() {
                         )
                         binding.phoneLayout.addView(tooManyTextView)
                     }
-
                 }
 
                 override fun onCodeSent(
@@ -473,7 +470,6 @@ class RegisterActivity : AppCompatActivity() {
                 ) {
                     super.onCodeSent(verificationId, token)
                     this@RegisterActivity.verificationId = verificationId
-
 
                     binding.phoneAuthLayout.removeAllViews()
                     binding.authProgressBar.visibility = View.GONE
@@ -493,7 +489,7 @@ class RegisterActivity : AppCompatActivity() {
                     authEditTextView.setPadding(25, 25, 25, 25)
                     authEditTextView.background = drawableBox
                     authEditTextView.hint = "인증번호 입력하기"
-                    authEditTextView.setTextSize(dpTextSize(10f))
+                    authEditTextView.setTextSize(dpTextSize(13f))
                     authEditTextView.gravity = Gravity.CENTER
 
                     // 인증 확인
@@ -585,7 +581,7 @@ class RegisterActivity : AppCompatActivity() {
             } else {
                 // 모두 완벽하게 기입
 
-                binding.registerBtn.visibility = View.GONE
+                binding.registerTextBar.visibility = View.GONE
                 binding.registerProgressBar.visibility = View.VISIBLE
 
                 if (avatarUri != null) {

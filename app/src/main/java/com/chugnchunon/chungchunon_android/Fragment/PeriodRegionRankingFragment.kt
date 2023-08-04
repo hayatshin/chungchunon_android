@@ -177,7 +177,7 @@ class PeriodRegionRankingFragment : Fragment() {
             periodSet()
             getGraph()
 
-            if(!communityOrNot){
+            if (!communityOrNot) {
                 getRegionRanking()
             } else {
                 getCommunityRanking(communityName)
@@ -213,7 +213,7 @@ class PeriodRegionRankingFragment : Fragment() {
             periodSet()
             getGraph()
 
-            if(!communityOrNot){
+            if (!communityOrNot) {
                 getRegionRanking()
             } else {
                 getCommunityRanking(communityName)
@@ -345,9 +345,10 @@ class PeriodRegionRankingFragment : Fragment() {
                                                     val communityImage =
                                                         communityData.data.getValue("communityImage")
                                                             .toString()
-                                                    val communityUsers = communityData.data.getValue("users") as ArrayList<String>
+                                                    val communityUsers =
+                                                        communityData.data.getValue("users") as ArrayList<String>
 
-                                                    if(communityUsers.contains(userId)) {
+                                                    if (communityUsers.contains(userId)) {
                                                         regionCommunitySet = Community(
                                                             communityTitle,
                                                             communityImage
@@ -375,7 +376,7 @@ class PeriodRegionRankingFragment : Fragment() {
         val today = Calendar.getInstance()
         val timeZone = TimeZone.getTimeZone("Asia/Seoul")
 
-        if(!allLastWeekOrNot) {
+        if (!allLastWeekOrNot) {
             // 이번주
             periodStart = Calendar.getInstance(timeZone).apply {
                 firstDayOfWeek = Calendar.MONDAY
@@ -396,7 +397,7 @@ class PeriodRegionRankingFragment : Fragment() {
             }.time
         } else {
             // 지난주
-            periodStart =  Calendar.getInstance(timeZone).apply {
+            periodStart = Calendar.getInstance(timeZone).apply {
                 firstDayOfWeek = Calendar.MONDAY
                 set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
                 add(Calendar.DAY_OF_MONTH, -7)
@@ -594,7 +595,7 @@ class PeriodRegionRankingFragment : Fragment() {
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {
                     val dateStepCountToInt = (dateStepCount as Long).toInt()
-                    if(dateStepCountToInt > 0) {
+                    if (dateStepCountToInt > 0) {
                         thisWeekMyStepCount += dateStepCountToInt
                     } else {
                         // null
@@ -648,35 +649,29 @@ class PeriodRegionRankingFragment : Fragment() {
 
         for (document in userdocuments) {
             if (document.data.containsKey("userType")) {
-                val userType = document.data.getValue("userType").toString()
+                try {
+                    val userId = document.data?.getValue("userId").toString()
+                    val username = document.data.getValue("name").toString()
+                    val userAvatar = document.data.getValue("avatar").toString()
+                    val userRegion = document.data.getValue("region").toString()
+                    val userSmallRegion = document.data.getValue("smallRegion").toString()
+                    val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
 
-                if (userType == "사용자") {
-                    try {
-                        val userId = document.data?.getValue("userId").toString()
-                        val username = document.data.getValue("name").toString()
-                        val userAvatar = document.data.getValue("avatar").toString()
-                        val userRegion = document.data.getValue("region").toString()
-                        val userSmallRegion = document.data.getValue("smallRegion").toString()
-                        val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
-
-                        if(diaryUserFullRegion == myUserFullRegion) {
-                            val userEntry = RankingLine(
-                                0,
-                                userId,
-                                username,
-                                userAvatar,
-                                0,
-                            )
-
-                            userPointArray.add(userEntry)
-                        }
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    if (diaryUserFullRegion == myUserFullRegion) {
+                        val userEntry = RankingLine(
+                            0,
+                            userId,
+                            username,
+                            userAvatar,
+                            0,
+                        )
+                        userPointArray.add(userEntry)
                     }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
-
         }
     }
 
@@ -690,7 +685,7 @@ class PeriodRegionRankingFragment : Fragment() {
                 val userName = document.data.getValue("name").toString()
                 val userType = document.data.getValue("userType").toString()
 
-                if (userType == "사용자" && userName != "탈퇴자") {
+                if (userName != "탈퇴자") {
                     try {
                         val userId = document.data?.getValue("userId").toString()
                         val username = document.data.getValue("name").toString()
@@ -699,7 +694,7 @@ class PeriodRegionRankingFragment : Fragment() {
                         val userSmallRegion = document.data.getValue("smallRegion").toString()
                         val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
 
-                        if(communityUsers.contains(userId)) {
+                        if (communityUsers.contains(userId)) {
                             val userEntry = RankingLine(
                                 0,
                                 userId,

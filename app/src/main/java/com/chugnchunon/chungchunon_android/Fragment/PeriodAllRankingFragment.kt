@@ -495,28 +495,24 @@ class PeriodAllRankingFragment : Fragment() {
 
         for (document in userdocuments) {
             if (document.data.containsKey("userType")) {
-                val userName = document.data.getValue("name").toString()
-                val userType = document.data.getValue("userType").toString()
+                try {
+                    val userId = document.data?.getValue("userId").toString()
+                    val username = document.data.getValue("name").toString()
+                    val userAvatar = document.data.getValue("avatar").toString()
 
-                if (userType == "사용자"  && userName != "탈퇴자") {
-                    try {
-                        val userId = document.data?.getValue("userId").toString()
-                        val username = document.data.getValue("name").toString()
-                        val userAvatar = document.data.getValue("avatar").toString()
+                    val userEntry = RankingLine(
+                        0,
+                        userId,
+                        username,
+                        userAvatar,
+                        0,
+                    )
 
-                        val userEntry = RankingLine(
-                            0,
-                            userId,
-                            username,
-                            userAvatar,
-                            0,
-                        )
-
-                        userPointArray.add(userEntry)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    userPointArray.add(userEntry)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+
             }
 
         }

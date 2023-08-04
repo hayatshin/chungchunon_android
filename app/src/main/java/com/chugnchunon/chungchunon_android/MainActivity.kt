@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnimationUtils
+import android.view.animation.BounceInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -18,6 +20,8 @@ import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
@@ -67,8 +71,57 @@ class MainActivity : AppCompatActivity() {
             Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
         }
 
+        var registerShown: Boolean = false
+
         // 일반 회원가입
+        binding.registerDetailLayout.alpha = 0f
+        binding.registerDetailLayout.y = -5f
+        binding.registerDetailLayout.visibility = View.GONE
+
         binding.registerBtn.setOnClickListener {
+            if(!registerShown) {
+                binding.registerDetailLayout.visibility = View.VISIBLE
+
+                Handler().postDelayed({
+                    binding.registerDetailLayout.animate()
+                        .translationY(0f)
+                        .setInterpolator(BounceInterpolator())
+                        .setDuration(500)
+                }, 200)
+
+                binding.registerDetailLayout.animate()
+                    .alpha(1f)
+                    .setInterpolator(AccelerateInterpolator())
+                    .setDuration(600)
+
+            } else {
+
+                Handler().postDelayed({
+                    binding.registerDetailLayout.animate()
+                        .translationY(-5f)
+                        .setInterpolator(BounceInterpolator())
+                        .setDuration(500)
+                }, 200)
+
+                binding.registerDetailLayout.animate()
+                    .alpha(0f)
+                    .setInterpolator(AccelerateInterpolator())
+                    .setDuration(500)
+
+                Handler().postDelayed({
+                    binding.registerDetailLayout.visibility = View.GONE
+                }, 500)
+            }
+
+            registerShown = !registerShown
+        }
+
+        binding.regularLoginProcess.setOnClickListener {
+            val goOriginLogin = Intent(this, OriginLoginActivity::class.java)
+            startActivity(goOriginLogin)
+        }
+
+        binding.regularRegisterProcess.setOnClickListener {
             val goRegisterUser = Intent(this, AgreementActivity::class.java)
             goRegisterUser.putExtra("userType", "사용자")
             startActivity(goRegisterUser)
@@ -117,11 +170,10 @@ class MainActivity : AppCompatActivity() {
                 Handler().postDelayed({
                     binding.loginLayout.visibility = View.VISIBLE
                     binding.partnerLayout.visibility = View.GONE
-
                 }, 500)
 
 
-                var downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
+                val downAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_enter)
                 binding.partnerLayout.startAnimation(downAnimation)
 
                 binding.partnerLayout.animate()

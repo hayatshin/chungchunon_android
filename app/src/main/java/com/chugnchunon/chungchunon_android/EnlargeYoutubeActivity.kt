@@ -21,14 +21,14 @@ class EnlargeYoutubeActivity : AppCompatActivity() {
         }
 
         val link = intent.getStringExtra("link").toString()
-        val videoId = intent.getStringExtra("videoId").toString()
+        val documentId = intent.getStringExtra("documentId").toString()
 
         lifecycle.addObserver(binding.youtubeView)
         // 이미지
         binding.youtubeView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
-                youTubePlayer.loadVideo(videoId, 0f)
+                youTubePlayer.loadVideo(documentId, 0f)
             }
         })
     }

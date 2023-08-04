@@ -140,10 +140,10 @@ class PeriodFriendRankingFragment : Fragment() {
             binding.thisWeekBox.background = mainLeftBox
             binding.lastWeekBox.background = grayRightBox
             binding.thisWeekText.setTextColor(
-               Color.WHITE
+                Color.WHITE
             )
             binding.lastWeekText.setTextColor(
-              Color.BLACK
+                Color.BLACK
             )
 
             friendLastWeekOrNot = false
@@ -170,10 +170,10 @@ class PeriodFriendRankingFragment : Fragment() {
             binding.thisWeekBox.background = grayLeftBox
             binding.lastWeekBox.background = mainRightBox
             binding.thisWeekText.setTextColor(
-               Color.BLACK
+                Color.BLACK
             )
             binding.lastWeekText.setTextColor(
-               Color.WHITE
+                Color.WHITE
             )
 
             friendLastWeekOrNot = true
@@ -354,7 +354,7 @@ class PeriodFriendRankingFragment : Fragment() {
             }.time
         } else {
             // 지난주
-            periodStart =  Calendar.getInstance(timeZone).apply {
+            periodStart = Calendar.getInstance(timeZone).apply {
                 firstDayOfWeek = Calendar.MONDAY
                 set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
                 add(Calendar.DAY_OF_MONTH, -7)
@@ -389,7 +389,8 @@ class PeriodFriendRankingFragment : Fragment() {
         val periodSubStringEnd = formatPeriodEnd.substring(5, 10)
         val replacePeriodStart = periodSubStringStart.replace("-", "/")
         val replacePeriodEnd = periodSubStringEnd.replace("-", "/")
-        binding.periodText.text = "${replacePeriodStart} ~ ${replacePeriodEnd}"    }
+        binding.periodText.text = "${replacePeriodStart} ~ ${replacePeriodEnd}"
+    }
 
     private fun getRanking() {
         // 데이터 불러오기
@@ -531,7 +532,7 @@ class PeriodFriendRankingFragment : Fragment() {
             userSteps.data?.forEach { (period, dateStepCount) ->
                 if (period == stepDate.toString()) {
                     val dateStepCountToInt = (dateStepCount as Long).toInt()
-                    if(dateStepCountToInt > 0) {
+                    if (dateStepCountToInt > 0) {
                         thisWeekMyStepCount += dateStepCountToInt
                     } else {
                         // null
@@ -583,32 +584,27 @@ class PeriodFriendRankingFragment : Fragment() {
 
         for (document in userdocuments) {
             if (document.data.containsKey("userType")) {
-                val userName = document.data.getValue("name").toString()
-                val userType = document.data.getValue("userType").toString()
+                try {
+                    val userId = document.data?.getValue("userId").toString()
+                    val username = document.data.getValue("name").toString()
+                    val userAvatar = document.data.getValue("avatar").toString()
+                    val userPhone = document.data.getValue("phone").toString()
 
-                if (userType == "사용자" && userName != "탈퇴자") {
-                    try {
-                        val userId = document.data?.getValue("userId").toString()
-                        val username = document.data.getValue("name").toString()
-                        val userAvatar = document.data.getValue("avatar").toString()
-                        val userPhone = document.data.getValue("phone").toString()
+                    myContactList.forEach { contact ->
+                        if (userPhone == contact) {
+                            val userEntry = RankingLine(
+                                0,
+                                userId,
+                                username,
+                                userAvatar,
+                                0,
+                            )
 
-                        myContactList.forEach { contact ->
-                            if (userPhone == contact) {
-                                val userEntry = RankingLine(
-                                    0,
-                                    userId,
-                                    username,
-                                    userAvatar,
-                                    0,
-                                )
-
-                                userPointArray.add(userEntry)
-                            }
+                            userPointArray.add(userEntry)
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
 

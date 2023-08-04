@@ -194,6 +194,17 @@ class DefaultDiaryWarningActivity : FragmentActivity() {
             binding.edConfirmBox.setOnClickListener {
                 finish()
             }
+        } else if (warningType == "originLoginFail") {
+            binding.edWarningText.text = "유저 정보가 없습니다.\n다시 회원가입을 진행해주세요."
+
+            binding.edGobackArrow.setOnClickListener {
+                finish()
+            }
+
+            binding.edConfirmBox.setOnClickListener {
+                val goMain = Intent(this, MainActivity::class.java)
+                startActivity(goMain)
+            }
         }
     }
 }

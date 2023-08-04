@@ -158,6 +158,7 @@ class MyDiaryFragment : Fragment() {
         private var partnerOrNot: Boolean = false
         private var fulfilledOrNot: Boolean = false
         private var editOrNot: Boolean = false
+        private var editTodayDiaryEmpty: Boolean = false
 
         private var editDiary: Boolean = false
         const val REQ_GALLERY = 200
@@ -179,12 +180,21 @@ class MyDiaryFragment : Fragment() {
         _binding = FragmentMyDiaryBinding.inflate(inflater, container, false)
         val view = binding.root
 
-//        val currentDateTime = LocalDate.now().toString()
-//        val userPref = requireActivity().getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
-//        val userPrefEdit = userPref.edit()
-//        userPrefEdit.clear().apply()
-
         binding.diaryBtn.alpha = 0.4f
+
+        val currentDateTime = LocalDate.now().toString()
+        val userPref = mcontext.getSharedPreferences(
+            "diary_${userId}_${currentDateTime}",
+            Context.MODE_PRIVATE
+        )
+
+        val moodDonePref = userPref.getBoolean("moodDone", false)
+        val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
+        val diaryDonePref = userPref.getBoolean("diaryDone", false)
+        val secretStatusPref = userPref.getBoolean("secretStatus", false)
+        val imageDonePref = userPref.getBoolean("imageDone", false)
+
+        fulfilledOrNot = recognitionDonePref && moodDonePref && diaryDonePref
 
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             stepAuthGrantedReceiver,
@@ -228,7 +238,7 @@ class MyDiaryFragment : Fragment() {
         flipAnimator.interpolator = AccelerateDecelerateInterpolator()
         flipAnimator.start()
 
-            // 특정 유저 점수
+        // 특정 유저 점수
 //        uiScope.launch(Dispatchers.IO) {
 //            listOf(
 //                launch { certainUserStepCountToArrayFun() },
@@ -294,12 +304,13 @@ class MyDiaryFragment : Fragment() {
                     }
                 } else {
                     // 참여 이벤트 존재 x
-
                     if (contractRegionExists) {
                         // 지역 계약 O
-                        Glide.with(mcontext)
-                            .load(contractRegionLogo)
-                            .into(binding.contractRegionImageView)
+                        if (activity?.isDestroyed == false) {
+                            Glide.with(mcontext)
+                                .load(contractRegionLogo)
+                                .into(binding.contractRegionImageView)
+                        }
                         binding.contractRegionTextView.text =
                             userSmallRegion
 
@@ -336,12 +347,12 @@ class MyDiaryFragment : Fragment() {
         }
 
         // 파트너 체크
-        userDB.document("$userId")
-            .get()
-            .addOnSuccessListener { userData ->
-                val userType = userData.data?.getValue("userType")
-                partnerOrNot = userType == "파트너"
-            }
+//        userDB.document("$userId")
+//            .get()
+//            .addOnSuccessListener { userData ->
+//                val userType = userData.data?.getValue("userType")
+//                partnerOrNot = userType == "파트너"
+//            }
 
         // 인지 화면 숨기기
         binding.recognitionResultLayout.visibility = View.GONE
@@ -409,7 +420,10 @@ class MyDiaryFragment : Fragment() {
         { value ->
 
             val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPref = mcontext.getSharedPreferences(
+                "diary_${userId}_${currentDateTime}",
+                Context.MODE_PRIVATE
+            )
             val userPrefEdit = userPref.edit()
             val secretStatusPref = userPref.getBoolean("secretStatus", false)
 
@@ -446,11 +460,16 @@ class MyDiaryFragment : Fragment() {
                 binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if (!partnerOrNot) {
-                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+//            if (!partnerOrNot) {
+            if (!editDiary) {
+                if (diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
                     binding.diaryBtn.alpha = 1f
                     fulfilledOrNot = true
+                } else {
+                    binding.diaryBtn.alpha = 0.4f
+                    fulfilledOrNot = false
                 }
+//            }
             }
 
         })
@@ -458,22 +477,21 @@ class MyDiaryFragment : Fragment() {
         diaryFillCheck.recognitionFill.observe(requireActivity(), Observer { value ->
             if (diaryFillCheck.recognitionFill.value!!) {
                 binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
-//                val currentDateTime = LocalDate.now().toString()
-//                val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
-//                val userPrefEdit = userPref.edit()
-//                userPrefEdit.putBoolean("recognitionDone", true).apply()
-
             } else if (!diaryFillCheck.recognitionFill.value!!) {
                 binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if (!partnerOrNot) {
-                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+//            if (!partnerOrNot) {
+            if (!editDiary) {
+                if (diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
                     binding.diaryBtn.alpha = 1f
                     fulfilledOrNot = true
+                } else {
+                    binding.diaryBtn.alpha = 0.4f
+                    fulfilledOrNot = false
                 }
             }
+//            }
         })
 
         diaryFillCheck.diaryFill.observe(requireActivity(), Observer
@@ -481,37 +499,55 @@ class MyDiaryFragment : Fragment() {
             if (diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
-//                val currentDateTime = LocalDate.now().toString()
-//                val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
-//                val userPrefEdit = userPref.edit()
-//                userPrefEdit.putBoolean("diaryDone", true).apply()
-
             } else if (!diaryFillCheck.diaryFill.value!!) {
                 binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
             }
 
-            if (!partnerOrNot) {
-                if (!editDiary && diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
+//            if (!partnerOrNot) {
+            if (!editDiary) {
+                if (diaryFillCheck.diaryFill.value!! && diaryFillCheck.recognitionFill.value!! && diaryFillCheck.moodFill.value!!) {
                     binding.diaryBtn.alpha = 1f
                     fulfilledOrNot = true
+                } else {
+                    binding.diaryBtn.alpha = 0.4f
+                    fulfilledOrNot = false
                 }
             }
+//            }
         })
 
         // 수정 시 필드별 변화
         diaryEditCheck.diaryEdit.observe(requireActivity(), Observer
         { value ->
+            if (diaryEditCheck.diaryEdit.value!!) {
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            } else if (!diaryEditCheck.diaryEdit.value!!) {
+                binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+            }
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 editOrNot = true
                 binding.diaryBtn.alpha = 1f
+            } else {
+                editOrNot = false
+                binding.diaryBtn.alpha = 0.4f
             }
         })
 
         diaryEditCheck.moodEdit.observe(requireActivity(), Observer
         { value ->
+            if (diaryEditCheck.moodEdit.value!!) {
+                binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
+            } else if (!diaryEditCheck.moodEdit.value!!) {
+                binding.moodCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+            }
+
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 editOrNot = true
                 binding.diaryBtn.alpha = 1f
+            } else {
+                editOrNot = false
+                binding.diaryBtn.alpha = 0.4f
             }
         })
 
@@ -520,12 +556,14 @@ class MyDiaryFragment : Fragment() {
             if (diaryEditCheck.diaryEdit.value == true || diaryEditCheck.moodEdit.value == true || diaryEditCheck.photoEdit.value == true || diaryEditCheck.secretEdit.value == true) {
                 editOrNot = true
                 binding.diaryBtn.alpha = 1f
+            } else {
+                editOrNot = false
+                binding.diaryBtn.alpha = 0.4f
             }
         })
 
         diaryEditCheck.secretEdit.observe(requireActivity(), Observer
         { value ->
-
             if (secretStatus) {
                 binding.secretButton.text = "함께 보기"
                 binding.secretButton.setCompoundDrawablesWithIntrinsicBounds(
@@ -552,27 +590,6 @@ class MyDiaryFragment : Fragment() {
                 binding.diaryBtn.alpha = 1f
             }
         })
-
-        // 화면 변경
-//        if (submitResume) {
-//            // 초기화
-//            binding.diaryBtn.alpha = 0.4f
-//            editOrNot = false
-//            fulfilledOrNot = false
-//
-//            if (!editDiary) {
-//                diaryFillCheck.recognitionFill.value = false
-//                diaryFillCheck.diaryFill.value = false
-//                diaryFillCheck.moodFill.value = false
-//                diaryFillCheck.photoFill.value = false
-//                diaryFillCheck.secretFill.value = false
-//            } else {
-//                diaryEditCheck.diaryEdit.value = false
-//                diaryEditCheck.moodEdit.value = false
-//                diaryEditCheck.photoEdit.value = false
-//                diaryEditCheck.secretEdit.value = false
-//            }
-//        }
 
         // 이미지
         newImageViewModel.newImageList.observe(requireActivity(), Observer
@@ -724,6 +741,8 @@ class MyDiaryFragment : Fragment() {
                         if (document.exists()) {
                             // 일기 작성을 한 상태
 
+                            editDiary = true
+
                             binding.userRecognitionText.setOnClickListener {
                                 if (editDiary) {
                                     binding.recognitionResultLayout.visibility =
@@ -762,34 +781,6 @@ class MyDiaryFragment : Fragment() {
                                 }
                             }
 
-                            // 이미지 보여주기
-//                            if (document.data?.contains("images") == true) {
-//                                binding.photoRecyclerView.visibility = View.VISI
-//
-//                                oldImageList =
-//                                    document.data?.getValue("images") as ArrayList<String>
-//
-//                                if (oldImageList.size != 0) {
-//                                    binding.photoRecyclerView.visibility = View.VISIBLE
-////                                    binding.diaryCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-//
-//
-//                                    for (i in 0 until oldImageList.size) {
-//                                        val uriParseImage = Uri.parse(oldImageList[i])
-//                                        newImageViewModel.addImage(uriParseImage)
-//                                        itemListItems.add(uriParseImage)
-//                                        photoAdapter.notifyItemInserted(oldImageList.size - 1)
-//                                    }
-////                                    photoAdapter = UploadPhotosAdapter(mcontext, oldImageList)
-////                                    binding.photoRecyclerView.adapter = photoAdapter
-////                                    photoAdapter.notifyDataSetChanged()
-//                                }
-//
-//                            } else {
-//                                // null
-//                                binding.photoRecyclerView.visibility = View.GONE
-//                            }
-
                             val lineCount = binding.todayDiary.lineCount
                             val lineHeight = binding.todayDiary.lineHeight
                             val desiredHeight = lineCount * lineHeight
@@ -798,76 +789,19 @@ class MyDiaryFragment : Fragment() {
                             binding.todayDiary.setSelection(binding.todayDiary.text.length)
 
                             val currentDateTime = LocalDate.now().toString()
-                            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
-
-                            val writingMoodPref = userPref.getInt("writingMood", 0)
-                            val writingDiaryPref = userPref.getString("writingDiary", "")
-
-
-                            binding.todayMood.setOnItemSelectedListener(object :
-                                AdapterView.OnItemSelectedListener {
-                                override fun onItemSelected(
-                                    p0: AdapterView<*>?,
-                                    p1: View?,
-                                    p2: Int,
-                                    p3: Long
-                                ) {
-                                    val nowMood = (binding.todayMood.selectedItem as Mood).position
-                                    if (nowMood != writingMoodPref) {
-                                        diaryEditCheck.moodEdit.value = true
-                                    }
-                                }
-
-                                override fun onNothingSelected(p0: AdapterView<*>?) {
-                                    // null
-                                }
-
-                            })
-
-                            // 일기 수정
-                            binding.todayDiary.addTextChangedListener(
-                                object : TextWatcher {
-                                    override fun beforeTextChanged(
-                                        char: CharSequence?,
-                                        p1: Int,
-                                        p2: Int,
-                                        p3: Int
-                                    ) {
-                                        // null
-                                    }
-
-                                    override fun onTextChanged(
-                                        char: CharSequence?,
-                                        start: Int,
-                                        before: Int,
-                                        count: Int
-                                    ) {
-                                        if (char != writingDiaryPref) diaryEditCheck.diaryEdit.value =
-                                            true
-
-                                    }
-
-                                    override fun afterTextChanged(p0: Editable?) {
-                                        // null
-                                    }
-                                })
-
+                            val userPref = mcontext.getSharedPreferences(
+                                "diary_${userId}_${currentDateTime}",
+                                Context.MODE_PRIVATE
+                            )
                         } else {
                             // 일기 작성 x
 //                            binding.diaryBtn.alpha = 0.4f
 //                            binding.secretInfoText.visibility = View.GONE
 
-                            if (!partnerOrNot) {
-                                editDiary = false
-                                fulfilledOrNot = false
-                                binding.diaryBtn.text = "일기 작성"
-                            }
-
-//                            if(partnerOrNot) {
-//                                binding.diaryBtn.isEnabled = true
-//                                binding.diaryBtn.alpha = 0.4f
-//                            } else {
-//                                editDiary = false
+//                            if (!partnerOrNot) {
+                            editDiary = false
+//                            fulfilledOrNot = false
+                            binding.diaryBtn.text = "일기 작성"
 //                            }
                         }
                     }
@@ -889,55 +823,58 @@ class MyDiaryFragment : Fragment() {
 
         // 걸음수 업데이트
         userDB.document("$userId").get().addOnSuccessListener { document ->
-            val todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
+            if(document.contains("todayStepCount")) {
+                val todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
 
-            todayTotalStepCount = todayStepCountFromDB
-            val decimal = DecimalFormat("#,###")
-            val step = decimal.format(todayTotalStepCount)
-            binding.todayStepCount.text = "$step 보"
+                todayTotalStepCount = todayStepCountFromDB
+                val decimal = DecimalFormat("#,###")
+                val step = decimal.format(todayTotalStepCount)
+                binding.todayStepCount.text = "$step 보"
 
-            if (todayTotalStepCount >= 3000) {
-                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
-
-                Handler().postDelayed({
-                    binding.stepSuccessLayout.visibility = View.VISIBLE
-
-                    val downSuccessAnimation =
-                        ObjectAnimator.ofFloat(binding.stepSuccessLayout, "translationY", -80f, 0f)
-                    downSuccessAnimation.duration = 1000
-                    downSuccessAnimation.interpolator = DecelerateInterpolator()
-                    downSuccessAnimation.start()
+                if (todayTotalStepCount >= 3000) {
+                    binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
 
                     Handler().postDelayed({
-                        binding.stepSuccessLayout.alpha = 1f
-                        binding.stepSuccessLayout.animate()
-                            .alpha(0f).duration = 1000
+                        binding.stepSuccessLayout.visibility = View.VISIBLE
 
-                        val upSuccessAnimation =
-                            ObjectAnimator.ofFloat(
-                                binding.stepSuccessLayout,
-                                "translationY",
-                                0f,
-                                -120f
-                            )
-                        upSuccessAnimation.duration = 1200
-                        upSuccessAnimation.interpolator = DecelerateInterpolator()
-                        upSuccessAnimation.start()
+                        val downSuccessAnimation =
+                            ObjectAnimator.ofFloat(binding.stepSuccessLayout, "translationY", -80f, 0f)
+                        downSuccessAnimation.duration = 1000
+                        downSuccessAnimation.interpolator = DecelerateInterpolator()
+                        downSuccessAnimation.start()
 
                         Handler().postDelayed({
-                            binding.stepSuccessLayout.visibility = View.GONE
-                        }, 500)
+                            binding.stepSuccessLayout.alpha = 1f
+                            binding.stepSuccessLayout.animate()
+                                .alpha(0f).duration = 1000
 
-                    }, 3000)
-                }, 1000)
+                            val upSuccessAnimation =
+                                ObjectAnimator.ofFloat(
+                                    binding.stepSuccessLayout,
+                                    "translationY",
+                                    0f,
+                                    -120f
+                                )
+                            upSuccessAnimation.duration = 1200
+                            upSuccessAnimation.interpolator = DecelerateInterpolator()
+                            upSuccessAnimation.start()
+
+                            Handler().postDelayed({
+                                binding.stepSuccessLayout.visibility = View.GONE
+                            }, 500)
+
+                        }, 3000)
+                    }, 1000)
 
 
+                } else {
+                    binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_no)
+                    binding.stepSuccessLayout.visibility = View.GONE
+
+                }
             } else {
-                binding.stepCheckBox.setImageResource(R.drawable.ic_checkbox_no)
-                binding.stepSuccessLayout.visibility = View.GONE
-
+                binding.todayStepCount.text = "0 보"
             }
-
         }
 
         // 사진 업로드
@@ -1015,14 +952,20 @@ class MyDiaryFragment : Fragment() {
                 override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
                     val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPref = mcontext.getSharedPreferences(
+                        "diary_${userId}_${currentDateTime}",
+                        Context.MODE_PRIVATE
+                    )
                     val userPrefEdit = userPref.edit()
                     val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
 
                     if (char?.length == 1 && !editDiary && !recognitionDonePref) {
 
                         val currentDateTime = LocalDate.now().toString()
-                        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                        val userPref = mcontext.getSharedPreferences(
+                            "diary_${userId}_${currentDateTime}",
+                            Context.MODE_PRIVATE
+                        )
                         val userPrefEdit = userPref.edit()
                         userPrefEdit.putBoolean("recognitionDone", true).apply()
 
@@ -1132,14 +1075,23 @@ class MyDiaryFragment : Fragment() {
                 override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
 
                     val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPref = mcontext.getSharedPreferences(
+                        "diary_${userId}_${currentDateTime}",
+                        Context.MODE_PRIVATE
+                    )
                     val userPrefEdit = userPref.edit()
                     userPrefEdit.putBoolean("moodDone", true).apply()
+                    val writingMoodPref = userPref.getInt("writingMood", 0)
 
                     if (!editDiary) {
                         diaryFillCheck.moodFill.value = true
                     } else {
-                        diaryEditCheck.moodEdit.value = true
+//                        diaryEditCheck.moodEdit.value = true
+
+                        val nowMood = (binding.todayMood.selectedItem as Mood).position
+                        if (nowMood != writingMoodPref) {
+                            diaryEditCheck.moodEdit.value = true
+                        }
                     }
                     return false
                 }
@@ -1175,26 +1127,31 @@ class MyDiaryFragment : Fragment() {
                     before: Int,
                     count: Int
                 ) {
-
                     val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                    val userPref = mcontext.getSharedPreferences(
+                        "diary_${userId}_${currentDateTime}",
+                        Context.MODE_PRIVATE
+                    )
                     val userPrefEdit = userPref.edit()
 
-                    if(char?.trim().toString().length != 0) {
-                        if(!editDiary) {
-                            diaryFillCheck.diaryFill.value = true
-                        }
-                        userPrefEdit.putBoolean("diaryDone", true).apply()
-                    } else {
-                        if(!editDiary) {
-                            diaryFillCheck.diaryFill.value = false
-                        }
-                        userPrefEdit.putBoolean("diaryDone", false).apply()
-                    }
+                    if (!editDiary) {
+                        val stringDiary = char?.trim().toString()
+                        val notEmptyCheck = stringDiary.isNotEmpty()
+//                    val checkWriting = notEmptyCheck && !editDiary
 
-//                    if (!editDiary) {
-//                        diaryFillCheck.diaryFill.value = char?.trim().toString().length != 0
-//                    }
+                        //writingDiary
+                        diaryFillCheck.diaryFill.value = notEmptyCheck
+                        userPrefEdit.putBoolean("diaryDone", notEmptyCheck).apply()
+                        userPrefEdit.putString("writingDiary", stringDiary).apply()
+                    } else {
+
+                        val writingDiaryPref = userPref.getString("writingDiary", "")
+
+                        if (char != writingDiaryPref) {
+                            diaryEditCheck.diaryEdit.value = true
+                            editTodayDiaryEmpty = char?.trim().toString().isEmpty()
+                        }
+                    }
                 }
 
                 override fun afterTextChanged(p0: Editable?) {
@@ -1211,166 +1168,167 @@ class MyDiaryFragment : Fragment() {
 //            val userPrefEdit = userPref.edit()
 //            userPrefEdit.clear().apply()
 
-            if (!partnerOrNot) {
-                if (!editDiary && !fulfilledOrNot) {
-                    // 작성인데 빈칸이 있음
-                    val goMyDiaryWarning = Intent(context, MyDiaryWarningActivity::class.java)
-                    goMyDiaryWarning.putExtra("recognition", diaryFillCheck.recognitionFill.value)
-                    goMyDiaryWarning.putExtra("mood", diaryFillCheck.moodFill.value)
-                    goMyDiaryWarning.putExtra("diary", diaryFillCheck.diaryFill.value)
-                    startActivity(goMyDiaryWarning)
-                } else if (editDiary && !editOrNot) {
-                    // 수정인데 수정 안함
-                    val goEditWarning = Intent(context, DefaultDiaryWarningActivity::class.java)
-                    goEditWarning.putExtra("warningType", "editDiary")
-                    startActivity(goEditWarning)
-                } else {
-                    // 문제 없이 진행
-                    binding.diaryBtn.text = ""
-                    binding.diaryProgressBar.visibility = View.VISIBLE
+//            if (!partnerOrNot) {
+            if (!editDiary && !fulfilledOrNot) {
+                // 작성인데 빈칸이 있음
+                val goMyDiaryWarning = Intent(context, MyDiaryWarningActivity::class.java)
+                goMyDiaryWarning.putExtra("recognition", diaryFillCheck.recognitionFill.value)
+                goMyDiaryWarning.putExtra("mood", diaryFillCheck.moodFill.value)
+                goMyDiaryWarning.putExtra("diary", diaryFillCheck.diaryFill.value)
+                startActivity(goMyDiaryWarning)
+            } else if (editDiary && !editOrNot) {
+                // 수정인데 수정 안함
+                val goEditWarning = Intent(context, DefaultDiaryWarningActivity::class.java)
+                goEditWarning.putExtra("warningType", "editDiary")
+                startActivity(goEditWarning)
 
-                    val currentMilliseconds = System.currentTimeMillis()
-                    val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
-                    val writeTime = LocalDateTime.now()
-                    val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
+            } else if (editDiary && editOrNot && editTodayDiaryEmpty) {
+                val goMyDiaryWarning = Intent(context, MyDiaryWarningActivity::class.java)
+                goMyDiaryWarning.putExtra("diary", false)
+                startActivity(goMyDiaryWarning)
+            } else {
+                // 문제 없이 진행
 
-                    if (diaryFillCheck.photoFill.value == true || diaryEditCheck.photoEdit.value == true) {
-                        // 이미지 있는 경우
+                binding.diaryBtn.text = ""
+                binding.diaryProgressBar.visibility = View.VISIBLE
 
-                        val allStartsWithHttps = newImageViewModel.newImageList.value!!.all {
-                            it.toString().startsWith("https://")
-                        }
+                val currentMilliseconds = System.currentTimeMillis()
+                val writeMonthDate = yearMonthDateFormat.format(currentMilliseconds)
+                val writeTime = LocalDateTime.now()
+                val diaryId = "${userId}_${writeTime.toString().substring(0, 10)}"
 
-                        if (allStartsWithHttps) {
-                            newImageViewModel.uploadFirebaseComplete.value = true
-                        } else {
-                            for (i in 0 until newImageViewModel.newImageList.value!!.size) {
-                                if (!newImageViewModel.newImageList.value!![i].toString()
-                                        .startsWith("https://")
-                                ) {
-                                    uploadImageToFirebase(
-                                        newImageViewModel.newImageList.value!![i] as Uri,
-                                        i,
-                                    )
-                                }
+                if (diaryFillCheck.photoFill.value == true || diaryEditCheck.photoEdit.value == true) {
+                    // 이미지 있는 경우
+
+                    val allStartsWithHttps = newImageViewModel.newImageList.value!!.all {
+                        it.toString().startsWith("https://")
+                    }
+
+                    if (allStartsWithHttps) {
+                        newImageViewModel.uploadFirebaseComplete.value = true
+                    } else {
+                        for (i in 0 until newImageViewModel.newImageList.value!!.size) {
+                            if (!newImageViewModel.newImageList.value!![i].toString()
+                                    .startsWith("https://")
+                            ) {
+                                uploadImageToFirebase(
+                                    newImageViewModel.newImageList.value!![i] as Uri,
+                                    i,
+                                )
                             }
                         }
+                    }
 
+                } else {
+                    // 이미지 없는 경우
+
+                    // 인지
+                    if (!editDiary) {
+                        val recognitionSet = hashMapOf(
+                            "userId" to userId,
+                            "diaryId" to diaryId,
+                            "monthDate" to writeMonthDate,
+                            "timestamp" to FieldValue.serverTimestamp(),
+                            "recognitionResult" to recognitionResult,
+                            "recognitionQuestion" to recognitionQuestion,
+                            "firstNumber" to firstNumber,
+                            "secondNumber" to secondNumber,
+                            "operator" to operator,
+                            "realAnswer" to dbRealAnswer,
+                            "userAnswer" to dbUserAnswer,
+                        )
+                        db.collection("recognition").document(diaryId)
+                            .set(recognitionSet, SetOptions.merge())
+                    }
+
+                    // 일기 업로드
+                    if (!editDiary) {
+                        userDB.document("$userId").get()
+                            .addOnSuccessListener { document ->
+                                var username = document.data?.getValue("name")
+                                var stepCount = document.data?.getValue("todayStepCount")
+
+                                val diarySet = hashMapOf(
+                                    "diaryId" to diaryId,
+                                    "userId" to userId.toString(),
+                                    "monthDate" to writeMonthDate,
+                                    "timestamp" to FieldValue.serverTimestamp(),
+                                    "todayMood" to binding.todayMood.selectedItem,
+                                    "todayDiary" to (binding.todayDiary.text.toString()),
+                                    "images" to newImageViewModel.newImageList.value,
+                                    "numLikes" to 0,
+                                    "numComments" to 0,
+                                    "blockedBy" to ArrayList<String>(),
+                                    "secret" to secretStatus
+                                )
+
+                                diaryDB
+                                    .document(diaryId)
+                                    .set(diarySet, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        val fragment = requireActivity().supportFragmentManager
+//                                fragment.beginTransaction()
+//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
+//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
+
+                                        val allFragment = AllDiaryFragmentTwo()
+                                        val bundle = Bundle()
+                                        bundle.putString("diaryType", "my")
+                                        allFragment.arguments = bundle
+                                        fragment.beginTransaction()
+                                            .replace(R.id.enterFrameLayout, allFragment)
+                                            .commit()
+
+                                        requireActivity().bottomNav.selectedItemId =
+                                            R.id.ourTodayMenu
+                                    }
+                            }
                     } else {
-                        // 이미지 없는 경우
+                        // 일기 수정
+                        userDB.document("$userId").get()
+                            .addOnSuccessListener { document ->
+                                var username = document.data?.getValue("name")
+                                var stepCount = document.data?.getValue("todayStepCount")
 
-                        // 인지
-                        if (!editDiary) {
-                            val recognitionSet = hashMapOf(
-                                "userId" to userId,
-                                "diaryId" to diaryId,
-                                "monthDate" to writeMonthDate,
-                                "timestamp" to FieldValue.serverTimestamp(),
-                                "recognitionResult" to recognitionResult,
-                                "recognitionQuestion" to recognitionQuestion,
-                                "firstNumber" to firstNumber,
-                                "secondNumber" to secondNumber,
-                                "operator" to operator,
-                                "realAnswer" to dbRealAnswer,
-                                "userAnswer" to dbUserAnswer,
-                            )
-                            db.collection("recognition").document(diaryId)
-                                .set(recognitionSet, SetOptions.merge())
-                        }
+                                val diarySet = hashMapOf(
+                                    "lastUpdate" to FieldValue.serverTimestamp(),
+                                    "todayMood" to binding.todayMood.selectedItem,
+                                    "todayDiary" to (binding.todayDiary.text.toString()),
+                                    "images" to newImageViewModel.newImageList.value,
+                                    "secret" to secretStatus
+                                )
 
-                        // 일기 업로드
-                        if (!editDiary) {
-                            userDB.document("$userId").get()
-                                .addOnSuccessListener { document ->
-                                    var username = document.data?.getValue("name")
-                                    var stepCount = document.data?.getValue("todayStepCount")
-
-                                    val diarySet = hashMapOf(
-                                        "diaryId" to diaryId,
-                                        "userId" to userId.toString(),
-                                        "monthDate" to writeMonthDate,
-                                        "timestamp" to FieldValue.serverTimestamp(),
-                                        "todayMood" to binding.todayMood.selectedItem,
-                                        "todayDiary" to (binding.todayDiary.text.toString()),
-                                        "images" to newImageViewModel.newImageList.value,
-                                        "numLikes" to 0,
-                                        "numComments" to 0,
-                                        "blockedBy" to ArrayList<String>(),
-                                        "secret" to secretStatus
-                                    )
-
-                                    diaryDB
-                                        .document(diaryId)
-                                        .set(diarySet, SetOptions.merge())
-                                        .addOnSuccessListener {
-                                            val fragment = requireActivity().supportFragmentManager
+                                diaryDB
+                                    .document(diaryId)
+                                    .set(diarySet, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        val fragment = requireActivity().supportFragmentManager
 //                                fragment.beginTransaction()
 //                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
 //                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
 
-                                            val allFragment = AllDiaryFragmentTwo()
-                                            val bundle = Bundle()
-                                            bundle.putString("diaryType", "my")
-                                            allFragment.arguments = bundle
-                                            fragment.beginTransaction()
-                                                .replace(R.id.enterFrameLayout, allFragment)
-                                                .commit()
+                                        val allFragment = AllDiaryFragmentTwo()
+                                        val bundle = Bundle()
+                                        bundle.putString("diaryType", "my")
+                                        allFragment.arguments = bundle
+                                        fragment.beginTransaction()
+                                            .replace(R.id.enterFrameLayout, allFragment)
+                                            .commit()
 
-                                            requireActivity().bottomNav.selectedItemId =
-                                                R.id.ourTodayMenu
-                                        }
-                                }
-                        } else {
-                            userDB.document("$userId").get()
-                                .addOnSuccessListener { document ->
-                                    var username = document.data?.getValue("name")
-                                    var stepCount = document.data?.getValue("todayStepCount")
-
-                                    val diarySet = hashMapOf(
-                                        "diaryId" to diaryId,
-                                        "userId" to userId.toString(),
-                                        "monthDate" to writeMonthDate,
-                                        "lastUpdate" to FieldValue.serverTimestamp(),
-                                        "todayMood" to binding.todayMood.selectedItem,
-                                        "todayDiary" to (binding.todayDiary.text.toString()),
-                                        "images" to newImageViewModel.newImageList.value,
-                                        "numLikes" to 0,
-                                        "numComments" to 0,
-                                        "blockedBy" to ArrayList<String>(),
-                                        "secret" to secretStatus
-                                    )
-
-                                    diaryDB
-                                        .document(diaryId)
-                                        .set(diarySet, SetOptions.merge())
-                                        .addOnSuccessListener {
-                                            val fragment = requireActivity().supportFragmentManager
-//                                fragment.beginTransaction()
-//                                    .replace(R.id.enterFrameLayout, AllDiaryFragmentTwo()).commit()
-//                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
-
-                                            val allFragment = AllDiaryFragmentTwo()
-                                            val bundle = Bundle()
-                                            bundle.putString("diaryType", "my")
-                                            allFragment.arguments = bundle
-                                            fragment.beginTransaction()
-                                                .replace(R.id.enterFrameLayout, allFragment)
-                                                .commit()
-
-                                            requireActivity().bottomNav.selectedItemId =
-                                                R.id.ourTodayMenu
-                                        }
-                                }
-                        }
+                                        requireActivity().bottomNav.selectedItemId =
+                                            R.id.ourTodayMenu
+                                    }
+                            }
                     }
                 }
-            } else {
-                // 파트너
-                val goPartnerWarning =
-                    Intent(context, DefaultDiaryWarningActivity::class.java)
-                goPartnerWarning.putExtra("warningType", "partnerDiary")
-                startActivity(goPartnerWarning)
             }
+//            } else {
+//                // 파트너
+//                val goPartnerWarning =
+//                    Intent(context, DefaultDiaryWarningActivity::class.java)
+//                goPartnerWarning.putExtra("warningType", "partnerDiary")
+//                startActivity(goPartnerWarning)
+//            }
 
         }
 
@@ -1455,7 +1413,10 @@ class MyDiaryFragment : Fragment() {
                         itemListItemsString.add(imageUri.toString())
 
                         val currentDateTime = LocalDate.now().toString()
-                        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+                        val userPref = mcontext.getSharedPreferences(
+                            "diary_${userId}_${currentDateTime}",
+                            Context.MODE_PRIVATE
+                        )
                         val userPrefEdit = userPref.edit()
                         userPrefEdit.putBoolean("imageDone", true)
 
@@ -1473,7 +1434,6 @@ class MyDiaryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-
         // 사진 삭제
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             deleteImageFunction,
@@ -1505,7 +1465,10 @@ class MyDiaryFragment : Fragment() {
         manAnimation.start()
 
         val currentDateTime = LocalDate.now().toString()
-        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+        val userPref = mcontext.getSharedPreferences(
+            "diary_${userId}_${currentDateTime}",
+            Context.MODE_PRIVATE
+        )
 
         val moodDonePref = userPref.getBoolean("moodDone", false)
         val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
@@ -1516,6 +1479,7 @@ class MyDiaryFragment : Fragment() {
         fulfilledOrNot = recognitionDonePref && moodDonePref && diaryDonePref
 
         if (recognitionDonePref) {
+            binding.recognitionCheckBox.setImageResource(R.drawable.ic_checkbox_yes)
             val writingRecognitionPref = userPref.getString("writingRecognition", "")
             val firstNumberPref = userPref.getString("firstNumber", "")
             val secondNumberPref = userPref.getString("secondNumber", "")
@@ -1540,30 +1504,30 @@ class MyDiaryFragment : Fragment() {
             dbRealAnswer = dbRealAnswerPref!!
             dbUserAnswer = writingRecognitionPref!!
 
-            if(!editDiary) {
+            if (!editDiary) {
                 diaryFillCheck.recognitionFill.value = true
             } else {
                 // no
             }
         }
 
-        if(moodDonePref) {
+        if (moodDonePref) {
             val writingMood = userPref.getInt("writingMood", 0)
             binding.todayMood.setSelection(writingMood)
 
-            if(!editDiary) {
+            if (!editDiary) {
                 diaryFillCheck.moodFill.value = true
             } else {
                 diaryEditCheck.moodEdit.value = true
             }
         }
 
-        if(diaryDonePref) {
+        if (diaryDonePref && !recordResume) {
             val writingDiary = userPref.getString("writingDiary", "")
             binding.todayDiary.setText(writingDiary)
             binding.todayDiary.setSelection(binding.todayDiary.text.length)
 
-            if(!editDiary) {
+            if (!editDiary) {
                 diaryFillCheck.diaryFill.value = true
             } else {
                 diaryEditCheck.diaryEdit.value = true
@@ -1573,13 +1537,13 @@ class MyDiaryFragment : Fragment() {
         // 비밀 업데이트
         secretStatus = secretStatusPref
 
-        if(!editDiary) {
+        if (!editDiary) {
             diaryFillCheck.secretFill.value = true
         } else {
             diaryEditCheck.secretEdit.value = true
         }
 
-        if(imageDonePref && !photoResume && !recordResume) {
+        if (imageDonePref && !photoResume && !recordResume) {
             val writingImage = userPref.getString("imageArray", "")
             val jsonString = """${writingImage}"""
             val gson = Gson()
@@ -1590,7 +1554,7 @@ class MyDiaryFragment : Fragment() {
                 val uriItem = Uri.parse(item)
                 newImageViewModel.addImage(uriItem)
                 itemListItems.add(uriItem)
-                photoAdapter.notifyItemInserted(itemListItems.size -1)
+                photoAdapter.notifyItemInserted(itemListItems.size - 1)
             }
 
             if (!editDiary) diaryFillCheck.photoFill.value =
@@ -1600,7 +1564,6 @@ class MyDiaryFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-
         val activity = activity
         if (activity != null) {
             val window = requireActivity().window
@@ -1612,7 +1575,10 @@ class MyDiaryFragment : Fragment() {
             .unregisterReceiver(deleteImageFunction);
 
         val currentDateTime = LocalDate.now().toString()
-        val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+        val userPref = mcontext.getSharedPreferences(
+            "diary_${userId}_${currentDateTime}",
+            Context.MODE_PRIVATE
+        )
         val userPrefEdit = userPref.edit()
 
         userPrefEdit.putString("writingDiary", binding.todayDiary.text.toString()).apply()
@@ -1715,7 +1681,10 @@ class MyDiaryFragment : Fragment() {
             secretStatus = newSecretStatus
 
             val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPref = mcontext.getSharedPreferences(
+                "diary_${userId}_${currentDateTime}",
+                Context.MODE_PRIVATE
+            )
             val userPrefEdit = userPref.edit()
             userPrefEdit.putBoolean("secretStatus", newSecretStatus).apply()
 
@@ -1740,7 +1709,10 @@ class MyDiaryFragment : Fragment() {
 
             itemListItemsString.removeAt(deleteImagePosition)
             val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences("diary_${userId}_${currentDateTime}", Context.MODE_PRIVATE)
+            val userPref = mcontext.getSharedPreferences(
+                "diary_${userId}_${currentDateTime}",
+                Context.MODE_PRIVATE
+            )
             val userPrefEdit = userPref.edit()
             userPrefEdit.putBoolean("imageDone", true)
 
@@ -1897,22 +1869,22 @@ class MyDiaryFragment : Fragment() {
             .get()
             .await()
 
-        dataSteps.data?.forEach {(period, dateStepCount) ->
-                    if (dateStepCount.toString().toInt() < 10000) {
-                        if (dateStepCount.toString().toInt() > 0) {
-                            // 걸음수 0~만보 사이 (일반)
-                            val dateStepInt = (dateStepCount as Long).toInt()
-                            val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
+        dataSteps.data?.forEach { (period, dateStepCount) ->
+            if (dateStepCount.toString().toInt() < 10000) {
+                if (dateStepCount.toString().toInt() > 0) {
+                    // 걸음수 0~만보 사이 (일반)
+                    val dateStepInt = (dateStepCount as Long).toInt()
+                    val dateToPoint = ((Math.floor(dateStepInt / 1000.0)) * 10).toInt()
 
-                            certainUserPoint += dateToPoint
+                    certainUserPoint += dateToPoint
 
-                        } else {
-                            // 걸음수 0 보다 적은 경우
-                        }
-                    } else {
-                        // 걸음수 만보 보다 큰 경우
-                        certainUserPoint += 100
-                    }
+                } else {
+                    // 걸음수 0 보다 적은 경우
+                }
+            } else {
+                // 걸음수 만보 보다 큰 경우
+                certainUserPoint += 100
+            }
 
         }
     }

@@ -282,23 +282,39 @@ class CommentActivity : FragmentActivity() {
 
             if (BtnStatus == BtnStatusEnum.WRITE_COMMENT) {
                 // diary +1
-                DiaryRef.update("numComments", FieldValue.increment(1))
-                    .addOnSuccessListener {
-                        // 전체 다이어리 화면
-                        DiaryRef
-                            .get()
-                            .addOnSuccessListener { document ->
-                                val createNumComments =
-                                    document.data?.getValue("numComments").toString().toInt()
 
-                                val createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
-                                createIntent.setAction("COMMENT_ACTION")
-                                createIntent.putExtra("newDiaryId", diaryId)
-                                createIntent.putExtra("newNumComments", createNumComments)
-                                LocalBroadcastManager.getInstance(this!!)
-                                    .sendBroadcast(createIntent)
-                            }
+                DiaryRef
+                    .get()
+                    .addOnSuccessListener { document ->
+                        val createNumComments =
+                            document.data?.getValue("numComments").toString().toInt()
+
+                        val createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
+                        createIntent.setAction("COMMENT_ACTION")
+                        createIntent.putExtra("newDiaryId", diaryId)
+                        createIntent.putExtra("newNumComments", createNumComments+1)
+                        LocalBroadcastManager.getInstance(this!!)
+                            .sendBroadcast(createIntent)
                     }
+
+
+//                DiaryRef.update("numComments", FieldValue.increment(1))
+//                    .addOnSuccessListener {
+//                        // 전체 다이어리 화면
+//                        DiaryRef
+//                            .get()
+//                            .addOnSuccessListener { document ->
+//                                val createNumComments =
+//                                    document.data?.getValue("numComments").toString().toInt()
+//
+//                                val createIntent = Intent(this, AllDiaryFragmentTwo::class.java)
+//                                createIntent.setAction("COMMENT_ACTION")
+//                                createIntent.putExtra("newDiaryId", diaryId)
+//                                createIntent.putExtra("newNumComments", createNumComments)
+//                                LocalBroadcastManager.getInstance(this!!)
+//                                    .sendBroadcast(createIntent)
+//                            }
+//                    }
 
                 // diary DB 내 comments 추가
                 val timestamp = System.currentTimeMillis()
@@ -589,7 +605,7 @@ class CommentActivity : FragmentActivity() {
                     val intent = Intent(context, AllDiaryFragmentTwo::class.java)
                     intent.setAction("COMMENT_ACTION")
                     intent.putExtra("newDiaryId", diaryId)
-                    intent.putExtra("newNumComments", newNumComments)
+                    intent.putExtra("newNumComments", newNumComments-1)
                     LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
                 }
         }

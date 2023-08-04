@@ -17,6 +17,7 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -47,6 +48,7 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -83,6 +85,8 @@ class EditDiaryActivity : AppCompatActivity() {
     private var editButtonClick: Boolean = false
 
     companion object {
+        private var editTodayDiaryEmptyForEditDiary: Boolean = false
+
         private var secretStatusForEditDiary: Boolean = false
 
         private var photoResumeForEditDiary: Boolean = false
@@ -356,7 +360,10 @@ class EditDiaryActivity : AppCompatActivity() {
                     }
 
                     override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                        if (char != oldDiary) diaryEditCheck.diaryEdit.value = true
+                        if (char != oldDiary) {
+                            diaryEditCheck.diaryEdit.value = true
+                            editTodayDiaryEmptyForEditDiary = char?.trim().toString().isEmpty()
+                        }
                     }
 
                     override fun afterTextChanged(p0: Editable?) {
@@ -531,11 +538,17 @@ class EditDiaryActivity : AppCompatActivity() {
                 val goEditWarning = Intent(this, DefaultDiaryWarningActivity::class.java)
                 goEditWarning.putExtra("warningType","editDiary")
                 startActivity(goEditWarning)
-            } else {
+            } else if(editOrNotForEditDiary && editTodayDiaryEmptyForEditDiary) {
+
+                val goMyDiaryWarning = Intent(this, MyDiaryWarningActivity::class.java)
+                goMyDiaryWarning.putExtra("diary", false)
+                startActivity(goMyDiaryWarning)
+            }else {
                 resumePause = false
 
                 binding.diaryBtn.text = ""
                 binding.diaryProgressBar.visibility = View.VISIBLE
+                newDiarySet.put("lastUpdate", FieldValue.serverTimestamp())
 
                 if (diaryEditCheck.photoEdit.value == true) {
 
@@ -672,6 +685,7 @@ class EditDiaryActivity : AppCompatActivity() {
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+
         recordResumeForEditDiary = true
 
         if (result.resultCode == RESULT_OK) {

@@ -58,7 +58,7 @@ class YoutubeAdapter(val context: Context, private val youtubeItems: ArrayList<Y
         holder.itemView.youtubeView.setOnClickListener {
             val goYoutubePlay = Intent(context, EnlargeYoutubeActivity::class.java)
             goYoutubePlay.putExtra("link", youtubeItems[position].link)
-            goYoutubePlay.putExtra("videoId", youtubeItems[position].videoId)
+            goYoutubePlay.putExtra("documentId", youtubeItems[position].documentId)
             context.startActivity(goYoutubePlay)
         }
     }

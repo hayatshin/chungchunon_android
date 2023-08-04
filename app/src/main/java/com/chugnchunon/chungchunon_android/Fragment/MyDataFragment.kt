@@ -155,10 +155,10 @@ class MyDataFragment : Fragment() {
             val newNumLikes = intent?.getIntExtra("newNumLikes", 0)
             val DiaryRef = diaryDB.document("$toggleDiaryId")
 
-            val newLikeNum = hashMapOf(
-                "numLikes" to newNumLikes
-            )
-            DiaryRef.set(newLikeNum, SetOptions.merge())
+//            val newLikeNum = hashMapOf(
+//                "numLikes" to newNumLikes
+//            )
+//            DiaryRef.set(newLikeNum, SetOptions.merge())
 
             val likeUserSet = hashMapOf(
                 "id" to userId,

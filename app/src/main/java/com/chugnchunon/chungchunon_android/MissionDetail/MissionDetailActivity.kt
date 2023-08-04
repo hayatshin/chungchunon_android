@@ -103,11 +103,11 @@ class MissionDetailActivity : Activity() {
                 if (task.isSuccessful) {
                     val userCheck = task.result
 
-                    if (partnerOrNotForMission) {
-                        // 파트너
-                        binding.mdParticipationBtn.alpha = 0.4f
-                        binding.mProgressTextBox.visibility = View.GONE
-                    } else {
+//                    if (partnerOrNotForMission) {
+//                        // 파트너
+//                        binding.mdParticipationBtn.alpha = 0.4f
+//                        binding.mProgressTextBox.visibility = View.GONE
+//                    } else {
                         // 파트너 아닌 경우
                         if (userCheck != null) {
                             if (userCheck.exists()) {
@@ -127,7 +127,7 @@ class MissionDetailActivity : Activity() {
                             binding.mdParticipationBtn.alpha = 1f
                             binding.mProgressTextBox.visibility = View.GONE
                         }
-                    }
+//                    }
 
                 }
             }
@@ -138,12 +138,12 @@ class MissionDetailActivity : Activity() {
         setContentView(binding.root)
 
         // 파트너 체크
-        userDB.document("$userId")
-            .get()
-            .addOnSuccessListener { userData ->
-                val userType = userData.data?.getValue("userType")
-                partnerOrNotForMission = userType == "파트너"
-            }
+//        userDB.document("$userId")
+//            .get()
+//            .addOnSuccessListener { userData ->
+//                val userType = userData.data?.getValue("userType")
+//                partnerOrNotForMission = userType == "파트너"
+//            }
 
         // 데이터 받기
         mdDocId = intent.getStringExtra("mdDocID").toString()
@@ -170,34 +170,53 @@ class MissionDetailActivity : Activity() {
                 if (task.isSuccessful) {
                     val userCheck = task.result
 
-                    userDB.document("$userId")
-                        .get()
-                        .addOnSuccessListener { userData ->
-                            val userType = userData.data?.getValue("userType")
-                            if (userType == "파트너") {
-                                binding.mdParticipationBtn.alpha = 0.4f
-                                binding.mProgressTextBox.visibility = View.GONE
-                            } else {
-                                if (userCheck != null) {
-                                    if (userCheck.exists()) {
-                                        // 이미 참여
-                                        participateState = true
-                                        binding.mdParticipationBtn.alpha = 0.4f
-                                        binding.mProgressTextBox.visibility = View.VISIBLE
+                    if (userCheck != null) {
+                        if (userCheck.exists()) {
+                            // 이미 참여
+                            participateState = true
+                            binding.mdParticipationBtn.alpha = 0.4f
+                            binding.mProgressTextBox.visibility = View.VISIBLE
 
-                                        drawProgress()
-                                    } else {
-                                        participateState = false
-                                        binding.mdParticipationBtn.alpha = 1f
-                                        binding.mProgressTextBox.visibility = View.GONE
-                                    }
-                                } else {
-                                    participateState = false
-                                    binding.mdParticipationBtn.alpha = 1f
-                                    binding.mProgressTextBox.visibility = View.GONE
-                                }
-                            }
+                            drawProgress()
+                        } else {
+                            participateState = false
+                            binding.mdParticipationBtn.alpha = 1f
+                            binding.mProgressTextBox.visibility = View.GONE
                         }
+                    } else {
+                        participateState = false
+                        binding.mdParticipationBtn.alpha = 1f
+                        binding.mProgressTextBox.visibility = View.GONE
+                    }
+
+//                    userDB.document("$userId")
+//                        .get()
+//                        .addOnSuccessListener { userData ->
+//                            val userType = userData.data?.getValue("userType")
+//                            if (userType == "파트너") {
+//                                binding.mdParticipationBtn.alpha = 0.4f
+//                                binding.mProgressTextBox.visibility = View.GONE
+//                            } else {
+//                                if (userCheck != null) {
+//                                    if (userCheck.exists()) {
+//                                        // 이미 참여
+//                                        participateState = true
+//                                        binding.mdParticipationBtn.alpha = 0.4f
+//                                        binding.mProgressTextBox.visibility = View.VISIBLE
+//
+//                                        drawProgress()
+//                                    } else {
+//                                        participateState = false
+//                                        binding.mdParticipationBtn.alpha = 1f
+//                                        binding.mProgressTextBox.visibility = View.GONE
+//                                    }
+//                                } else {
+//                                    participateState = false
+//                                    binding.mdParticipationBtn.alpha = 1f
+//                                    binding.mProgressTextBox.visibility = View.GONE
+//                                }
+//                            }
+//                        }
                 }
             }
 
@@ -225,16 +244,16 @@ class MissionDetailActivity : Activity() {
 
         binding.mdParticipationBtn.setOnClickListener {
 
-            if (partnerOrNotForMission) {
-                // 파트너
-                val goMissionResult =
-                    Intent(this, DefaultDiaryWarningActivity::class.java)
-                goMissionResult.putExtra("warningType", "partnerMission")
-                startActivityForResult(
-                    goMissionResult,
-                    REFRESH_RESULT_MISSION_CODE
-                )
-            } else {
+//            if (partnerOrNotForMission) {
+//                // 파트너
+//                val goMissionResult =
+//                    Intent(this, DefaultDiaryWarningActivity::class.java)
+//                goMissionResult.putExtra("warningType", "partnerMission")
+//                startActivityForResult(
+//                    goMissionResult,
+//                    REFRESH_RESULT_MISSION_CODE
+//                )
+//            } else {
                 if (!participateState) {
                     // 참여 안 한 상태
 
@@ -316,7 +335,7 @@ class MissionDetailActivity : Activity() {
                     goMissionResult.putExtra("participateState", "Already")
                     startActivityForResult(goMissionResult, REFRESH_RESULT_MISSION_CODE)
                 }
-            }
+//            }
         }
 
         val pattern = "yyyy-MM-dd"

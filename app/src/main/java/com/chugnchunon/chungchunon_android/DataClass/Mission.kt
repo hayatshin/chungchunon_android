@@ -2,8 +2,8 @@ package com.chugnchunon.chungchunon_android.DataClass
 
 data class Mission(
     var documentId: String,
-    var community: String,
-    var communityLogo: String,
+    var contractName: String,
+    var contractLogo: String,
     var missionImage: String,
     var title: String,
     var startPeriod: String,

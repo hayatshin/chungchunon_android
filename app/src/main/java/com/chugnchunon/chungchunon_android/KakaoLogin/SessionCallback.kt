@@ -89,6 +89,7 @@ class SessionCallback(val context: MainActivity) : ISessionCallback {
                                             val userDocument = task.result
                                             if (userDocument.exists()) {
                                                 // user 이미 존재
+
                                                 val userName = userDocument.data!!.getValue("name").toString()
                                                 if(userName == "탈퇴자") {
                                                     // 탈퇴한 경우
