@@ -657,7 +657,7 @@ class PeriodRegionRankingFragment : Fragment() {
                     val userSmallRegion = document.data.getValue("smallRegion").toString()
                     val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
 
-                    if (diaryUserFullRegion == myUserFullRegion) {
+                    if (diaryUserFullRegion == myUserFullRegion && userId != "kakao:2358828971") {
                         val userEntry = RankingLine(
                             0,
                             userId,
@@ -685,30 +685,28 @@ class PeriodRegionRankingFragment : Fragment() {
                 val userName = document.data.getValue("name").toString()
                 val userType = document.data.getValue("userType").toString()
 
-                if (userName != "탈퇴자") {
-                    try {
-                        val userId = document.data?.getValue("userId").toString()
-                        val username = document.data.getValue("name").toString()
-                        val userAvatar = document.data.getValue("avatar").toString()
-                        val userRegion = document.data.getValue("region").toString()
-                        val userSmallRegion = document.data.getValue("smallRegion").toString()
-                        val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
+                try {
+                    val userId = document.data?.getValue("userId").toString()
+                    val username = document.data.getValue("name").toString()
+                    val userAvatar = document.data.getValue("avatar").toString()
+                    val userRegion = document.data.getValue("region").toString()
+                    val userSmallRegion = document.data.getValue("smallRegion").toString()
+                    val diaryUserFullRegion = "${userRegion} ${userSmallRegion}"
 
-                        if (communityUsers.contains(userId)) {
-                            val userEntry = RankingLine(
-                                0,
-                                userId,
-                                username,
-                                userAvatar,
-                                0,
-                            )
+                    if (communityUsers.contains(userId) && userId != "kakao:2358828971") {
+                        val userEntry = RankingLine(
+                            0,
+                            userId,
+                            username,
+                            userAvatar,
+                            0,
+                        )
 
-                            userPointArray.add(userEntry)
-                        }
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                        userPointArray.add(userEntry)
                     }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
 

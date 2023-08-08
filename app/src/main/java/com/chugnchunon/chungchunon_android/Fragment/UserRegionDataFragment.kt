@@ -386,7 +386,7 @@ class UserRegionDataFragment : Fragment() {
                     if (!blockedList.contains((userId))) {
                         // 내가 차단하지 않은 글
                         val secretStatus = document.data.getValue("secret") as Boolean
-                        if (secretStatus == false) {
+                        if (!secretStatus && !document.data.containsKey("forceSecret")) {
                             // 비밀이 아닌 글 -> 가져올 전체 일기
                             val diaryUserId =
                                 document.data?.getValue("userId").toString()
@@ -417,7 +417,7 @@ class UserRegionDataFragment : Fragment() {
                                     val communityUsers =
                                         communityData.data?.getValue("users") as ArrayList<String>
 
-                                    if (communityUsers.contains(diaryUserId)) {
+                                    if (diaryUserId != "kakao:2358828971" &&  communityUsers.contains(diaryUserId)) {
 
                                         // 유저 정보
                                         userDB.document(diaryUserId)
@@ -466,7 +466,8 @@ class UserRegionDataFragment : Fragment() {
                                                                         numLikes = numLikes,
                                                                         numComments = numComments,
                                                                         images = diaryImages,
-                                                                        secret = false
+                                                                        secret = false,
+                                                                        forceSecret = false
                                                                     )
 
                                                                 } else {
@@ -484,7 +485,8 @@ class UserRegionDataFragment : Fragment() {
                                                                         diary = diaryDiary,
                                                                         numLikes = numLikes,
                                                                         numComments = numComments,
-                                                                        secret = false
+                                                                        secret = false,
+                                                                        forceSecret = false
                                                                     )
                                                                 }
                                                                 userRegionDiaryItems.add(diarySet)
@@ -535,7 +537,8 @@ class UserRegionDataFragment : Fragment() {
                                                                         numLikes = numLikes,
                                                                         numComments = numComments,
                                                                         images = diaryImages,
-                                                                        secret = false
+                                                                        secret = false,
+                                                                        forceSecret = false
                                                                     )
 
                                                                 } else {
@@ -553,7 +556,8 @@ class UserRegionDataFragment : Fragment() {
                                                                         diary = diaryDiary,
                                                                         numLikes = numLikes,
                                                                         numComments = numComments,
-                                                                        secret = false
+                                                                        secret = false,
+                                                                        forceSecret = false
                                                                     )
                                                                 }
                                                                 userRegionDiaryItems.add(diarySet)
@@ -618,7 +622,8 @@ class UserRegionDataFragment : Fragment() {
                                                             numLikes = numLikes,
                                                             numComments = numComments,
                                                             images = diaryImages,
-                                                            secret = false
+                                                            secret = false,
+                                                            forceSecret = false
                                                         )
 
                                                     } else {
@@ -636,7 +641,8 @@ class UserRegionDataFragment : Fragment() {
                                                             diary = diaryDiary,
                                                             numLikes = numLikes,
                                                             numComments = numComments,
-                                                            secret = false
+                                                            secret = false,
+                                                            forceSecret = false
                                                         )
                                                     }
                                                     userRegionDiaryItems.add(diarySet)
@@ -749,7 +755,7 @@ class UserRegionDataFragment : Fragment() {
                             if (!blockedList.contains((userId))) {
                                 // 내가 차단하지 않은 글
                                 val secretStatus = document.data.getValue("secret") as Boolean
-                                if (secretStatus == false) {
+                                if (!secretStatus && !document.data.containsKey("forceSecret")) {
                                     // 비밀이 아닌 글 -> 가져올 전체 일기
                                     val diaryUserId =
                                         document.data?.getValue("userId").toString()
@@ -799,7 +805,8 @@ class UserRegionDataFragment : Fragment() {
                                                             numLikes = numLikes,
                                                             numComments = numComments,
                                                             images = diaryImages,
-                                                            secret = false
+                                                            secret = false,
+                                                            forceSecret = false
                                                         )
 
                                                     } else {
@@ -817,7 +824,8 @@ class UserRegionDataFragment : Fragment() {
                                                             diary = diaryDiary,
                                                             numLikes = numLikes,
                                                             numComments = numComments,
-                                                            secret = false
+                                                            secret = false,
+                                                            forceSecret = false
                                                         )
                                                     }
 
@@ -850,7 +858,7 @@ class UserRegionDataFragment : Fragment() {
                                                 }
                                         }
 
-                                    } else if(!diaryUserId.startsWith("notice:community")) {
+                                    } else if(diaryUserId != "kakao:2358828971" && !diaryUserId.startsWith("notice:community")) {
                                         // 유저 정보
                                         userDB.document(diaryUserId)
                                             .get()
@@ -908,7 +916,8 @@ class UserRegionDataFragment : Fragment() {
                                                                             numLikes = numLikes,
                                                                             numComments = numComments,
                                                                             images = diaryImages,
-                                                                            secret = false
+                                                                            secret = false,
+                                                                            forceSecret = false,
                                                                         )
 
                                                                     } else {
@@ -926,7 +935,8 @@ class UserRegionDataFragment : Fragment() {
                                                                             diary = diaryDiary,
                                                                             numLikes = numLikes,
                                                                             numComments = numComments,
-                                                                            secret = false
+                                                                            secret = false,
+                                                                            forceSecret = false
                                                                         )
                                                                     }
                                                                     userRegionDiaryItems.add(diarySet)
@@ -977,7 +987,8 @@ class UserRegionDataFragment : Fragment() {
                                                                             numLikes = numLikes,
                                                                             numComments = numComments,
                                                                             images = diaryImages,
-                                                                            secret = false
+                                                                            secret = false,
+                                                                            forceSecret = false
                                                                         )
 
                                                                     } else {
@@ -995,7 +1006,8 @@ class UserRegionDataFragment : Fragment() {
                                                                             diary = diaryDiary,
                                                                             numLikes = numLikes,
                                                                             numComments = numComments,
-                                                                            secret = false
+                                                                            secret = false,
+                                                                            forceSecret = false
                                                                         )
                                                                     }
                                                                     userRegionDiaryItems.add(diarySet)

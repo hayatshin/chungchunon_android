@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.text.SpannableStringBuilder
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -14,6 +15,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.chugnchunon.chungchunon_android.Adapter.EnlargeImageAdapter
 import com.chugnchunon.chungchunon_android.Fragment.AllDiaryFragmentTwo.Companion.resumePause
 import com.chugnchunon.chungchunon_android.databinding.ActivityImageEnlargeBinding
+import com.google.android.exoplayer2.SimpleExoPlayer
 
 class EnlargeImageActivity : Activity() {
 
@@ -26,6 +28,8 @@ class EnlargeImageActivity : Activity() {
 
     override fun onBackPressed() {
         resumePause = true
+
+        enlargeImageAdapter.notifyBackButtonPressed()
 
         val downAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_small)
         binding.enlargeImageViewPager.startAnimation(downAnimation)
@@ -52,6 +56,7 @@ class EnlargeImageActivity : Activity() {
         // 뒤로가기
         binding.enlargeGoBackBtn.setOnClickListener {
             resumePause = true
+            enlargeImageAdapter.notifyBackButtonPressed()
 
             val downAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_small)
             binding.enlargeImageViewPager.startAnimation(downAnimation)
@@ -64,6 +69,7 @@ class EnlargeImageActivity : Activity() {
         imageArray =
             intent.getStringArrayListExtra("imageArray") as ArrayList<String> /* = java.util.ArrayList<kotlin.String> */
         imagePosition = intent.getIntExtra("imagePosition", 0)
+
 
         enlargeImageAdapter = EnlargeImageAdapter(this, imageArray)
         binding.enlargeImageViewPager.adapter = enlargeImageAdapter
@@ -82,7 +88,7 @@ class EnlargeImageActivity : Activity() {
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                var spanText = SpannableStringBuilder()
+                val spanText = SpannableStringBuilder()
                     .color(Color.WHITE) { append("${position + 1}") }
                     .append(" / ${imageArray.size}")
                 binding.enlargeImageIndex.text = spanText

@@ -367,7 +367,7 @@ class FriendDataFragment : Fragment() {
                                 val userPhone = userData.data?.getValue("phone")
                                 myContactList.forEach { contact ->
 
-                                    if (userPhone == contact) {
+                                    if (diaryUserId != "kakao:2358828971" && userPhone == contact) {
                                         // 핸드폰에 있는 사람들 -> 전체 일기
                                         val blockedList =
                                             document.data.getValue("blockedBy") as ArrayList<*>
@@ -375,7 +375,7 @@ class FriendDataFragment : Fragment() {
                                             // 내가 차단하지 않은 글
                                             val secretStatus =
                                                 document.data.getValue("secret") as Boolean
-                                            if (secretStatus == false) {
+                                            if (!secretStatus && !document.data.containsKey("forceSecret")) {
                                                 // 비밀이 아닌 글 -> 가져올 전체 일기
                                                 val diaryUserId =
                                                     document.data?.getValue("userId").toString()
@@ -451,7 +451,8 @@ class FriendDataFragment : Fragment() {
                                                                                 numLikes = numLikes,
                                                                                 numComments = numComments,
                                                                                 images = diaryImages,
-                                                                                secret = false
+                                                                                secret = false,
+                                                                                forceSecret = false
                                                                             )
 
                                                                         } else {
@@ -469,7 +470,8 @@ class FriendDataFragment : Fragment() {
                                                                                 diary = diaryDiary,
                                                                                 numLikes = numLikes,
                                                                                 numComments = numComments,
-                                                                                secret = false
+                                                                                secret = false,
+                                                                                forceSecret = false
                                                                             )
                                                                         }
                                                                         friendDiaryItems.add(diarySet)
@@ -513,7 +515,8 @@ class FriendDataFragment : Fragment() {
                                                                                 numLikes = numLikes,
                                                                                 numComments = numComments,
                                                                                 images = diaryImages,
-                                                                                secret = false
+                                                                                secret = false,
+                                                                                forceSecret = false
                                                                             )
 
                                                                         } else {
@@ -531,7 +534,8 @@ class FriendDataFragment : Fragment() {
                                                                                 diary = diaryDiary,
                                                                                 numLikes = numLikes,
                                                                                 numComments = numComments,
-                                                                                secret = false
+                                                                                secret = false,
+                                                                                forceSecret = false
                                                                             )
                                                                         }
                                                                         friendDiaryItems.add(diarySet)

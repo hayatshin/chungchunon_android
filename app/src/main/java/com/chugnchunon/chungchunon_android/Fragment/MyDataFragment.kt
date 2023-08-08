@@ -243,6 +243,7 @@ class MyDataFragment : Fragment() {
                             val diaryDiary =
                                 document.data?.getValue("todayDiary").toString()
                             val diarySecret = document.data?.getValue("secret") as Boolean
+                            val diaryForceSecret = if(document.data?.containsKey("forceSecret") as Boolean) document.data?.getValue("forceSecret") as Boolean else false
 
                             var userFinalId = "default_user"
                             var userFinalName = "탈퇴자"
@@ -301,7 +302,8 @@ class MyDataFragment : Fragment() {
                                                             numLikes = numLikes,
                                                             numComments = numComments,
                                                             images = diaryImages,
-                                                            diarySecret
+                                                            secret = diarySecret,
+                                                            forceSecret = diaryForceSecret,
                                                         )
 
                                                     } else {
@@ -319,8 +321,9 @@ class MyDataFragment : Fragment() {
                                                             diary = diaryDiary,
                                                             numLikes = numLikes,
                                                             numComments = numComments,
-                                                            secret = diarySecret
-                                                        )
+                                                            secret = diarySecret,
+                                                            forceSecret = diaryForceSecret,
+                                                            )
                                                     }
                                                     myDiaryItems.add(diarySet)
                                                     myDiaryItems.sortWith(compareBy({ it.writeTime }))
@@ -361,8 +364,9 @@ class MyDataFragment : Fragment() {
                                                             numLikes = numLikes,
                                                             numComments = numComments,
                                                             images = diaryImages,
-                                                            secret = diarySecret
-                                                        )
+                                                            secret = diarySecret,
+                                                            forceSecret = diaryForceSecret,
+                                                            )
 
                                                     } else {
                                                         // 이미지 x
@@ -379,8 +383,9 @@ class MyDataFragment : Fragment() {
                                                             diary = diaryDiary,
                                                             numLikes = numLikes,
                                                             numComments = numComments,
-                                                            secret = diarySecret
-                                                        )
+                                                            secret = diarySecret,
+                                                            forceSecret = diaryForceSecret,
+                                                            )
                                                     }
                                                     myDiaryItems.add(diarySet)
                                                     myDiaryItems.sortWith(
@@ -423,8 +428,9 @@ class MyDataFragment : Fragment() {
                                                 numLikes = numLikes,
                                                 numComments = numComments,
                                                 images = diaryImages,
-                                                secret = diarySecret
-                                            )
+                                                secret = diarySecret,
+                                                forceSecret = diaryForceSecret,
+                                                )
 
                                         } else {
                                             // 이미지 x
@@ -441,8 +447,9 @@ class MyDataFragment : Fragment() {
                                                 diary = diaryDiary,
                                                 numLikes = numLikes,
                                                 numComments = numComments,
-                                                secret = diarySecret
-                                            )
+                                                secret = diarySecret,
+                                                forceSecret = diaryForceSecret,
+                                                )
                                         }
                                         myDiaryItems.add(diarySet)
                                         myDiaryItems.sortWith(compareBy({ it.writeTime }))

@@ -5,16 +5,22 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
+import android.os.CancellationSignal
+import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.chugnchunon.chungchunon_android.CommentActivity
 import com.chugnchunon.chungchunon_android.DiaryTwoActivity
 import com.chugnchunon.chungchunon_android.EnlargeImageActivity
@@ -30,11 +36,27 @@ class DisplayPhotosAdapter(val context: Context, private val imageData: ArrayLis
 
     inner class ViewHolder(view: View?) : RecyclerView.ViewHolder(view!!) {
         val displayImageCard = view?.findViewById<ImageView>(R.id.displayImageCard)
+        val videoPlayBtn = view?.findViewById<RelativeLayout>(R.id.videoPlayBtn)
 
         fun bind(context: Context, eachImage: String) {
-            Glide.with(context)
-                .load(eachImage)
-                .into(displayImageCard!!);
+
+            if(eachImage.contains("video")) {
+                videoPlayBtn!!.visibility = View.VISIBLE
+
+                Glide.with(context)
+                    .load(eachImage)
+                    .thumbnail(0.1f) // Load a 10% scaled down version as a thumbnail
+                    .diskCacheStrategy(DiskCacheStrategy.DATA) // Cache the data source
+                    .into(displayImageCard!!)
+
+            } else {
+                videoPlayBtn!!.visibility = View.GONE
+
+                Glide.with(context)
+                    .load(eachImage)
+                    .into(displayImageCard!!);
+            }
+
         }
     }
 

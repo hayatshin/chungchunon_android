@@ -591,7 +591,7 @@ class PeriodFriendRankingFragment : Fragment() {
                     val userPhone = document.data.getValue("phone").toString()
 
                     myContactList.forEach { contact ->
-                        if (userPhone == contact) {
+                        if (userPhone == contact && userId != "kakao:2358828971") {
                             val userEntry = RankingLine(
                                 0,
                                 userId,

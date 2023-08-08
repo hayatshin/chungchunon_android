@@ -500,15 +500,18 @@ class PeriodAllRankingFragment : Fragment() {
                     val username = document.data.getValue("name").toString()
                     val userAvatar = document.data.getValue("avatar").toString()
 
-                    val userEntry = RankingLine(
-                        0,
-                        userId,
-                        username,
-                        userAvatar,
-                        0,
-                    )
+                    if(userId != "kakao:2358828971") {
+                        val userEntry = RankingLine(
+                            0,
+                            userId,
+                            username,
+                            userAvatar,
+                            0,
+                        )
 
-                    userPointArray.add(userEntry)
+                        userPointArray.add(userEntry)
+                    }
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

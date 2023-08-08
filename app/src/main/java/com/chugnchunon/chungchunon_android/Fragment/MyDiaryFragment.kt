@@ -163,6 +163,9 @@ class MyDiaryFragment : Fragment() {
         private var editDiary: Boolean = false
         const val REQ_GALLERY = 200
         const val REQ_MULTI_PHOTO = 2000
+
+        const val REQ_VIDEO = 300
+        const val REQ_MULTI_VIDEO = 3000
     }
 
     override fun onAttach(context: Context) {
@@ -781,18 +784,21 @@ class MyDiaryFragment : Fragment() {
                                 }
                             }
 
-                            val lineCount = binding.todayDiary.lineCount
-                            val lineHeight = binding.todayDiary.lineHeight
-                            val desiredHeight = lineCount * lineHeight
-
-                            binding.todayDiary.height = desiredHeight
-                            binding.todayDiary.setSelection(binding.todayDiary.text.length)
+//                            val lineCount = binding.todayDiary.lineCount
+//                            val lineHeight = binding.todayDiary.lineHeight
+//                            val desiredHeight = lineCount * lineHeight
+//
+//                            binding.todayDiary.height = desiredHeight
+//                            binding.todayDiary.setSelection(binding.todayDiary.text.length)
 
                             val currentDateTime = LocalDate.now().toString()
                             val userPref = mcontext.getSharedPreferences(
                                 "diary_${userId}_${currentDateTime}",
                                 Context.MODE_PRIVATE
                             )
+
+                            binding.diaryBtn.text = "일기 수정"
+
                         } else {
                             // 일기 작성 x
 //                            binding.diaryBtn.alpha = 0.4f
@@ -823,8 +829,9 @@ class MyDiaryFragment : Fragment() {
 
         // 걸음수 업데이트
         userDB.document("$userId").get().addOnSuccessListener { document ->
-            if(document.contains("todayStepCount")) {
-                val todayStepCountFromDB = (document.data?.getValue("todayStepCount") as Long).toInt()
+            if (document.contains("todayStepCount")) {
+                val todayStepCountFromDB =
+                    (document.data?.getValue("todayStepCount") as Long).toInt()
 
                 todayTotalStepCount = todayStepCountFromDB
                 val decimal = DecimalFormat("#,###")
@@ -838,7 +845,12 @@ class MyDiaryFragment : Fragment() {
                         binding.stepSuccessLayout.visibility = View.VISIBLE
 
                         val downSuccessAnimation =
-                            ObjectAnimator.ofFloat(binding.stepSuccessLayout, "translationY", -80f, 0f)
+                            ObjectAnimator.ofFloat(
+                                binding.stepSuccessLayout,
+                                "translationY",
+                                -80f,
+                                0f
+                            )
                         downSuccessAnimation.duration = 1000
                         downSuccessAnimation.interpolator = DecelerateInterpolator()
                         downSuccessAnimation.start()
@@ -898,7 +910,7 @@ class MyDiaryFragment : Fragment() {
                 } else {
                     val intent = Intent(Intent.ACTION_PICK)
                     intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    intent.type = "image/*"
+                    intent.type = "image/* video/*"
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                     startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -915,7 +927,7 @@ class MyDiaryFragment : Fragment() {
                 } else {
                     val intent = Intent(Intent.ACTION_PICK)
                     intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    intent.type = "image/*"
+                    intent.type = "image/* video/*"
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                     startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -1382,7 +1394,7 @@ class MyDiaryFragment : Fragment() {
 
             val intent = Intent(Intent.ACTION_PICK)
             intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            intent.type = "image/*"
+            intent.type = "image/* video/*"
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
             startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -1402,15 +1414,16 @@ class MyDiaryFragment : Fragment() {
 
                     for (i in 0 until count) {
 
-                        val imageUri = data?.clipData!!.getItemAt(i).uri
-                        newImageViewModel.addImage(imageUri)
-                        itemListItems.add(imageUri)
+                        val itemUri = data?.clipData!!.getItemAt(i).uri
+
+                        newImageViewModel.addImage(itemUri)
+                        itemListItems.add(itemUri)
                         photoAdapter.notifyItemInserted(itemListItems.size - 1)
 
                         if (!editDiary) diaryFillCheck.photoFill.value =
                             true else diaryEditCheck.photoEdit.value = true
 
-                        itemListItemsString.add(imageUri.toString())
+                        itemListItemsString.add(itemUri.toString())
 
                         val currentDateTime = LocalDate.now().toString()
                         val userPref = mcontext.getSharedPreferences(
@@ -1426,11 +1439,13 @@ class MyDiaryFragment : Fragment() {
                         userPrefEdit.putString("imageArray", arrayString)
                         userPrefEdit.apply()
                     }
+
                     binding.photoRecyclerView.visibility = View.VISIBLE
                 }
             }
         }
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -1624,9 +1639,13 @@ class MyDiaryFragment : Fragment() {
 
 
     private fun uploadImageToFirebase(fileUri: Uri, position: Int) {
-        val fileName = UUID.randomUUID().toString() + ".jpg"
-        val database = FirebaseDatabase.getInstance()
-        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+        val fileName = if (fileUri.toString()
+                .contains("video")
+        ) "video_${System.currentTimeMillis()}" else "image_${System.currentTimeMillis()}"
+        val refStorage =
+            if (fileUri.toString().contains("video")) FirebaseStorage.getInstance().reference.child(
+                "video/$fileName"
+            ) else FirebaseStorage.getInstance().reference.child("image/$fileName")
 
         refStorage.putFile(fileUri)
             .addOnSuccessListener(

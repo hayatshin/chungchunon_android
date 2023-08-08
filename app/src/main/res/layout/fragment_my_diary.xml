@@ -720,7 +720,7 @@
                             android:minHeight="150dp"
                             android:paddingHorizontal="20dp"
                             android:paddingTop="20dp"
-                            android:paddingBottom="50dp"
+                            android:paddingBottom="20dp"
                             android:textColorHint="@color/light_gray"
                             android:textSize="20dp" />
 
@@ -766,7 +766,7 @@
                                     android:layout_height="wrap_content"
                                     android:clickable="false"
                                     android:gravity="center"
-                                    android:text="사진"
+                                    android:text="사진/영상"
                                     android:textColor="@color/light_gray"
                                     android:textSize="15dp"
                                     android:textStyle="bold" />

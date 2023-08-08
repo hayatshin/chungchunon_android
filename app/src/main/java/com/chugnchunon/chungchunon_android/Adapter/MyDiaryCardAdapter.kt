@@ -57,6 +57,7 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
         var commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
         var imageDisplayRecyclerView: RecyclerView = itemView.findViewById(R.id.imageDisplayRecyclerView)
         var secretStatusView: ImageView = itemView.findViewById(R.id.secretStatusView)
+        var forceSecretText: TextView = itemView.findViewById(R.id.forceSecretText)
         var moreDiaryView: TextView = itemView.findViewById(R.id.moreDiary)
 
         @SuppressLint("SetTextI18n")
@@ -77,6 +78,11 @@ class MyDiaryCardAdapter(val context: Context, var items: ArrayList<DiaryCard>) 
                 secretStatusView.visibility = View.VISIBLE
             } else {
                 secretStatusView.visibility = View.GONE
+            }
+
+            if(items[position].forceSecret) {
+                secretStatusView.visibility = View.VISIBLE
+                forceSecretText.visibility = View.VISIBLE
             }
 
             userWriteTime.text = DateFormat().convertMillisToDate(items[position].writeTime)

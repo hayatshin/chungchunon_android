@@ -21,8 +21,8 @@ android {
         applicationId "com.chugnchunon.chungchunon_android"
         minSdk 26
         targetSdk 33
-        versionCode 88
-        versionName "2.1.47"
+        versionCode 89
+        versionName "2.1.48"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -65,6 +65,8 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.exoplayer:exoplayer:2.19.0'
+
     implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:12.0.0'
 
     implementation 'com.squareup.picasso:picasso:2.71828'

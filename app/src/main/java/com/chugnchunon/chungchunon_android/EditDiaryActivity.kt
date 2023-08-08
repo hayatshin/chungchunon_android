@@ -353,7 +353,6 @@ class EditDiaryActivity : AppCompatActivity() {
 
                 binding.todayDiary.height = desiredHeight
 
-
                 binding.todayDiary.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                         // null
@@ -430,7 +429,7 @@ class EditDiaryActivity : AppCompatActivity() {
                     } else {
                         val intent = Intent(Intent.ACTION_PICK)
                         intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        intent.type = "image/*"
+                        intent.type = "image/* video/*"
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                         startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -447,7 +446,7 @@ class EditDiaryActivity : AppCompatActivity() {
                     } else {
                         val intent = Intent(Intent.ACTION_PICK)
                         intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        intent.type = "image/*"
+                        intent.type = "image/* video/*"
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                         startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -465,16 +464,6 @@ class EditDiaryActivity : AppCompatActivity() {
         binding.todayMood.adapter = applicationContext?.let {
             MoodArrayAdapter(
                 it,
-//                listOf(
-//                    Mood(R.drawable.ic_joy, "기뻐요", 0),
-//                    Mood(R.drawable.ic_shalom, "평온해요", 1),
-//                    Mood(R.drawable.ic_throb, "설레요", 2),
-//                    Mood(R.drawable.ic_soso, "그냥 그래요", 3),
-//                    Mood(R.drawable.ic_anxious, "걱정돼요", 4),
-//                    Mood(R.drawable.ic_sad, "슬퍼요", 5),
-//                    Mood(R.drawable.ic_gloomy, "우울해요", 6),
-//                    Mood(R.drawable.ic_angry, "화나요", 7),
-//                )
                 listOf(
                     Mood(R.drawable.ic_joy, "기뻐요", 0),
                     Mood(R.drawable.ic_throb, "설레요", 1),
@@ -619,9 +608,13 @@ class EditDiaryActivity : AppCompatActivity() {
 
 
     private fun uploadImageToFirebase(fileUri: Uri, position: Int) {
-        val fileName = UUID.randomUUID().toString() + ".jpg"
-        val database = FirebaseDatabase.getInstance()
-        val refStorage = FirebaseStorage.getInstance().reference.child("images/$fileName")
+        val fileName = if (fileUri.toString()
+                .contains("video")
+        ) "video_${System.currentTimeMillis()}" else "image_${System.currentTimeMillis()}"
+        val refStorage =
+            if (fileUri.toString().contains("video")) FirebaseStorage.getInstance().reference.child(
+                "video/$fileName"
+            ) else FirebaseStorage.getInstance().reference.child("image/$fileName")
 
         refStorage.putFile(fileUri)
             .addOnSuccessListener(
@@ -717,7 +710,7 @@ class EditDiaryActivity : AppCompatActivity() {
 
             val intent = Intent(Intent.ACTION_PICK)
             intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            intent.type = "image/*"
+            intent.type = "image/* video/*"
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
             startActivityForResult(intent, MyDiaryFragment.REQ_MULTI_PHOTO)

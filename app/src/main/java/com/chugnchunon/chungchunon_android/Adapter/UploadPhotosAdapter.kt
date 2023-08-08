@@ -2,8 +2,13 @@ package com.chugnchunon.chungchunon_android.Adapter
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
+import android.os.CancellationSignal
+import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,12 +31,28 @@ class UploadPhotosAdapter(val context: Context, private val imageData: List<Any>
 
         fun bind(context: Context, imageBitmap: Any) {
 
-            if(imageBitmap.toString().startsWith("https://")) {
+            if (imageBitmap.toString().startsWith("https://")) {
                 Glide.with(context)
                     .load(imageBitmap)
                     .into(imageView!!)
             } else if (imageBitmap is Uri) {
-                imageView?.setImageURI(imageBitmap)
+                if (imageBitmap.toString().contains("image")) {
+                    imageView?.setImageURI(imageBitmap)
+                } else if (imageBitmap.toString().contains("video")) {
+                    val thumbnail: Bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val cs = CancellationSignal()
+                        context.contentResolver.loadThumbnail(imageBitmap, Size(90, 90), cs)
+                    } else {
+                       MediaStore.Video.Thumbnails.getThumbnail(
+                            context.contentResolver,
+                            imageBitmap.path?.toLong() ?: 0,
+                            MediaStore.Video.Thumbnails.MINI_KIND,
+                            null,
+                        )
+                    }
+                    imageView?.setImageBitmap(thumbnail)
+                }
+
             }
         }
     }
@@ -57,6 +78,6 @@ class UploadPhotosAdapter(val context: Context, private val imageData: List<Any>
     }
 
     override fun getItemCount(): Int {
-        if(imageData != null) return imageData.size else return 0
+        if (imageData != null) return imageData.size else return 0
     }
 }

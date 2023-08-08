@@ -256,7 +256,7 @@ class AllRegionDataFragment : Fragment() {
 
                     // 내가 차단하지 않은 글
                     val secretStatus = document.data.getValue("secret") as Boolean
-                    if (secretStatus == false) {
+                    if (!secretStatus && !document.data.containsKey("forceSecret")) {
                         // 비밀이 아닌 글 -> 가져올 전체 일기
                         val diaryId = document.data?.getValue("diaryId").toString()
                         val numLikes = document.data?.getValue("numLikes") as Long
@@ -319,7 +319,8 @@ class AllRegionDataFragment : Fragment() {
                                                         numLikes = numLikes,
                                                         numComments = numComments,
                                                         images = diaryImages,
-                                                        secret = false
+                                                        secret = false,
+                                                        forceSecret = false,
                                                     )
 
                                                 } else {
@@ -337,7 +338,8 @@ class AllRegionDataFragment : Fragment() {
                                                         diary = diaryDiary,
                                                         numLikes = numLikes,
                                                         numComments = numComments,
-                                                        secret = false
+                                                        secret = false,
+                                                        forceSecret = false,
                                                     )
                                                 }
                                                 diaryItems.add(diarySet)
@@ -397,7 +399,8 @@ class AllRegionDataFragment : Fragment() {
                                                         numLikes = numLikes,
                                                         numComments = numComments,
                                                         images = diaryImages,
-                                                        secret = false
+                                                        secret = false,
+                                                        forceSecret = false,
                                                     )
 
                                                 } else {
@@ -415,7 +418,8 @@ class AllRegionDataFragment : Fragment() {
                                                         diary = diaryDiary,
                                                         numLikes = numLikes,
                                                         numComments = numComments,
-                                                        secret = false
+                                                        secret = false,
+                                                        forceSecret = false,
                                                     )
                                                 }
                                                 diaryItems.add(diarySet)

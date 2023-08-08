@@ -14,21 +14,34 @@
 
     <LinearLayout
         android:id="@+id/moreLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="right|center_vertical"
         android:layout_marginBottom="10dp"
+        android:gravity="right"
         android:orientation="horizontal"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/forceSecretText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="이 글은 공개하기 적절하지 않아\n비밀 글 처리되었습니다."
+            android:textColor="@color/light_main_color"
+            android:textSize="14dp"
+            android:visibility="gone" />
+
         <ImageView
-            android:layout_marginRight="20dp"
             android:id="@+id/secretStatusView"
             android:layout_width="25dp"
             android:layout_height="25dp"
+            android:layout_marginRight="20dp"
             android:src="@drawable/ic_lock"
-            android:visibility="visible"
+            android:visibility="gone"
             app:tint="@color/light_main_color" />
 
         <ImageView
@@ -36,7 +49,6 @@
             android:layout_width="25dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_more_empty" />
-
 
     </LinearLayout>
 
@@ -71,15 +83,15 @@
             app:layout_constraintRight_toLeftOf="@id/userActInfo">
 
             <TextView
-                android:textFontWeight="900"
-                android:fontFamily="@font/nanum_barun_gothic_bold"
-                android:textStyle="bold"
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
+                android:fontFamily="@font/nanum_barun_gothic_bold"
                 android:textColor="@color/black"
+                android:textFontWeight="900"
                 android:textSize="21dp"
+                android:textStyle="bold"
                 tools:text="신혜정" />
 
             <TextView
@@ -179,13 +191,13 @@
 
             <TextView
                 android:id="@+id/moreDiary"
-                android:textColor="@color/light_gray"
-                android:textStyle="bold"
-                android:layout_marginTop="15dp"
-                android:textSize="22dp"
-                android:text="더보기"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="더보기"
+                android:textColor="@color/light_gray"
+                android:textSize="22dp"
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>
