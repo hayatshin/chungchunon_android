@@ -634,16 +634,11 @@ class PeriodAllRankingFragment : Fragment() {
         userPointArray.sortWith(compareBy { it.point })
         userPointArray.reverse()
 
-        for (i in 0..userPointArray.size - 1) {
+        for (i in 0 until userPointArray.size) {
             userPointArray[i].index = initialIndex
 
-            if (i != userPointArray.size - 1) {
-                if (userPointArray[i].point != userPointArray[i + 1].point) {
-                    initialIndex += 1
-                }
-            } else {
-                // i+1 = userPointArray.size
-                null
+            if (i < userPointArray.size - 1 && userPointArray[i].point != userPointArray[i + 1].point) {
+                initialIndex += 1
             }
 
         }

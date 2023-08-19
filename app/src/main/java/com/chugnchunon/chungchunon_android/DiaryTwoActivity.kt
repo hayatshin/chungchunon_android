@@ -108,8 +108,6 @@ class DiaryTwoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        userTrackGoogleAnalytics()
-
         val currentAppVersion = packageManager.getPackageInfo(packageName, 0).versionCode
 
         // 거주 지역 설정 안되어있으면 설정하도록 넘기기
@@ -269,6 +267,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                             Manifest.permission.ACTIVITY_RECOGNITION,
                             Manifest.permission.READ_CONTACTS,
                             Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.READ_MEDIA_VIDEO,
                             Manifest.permission.POST_NOTIFICATIONS,
                         ),
                         ALL_ABOVE_13_CODE
@@ -290,6 +289,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                         arrayOf(
                             Manifest.permission.READ_CONTACTS,
                             Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.READ_MEDIA_VIDEO,
                             Manifest.permission.POST_NOTIFICATIONS,
                         ),
                         BAN_STEP_ABOVE_13_CODE
@@ -431,6 +431,8 @@ class DiaryTwoActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
         val readMediaImagesPermission =
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+        val readMediaVideoPermission =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
         val postNotificationPermission =
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
         val userData = userDB.document("$userId").get().await()
@@ -446,6 +448,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                         readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
                                 && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
                                 && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                                && readMediaVideoPermission == PackageManager.PERMISSION_GRANTED
                                 && postNotificationPermission == PackageManager.PERMISSION_GRANTED
                 } else {
                     permissionCase = 2
@@ -461,6 +464,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                     permissionCheck =
                         readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
                                 && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                                && readMediaVideoPermission == PackageManager.PERMISSION_GRANTED
                                 && postNotificationPermission == PackageManager.PERMISSION_GRANTED
                 } else {
                     permissionCase = 4
@@ -478,6 +482,7 @@ class DiaryTwoActivity : AppCompatActivity() {
                     readContactPermissionCheck == PackageManager.PERMISSION_GRANTED
                             && stepPermissionCheck == PackageManager.PERMISSION_GRANTED
                             && readMediaImagesPermission == PackageManager.PERMISSION_GRANTED
+                            && readMediaVideoPermission == PackageManager.PERMISSION_GRANTED
                             && postNotificationPermission == PackageManager.PERMISSION_GRANTED
             } else {
                 permissionCase = 2
@@ -686,26 +691,5 @@ class DiaryTwoActivity : AppCompatActivity() {
                 userDB.document("$userId").set(authSet, SetOptions.merge())
             }
         }
-    }
-
-    private fun userTrackGoogleAnalytics() {
-        val firebaseAnalytics = FirebaseAnalytics.getInstance(applicationContext)
-        firebaseAnalytics.setUserId(userId)
-        val currentDate = Date()
-
-        val calendar = Calendar.getInstance()
-        calendar.time = currentDate
-//        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-//        val startDate = calendar.time
-//        calendar.add(Calendar.DATE, 6)
-//        val endDate = calendar.time
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val currentDateString = dateFormat.format(currentDate)
-
-        val bundle = Bundle().apply {
-            putString("access_date", currentDateString)
-        }
-        firebaseAnalytics.logEvent("user_access_date", bundle)
     }
 }

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.chugnchunon.chungchunon_android.Adapter.KakaoSDKAdapter
 import com.chugnchunon.chungchunon_android.KakaoLogin.PartnerSessionCallback
 import com.chugnchunon.chungchunon_android.KakaoLogin.SessionCallback
 import com.chugnchunon.chungchunon_android.databinding.ActivityMainBinding
@@ -23,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
+import com.kakao.auth.KakaoSDK
 import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
 import org.json.JSONObject
@@ -62,6 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         // 카톡 로그인 버튼 클릭
         binding.kakaoLoginBtn.setOnClickListener {
+
             binding.kakaoLoginTextView.visibility = View.GONE
             binding.kakaoActivityIndicator.visibility = View.VISIBLE
 

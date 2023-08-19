@@ -216,6 +216,9 @@ class CommentAdapter(var context: Context, var items: ArrayList<Comment>) :
 
         // 아바타 클릭
         holder.itemView.commentAvatar.setOnClickListener { view ->
+
+            Log.d("코멘트", "$items")
+
             val goEnlargeAvatar = Intent(context, EnlargeAvatarActivity::class.java)
             goEnlargeAvatar.putExtra("userAvatar", items[position].commentUserAvatar)
             context.startActivity(goEnlargeAvatar)

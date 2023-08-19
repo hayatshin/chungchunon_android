@@ -117,7 +117,12 @@ class MoreFragment : Fragment() {
         }
 
         binding.invitationIcon.setOnClickListener {
-            sendKakaoLink()
+            try {
+                sendKakaoLink()
+            } catch (e: Exception) {
+                e.stackTrace
+            }
+
         }
 
         // 걸음수
@@ -271,7 +276,7 @@ class MoreFragment : Fragment() {
                 )
             )
         )
-        if (ShareClient.instance.isKakaoTalkSharingAvailable(requireActivity())) {
+        if (ShareClient.instance.isKakaoTalkSharingAvailable(mcontext)) {
             ShareClient.instance.shareDefault(
                 requireActivity(),
                 defaultFeed
@@ -279,7 +284,7 @@ class MoreFragment : Fragment() {
                 if (error != null) {
                     // 실패
                     val goWarning =
-                        Intent(requireActivity(), DefaultDiaryWarningActivity::class.java)
+                        Intent(mcontext, DefaultDiaryWarningActivity::class.java)
                     goWarning.putExtra("warningType", "appInvitation")
                     startActivity(goWarning)
                 } else if (sharingResult != null) {

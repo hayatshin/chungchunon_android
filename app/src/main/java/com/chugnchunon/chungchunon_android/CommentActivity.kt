@@ -428,6 +428,12 @@ class CommentActivity : FragmentActivity() {
             }
         }
 
+//        getData()
+//        scrollToPosition()
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
         getData()
         scrollToPosition()
     }

@@ -88,12 +88,7 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                                                 context!!.startService(startService);
                                             }
                                         } catch (e: Exception) {
-                                            val serviceError = hashMapOf(
-                                                "service_error" to e,
-                                                "service_step_status" to false,
-                                            )
-                                            userDB.document("$userId")
-                                                .set(serviceError, SetOptions.merge())
+                                           e.stackTrace
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -105,12 +100,7 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
                                             context!!.startService(startService);
                                         }
                                     } catch (e: Exception) {
-                                        val serviceError = hashMapOf(
-                                            "service_error" to e,
-                                            "service_step_status" to false,
-                                        )
-                                        userDB.document("$userId")
-                                            .set(serviceError, SetOptions.merge())
+                                       e.stackTrace
                                     }
                                 }
                             }

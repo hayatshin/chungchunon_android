@@ -2,10 +2,7 @@ package com.chugnchunon.chungchunon_android
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -54,7 +51,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
+import com.google.gson.Gson
 import org.apache.commons.lang3.StringUtils
+import java.time.LocalDate
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -84,6 +83,9 @@ class EditDiaryActivity : AppCompatActivity() {
     private var newImageList: ArrayList<String> = ArrayList()
     private var editButtonClick: Boolean = false
 
+    lateinit var userPref: SharedPreferences
+    lateinit var userPrefEdit: SharedPreferences.Editor
+
     companion object {
         private var editTodayDiaryEmptyForEditDiary: Boolean = false
 
@@ -104,6 +106,13 @@ class EditDiaryActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.diaryBtn.alpha = 0.4f
+
+        val currentDateTime = LocalDate.now().toString()
+        userPref = getSharedPreferences(
+            "diary_${userId}_${currentDateTime}",
+            Context.MODE_PRIVATE
+        )
+        userPrefEdit = userPref.edit()
 
         val diaryType = intent.getStringExtra("diaryType")
         val editDiaryId = intent.getStringExtra("editDiaryId")
@@ -427,9 +436,13 @@ class EditDiaryActivity : AppCompatActivity() {
                             REQ_GALLERY
                         )
                     } else {
-                        val intent = Intent(Intent.ACTION_PICK)
-                        intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        intent.type = "image/* video/*"
+
+
+                        val intent =
+                            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        intent.type = "*/*"
+                        val mimetypes = arrayOf("image/*", "video/*")
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                         startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -444,9 +457,11 @@ class EditDiaryActivity : AppCompatActivity() {
                             REQ_GALLERY
                         )
                     } else {
-                        val intent = Intent(Intent.ACTION_PICK)
-                        intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        intent.type = "image/* video/*"
+                        val intent =
+                            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        intent.type = "*/*"
+                        val mimetypes = arrayOf("image/*", "video/*")
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                         startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -561,29 +576,45 @@ class EditDiaryActivity : AppCompatActivity() {
                     }
 
                     if (diaryEditCheck.diaryEdit.value == true) {
-                        var newDiary = binding.todayDiary.text
-                        newDiarySet.put("todayDiary", newDiary.toString())
+                        val newDiary = binding.todayDiary.text.toString()
+                        newDiarySet.put("todayDiary", newDiary)
+
+                        userPrefEdit.putBoolean("diaryDone", true).apply()
+                        userPrefEdit.putString("writingDiary", newDiary).apply()
+
                     }
 
                     if (diaryEditCheck.moodEdit.value == true) {
-                        newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
+                        val moodObject = binding.todayMood.selectedItem as Mood
+                        newDiarySet.put("todayMood", moodObject)
+
+                        userPrefEdit.putBoolean("moodDone", true).apply()
+                        userPrefEdit.putInt("writingMood", moodObject.position).apply()
                     }
 
                     newDiarySet.put("secret", secretStatusForEditDiary)
+                    userPrefEdit.putBoolean("secretStatus", secretStatusForEditDiary).apply()
 
                 } else {
                     // 이미지 업로드 안 하는 경우
                     if (diaryEditCheck.diaryEdit.value == true) {
-                        var newDiary = binding.todayDiary.text
-                        newDiarySet.put("todayDiary", newDiary.toString())
+                        var newDiary = binding.todayDiary.text.toString()
+                        newDiarySet.put("todayDiary", newDiary)
+
+                        userPrefEdit.putBoolean("diaryDone", true).apply()
+                        userPrefEdit.putString("writingDiary", newDiary).apply()
                     }
 
                     if (diaryEditCheck.moodEdit.value == true) {
-                        newDiarySet.put("todayMood", binding.todayMood.selectedItem as Mood)
+                        val moodObject = binding.todayMood.selectedItem as Mood
+                        userPrefEdit.putInt("writingMood", moodObject.position).apply()
+
+                        userPrefEdit.putBoolean("moodDone", true).apply()
+                        userPrefEdit.putInt("writingMood", moodObject.position).apply()
                     }
 
                     newDiarySet.put("secret", secretStatusForEditDiary)
-
+                    userPrefEdit.putBoolean("secretStatus", secretStatusForEditDiary).apply()
 
                     diaryDB.document("$editDiaryId")
                         .set(newDiarySet, SetOptions.merge())
@@ -627,6 +658,25 @@ class EditDiaryActivity : AppCompatActivity() {
                                 it.toString().startsWith("https://")
                             }) {
 //                            newDiarySet.put("images", newImageViewModel.newImageList.value!!)
+
+                            val itemListItemsString: ArrayList<String> = ArrayList()
+
+                            if(newImageViewModel.newImageList.value != null) {
+                                for(item in newImageViewModel.newImageList.value!!) {
+                                    itemListItemsString.add(item.toString())
+                                }
+
+                                val gson = Gson()
+                                val arrayString = gson.toJson(itemListItemsString)
+
+                                userPrefEdit.putBoolean("imageDone", true)
+                                userPrefEdit.putString("imageArray", arrayString)
+                                userPrefEdit.apply()
+                            } else {
+                                userPrefEdit.putBoolean("imageDone", false)
+                                userPrefEdit.apply()
+                            }
+
                             newImageViewModel.uploadFirebaseComplete.value = true
                         }
 
@@ -708,12 +758,14 @@ class EditDiaryActivity : AppCompatActivity() {
         // 사진 보기 권한 요청
         if (requestCode == REQ_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            intent.type = "image/* video/*"
+            val intent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = "*/*"
+            val mimetypes = arrayOf("image/*", "video/*")
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
-            startActivityForResult(intent, MyDiaryFragment.REQ_MULTI_PHOTO)
+            startActivityForResult(intent, REQ_MULTI_PHOTO)
         }
     }
 

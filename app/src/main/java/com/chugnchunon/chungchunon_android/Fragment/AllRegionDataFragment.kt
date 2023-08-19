@@ -280,7 +280,8 @@ class AllRegionDataFragment : Fragment() {
                             .get()
                             .addOnCompleteListener { userTask ->
                                 val userData = userTask.result
-                                if (userData != null) {
+                                if (userData != null && userData.data?.getValue("name") != null) {
+
                                     // 유저 정보 o
                                     userFinalId = diaryUserId
                                     userFinalName = userData.data?.getValue("name").toString()

@@ -39,7 +39,6 @@ class MyService : Service(), SensorEventListener {
     private val diaryDB = Firebase.firestore.collection("diary")
     private val userId = Firebase.auth.currentUser?.uid
 
-
     lateinit var dateChangeBroadcastReceiver: DateChangeBroadcastReceiver
     lateinit var deviceShutdownBroadcastReceiver: DeviceShutdownBroadcastReceiver
 
@@ -72,6 +71,90 @@ class MyService : Service(), SensorEventListener {
         super.onCreate()
 
         Log.d("서비스", "onCreate")
+
+
+        // 워크매니저
+        val workManager = WorkManager.getInstance(applicationContext)
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<RegisterAlarmWorker>(15, TimeUnit.MINUTES).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            UNIQUE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicWorkRequest
+        )
+
+        val state = workManager.getWorkInfosForUniqueWork(UNIQUE_WORK_NAME).get()
+
+
+        // 알람 매니저
+        alarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        registerReceiver(alarmBroadcastReceiver, IntentFilter(ALARM_NOTIFICATION_NAME))
+
+        alarmIntent = Intent(applicationContext, AlarmBroadcastReceiver::class.java)
+        pendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            ALARM_REQ_CODE,
+            alarmIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val newCalendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+        }
+
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            newCalendar.timeInMillis,
+            pendingIntent
+        )
+
+        // 기본
+        sensorManager =
+            applicationContext?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        step_sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+
+        // 오늘 걸음수 초기화
+        userDB.document("$userId").get().addOnSuccessListener { document ->
+            var todayStepCountFromDB = document.getLong("todayStepCount") ?: 0
+            todayTotalStepCount = todayStepCountFromDB.toInt()
+
+            StepCountNotification(this, todayTotalStepCount)
+        }
+
+        // 1. 1분마다 체크 (날짜 바뀔 때)
+        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()
+        val dateChangeIntent = IntentFilter()
+        dateChangeIntent.addAction(Intent.ACTION_TIME_TICK)
+        applicationContext?.registerReceiver(dateChangeBroadcastReceiver, dateChangeIntent)
+
+        // 2. 날짜 바뀔 때
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            stepInitializeReceiver,
+            IntentFilter("NEW_DATE_STEP_ZERO")
+        )
+
+        // 3. 핸드폰 꺼질 때
+        deviceShutdownBroadcastReceiver = DeviceShutdownBroadcastReceiver()
+        val deviceShutdownIntent = IntentFilter()
+        deviceShutdownIntent.addAction(Intent.ACTION_BOOT_COMPLETED)
+        deviceShutdownIntent.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+        applicationContext?.registerReceiver(deviceShutdownBroadcastReceiver, deviceShutdownIntent)
+
+        // 4. 알람 주기적 브로드캐스터
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            BroadcastReregister,
+            IntentFilter("ALARM_BROADCAST_RECEIVER_RING")
+        );
+
+        // 5. 앱 탈퇴
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            exitAppReceiver,
+            IntentFilter("EXIT_APP")
+        )
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -681,6 +764,8 @@ class MyService : Service(), SensorEventListener {
             .unregisterReceiver(BroadcastReregister)
         LocalBroadcastManager.getInstance(applicationContext)
             .unregisterReceiver(exitAppReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+            .unregisterReceiver(alarmBroadcastReceiver)
 
         // 1. 1분마다 체크 (날짜 바뀔 때)
 //        dateChangeBroadcastReceiver = DateChangeBroadcastReceiver()

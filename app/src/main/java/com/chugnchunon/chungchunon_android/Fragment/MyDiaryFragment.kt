@@ -1,6 +1,5 @@
 package com.chugnchunon.chungchunon_android.Fragment
 
-import com.chugnchunon.chungchunon_android.Service.MyService
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
@@ -8,7 +7,6 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.*
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.icu.text.DecimalFormat
 import android.icu.text.SimpleDateFormat
@@ -21,7 +19,6 @@ import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.text.*
 import android.text.style.BackgroundColorSpan
-import android.util.Base64
 import android.util.Log
 import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
@@ -29,9 +26,7 @@ import android.view.KeyEvent.ACTION_UP
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.animation.*
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
 import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,37 +35,34 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
-import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
-import com.chugnchunon.chungchunon_android.DataClass.Mood
-import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
-import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import java.time.LocalDateTime
-import java.util.*
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
+import androidx.loader.content.CursorLoader
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chugnchunon.chungchunon_android.*
+import com.chugnchunon.chungchunon_android.Adapter.MoodArrayAdapter
 import com.chugnchunon.chungchunon_android.Adapter.UploadPhotosAdapter
 import com.chugnchunon.chungchunon_android.DataClass.DateFormat
 import com.chugnchunon.chungchunon_android.DataClass.MonthDate
+import com.chugnchunon.chungchunon_android.DataClass.Mood
 import com.chugnchunon.chungchunon_android.MoneyActivity.MoneyDetailActivity
+import com.chugnchunon.chungchunon_android.Service.MyService
+import com.chugnchunon.chungchunon_android.ViewModel.BaseViewModel
+import com.chugnchunon.chungchunon_android.databinding.FragmentMyDiaryBinding
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.Timestamp
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.UploadTask
 import com.google.gson.Gson
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_diary_two.*
 import kotlinx.android.synthetic.main.fragment_more_two.*
 import kotlinx.coroutines.*
@@ -78,7 +70,8 @@ import kotlinx.coroutines.tasks.await
 import me.moallemi.tools.daterange.localdate.rangeTo
 import org.apache.commons.lang3.StringUtils
 import java.time.LocalDate
-import kotlin.collections.ArrayList
+import java.time.LocalDateTime
+import java.util.*
 import kotlin.random.Random
 
 class MyDiaryFragment : Fragment() {
@@ -149,11 +142,15 @@ class MyDiaryFragment : Fragment() {
 
     private var removeZeroCurrentMonth = ""
 
+    lateinit var userPref: SharedPreferences
+    lateinit var userPrefEdit: SharedPreferences.Editor
+
     companion object {
         private var secretStatus: Boolean = false
 
         private var photoResume: Boolean = false
         private var recordResume: Boolean = false
+        private var pauseResume: Boolean = false
 
         private var partnerOrNot: Boolean = false
         private var fulfilledOrNot: Boolean = false
@@ -186,16 +183,18 @@ class MyDiaryFragment : Fragment() {
         binding.diaryBtn.alpha = 0.4f
 
         val currentDateTime = LocalDate.now().toString()
-        val userPref = mcontext.getSharedPreferences(
+        userPref = mcontext.getSharedPreferences(
             "diary_${userId}_${currentDateTime}",
             Context.MODE_PRIVATE
         )
+        userPrefEdit = userPref.edit()
 
         val moodDonePref = userPref.getBoolean("moodDone", false)
         val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
         val diaryDonePref = userPref.getBoolean("diaryDone", false)
         val secretStatusPref = userPref.getBoolean("secretStatus", false)
         val imageDonePref = userPref.getBoolean("imageDone", false)
+
 
         fulfilledOrNot = recognitionDonePref && moodDonePref && diaryDonePref
 
@@ -422,12 +421,11 @@ class MyDiaryFragment : Fragment() {
         diaryFillCheck.secretFill.observe(requireActivity(), Observer
         { value ->
 
-            val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences(
-                "diary_${userId}_${currentDateTime}",
-                Context.MODE_PRIVATE
-            )
-            val userPrefEdit = userPref.edit()
+//            val currentDateTime = LocalDate.now().toString()
+//            val userPref = mcontext.getSharedPreferences(
+//                "diary_${userId}_${currentDateTime}",
+//                Context.MODE_PRIVATE
+//            )
             val secretStatusPref = userPref.getBoolean("secretStatus", false)
 
             if (secretStatusPref) {
@@ -682,16 +680,10 @@ class MyDiaryFragment : Fragment() {
                             val stepCount = document.data?.getValue("todayStepCount")
 
                             val diarySet = hashMapOf(
-                                "diaryId" to diaryId,
-                                "userId" to userId.toString(),
-                                "monthDate" to writeMonthDate,
                                 "lastUpdate" to FieldValue.serverTimestamp(),
                                 "todayMood" to binding.todayMood.selectedItem,
                                 "todayDiary" to (binding.todayDiary.text.toString()),
                                 "images" to newImageViewModel.newImageList.value,
-                                "numLikes" to 0,
-                                "numComments" to 0,
-                                "blockedBy" to ArrayList<String>(),
                                 "secret" to secretStatus,
                             )
 
@@ -791,11 +783,11 @@ class MyDiaryFragment : Fragment() {
 //                            binding.todayDiary.height = desiredHeight
 //                            binding.todayDiary.setSelection(binding.todayDiary.text.length)
 
-                            val currentDateTime = LocalDate.now().toString()
-                            val userPref = mcontext.getSharedPreferences(
-                                "diary_${userId}_${currentDateTime}",
-                                Context.MODE_PRIVATE
-                            )
+//                            val currentDateTime = LocalDate.now().toString()
+//                            val userPref = mcontext.getSharedPreferences(
+//                                "diary_${userId}_${currentDateTime}",
+//                                Context.MODE_PRIVATE
+//                            )
 
                             binding.diaryBtn.text = "일기 수정"
 
@@ -890,6 +882,7 @@ class MyDiaryFragment : Fragment() {
         }
 
         // 사진 업로드
+
         val readGalleryPermission =
             ContextCompat.checkSelfPermission(
                 requireActivity(),
@@ -897,37 +890,60 @@ class MyDiaryFragment : Fragment() {
             )
         val readMediaImagesPermission = ContextCompat.checkSelfPermission(
             requireActivity(),
-            Manifest.permission.READ_MEDIA_IMAGES
+            Manifest.permission.READ_MEDIA_IMAGES,
         )
+        val readMediaVideoPermission =
+            ContextCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
 
         // 사진 가져오기 권한 체크
         binding.photoButton.setOnClickListener {
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
                 if (readMediaImagesPermission == PackageManager.PERMISSION_DENIED) {
+
                     // 권한 요청
                     requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES), REQ_GALLERY)
+                } else if (readMediaVideoPermission == PackageManager.PERMISSION_DENIED) {
+                    // 권한 요청
+                    requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_VIDEO), REQ_VIDEO)
                 } else {
-                    val intent = Intent(Intent.ACTION_PICK)
-                    intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    intent.type = "image/* video/*"
+                    photoResume = true
+
+//                    val intent = Intent(Intent.ACTION_PICK)
+//                    intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+//                    intent.type = "image/* video/*"
+//                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+//
+//                    startActivityForResult(intent, EditDiaryActivity.REQ_MULTI_PHOTO)
+
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    intent.type = "*/*"
+                    val mimetypes = arrayOf("image/*", "video/*")
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                     startActivityForResult(intent, REQ_MULTI_PHOTO)
                 }
 
             } else {
-
                 if (readGalleryPermission == PackageManager.PERMISSION_DENIED) {
+
                     // 권한 요청
                     requestPermissions(
                         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                         REQ_GALLERY
                     )
                 } else {
-                    val intent = Intent(Intent.ACTION_PICK)
-                    intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    intent.type = "image/* video/*"
+                    photoResume = true
+
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    intent.type = "*/*"
+                    val mimetypes = arrayOf("image/*", "video/*")
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
                     startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -963,22 +979,22 @@ class MyDiaryFragment : Fragment() {
 
                 override fun onTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
-                    val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences(
-                        "diary_${userId}_${currentDateTime}",
-                        Context.MODE_PRIVATE
-                    )
-                    val userPrefEdit = userPref.edit()
+//                    val currentDateTime = LocalDate.now().toString()
+//                    val userPref = mcontext.getSharedPreferences(
+//                        "diary_${userId}_${currentDateTime}",
+//                        Context.MODE_PRIVATE
+//                    )
+//                    val userPrefEdit = userPref.edit()
                     val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
 
                     if (char?.length == 1 && !editDiary && !recognitionDonePref) {
 
-                        val currentDateTime = LocalDate.now().toString()
-                        val userPref = mcontext.getSharedPreferences(
-                            "diary_${userId}_${currentDateTime}",
-                            Context.MODE_PRIVATE
-                        )
-                        val userPrefEdit = userPref.edit()
+//                        val currentDateTime = LocalDate.now().toString()
+//                        val userPref = mcontext.getSharedPreferences(
+//                            "diary_${userId}_${currentDateTime}",
+//                            Context.MODE_PRIVATE
+//                        )
+//                        val userPrefEdit = userPref.edit()
                         userPrefEdit.putBoolean("recognitionDone", true).apply()
 
                         diaryFillCheck.recognitionFill.value = true
@@ -1086,12 +1102,12 @@ class MyDiaryFragment : Fragment() {
             object : View.OnTouchListener {
                 override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
 
-                    val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences(
-                        "diary_${userId}_${currentDateTime}",
-                        Context.MODE_PRIVATE
-                    )
-                    val userPrefEdit = userPref.edit()
+//                    val currentDateTime = LocalDate.now().toString()
+//                    val userPref = mcontext.getSharedPreferences(
+//                        "diary_${userId}_${currentDateTime}",
+//                        Context.MODE_PRIVATE
+//                    )
+//                    val userPrefEdit = userPref.edit()
                     userPrefEdit.putBoolean("moodDone", true).apply()
                     val writingMoodPref = userPref.getInt("writingMood", 0)
 
@@ -1120,13 +1136,14 @@ class MyDiaryFragment : Fragment() {
         model.initial(textToSpeechEngine, startForResult)
 
         binding.recordBtn.setOnClickListener {
+            recordResume = true
             model.displaySpeechRecognizer()
 //            val text = todayDiary.text?.trim().toString()
 //            model.speak(if (text.isNotEmpty()) text else "일기를 써보세요")
         }
 
         // 다이어리 작성
-        binding.todayDiary.setSelection(binding.todayDiary.text.length)
+//        binding.todayDiary.setSelection(binding.todayDiary.text.length)
         binding.todayDiary.addTextChangedListener(
             object : TextWatcher {
                 override fun beforeTextChanged(char: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -1139,12 +1156,12 @@ class MyDiaryFragment : Fragment() {
                     before: Int,
                     count: Int
                 ) {
-                    val currentDateTime = LocalDate.now().toString()
-                    val userPref = mcontext.getSharedPreferences(
-                        "diary_${userId}_${currentDateTime}",
-                        Context.MODE_PRIVATE
-                    )
-                    val userPrefEdit = userPref.edit()
+//                    val currentDateTime = LocalDate.now().toString()
+//                    val userPref = mcontext.getSharedPreferences(
+//                        "diary_${userId}_${currentDateTime}",
+//                        Context.MODE_PRIVATE
+//                    )
+//                    val userPrefEdit = userPref.edit()
 
                     if (!editDiary) {
                         val stringDiary = char?.trim().toString()
@@ -1284,9 +1301,9 @@ class MyDiaryFragment : Fragment() {
 //                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
 
                                         val allFragment = AllDiaryFragmentTwo()
-                                        val bundle = Bundle()
-                                        bundle.putString("diaryType", "my")
-                                        allFragment.arguments = bundle
+//                                        val bundle = Bundle()
+//                                        bundle.putString("diaryType", "my")
+//                                        allFragment.arguments = bundle
                                         fragment.beginTransaction()
                                             .replace(R.id.enterFrameLayout, allFragment)
                                             .commit()
@@ -1320,9 +1337,9 @@ class MyDiaryFragment : Fragment() {
 //                                requireActivity().bottomNav.selectedItemId = R.id.ourTodayMenu
 
                                         val allFragment = AllDiaryFragmentTwo()
-                                        val bundle = Bundle()
-                                        bundle.putString("diaryType", "my")
-                                        allFragment.arguments = bundle
+//                                        val bundle = Bundle()
+//                                        bundle.putString("diaryType", "my")
+//                                        allFragment.arguments = bundle
                                         fragment.beginTransaction()
                                             .replace(R.id.enterFrameLayout, allFragment)
                                             .commit()
@@ -1363,7 +1380,6 @@ class MyDiaryFragment : Fragment() {
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        recordResume = true
 
         // 말로 쓰기 결과
         if (result.resultCode == RESULT_OK) {
@@ -1391,10 +1407,23 @@ class MyDiaryFragment : Fragment() {
 
         // 사진 보기 권한 요청
         if (requestCode == REQ_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            photoResume = true
 
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.data = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            intent.type = "image/* video/*"
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = "*/*"
+            val mimetypes = arrayOf("image/*", "video/*")
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+
+            startActivityForResult(intent, REQ_MULTI_PHOTO)
+        } else if (requestCode == REQ_VIDEO && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            photoResume = true
+
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            intent.type = "*/*"
+            val mimetypes = arrayOf("image/*", "video/*")
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
             startActivityForResult(intent, REQ_MULTI_PHOTO)
@@ -1406,8 +1435,6 @@ class MyDiaryFragment : Fragment() {
 
         when (requestCode) {
             REQ_MULTI_PHOTO -> {
-                photoResume = true
-
                 if (data?.clipData != null) {
 
                     val count = data!!.clipData!!.itemCount
@@ -1425,12 +1452,12 @@ class MyDiaryFragment : Fragment() {
 
                         itemListItemsString.add(itemUri.toString())
 
-                        val currentDateTime = LocalDate.now().toString()
-                        val userPref = mcontext.getSharedPreferences(
-                            "diary_${userId}_${currentDateTime}",
-                            Context.MODE_PRIVATE
-                        )
-                        val userPrefEdit = userPref.edit()
+//                        val currentDateTime = LocalDate.now().toString()
+//                        val userPref = mcontext.getSharedPreferences(
+//                            "diary_${userId}_${currentDateTime}",
+//                            Context.MODE_PRIVATE
+//                        )
+//                        val userPrefEdit = userPref.edit()
                         userPrefEdit.putBoolean("imageDone", true)
 
                         val gson = Gson()
@@ -1449,6 +1476,7 @@ class MyDiaryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
         // 사진 삭제
         LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(
             deleteImageFunction,
@@ -1479,11 +1507,11 @@ class MyDiaryFragment : Fragment() {
         manAnimation.interpolator = LinearInterpolator()
         manAnimation.start()
 
-        val currentDateTime = LocalDate.now().toString()
-        val userPref = mcontext.getSharedPreferences(
-            "diary_${userId}_${currentDateTime}",
-            Context.MODE_PRIVATE
-        )
+//        val currentDateTime = LocalDate.now().toString()
+//        val userPref = mcontext.getSharedPreferences(
+//            "diary_${userId}_${currentDateTime}",
+//            Context.MODE_PRIVATE
+//        )
 
         val moodDonePref = userPref.getBoolean("moodDone", false)
         val recognitionDonePref = userPref.getBoolean("recognitionDone", false)
@@ -1559,6 +1587,7 @@ class MyDiaryFragment : Fragment() {
         }
 
         if (imageDonePref && !photoResume && !recordResume) {
+
             val writingImage = userPref.getString("imageArray", "")
             val jsonString = """${writingImage}"""
             val gson = Gson()
@@ -1566,19 +1595,38 @@ class MyDiaryFragment : Fragment() {
             itemListItemsString = ArrayList(array.toList())
 
             for (item in array) {
-                val uriItem = Uri.parse(item)
-                newImageViewModel.addImage(uriItem)
-                itemListItems.add(uriItem)
-                photoAdapter.notifyItemInserted(itemListItems.size - 1)
+                if (!item.startsWith("https://")) {
+                    val uriItem = Uri.parse(item)
+                    newImageViewModel.addImage(uriItem)
+                    itemListItems.add(uriItem)
+                    photoAdapter.notifyItemInserted(itemListItems.size - 1)
+                } else {
+                    newImageViewModel.addImage(item)
+                    itemListItems.add(item)
+                    photoAdapter.notifyItemInserted(itemListItems.size - 1)
+                }
+
             }
 
             if (!editDiary) diaryFillCheck.photoFill.value =
                 true else diaryEditCheck.photoEdit.value = true
         }
+
+        photoResume = false
+        recordResume = false
     }
 
     override fun onPause() {
         super.onPause()
+
+
+        if (!photoResume && !recordResume) {
+            newImageViewModel.clear()
+            itemListItems.clear()
+            itemListItemsString.clear()
+        }
+
+
         val activity = activity
         if (activity != null) {
             val window = requireActivity().window
@@ -1589,12 +1637,12 @@ class MyDiaryFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireActivity())
             .unregisterReceiver(deleteImageFunction);
 
-        val currentDateTime = LocalDate.now().toString()
-        val userPref = mcontext.getSharedPreferences(
-            "diary_${userId}_${currentDateTime}",
-            Context.MODE_PRIVATE
-        )
-        val userPrefEdit = userPref.edit()
+//        val currentDateTime = LocalDate.now().toString()
+//        val userPref = mcontext.getSharedPreferences(
+//            "diary_${userId}_${currentDateTime}",
+//            Context.MODE_PRIVATE
+//        )
+//        val userPrefEdit = userPref.edit()
 
         userPrefEdit.putString("writingDiary", binding.todayDiary.text.toString()).apply()
 
@@ -1618,7 +1666,6 @@ class MyDiaryFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-
         photoResume = false
         recordResume = false
 
@@ -1699,12 +1746,12 @@ class MyDiaryFragment : Fragment() {
             val newSecretStatus = intent?.getBooleanExtra("newSecretStatus", false) as Boolean
             secretStatus = newSecretStatus
 
-            val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences(
-                "diary_${userId}_${currentDateTime}",
-                Context.MODE_PRIVATE
-            )
-            val userPrefEdit = userPref.edit()
+//            val currentDateTime = LocalDate.now().toString()
+//            val userPref = mcontext.getSharedPreferences(
+//                "diary_${userId}_${currentDateTime}",
+//                Context.MODE_PRIVATE
+//            )
+//            val userPrefEdit = userPref.edit()
             userPrefEdit.putBoolean("secretStatus", newSecretStatus).apply()
 
             if (!editDiary) {
@@ -1722,17 +1769,19 @@ class MyDiaryFragment : Fragment() {
             val deleteImagePosition = intent?.getIntExtra("deleteImagePosition", 0)
             newImageViewModel.removeImage(deleteImagePosition!!)
             itemListItems.removeAt(deleteImagePosition)
-            photoAdapter.notifyItemRemoved(deleteImagePosition!!)
+            photoAdapter.notifyDataSetChanged()
+//            photoAdapter.notifyItemRemoved(deleteImagePosition!!)
+//            photoAdapter = UploadPhotosAdapter(mcontext, itemListItems)
 
             if (editDiary) diaryEditCheck.photoEdit.value = true
 
             itemListItemsString.removeAt(deleteImagePosition)
-            val currentDateTime = LocalDate.now().toString()
-            val userPref = mcontext.getSharedPreferences(
-                "diary_${userId}_${currentDateTime}",
-                Context.MODE_PRIVATE
-            )
-            val userPrefEdit = userPref.edit()
+//            val currentDateTime = LocalDate.now().toString()
+//            val userPref = mcontext.getSharedPreferences(
+//                "diary_${userId}_${currentDateTime}",
+//                Context.MODE_PRIVATE
+//            )
+//            val userPrefEdit = userPref.edit()
             userPrefEdit.putBoolean("imageDone", true)
 
             val gson = Gson()
@@ -2030,6 +2079,11 @@ class MyDiaryFragment : Fragment() {
 
         fun removeImage(removePosition: Int) {
             templateList.removeAt(removePosition)
+            newImageList.value = templateList
+        }
+
+        fun clear() {
+            templateList.clear()
             newImageList.value = templateList
         }
     }

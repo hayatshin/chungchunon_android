@@ -65,12 +65,7 @@ class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Wo
                                                     applicationContext!!.startService(startService);
                                                 }
                                             } catch (e: Exception) {
-                                                val serviceError = hashMapOf(
-                                                    "service_error" to e,
-                                                    "service_step_status" to false,
-                                                )
-                                                userDB.document("$userId")
-                                                    .set(serviceError, SetOptions.merge())
+                                                e.printStackTrace()
                                             }
                                         }
                                     } catch (e: Exception) {
@@ -82,12 +77,7 @@ class RegisterAlarmWorker(context: Context, workerParams: WorkerParameters) : Wo
                                                 applicationContext!!.startService(startService);
                                             }
                                         } catch (e: Exception) {
-                                            val serviceError = hashMapOf(
-                                                "service_error" to e,
-                                                "service_step_status" to false,
-                                            )
-                                            userDB.document("$userId")
-                                                .set(serviceError, SetOptions.merge())
+                                            e.printStackTrace()
                                         }
                                     }
                                 }

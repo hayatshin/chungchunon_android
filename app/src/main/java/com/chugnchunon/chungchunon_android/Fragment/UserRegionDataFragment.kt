@@ -424,7 +424,7 @@ class UserRegionDataFragment : Fragment() {
                                             .get()
                                             .addOnCompleteListener { userTask ->
                                                 val userData = userTask.result
-                                                if (userData != null) {
+                                                if (userData != null && userData.data?.getValue("name") != null) {
                                                     val userCommunity =
                                                         userData.data?.getValue("community") as ArrayList<String>
 
@@ -864,7 +864,7 @@ class UserRegionDataFragment : Fragment() {
                                             .get()
                                             .addOnCompleteListener { userTask ->
                                                 val userData = userTask.result
-                                                if (userData != null) {
+                                                if (userData != null  && userData.data?.getValue("name") != null) {
 
                                                     val diaryUserRegion =
                                                         userData.data?.getValue("region").toString()

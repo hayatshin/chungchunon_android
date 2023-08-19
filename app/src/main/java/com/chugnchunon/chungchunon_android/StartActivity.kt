@@ -23,6 +23,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.KakaoSDK
 import com.kakao.sdk.common.KakaoSdk
+import io.grpc.internal.ConscryptLoader
+import java.security.Security
 import java.util.*
 
 class StartActivity : AppCompatActivity() {
